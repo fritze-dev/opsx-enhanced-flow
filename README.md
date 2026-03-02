@@ -434,23 +434,26 @@ For tools other than Claude Code, set up manually:
 
 #### Updating the Plugin
 
-After the plugin repo is updated (new commits pushed), update the installed plugin in your target project:
+After the plugin repo is updated (new commits pushed **and version bumped** in `.claude-plugin/plugin.json`):
 
 ```bash
-# In your target project, open Claude Code and run:
+# 1. Refresh the marketplace listing
+/plugin marketplace update opsx-enhanced-flow
+
+# 2. Update the plugin
 /plugin update opsx@opsx-enhanced-flow
 
-# Restart Claude Code for changes to take effect
+# 3. Restart Claude Code for changes to take effect
 ```
 
-Alternatively, uninstall and reinstall:
+If the update isn't detected (version not bumped), uninstall and reinstall:
 
 ```bash
 /plugin uninstall opsx@opsx-enhanced-flow
 /plugin install opsx@opsx-enhanced-flow
 ```
 
-> **Note:** The plugin is cached locally at `~/.claude/plugins/cache/`. Updates pull the latest version from the marketplace repo.
+> **Important:** Claude Code uses the `version` field in `plugin.json` to detect updates. Pushing new commits without bumping the version won't trigger an update — the cached version is used. Always bump the version when publishing changes.
 
 #### Development & Testing
 

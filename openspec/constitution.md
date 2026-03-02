@@ -53,6 +53,7 @@
 ## Conventions
 
 - **Commits:** Imperative present tense with category prefix (e.g., `Refactor: ...`, `Fix: ...`)
+- **Version bump:** Every commit that changes plugin behavior (skills, schema, config, constitution) MUST bump the `version` field in `.claude-plugin/plugin.json`. Without a version bump, `/plugin update` won't detect changes in target projects.
 - **Archive naming:** `YYYY-MM-DD-<feature-name>`
 - **Artifact files:** Fixed names (research.md, proposal.md, design.md, preflight.md, tasks.md)
 - **Spec merging:** Agent-driven via `/opsx:sync` (intelligent merge, not programmatic)
