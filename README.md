@@ -202,11 +202,10 @@ The rules in `config.yaml` encode these design decisions:
 
 | Step | Command | What Happens |
 |------|---------|--------------|
-| 1. Install | `/plugin install opsx@opsx-enhanced-flow` | Install the plugin. |
-| 2. Setup | `/opsx:init` | Installs OpenSpec schema + config into the project. |
-| 3. Bootstrap | `/opsx:bootstrap` | Scans codebase → generates `constitution.md` + initial specs. |
-| 4. Review | *Manual* | Review constitution and generated specs for correctness. |
-| 5. Archive | `/opsx:archive` | Initial specs land in `openspec/specs/` as baseline. |
+| 1. Setup | `/opsx:init` | Installs OpenSpec schema + config into the project. |
+| 2. Bootstrap | `/opsx:bootstrap` | Scans codebase → generates `constitution.md` + initial specs. |
+| 3. Review | *Manual* | Review constitution and generated specs for correctness. |
+| 4. Archive | `/opsx:archive` | Initial specs land in `openspec/specs/` as baseline. |
 
 #### Feature Cycle
 

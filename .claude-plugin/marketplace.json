@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "opsx",
-      "source": ".",
+      "source": "./",
       "description": "Spec-driven development workflow — every feature produces research, specs, architecture, quality checks, changelogs, and user docs alongside code.",
       "version": "1.0.0"
     }
