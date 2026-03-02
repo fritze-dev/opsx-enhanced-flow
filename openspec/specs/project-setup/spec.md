@@ -5,19 +5,30 @@ Handles one-time project initialization via `/opsx:init`, including OpenSpec CLI
 ## Requirements
 
 ### Requirement: Install OpenSpec and Schema
-The system SHALL provide `/opsx:init` as the single entry point for project setup. The init command SHALL install the OpenSpec CLI globally via npm, copy the `opsx-enhanced` schema into the project's `openspec/schemas/` directory, create the `openspec/config.yaml` with workflow rules, and register the plugin in `.claude-plugin/`. The init command SHALL be idempotent -- running it on an already-initialized project SHALL skip completed steps and report what was already in place.
+The system SHALL provide `/opsx:init` as the single entry point for project setup. The init command SHALL install the OpenSpec CLI globally via npm, register the `opsx-enhanced` schema via `openspec schema init`, copy the plugin's custom schema files and templates into the project's `openspec/schemas/` directory, create the `openspec/config.yaml` with workflow rules, and create a constitution placeholder if none exists. The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps and report what was already in place.
+
+The init skill SHALL set `disable-model-invocation: false` in its frontmatter so that it is discoverable and invocable via `/opsx:init`.
+
+The init command SHALL NOT run `openspec init --tools claude` because that creates built-in OpenSpec skills (e.g. `openspec-apply-change`) in `.claude/skills/` that duplicate and conflict with the plugin's own `/opsx:*` skills. Schema initialization SHALL use `openspec schema init` directly, which works independently without prior `openspec init`.
+
+The init command SHALL ensure target directories exist (via `mkdir -p`) before copying files from the plugin.
 
 **User Story:** As a new user I want a single `/opsx:init` command that sets up everything, so that I do not have to manually install dependencies or configure the project.
 
 #### Scenario: First-time project initialization
 - **GIVEN** a project directory without OpenSpec or the opsx-enhanced plugin installed
 - **WHEN** the user runs `/opsx:init`
-- **THEN** the system SHALL install the OpenSpec CLI globally, copy the schema, create config.yaml, and set up the plugin manifests
+- **THEN** the system SHALL install the OpenSpec CLI globally, register the schema via `openspec schema init`, copy custom schema files from the plugin, create config.yaml, create a constitution placeholder, and validate the setup
 
 #### Scenario: Idempotent re-initialization
 - **GIVEN** a project that has already been initialized with `/opsx:init`
 - **WHEN** the user runs `/opsx:init` again
-- **THEN** the system SHALL skip already-completed steps and report which components were already in place without overwriting existing configuration
+- **THEN** the system SHALL skip already-completed steps, preserve existing constitution.md, and report which components were already in place
+
+#### Scenario: No duplicate skill creation
+- **GIVEN** a project where the opsx plugin is already installed
+- **WHEN** the user runs `/opsx:init`
+- **THEN** the system SHALL NOT create any `.claude/skills/openspec-*` skill files that would duplicate the plugin's `/opsx:*` skills
 
 ### Requirement: OpenSpec CLI Prerequisite Check
 The init command SHALL check whether the OpenSpec CLI (`@fission-ai/openspec`) is installed globally. If the CLI is not found, the init command SHALL auto-install it via `npm install -g @fission-ai/openspec`. The installed version SHALL be compatible with `^1.2.0`. If npm is not available, the init command SHALL report a clear error instructing the user to install Node.js and npm first.
@@ -63,11 +74,11 @@ The init command SHALL validate the project setup after all installation steps c
 
 - If the user does not have write permissions to the global npm prefix, the auto-install SHALL fail with a clear error suggesting `sudo` or an npm prefix configuration change.
 - If the project directory is read-only, init SHALL fail before making any changes and report the permission issue.
-- If a `.claude-plugin/plugin.json` already exists with a different plugin name, init SHALL warn the user about the conflict rather than silently overwriting.
 - If network connectivity is unavailable during npm install, the system SHALL report a network error with a suggestion to retry.
 
 ## Assumptions
 
 <!-- ASSUMPTION: npm global install (`npm install -g`) is the correct installation method for the OpenSpec CLI. This assumes the user's Node.js environment supports global installs. -->
 <!-- ASSUMPTION: The `^1.2.0` version constraint is enforced via npm semver, meaning any version >= 1.2.0 and < 2.0.0 is acceptable. -->
+<!-- ASSUMPTION: `openspec schema init` works independently without prior `openspec init`. Verified by testing in a clean directory. -->
 No further assumptions beyond those marked above.

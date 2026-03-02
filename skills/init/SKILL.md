@@ -1,7 +1,7 @@
 ---
 name: init
 description: Install OpenSpec and the opsx-enhanced schema into the current project. Run once per project before using any other /opsx commands.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # /opsx:init — Project Setup
@@ -20,7 +20,7 @@ Execute these steps in order. Report each result to the user. Stop on any failur
 openspec --version
 ```
 
-**If the command succeeds:** Report the version and continue to step 2.
+**If the command succeeds:** Report the version and continue.
 
 **If the command fails (not found):** Install it automatically:
 
@@ -46,31 +46,26 @@ openspec --version
    openspec --version
    ```
 
-### 2. Initialize OpenSpec
-
-```bash
-openspec init --tools claude
-```
-
-### 3. Register the schema
+### 2. Register the schema
 
 ```bash
 openspec schema init opsx-enhanced --force
 ```
 
-### 4. Copy schema files from plugin
+### 3. Copy schema files from plugin
 
 ```bash
+mkdir -p openspec/schemas/opsx-enhanced
 cp -r "${CLAUDE_PLUGIN_ROOT}/openspec/schemas/opsx-enhanced/." openspec/schemas/opsx-enhanced/
 ```
 
-### 5. Copy workflow config
+### 4. Copy workflow config
 
 ```bash
 cp "${CLAUDE_PLUGIN_ROOT}/openspec/config.yaml" openspec/config.yaml
 ```
 
-### 6. Create constitution placeholder (skip if exists)
+### 5. Create constitution placeholder (skip if exists)
 
 Only if `openspec/constitution.md` does **not** already exist, create it:
 
@@ -82,7 +77,7 @@ Only if `openspec/constitution.md` does **not** already exist, create it:
 
 If it already exists, report: "constitution.md already exists — preserved."
 
-### 7. Validate
+### 6. Validate
 
 ```bash
 openspec schema validate opsx-enhanced

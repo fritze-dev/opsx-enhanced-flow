@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-02 — Fix Init Skill
+
+### Fixed
+- `/opsx:init` can now be invoked — was previously invisible due to `disable-model-invocation: true`
+
+### Changed
+- Init no longer creates duplicate built-in OpenSpec skills that conflict with the plugin's `/opsx:*` commands
+- Init steps reduced from 7 to 6 (removed redundant `openspec init --tools claude`)
+- Added directory safety (`mkdir -p`) before copying schema files
+
 ## 2026-03-02 — Initial Specification
 
 ### Added

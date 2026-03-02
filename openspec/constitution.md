@@ -16,7 +16,7 @@
 - Layers are independently modifiable — schema does not embed skill logic, skills depend on schema via CLI
 - All 13 commands are delivered as `skills/*/SKILL.md` files
 - Skills split into: 6 workflow (new, continue, ff, apply, verify, archive), 5 governance (init, bootstrap, discover, preflight, sync), 2 documentation (changelog, docs)
-- All skills are model-invocable except `init` (user-only, one-time setup)
+- All skills are model-invocable (including `init` — idempotent one-time setup)
 - Artifact pipeline: research → proposal → specs → design → preflight → tasks → apply
 - Each pipeline stage produces a verifiable artifact that gates progression to the next
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)

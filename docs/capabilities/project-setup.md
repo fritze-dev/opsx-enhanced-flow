@@ -8,24 +8,31 @@ lastUpdated: "2026-03-02"
 
 # Project Setup
 
-Run `/opsx:init` once to set up everything needed for spec-driven development. The command installs the OpenSpec CLI, copies the schema, creates configuration, and validates the result.
+Run `/opsx:init` once to set up everything needed for spec-driven development. The command installs the OpenSpec CLI, registers the schema, copies custom templates from the plugin, creates configuration and a constitution placeholder, and validates the result.
 
 ## Features
 
 - Single command sets up the entire project for spec-driven development
 - Automatically installs the OpenSpec CLI if not present
-- Idempotent: running it again skips already-completed steps
+- Copies the plugin's custom schema and templates into your project
+- Creates a constitution placeholder for project-specific rules
+- Idempotent: running it again skips already-completed steps and preserves existing files
 - Validates the setup after installation to confirm everything works
+- No duplicate skills: uses the plugin's `/opsx:*` commands instead of creating built-in OpenSpec skills
 
 ## Behavior
 
 ### First-Time Initialization
 
-When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally via npm, copies the `opsx-enhanced` schema into your project, creates `openspec/config.yaml` with workflow rules, and registers the plugin.
+When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally via npm, registers the `opsx-enhanced` schema, copies custom schema files and templates from the plugin, creates `openspec/config.yaml` with workflow rules, creates a constitution placeholder, and validates the setup.
 
 ### Re-Initialization
 
-Running `/opsx:init` on an already-initialized project skips completed steps and reports what was already in place. Existing configuration is not overwritten.
+Running `/opsx:init` on an already-initialized project skips completed steps, preserves your existing `constitution.md`, and reports what was already in place.
+
+### No Duplicate Skills
+
+The init command uses `openspec schema init` directly instead of `openspec init --tools claude`. This avoids creating built-in OpenSpec skills that would conflict with the plugin's own `/opsx:*` commands.
 
 ### CLI Version Management
 
@@ -39,5 +46,4 @@ After installation, the system verifies CLI accessibility, schema validity, and 
 
 - If you lack write permissions to the global npm prefix, the install fails with a clear error suggesting `sudo` or npm prefix configuration.
 - If the project directory is read-only, init fails before making any changes.
-- If a `.claude-plugin/plugin.json` already exists with a different plugin name, init warns about the conflict rather than silently overwriting.
 - If network connectivity is unavailable during npm install, you get a network error with a retry suggestion.
