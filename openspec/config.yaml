@@ -1,13 +1,5 @@
 schema: opsx-enhanced
 
 context: |
-  [WORKFLOW RULES]
-  1. Always run openspec CLI commands from the project root directory. If the shell working directory may have drifted, prefix with: cd "$(git rev-parse --show-toplevel)" && openspec ...
-  2. Specifications SHOULD include User Stories where applicable to capture intent and motivation.
-  3. All functional scenarios must use strict Gherkin (Given/When/Then).
-  4. The Pre-Flight Check (preflight.md) is a mandatory review artifact.
-  5. The AI must NEVER archive without permission. Wait for "Approved" in the QA loop.
-  6. Always read and follow the project constitution at openspec/constitution.md before proceeding.
-  7. Verify findings are binding — all critical/warning issues must be resolved (code fix or spec update) before archiving.
-  8. Bidirectional feedback — when implementation reveals new edge cases or design flaws, update specs and design (not just the code). The QA fix loop (tasks.md §3.4) is the enforcement point.
-  9. Definition of Done is emergent from artifacts — Gherkin scenarios define functional completeness, success metrics define quality targets, preflight findings define risk resolution, and explicit approval gates implementation completeness.
+  Always read and follow the project constitution at
+  openspec/constitution.md before proceeding.

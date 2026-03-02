@@ -1,20 +1,21 @@
 ---
 title: "Project Setup"
 capability: "project-setup"
-description: "One-time project initialization with /opsx:init including CLI installation and validation"
+description: "One-time project initialization with /opsx:init including CLI installation, config template, and validation"
 order: 2
 lastUpdated: "2026-03-02"
 ---
 
 # Project Setup
 
-Run `/opsx:init` once to set up everything needed for spec-driven development. The command installs the OpenSpec CLI, registers the schema, copies custom templates from the plugin, creates configuration and a constitution placeholder, and validates the result.
+Run `/opsx:init` once to set up everything needed for spec-driven development. The command installs the OpenSpec CLI, registers the schema, copies custom templates from the plugin, creates a minimal configuration and a constitution placeholder, and validates the result.
 
 ## Features
 
 - Single command sets up the entire project for spec-driven development
 - Automatically installs the OpenSpec CLI if not present
 - Copies the plugin's custom schema and templates into your project
+- Creates a minimal config.yaml bootstrap (schema reference + constitution pointer)
 - Creates a constitution placeholder for project-specific rules
 - Idempotent: running it again skips already-completed steps and preserves existing files
 - Validates the setup after installation to confirm everything works
@@ -24,11 +25,15 @@ Run `/opsx:init` once to set up everything needed for spec-driven development. T
 
 ### First-Time Initialization
 
-When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally via npm, registers the `opsx-enhanced` schema, copies custom schema files and templates from the plugin, creates `openspec/config.yaml` with workflow rules, creates a constitution placeholder, and validates the setup.
+When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally via npm, registers the `opsx-enhanced` schema, copies custom schema files and templates from the plugin, generates a minimal `openspec/config.yaml` bootstrap template, creates a constitution placeholder, and validates the setup.
+
+### Minimal Config Template
+
+The init command generates a clean config.yaml with just a schema reference and a constitution pointer — no workflow rules. This prevents plugin-specific configuration from leaking into consumer projects. If config.yaml already exists, it is preserved.
 
 ### Re-Initialization
 
-Running `/opsx:init` on an already-initialized project skips completed steps, preserves your existing `constitution.md`, and reports what was already in place.
+Running `/opsx:init` on an already-initialized project skips completed steps, preserves your existing `constitution.md` and `config.yaml`, and reports what was already in place.
 
 ### No Duplicate Skills
 
@@ -47,3 +52,4 @@ After installation, the system verifies CLI accessibility, schema validity, and 
 - If you lack write permissions to the global npm prefix, the install fails with a clear error suggesting `sudo` or npm prefix configuration.
 - If the project directory is read-only, init fails before making any changes.
 - If network connectivity is unavailable during npm install, you get a network error with a retry suggestion.
+- The config template is generated fresh (not copied from the plugin), so plugin-specific customizations never leak into consumer projects.

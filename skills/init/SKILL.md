@@ -59,11 +59,19 @@ mkdir -p openspec/schemas/opsx-enhanced
 cp -r "${CLAUDE_PLUGIN_ROOT}/openspec/schemas/opsx-enhanced/." openspec/schemas/opsx-enhanced/
 ```
 
-### 4. Copy workflow config
+### 4. Create workflow config (skip if exists)
 
-```bash
-cp "${CLAUDE_PLUGIN_ROOT}/openspec/config.yaml" openspec/config.yaml
+Only if `openspec/config.yaml` does **not** already exist, create it with this minimal bootstrap:
+
+```yaml
+schema: opsx-enhanced
+
+context: |
+  Always read and follow the project constitution at
+  openspec/constitution.md before proceeding.
 ```
+
+If it already exists, report: "config.yaml already exists — preserved."
 
 ### 5. Create constitution placeholder (skip if exists)
 
@@ -90,7 +98,7 @@ If validation fails, tell the user to check `openspec/schemas/opsx-enhanced/sche
 Report a summary:
 - OpenSpec CLI version (installed or already present)
 - Schema installed and validated
-- Config written
+- Config status (created or preserved)
 - Constitution status (created or preserved)
 - Suggest: "Run `/opsx:bootstrap` to scan your codebase and generate the project constitution."
 

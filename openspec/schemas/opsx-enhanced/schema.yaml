@@ -171,6 +171,12 @@ artifacts:
       in the QA Loop (before Auto-Verify).
       Add the QA loop with an explicit human approval gate.
 
+      Definition of Done is emergent from artifacts — there is no
+      separate DoD checklist. Gherkin scenarios define functional
+      completeness, success metrics define quality targets, preflight
+      findings define risk resolution, and explicit user approval
+      gates implementation completeness.
+
       IMPORTANT: Do NOT include sync or archive as tasks. Sync (`/opsx:sync`)
       and archive (`/opsx:archive`) are separate workflow steps invoked AFTER
       apply completes. The apply phase covers only implementation and QA.
@@ -184,3 +190,6 @@ apply:
   instruction: |
     Read context files, work through pending tasks, mark complete as you go.
     Pause if you hit blockers or need clarification.
+
+    Post-apply workflow: /opsx:verify → /opsx:archive →
+    /opsx:changelog → /opsx:docs → commit. Never skip steps.

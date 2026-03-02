@@ -458,17 +458,11 @@ If the update isn't detected (version not bumped), uninstall and reinstall:
 #### Development & Testing
 
 ```bash
-# Load the plugin locally for testing (bypasses cache)
+# Load the plugin locally for development (bypasses cache)
 claude --plugin-dir .
-
-# Test skills
-/opsx:init
-/opsx:bootstrap
-/opsx:discover
-/opsx:preflight
-/opsx:changelog
-/opsx:docs
 ```
+
+For testing in a separate consumer project, use the [Updating the Plugin](#updating-the-plugin) workflow.
 
 ---
 

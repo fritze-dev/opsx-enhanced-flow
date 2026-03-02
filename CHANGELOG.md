@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-02 — Fix Workflow Friction
+
+### Changed
+- Workflow rules now live at their authoritative source — schema owns universal rules, constitution owns project-specific rules, config.yaml is just a bootstrap pointer
+- Constitution cleaned up: 12 redundant rules removed that duplicated schema instructions and templates
+- Init skill generates a minimal config template instead of copying the plugin's own config, preventing project-specific rules from leaking into consumer projects
+- Development & Testing documentation simplified
+
+### Added
+- Friction tracking convention: workflow friction is now captured as GitHub Issues with the `friction` label
+- Definition of Done rule embedded in the schema's task instruction
+- Post-apply workflow sequence embedded in the schema's apply instruction
+
 ## 2026-03-02 — Fix Init Skill
 
 ### Fixed
