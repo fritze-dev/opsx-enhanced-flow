@@ -114,12 +114,27 @@ The project spec SHALL document the complete happy path for plugin installation 
 - **AND** `claude plugin update opsx@opsx-enhanced-flow` SHALL detect and install version N+1
 - **AND** `/opsx:init` SHALL run idempotently without errors
 
+### Requirement: Post-Push Developer Plugin Update
+
+After pushing a version bump to the remote, the developer's local plugin installation SHALL be updated to match the new version. The constitution convention SHALL include this as a next step after push, ensuring the developer always runs the latest plugin version during development.
+
+**User Story:** As a plugin developer I want my local plugin to auto-update after I push a new version, so that I'm always developing against the latest version.
+
+#### Scenario: Developer updates local plugin after push
+
+- **GIVEN** a version bump has been applied (via archive auto-bump or manual)
+- **AND** the changes have been pushed to remote
+- **WHEN** the developer follows the post-archive next steps
+- **THEN** the developer SHALL run `claude plugin marketplace update opsx-enhanced-flow`
+- **AND** SHALL run `claude plugin update opsx@opsx-enhanced-flow`
+- **AND** the local plugin installation SHALL reflect the new version
+
 ### Requirement: Archive Output Includes Next Steps
 
-The archive summary output SHALL include a "Next steps" section guiding the user to run `/opsx:changelog` and then push. This is defined via the constitution convention.
+The archive summary output SHALL include a "Next steps" section guiding the user through the complete post-archive workflow: generate changelog, push, and update the local plugin. This is defined via the constitution convention.
 
 #### Scenario: Next steps shown after archive
 
 - **GIVEN** a successful archive with auto-bump
 - **WHEN** the archive summary is displayed
-- **THEN** the output SHALL include next steps: `/opsx:changelog` -> push
+- **THEN** the output SHALL include next steps: `/opsx:changelog` → push → update plugin

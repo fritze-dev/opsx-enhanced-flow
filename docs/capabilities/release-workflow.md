@@ -16,6 +16,7 @@ The plugin uses automatic patch version bumps to ensure consumers always detect 
 - Both plugin version files stay synchronized automatically
 - Manual process for minor and major version releases with git tags and GitHub Releases
 - Clear consumer update steps: refresh marketplace, update plugin, restart Claude Code
+- Developer plugin auto-update after pushing a new version
 - End-to-end checklist for testing the full install and update flow
 
 ## Behavior
@@ -40,9 +41,13 @@ Skills are shared plugin code and must not be customized for specific projects. 
 
 The full install flow (marketplace add, plugin install, `/opsx:init`, `/opsx:bootstrap`) and the update flow (marketplace update, plugin update, verify) are documented as testable checklists to catch regressions.
 
+### Developer Plugin Update
+
+After pushing a version bump, developers update their local plugin installation by refreshing the marketplace listing and running the plugin update command. This ensures the developer always works with the latest plugin version.
+
 ### Archive Next Steps
 
-After a successful archive with auto-bump, the system shows next steps: run `/opsx:changelog` to generate release notes, then push.
+After a successful archive with auto-bump, the system shows next steps: generate changelog, push, and update the local plugin.
 
 ## Edge Cases
 
