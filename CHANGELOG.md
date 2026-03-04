@@ -3,6 +3,21 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-04 — Release Workflow
+
+### Added
+- Automatic patch version bump on archive — plugin version in `plugin.json` and `marketplace.json` auto-increments after each `/opsx:archive`
+- Skill immutability rule — skills are shared plugin code and must not be modified for project-specific behavior
+- Release workflow spec covering auto-bump, manual minor/major releases, consumer update process, and end-to-end test checklist
+- Documented consumer update process: marketplace refresh → plugin update → restart
+
+### Fixed
+- `marketplace.json` version synced to match `plugin.json` (was 3 patch versions behind)
+- Manual version bump convention replaced with automatic post-archive bump — eliminates forgotten version bumps
+
+### Changed
+- "Updating the Plugin" section in README simplified to reflect automatic versioning
+
 ## 2026-03-02 — Final Verify Step
 
 ### Changed

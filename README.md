@@ -408,7 +408,7 @@ After installing the plugin, run `/opsx:init` in your project to install the sch
 
 #### Updating the Plugin
 
-After the plugin repo is updated (new commits pushed **and version bumped** in `.claude-plugin/plugin.json`):
+Patch versions are bumped automatically when changes are archived via `/opsx:archive`. To update as a consumer:
 
 ```bash
 # 1. Refresh the marketplace listing
@@ -420,14 +420,14 @@ claude plugin update opsx@opsx-enhanced-flow
 # 3. Restart Claude Code for changes to take effect
 ```
 
-If the update isn't detected (version not bumped), uninstall and reinstall:
+If the update isn't detected, uninstall and reinstall as fallback:
 
 ```bash
 claude plugin uninstall opsx@opsx-enhanced-flow
 claude plugin install opsx@opsx-enhanced-flow
 ```
 
-> **Important:** Claude Code uses the `version` field in `plugin.json` to detect updates. Pushing new commits without bumping the version won't trigger an update — the cached version is used. Always bump the version when publishing changes.
+> **Versioning:** Patch versions auto-increment on `/opsx:archive`. For minor/major releases, the version is set manually with a git tag (`v<version>`).
 
 #### Development & Testing
 

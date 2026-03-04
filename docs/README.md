@@ -16,4 +16,5 @@
 | [Spec Sync](capabilities/spec-sync.md) | Agent-driven delta spec merging into baseline specs with /opsx:sync |
 | [Constitution Management](capabilities/constitution-management.md) | Constitution generation from codebase, automatic updates during design, global enforcement, and friction tracking |
 | [Docs & Changelog Generation](capabilities/docs-generation.md) | User-facing documentation from specs (/opsx:docs) and release notes from archives (/opsx:changelog) |
+| [Release Workflow](capabilities/release-workflow.md) | Automatic patch versioning on archive, manual minor/major releases, and consumer update process |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with roadmap label |
