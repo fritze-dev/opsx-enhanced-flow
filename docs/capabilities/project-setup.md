@@ -1,55 +1,46 @@
 ---
 title: "Project Setup"
 capability: "project-setup"
-description: "One-time project initialization with /opsx:init including CLI installation, config template, and validation"
-order: 2
-lastUpdated: "2026-03-02"
+description: "One-time project initialization with OpenSpec CLI, schema, and configuration"
+order: 1
+lastUpdated: "2026-03-04"
 ---
 
 # Project Setup
 
-Run `/opsx:init` once to set up everything needed for spec-driven development. The command installs the OpenSpec CLI, registers the schema, copies custom templates from the plugin, creates a minimal configuration and a constitution placeholder, and validates the result.
+Set up your project for the spec-driven workflow with a single command. `/opsx:init` installs all dependencies, registers the schema, creates configuration files, and validates the setup.
 
 ## Features
 
-- Single command sets up the entire project for spec-driven development
-- Automatically installs the OpenSpec CLI if not present
-- Copies the plugin's custom schema and templates into your project
-- Creates a minimal config.yaml bootstrap (schema reference + constitution pointer)
-- Creates a constitution placeholder for project-specific rules
-- Idempotent: running it again skips already-completed steps and preserves existing files
-- Validates the setup after installation to confirm everything works
-- No duplicate skills: uses the plugin's `/opsx:*` commands instead of creating built-in OpenSpec skills
+- Initialize a project for spec-driven development with one command
+- Automatic OpenSpec CLI installation and version management
+- Schema registration and custom template setup
+- Minimal configuration file generation
+- Constitution placeholder creation
+- Post-setup validation to confirm everything works
+- Idempotent — safe to run again on an already-initialized project
 
 ## Behavior
 
 ### First-Time Initialization
 
-When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally via npm, registers the `opsx-enhanced` schema, copies custom schema files and templates from the plugin, generates a minimal `openspec/config.yaml` bootstrap template, creates a constitution placeholder, and validates the setup.
+When you run `/opsx:init` on a fresh project, the system installs the OpenSpec CLI globally (if not already present), registers the schema, copies custom schema files and templates into your project, creates a minimal configuration file, and sets up a constitution placeholder. After all steps complete, a validation phase confirms that the CLI is accessible, the schema is valid, and the config is in place.
 
-### Minimal Config Template
+### Automatic CLI Management
 
-The init command generates a clean config.yaml with just a schema reference and a constitution pointer — no workflow rules. This prevents plugin-specific configuration from leaking into consumer projects. If config.yaml already exists, it is preserved.
+If the OpenSpec CLI is not installed, it is installed automatically. If an older incompatible version is found, it is upgraded. If Node.js or npm are not available, a clear error message explains what needs to be installed first.
 
-### Re-Initialization
+### Idempotent Re-Initialization
 
-Running `/opsx:init` on an already-initialized project skips completed steps, preserves your existing `constitution.md` and `config.yaml`, and reports what was already in place.
+Running `/opsx:init` on an already-initialized project skips completed steps and preserves your existing constitution. It reports which components were already in place.
 
-### No Duplicate Skills
+### Configuration Generation
 
-The init command uses `openspec schema init` directly instead of `openspec init --tools claude`. This avoids creating built-in OpenSpec skills that would conflict with the plugin's own `/opsx:*` commands.
-
-### CLI Version Management
-
-The system checks for the OpenSpec CLI (`@fission-ai/openspec`) at version `^1.2.0`. If the CLI is missing, it auto-installs. If an incompatible version is found, it upgrades. If npm is unavailable, you get a clear error with installation guidance.
-
-### Post-Setup Validation
-
-After installation, the system verifies CLI accessibility, schema validity, and config presence. You see a summary of all validation results so you can trust the environment is ready.
+The configuration file contains only a schema reference and a pointer to the constitution — no workflow rules or project-specific content. If a configuration file already exists, it is preserved unchanged.
 
 ## Edge Cases
 
-- If you lack write permissions to the global npm prefix, the install fails with a clear error suggesting `sudo` or npm prefix configuration.
-- If the project directory is read-only, init fails before making any changes.
-- If network connectivity is unavailable during npm install, you get a network error with a retry suggestion.
-- The config template is generated fresh (not copied from the plugin), so plugin-specific customizations never leak into consumer projects.
+- If the plugin's own config has project-specific rules, your project still gets a clean, minimal config — the template is hardcoded in the skill, not copied from the plugin's config.
+- If you lack write permissions to the global npm prefix, the install fails with a clear error suggesting `sudo` or an npm prefix configuration change.
+- If the project directory is read-only, init fails before making any changes and reports the permission issue.
+- If network connectivity is unavailable during npm install, a network error is reported with a suggestion to retry.

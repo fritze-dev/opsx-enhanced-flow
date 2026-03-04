@@ -1,0 +1,26 @@
+## ADDED Requirements
+
+### Requirement: Generate Architecture Overview
+The `/opsx:docs` command SHALL generate a cross-cutting architecture overview document at `docs/architecture-overview.md`. The document SHALL be synthesized from the project constitution (`openspec/constitution.md`), the three-layer-architecture spec (`openspec/specs/three-layer-architecture/spec.md`), and all `## Decisions` tables found across archived `design.md` files in `openspec/changes/archive/*/design.md`. The architecture overview SHALL include: a "System Architecture" section describing the three-layer model, a "Tech Stack" section from the constitution, a "Key Design Decisions" section aggregating notable decisions across all changes (deduplicated), and a "Conventions" section from the constitution. The document SHALL be written in user-facing language. The file SHALL be regenerated fully on each run of `/opsx:docs`.
+
+**User Story:** As a developer or contributor I want a single document that explains the system architecture and key decisions, so that I can understand the project structure without reading individual design artifacts.
+
+#### Scenario: Architecture overview generated from constitution and design artifacts
+- **GIVEN** a constitution at `openspec/constitution.md` with Tech Stack and Architecture Rules sections
+- **AND** archived changes with `design.md` files containing Decisions tables
+- **WHEN** the developer runs `/opsx:docs`
+- **THEN** the agent creates `docs/architecture-overview.md` with System Architecture, Tech Stack, Key Design Decisions, and Conventions sections
+
+#### Scenario: Architecture overview with no archived design artifacts
+- **GIVEN** a constitution exists but no archived changes have `design.md` files
+- **WHEN** the developer runs `/opsx:docs`
+- **THEN** the agent generates `docs/architecture-overview.md` with System Architecture, Tech Stack, and Conventions sections, omitting Key Design Decisions
+
+## Edge Cases
+
+- **No constitution found**: The agent SHALL warn the user and skip architecture overview generation.
+- **No three-layer-architecture spec**: The agent SHALL generate a minimal System Architecture section from constitution Architecture Rules only.
+
+## Assumptions
+
+- The constitution at `openspec/constitution.md` is the source of truth for tech stack and conventions. <!-- ASSUMPTION: Constitution maintained by archive workflow -->

@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-04 — Documentation Ecosystem
+
+### Added
+- Enriched capability docs — `/opsx:docs` now adds "Why This Exists", "Background", and "Known Limitations" sections by reading archived proposal, research, design, and preflight artifacts
+- Architecture overview generation — `/opsx:docs` creates `docs/architecture-overview.md` from constitution, three-layer-architecture spec, and design decisions
+- Architecture Decision Records (ADRs) — `/opsx:docs` generates formal ADRs from archived design.md Decisions tables with research context
+
+### Changed
+- `docs-generation` capability split into three focused capabilities: `user-docs`, `architecture-docs`, `decision-docs`
+- Changelog generation moved from `docs-generation` to `release-workflow` capability
+- Documentation table of contents now links architecture overview and decisions index
+
 ## 2026-03-04 — Release Workflow
 
 ### Added

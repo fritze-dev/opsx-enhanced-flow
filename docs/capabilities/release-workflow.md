@@ -1,55 +1,57 @@
 ---
 title: "Release Workflow"
 capability: "release-workflow"
-description: "Automatic patch versioning on archive, manual minor/major releases, and consumer update process"
+description: "Automatic patch version bumps on archive, version sync, manual release process, and consumer update guidance"
 order: 16
 lastUpdated: "2026-03-04"
 ---
 
 # Release Workflow
 
-The plugin uses automatic patch version bumps to ensure consumers always detect updates. When you archive a change, the version increments automatically. For larger releases, a manual process with git tags is available.
+The release workflow handles version management automatically on archive, keeps version numbers in sync across plugin files, and provides clear processes for both maintainers releasing new versions and consumers updating.
 
 ## Features
 
-- Patch versions auto-increment when you archive a change via `/opsx:archive`
-- Both plugin version files stay synchronized automatically
-- Manual process for minor and major version releases with git tags and GitHub Releases
-- Clear consumer update steps: refresh marketplace, update plugin, restart Claude Code
-- Developer plugin auto-update after pushing a new version
-- End-to-end checklist for testing the full install and update flow
+- Automatic patch version bump after each successful archive
+- Version synchronization between plugin files
+- Documented manual process for minor and major releases with git tags
+- Consumer update guidance (marketplace refresh, plugin update, restart)
+- Skill immutability convention — project-specific behavior lives in the constitution, not in skills
+- End-to-end install and update checklists for verification
+- Post-push developer plugin auto-update guidance
 
 ## Behavior
 
-### Automatic Patch Bump
+### Automatic Patch Bump on Archive
 
-When you archive a completed change, the system automatically increments the patch version (e.g., 1.0.3 becomes 1.0.4) and keeps both version files in sync. If the files were out of sync beforehand, the system corrects this before bumping. The new version is displayed in the archive summary along with next steps.
+After a successful archive, the patch version is automatically incremented in both plugin files (e.g., 1.0.3 becomes 1.0.4). The new version is displayed in the archive summary. If the version numbers are out of sync before bumping, they are aligned to the plugin.json version first, then the patch bump is applied.
 
 ### Manual Minor and Major Releases
 
-For intentional feature-level or breaking changes, you manually set the version in both plugin files, create a git tag, push it, and optionally create a GitHub Release. This gives you full control over when and how larger releases are published.
+For intentional minor or major version changes, you manually update the version in both plugin files, create a git tag (e.g., `v1.1.0`), push the tag, and optionally create a GitHub Release. This process is documented but not automated.
 
-### Consumer Update Process
+### Consumer Updates
 
-To update the plugin, consumers refresh the marketplace listing, run the update command, and restart Claude Code. If an update isn't detected, refreshing the marketplace listing first usually resolves it. As a last resort, uninstalling and reinstalling the plugin works as a fallback.
+To update to the latest plugin version:
+1. Run `claude plugin marketplace update opsx-enhanced-flow` to refresh the listing
+2. Run `claude plugin update opsx@opsx-enhanced-flow` to install the update
+3. Restart Claude Code to load the new version
+
+If an update is not detected, refresh the marketplace listing first and retry. As a last resort, uninstall and reinstall the plugin.
 
 ### Skill Immutability
 
-Skills are shared plugin code and must not be customized for specific projects. Any project-specific behavior — like version bumps or post-action workflows — is defined in the project constitution instead.
+Skills are generic plugin code shared across all consumers. They are not modified for project-specific behavior. Project-specific workflows and conventions are defined in the constitution.
 
-### End-to-End Testing
+### Post-Archive Next Steps
 
-The full install flow (marketplace add, plugin install, `/opsx:init`, `/opsx:bootstrap`) and the update flow (marketplace update, plugin update, verify) are documented as testable checklists to catch regressions.
+After a successful archive, the output includes next steps guiding you through the complete post-archive workflow: generate changelog, push, and update the local plugin.
 
-### Developer Plugin Update
+### Developer Plugin Auto-Update
 
-After pushing a version bump, developers update their local plugin installation by refreshing the marketplace listing and running the plugin update command. This ensures the developer always works with the latest plugin version.
-
-### Archive Next Steps
-
-After a successful archive with auto-bump, the system shows next steps: generate changelog, push, and update the local plugin.
+After pushing a version bump to the remote, the developer updates their local plugin installation to match, ensuring they always develop against the latest version.
 
 ## Edge Cases
 
-- If the `gh` CLI is not available, you can create GitHub Releases through the web UI instead
-- The consumer update process is the same regardless of how many versions behind — marketplace update followed by plugin update always fetches the latest version
+- If plugin files have version numbers that are out of sync, they are aligned to the plugin.json version before the patch bump is applied.
+- The clean install flow (marketplace add → install → init → bootstrap) and update flow (marketplace update → plugin update → verify) serve as end-to-end checklists for verifying the full pipeline works.

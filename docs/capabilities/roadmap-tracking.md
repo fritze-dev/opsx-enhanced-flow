@@ -1,40 +1,44 @@
 ---
 title: "Roadmap Tracking"
 capability: "roadmap-tracking"
-description: "Planned improvements tracked as GitHub Issues with roadmap label"
+description: "Track planned improvements as GitHub Issues with a roadmap label and a single always-current view"
 order: 15
-lastUpdated: "2026-03-02"
+lastUpdated: "2026-03-04"
 ---
 
 # Roadmap Tracking
 
-Planned improvements and future features are tracked as GitHub Issues labeled `roadmap`. The README links to the filtered issue list for an always-current view of planned work.
+Planned improvements and future features are tracked as GitHub Issues with a `roadmap` label. The project README links to the filtered issue list, providing a single always-current view of planned work.
 
 ## Features
 
-- Track improvements as GitHub Issues with the `roadmap` label
-- README contains a Roadmap section linking to the filtered issue view
-- Roadmap stays current automatically without manual README updates
-- Issues are actionable with enough context to start a change
+- Track planned improvements as GitHub Issues with the `roadmap` label
+- Single always-current roadmap view via a filtered issue link in the README
+- No manual README updates needed when new roadmap items are added
+- Roadmap items can grow into full spec-driven changes for traceability
 
 ## Behavior
 
-### Creating Roadmap Issues
+### Creating Roadmap Items
 
-When you identify an improvement during development, review, or spec work that's outside the current change's scope, create a GitHub Issue with the `roadmap` label. Include a clear title, description, and enough context for someone to act on it independently.
+When you identify a concrete improvement — during development, review, retrospectives, or spec work — create a GitHub Issue with the `roadmap` label. Each issue should have a clear title, a description of the improvement, and enough context for a developer to understand the intent and scope.
 
-### README Integration
+### Always-Current README Link
 
-The project README has a Roadmap section with a link to GitHub Issues filtered by the `roadmap` label. When new roadmap issues are created, they appear in the filtered list automatically.
+The project README contains a Roadmap section with a link to the GitHub Issues filtered by the `roadmap` label. When new roadmap issues are created, they automatically appear in the filtered view without any README edits.
 
 ### Completing Roadmap Items
 
-When a roadmap issue is implemented through the spec-driven workflow and archived, the corresponding issue is closed. It disappears from the active roadmap view.
+When a roadmap item is implemented and archived through the spec-driven workflow, the corresponding GitHub Issue is closed and no longer appears in the active roadmap view. If a roadmap item grows in scope, it can be developed as a full spec-driven change — the issue is referenced in the change's research or proposal for traceability.
+
+### Capturing Ideas During Development
+
+When working on a current change and you notice a potential improvement outside the current scope, create a roadmap issue to capture it without derailing your current work.
 
 ## Edge Cases
 
-- If no roadmap issues exist, the README link shows an empty list that populates as issues are created.
-- If an issue is created without the `roadmap` label, it won't appear in the filtered view. Periodic review of unlabeled issues is recommended.
-- If the `roadmap` label doesn't exist in the repository, it needs to be created with the first roadmap issue.
-- For large numbers of issues, GitHub milestones or project boards can be used for grouping, but the label and README link remain the primary entry point.
-- Stale issues that have been open too long should be periodically reviewed and closed or updated.
+- If no roadmap issues exist, the README link shows an empty list — this is expected and the link remains valid.
+- If an issue is created without the `roadmap` label, it does not appear in the filtered view. Unlabeled issues should be reviewed periodically to catch missed labels.
+- If the `roadmap` label does not exist in the repository, it is created when the first roadmap issue is filed.
+- If the roadmap grows to many issues, GitHub milestones or project boards can be used for grouping, but the `roadmap` label and README link remain the primary entry point.
+- Roadmap issues that have been open for a long time without activity should be periodically reviewed and closed or updated to keep the roadmap meaningful.

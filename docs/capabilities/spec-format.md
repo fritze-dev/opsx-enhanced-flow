@@ -1,44 +1,49 @@
 ---
 title: "Spec Format"
 capability: "spec-format"
-description: "Requirement format rules including normative descriptions, Gherkin scenarios, and delta operations"
+description: "Format rules for specifications including normative descriptions, User Stories, Gherkin scenarios, and delta operations"
 order: 6
-lastUpdated: "2026-03-02"
+lastUpdated: "2026-03-04"
 ---
 
 # Spec Format
 
-Specifications follow a strict format: normative descriptions with SHALL/MUST keywords, optional User Stories, Gherkin scenarios with GIVEN/WHEN/THEN, and delta operations for tracking changes.
+Specifications follow a consistent format with normative descriptions using RFC 2119 keywords, optional User Stories, Gherkin scenarios, and structured delta operations for tracking changes.
 
 ## Features
 
-- Consistent requirement format with binding normative descriptions
-- Gherkin scenarios for every requirement, suitable for test generation
-- Delta spec operations (ADDED, MODIFIED, REMOVED, RENAMED) for tracking changes
-- Clean baseline format with Purpose and Requirements sections
+- Normative descriptions with RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) as the binding specification
+- Optional User Stories in "As a [role] I want [goal], so that [benefit]" format
+- Gherkin scenarios with GIVEN/WHEN/THEN clauses for testable behavior
+- Delta spec operations (ADDED, MODIFIED, REMOVED, RENAMED) for change tracking
+- Clean baseline format without change-tracking noise
 
 ## Behavior
 
 ### Normative Descriptions
 
-Every requirement starts with a normative description using RFC 2119 keywords (SHALL, MUST, SHOULD, MAY). This is the binding specification. An optional User Story may follow using the format "As a [role] I want [goal], so that [benefit]". The description always comes before the User Story.
+Every requirement starts with a normative description placed immediately after the requirement header. This description uses RFC 2119 keywords to express obligation levels. An optional User Story may follow the description. The description always comes before the User Story — reversing this order is a format violation caught during preflight.
 
 ### Gherkin Scenarios
 
-Every requirement has at least one scenario using `#### Scenario:` (exactly 4 hashtags). Each scenario contains GIVEN (preconditions), WHEN (trigger), and THEN (expected outcome) clauses. Using 3 hashtags instead of 4 causes a silent failure where the scenario renders as a subsection heading. Additional conditions use `- **AND** ...`.
+Every requirement has at least one scenario in Gherkin format. Scenarios use GIVEN (preconditions), WHEN (trigger/action), and THEN (expected outcome) clauses. Additional conditions use AND clauses after the relevant step. Scenarios must use the correct heading level (4 hashtags) — using 3 hashtags causes the scenario to be misinterpreted as a requirement-level heading, breaking automated parsing.
 
 ### Delta Spec Operations
 
-Delta specs (in change directories) use operation-prefixed headers: `## ADDED Requirements` for new capabilities, `## MODIFIED Requirements` for changes (must include full updated content), `## REMOVED Requirements` for deprecations (must include Reason and Migration), and `## RENAMED Requirements` (FROM/TO format).
+Specs within a change workspace use operation-prefixed headers to indicate the type of change:
+- **ADDED** — for new capabilities
+- **MODIFIED** — for changes to existing capabilities (must include the full updated content, not partial diffs)
+- **REMOVED** — for deprecated capabilities (must include a reason and migration path)
+- **RENAMED** — for name-only changes (uses FROM/TO format)
 
 ### Baseline Spec Format
 
-Baseline specs (in `openspec/specs/`) use `## Purpose` followed by `## Requirements` with no operation prefixes. They represent the current merged state of all requirements.
+Baseline specs (the merged, current state) use a Purpose section followed by a Requirements section. They do not use operation prefixes — they represent the current state, not a set of changes. Each requirement follows the same format: header, normative description, optional User Story, and scenario blocks.
 
 ## Edge Cases
 
-- If a delta spec contains both ADDED and MODIFIED sections, the sync process handles each independently.
-- If a delta spec uses an unrecognized operation prefix, the sync process flags it as an error.
-- If a requirement has zero scenarios, it is flagged during preflight.
-- If the same requirement name appears in both ADDED and MODIFIED sections, it is treated as a conflict.
-- If a RENAMED requirement's target name conflicts with an existing requirement, the naming collision is flagged.
+- If a delta spec contains both ADDED and MODIFIED sections, each operation is handled independently during sync.
+- If a delta spec uses an unrecognized operation prefix (e.g., "UPDATED"), it is flagged as an error and the sync process refuses to merge.
+- If a requirement has zero scenarios, the spec is considered invalid and flagged during preflight.
+- If the same requirement name appears in both ADDED and MODIFIED sections of the same delta spec, it is treated as a conflict and flagged during preflight.
+- If a RENAMED requirement's new name conflicts with an existing requirement in the baseline, the naming collision is flagged during sync.

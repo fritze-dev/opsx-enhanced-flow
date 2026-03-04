@@ -1,41 +1,43 @@
 ---
 title: "Change Workspace"
 capability: "change-workspace"
-description: "Change lifecycle: creation with /opsx:new, workspace structure, and archiving with /opsx:archive"
+description: "Create, structure, and archive change workspaces for the spec-driven workflow"
 order: 7
-lastUpdated: "2026-03-02"
+lastUpdated: "2026-03-04"
 ---
 
 # Change Workspace
 
-Use `/opsx:new` to create a change workspace, work through the pipeline, and `/opsx:archive` to finalize and archive the completed change.
+Manage the full lifecycle of changes — from creating a new workspace with `/opsx:new` through to archiving completed work with `/opsx:archive`. Each workspace is pre-structured according to the workflow schema.
 
 ## Features
 
-- Create a scaffolded change workspace with a single command
-- Workspace structure follows the active schema with dependency-gated artifacts
-- Archive completed changes with date-prefixed directory names
-- Safety prompt for unsynced delta specs before archiving
+- Create a new change workspace with a single command
+- Automatic name derivation from descriptions (converted to kebab-case)
+- Pre-structured workspace with schema-defined artifacts and dependency gating
+- Archive completed changes with date-prefixed directory names for chronological history
+- Sync prompt before archiving to keep baseline specs up to date
 
 ## Behavior
 
-### Creating a Change
+### Creating a Change Workspace
 
-Run `/opsx:new <change-name>` with a kebab-case name. If you provide a description instead, the system derives a name. The workspace is created at `openspec/changes/<name>/` with an `.openspec.yaml` manifest recording the schema.
+Run `/opsx:new <change-name>` to create a scaffolded workspace. The name must be in kebab-case format. If you provide a description instead of a name, the system derives a kebab-case name from it. If the name contains invalid characters, the system asks for a valid name. If a change with that name already exists, the system suggests continuing the existing change instead.
 
 ### Workspace Structure
 
-The workspace contains artifacts defined by the active schema. Only the first artifact (research) is ready initially; downstream artifacts are blocked by unmet dependencies. You can check status with `openspec status --change "<name>"`.
+The workspace is pre-structured according to the active schema. It includes a manifest recording the schema used and creation metadata. The artifact pipeline sequence is determined by the schema definition (research, proposal, specs, design, preflight, tasks for the `opsx-enhanced` schema). Only the first artifact (research) is ready initially — downstream artifacts are blocked by unmet dependencies.
 
-### Archiving
+### Archiving Changes
 
-Run `/opsx:archive` to move a completed change to `openspec/changes/archive/` with a `YYYY-MM-DD-<name>` prefix. If delta specs exist and haven't been synced, the system prompts you to sync first. If artifacts or tasks are incomplete, you get a warning and must confirm.
+Run `/opsx:archive` to move a completed change to the archive with a date-prefixed directory name (e.g., `2026-03-02-add-user-auth`). Before archiving, the system checks for unsynced delta specs and prompts you to sync if needed — you can choose to sync now or archive without syncing.
+
+If artifacts or tasks are incomplete, the system warns you and asks for confirmation before proceeding. If the archive target directory already exists, the system fails with an error and suggests a resolution.
 
 ## Edge Cases
 
-- If a change with the same name already exists, the system suggests continuing it instead of creating a duplicate.
-- If the user provides an invalid name format, the system asks for a valid kebab-case name.
-- If no active changes exist when archiving, the system suggests creating one.
-- If multiple changes exist and none is specified, the system lists them and asks you to choose.
-- If the archive target already exists, the system fails and suggests renaming or using a different date.
-- The system creates `openspec/changes/archive/` if it doesn't exist.
+- If no active changes exist when archiving, the system informs you and suggests creating a new change.
+- If multiple active changes exist and you do not specify which to archive, the system lists available changes and asks you to select one.
+- An empty workspace (no artifacts created) can still be archived if you confirm the warning.
+- If the move operation fails (e.g., disk full), the workspace remains in its original location and the error is reported.
+- The archive directory is created automatically if it does not already exist.
