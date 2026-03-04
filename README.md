@@ -452,7 +452,6 @@ Ideas for future versions:
 - [ ] **Autonomous Agent Flow** — Fully automated pipeline run via specialized sub-agents: a Reviewer agent reviews artifacts, a Q&A agent answers discovery questions, a Test agent validates implementation, and an Approval agent gates quality checks — replacing all manual user steps with domain-specific agents orchestrated by a single `/opsx:auto` command.
 - [ ] **Agent Handoff Protocol** — Explicit handoff criteria between agents in the Autonomous Agent Flow. Each agent validates its output against the Checklist Gem's per-artifact acceptance criteria before passing to the next agent. Includes rollback rules.
 - [ ] **Auto GitHub Releases** — Automatically create GitHub Releases from changelog entries after `/opsx:changelog`.
-- [ ] **Multi-Tool Plugin Support** — Package as plugins for Cursor, Windsurf, and other AI tools as they add plugin support.
 
 ---
 
