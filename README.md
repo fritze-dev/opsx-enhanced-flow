@@ -47,15 +47,17 @@ Research → Plan → Review → Build → QA → Document
 
 ### Install the Plugin
 
+**Prerequisite:** OpenSpec CLI must be installed (`npm install -g @fission-ai/openspec@^1.2.0`).
+
 ```bash
 # 1. Add the marketplace (one-time)
-/plugin marketplace add fritze-dev/opsx-enhanced-flow
+claude plugin marketplace add fritze-dev/opsx-enhanced-flow
 
 # 2. Install the plugin
-/plugin install opsx@opsx-enhanced-flow
+claude plugin install opsx@opsx-enhanced-flow
 ```
 
-**Prerequisite:** OpenSpec CLI must be installed (`npm install -g @fission-ai/openspec`).
+Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 
 ### Use the Workflow
 
@@ -395,10 +397,10 @@ Generates user-facing documentation from merged specs. Supports full regeneratio
 
 ```bash
 # Add the marketplace (one-time)
-/plugin marketplace add fritze-dev/opsx-enhanced-flow
+claude plugin marketplace add fritze-dev/opsx-enhanced-flow
 
 # Install the plugin
-/plugin install opsx@opsx-enhanced-flow
+claude plugin install opsx@opsx-enhanced-flow
 ```
 
 After installing the plugin, run `/opsx:init` in your project to install the schema and configure OpenSpec. Then run `/opsx:bootstrap` to scan your codebase and generate the constitution + initial specs.
@@ -410,10 +412,10 @@ After the plugin repo is updated (new commits pushed **and version bumped** in `
 
 ```bash
 # 1. Refresh the marketplace listing
-/plugin marketplace update opsx-enhanced-flow
+claude plugin marketplace update opsx-enhanced-flow
 
 # 2. Update the plugin
-/plugin update opsx@opsx-enhanced-flow
+claude plugin update opsx@opsx-enhanced-flow
 
 # 3. Restart Claude Code for changes to take effect
 ```
@@ -421,8 +423,8 @@ After the plugin repo is updated (new commits pushed **and version bumped** in `
 If the update isn't detected (version not bumped), uninstall and reinstall:
 
 ```bash
-/plugin uninstall opsx@opsx-enhanced-flow
-/plugin install opsx@opsx-enhanced-flow
+claude plugin uninstall opsx@opsx-enhanced-flow
+claude plugin install opsx@opsx-enhanced-flow
 ```
 
 > **Important:** Claude Code uses the `version` field in `plugin.json` to detect updates. Pushing new commits without bumping the version won't trigger an update — the cached version is used. Always bump the version when publishing changes.
