@@ -1,0 +1,58 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+  "name": "opsx-enhanced-flow",
+  "image": "mcr.microsoft.com/devcontainers/base:noble",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers-extra/features/claude-code:1": {}
+  },
+
+  "postCreateCommand": "npm install -g @fission-ai/openspec",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropics.claude-code",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint",
+        "bierner.markdown-preview-github-styles",
+        "mhutchie.git-graph"
+      ],
+      "settings": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": true,
+        "editor.rulers": [80, 120],
+        "files.eol": "\n",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "[yaml]": {
+          "editor.tabSize": 2,
+          "editor.insertSpaces": true,
+          "editor.defaultFormatter": "redhat.vscode-yaml",
+          "editor.formatOnSave": true
+        },
+        "yaml.format.enable": true,
+        "yaml.format.printWidth": 120,
+        "yaml.format.proseWrap": "preserve",
+        "yaml.completion": true,
+        "yaml.validate": true,
+        "[markdown]": {
+          "editor.wordWrap": "on",
+          "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+          "editor.formatOnSave": false
+        },
+        "markdownlint.config": {
+          "MD013": false,
+          "MD033": false
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "git.autofetch": true,
+        "git.confirmSync": false
+      }
+    }
+  }
+}
