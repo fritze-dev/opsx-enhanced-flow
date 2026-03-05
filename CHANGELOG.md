@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-05 — Fix Docs Skill Regressions
+
+### Fixed
+- Phantom ADR no longer generated from archives with prose-only or non-Decisions tables in design.md
+- Manual ADR (`adr-M001-init-model-invocable.md`) no longer lost during docs regeneration
+- ADR slug generation is now deterministic — consistent file names across regeneration runs
+- ADR references now use descriptive link text instead of raw file paths
+
+### Changed
+- Manual ADRs (`adr-MNNN-slug.md` naming) are now preserved during regeneration and included in the README design decisions table
+- Capability doc Rationale sections use present tense and no longer narrate change history
+- Multi-command capabilities now include command names in behavior section headers for quick scanning
+- Initial-spec-only capabilities now derive Rationale from spec requirements when archive research data is thin
+- README capability descriptions limited to 80 characters / 15 words for scannability
+- Notable Trade-offs section now aims to represent every ADR with a substantive negative consequence
+
 ## 2026-03-05 — Configurable Docs Language
 
 ### Added
