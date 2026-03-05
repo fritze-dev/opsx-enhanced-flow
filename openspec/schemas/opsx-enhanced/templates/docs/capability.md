@@ -40,8 +40,17 @@ Guidelines:
 [3-5 sentences of design context: key decisions, alternatives explored,
  why this specific approach was chosen.
  For enriched capabilities: derived from research.md and design.md.
- For initial-spec-only: derived from initial-spec research.md or spec Assumptions.
+ For initial-spec-only: derived from spec requirements, scenarios, and assumptions.
  OMIT this section if no useful design context available.]
+
+<!-- Rationale guardrail:
+     Describe the CURRENT design and why it works this way. Write in present tense.
+     Do NOT narrate the change history ("was later added", "initially... then...",
+     "a subsequent change introduced..."). Every sentence should answer "why does it
+     work this way?" not "how did it get this way?"
+
+     BAD: "The initial design used X. A later change added Y to address Z."
+     GOOD: "X handles the common case. Y covers edge cases where Z occurs." -->
 
 ## Features
 
@@ -55,6 +64,11 @@ Guidelines:
      "Run /opsx:preflight before tasks (pre-implementation).
       Run /opsx:verify after implementation (post-implementation)."
 -->
+
+<!-- For multi-command capabilities, include the command name in behavior subsection
+     headers for quick scanning.
+     Example: "### Step-by-Step Generation (/opsx:continue)" rather than just
+     "### Step-by-Step Generation". This helps users find the command they need. -->
 
 ### [Feature Group]
 

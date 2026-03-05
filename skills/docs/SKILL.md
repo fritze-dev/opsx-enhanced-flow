@@ -53,7 +53,7 @@ For each archive found, read the following files from the archive root directory
 
 **CRITICAL — Purpose section source:** The Purpose section ALWAYS describes what the capability does and why it matters — never the motivation for a specific change. Derive Purpose from the spec's `## Purpose` section using problem-framing (what goes wrong without this capability). Archive proposals provide context for the Rationale section, NOT for Purpose. Do not use proposal "Why" sections as the Purpose — they describe why a change was made, not why the capability exists.
 
-**initial-spec fallback:** If a capability's only relevant archive is `initial-spec`, derive Purpose from the spec's `## Purpose` section. Derive Rationale from initial-spec research.md if it has useful design context.
+**initial-spec fallback:** If a capability's only relevant archive is `initial-spec`, derive Purpose from the spec's `## Purpose` section. Derive Rationale from spec requirements, scenarios, and assumptions — explain WHY the design works this way (e.g., why kebab-case naming, why date-prefix sorting, why certain constraints exist). The initial-spec research.md may also contain useful design context. Only omit Rationale if truly no design reasoning is derivable from the spec itself.
 
 **No archives found:** Skip enrichment — generate a spec-only doc (current behavior).
 
@@ -105,9 +105,19 @@ Generate formal ADRs from `## Decisions` tables across all archived `design.md` 
 
 **Discovery:** Glob `openspec/changes/archive/*/design.md`. Sort archives chronologically by their `YYYY-MM-DD` prefix. Skip archives without `design.md`.
 
+**Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that archive for ADR generation.
+
 **Numbering:** Assign sequential numbers (zero-padded, 3 digits) across all archives. Within each archive, number decisions in table row order. Example: initial-spec has 3 decisions → ADR-001, ADR-002, ADR-003. release-workflow has 4 → ADR-004 through ADR-007.
 
-**Slug generation:** From the Decision column text: lowercase, replace spaces with hyphens, truncate to 50 characters, strip trailing hyphens.
+**Slug generation:** From the Decision column text, apply this deterministic algorithm:
+1. Lowercase the entire string
+2. Replace any character that is NOT in `[a-z0-9]` with a hyphen
+3. Collapse consecutive hyphens into a single hyphen
+4. Trim leading and trailing hyphens
+5. Truncate to 50 characters
+6. Trim trailing hyphens again (in case truncation split a word)
+
+Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-in-same-convention`. "Config as bootstrap-only" → `config-as-bootstrap-only`.
 
 **Handle both table formats:**
 - 3-column: `| Decision | Rationale | Alternatives |`
@@ -120,6 +130,8 @@ Generate formal ADRs from `## Decisions` tables across all archived `design.md` 
 **No archives with design.md:** Skip ADR generation entirely, do not create `docs/decisions/`.
 
 ADRs are fully regenerated on each run (not incremental). Create `docs/decisions/` directory if it does not exist.
+
+**Manual ADR preservation:** Do NOT delete files matching `adr-M*.md` in `docs/decisions/`. These are manual ADRs not generated from archived design.md files. They use the `adr-MNNN-slug.md` naming convention (M prefix + 3-digit zero-padded number) to distinguish them from generated ADRs.
 
 ### Step 5: Generate Consolidated README
 
@@ -134,7 +146,7 @@ Create or update `docs/README.md` as the **single entry point** for all generate
 - All generated ADR files (from Step 4) — for inline ADR links
 - All generated capability docs (from Step 3) — for the capabilities table
 
-**Key Design Decisions table:** Use an "ADR" column linking directly to the corresponding ADR file (e.g., `[ADR-001](decisions/adr-001-slug.md)`). Include ALL decisions from archived design.md files. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences.
+**Key Design Decisions table:** Use an "ADR" column linking directly to the corresponding ADR file (e.g., `[ADR-001](decisions/adr-001-slug.md)`). Include ALL decisions from archived design.md files. Additionally, discover manual ADRs matching `docs/decisions/adr-M*.md` and include them in the table after all generated ADRs, with links like `[ADR-M001](decisions/adr-M001-init-model-invocable.md)`. Extract the Decision and Rationale from the manual ADR's `## Decision` and `## Rationale` sections. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences. Include trade-offs that affect documentation consumers or represent meaningful constraints — every ADR with a substantive negative consequence should be represented.
 
 **Capabilities section:** Group capabilities by the `category` field from baseline spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
 
@@ -145,7 +157,7 @@ This file is fully regenerated on each run.
 
 ### Step 6: Cleanup Stale Files + Confirm
 
-**Cleanup:** If `docs/architecture-overview.md` exists (from a previous run), delete it — its content is now part of `docs/README.md`. If `docs/decisions/README.md` exists, delete it — ADR discovery is now via inline links in `docs/README.md`.
+**Cleanup:** If `docs/architecture-overview.md` exists (from a previous run), delete it — its content is now part of `docs/README.md`. If `docs/decisions/README.md` exists, delete it — ADR discovery is now via inline links in `docs/README.md`. Never delete files matching `adr-M*.md` in `docs/decisions/` — these are manual ADRs.
 
 **Confirm:** Show the user which docs were created/updated and a summary of changes.
 

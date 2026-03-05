@@ -41,6 +41,18 @@ Accepted (YYYY-MM-DD)
 
 ## References
 
-- [Link to relevant spec: ../../openspec/specs/<capability>/spec.md]
-- [Related ADRs if applicable: adr-NNN-slug.md]
-- [GitHub Issue if applicable]
+<!-- Use semantic link text that describes what the reference IS, not the file path.
+     ALWAYS use proper markdown link syntax: [descriptive text](path).
+
+     CORRECT:
+     - [Spec: three-layer-architecture](../../openspec/specs/three-layer-architecture/spec.md)
+     - [ADR-019: Constitution Convention Only](adr-019-constitution-convention-only.md)
+     - [GitHub Issue #21](https://github.com/owner/repo/issues/21)
+
+     WRONG (raw path as link text):
+     - [../../openspec/specs/three-layer-architecture/spec.md](../../openspec/specs/three-layer-architecture/spec.md)
+-->
+
+- [Spec: <capability-name>](../../openspec/specs/<capability>/spec.md)
+- [ADR-NNN: <decision-title>](adr-NNN-slug.md)
+- [GitHub Issue #N](https://github.com/owner/repo/issues/N)

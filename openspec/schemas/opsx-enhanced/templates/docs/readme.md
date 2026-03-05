@@ -22,7 +22,10 @@
 | [Decision text] | [Rationale text] | [ADR-NNN](decisions/adr-NNN-slug.md) |
 
 <!-- If any decisions have significant negative consequences,
-     add a "Notable Trade-offs" subsection: -->
+     add a "Notable Trade-offs" subsection.
+     Include trade-offs that affect documentation consumers or represent
+     meaningful constraints on the system. Aim for completeness — every ADR
+     with a substantive negative consequence should be represented. -->
 
 ### Notable Trade-offs
 
@@ -43,4 +46,4 @@
 
 | Capability | Description |
 |---|---|
-| [Capability Title](capabilities/<capability-id>.md) | [One-line summary from spec Purpose or frontmatter description] |
+| [Capability Title](capabilities/<capability-id>.md) | [One-line summary: max 80 characters or 15 words. One short phrase, not a multi-clause sentence.] |
