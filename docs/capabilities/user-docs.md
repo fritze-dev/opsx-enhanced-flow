@@ -25,13 +25,14 @@ Documentation is generated from baseline specs (the source of truth) rather than
 - Enriched with "Purpose," "Rationale," "Known Limitations," and "Future Enhancements" when archive data is available
 - Multi-command capabilities include workflow sequence notes
 - Edge Cases section contains only surprising states, not normal flow variants
+- Existing docs read before writing — preserves established tone and quality across regeneration runs
 - Documentation table of contents in `docs/README.md` grouped by category
 
 ## Behavior
 
 ### Generating Capability Docs
 
-When you run `/opsx:docs`, the system reads each baseline spec and produces a documentation file. Normative language (SHALL, MUST) is replaced with natural explanations. Requirement descriptions become feature bullets. Gherkin scenarios become plain-language behavior descriptions. Implementation details are omitted.
+When you run `/opsx:docs`, the system reads each baseline spec. If a capability doc already exists, it reads the existing doc first and updates or enriches it rather than rewriting from scratch — this preserves established tone, phrasing, and structure. It then produces or updates a documentation file. Normative language (SHALL, MUST) is replaced with natural explanations. Requirement descriptions become feature bullets. Gherkin scenarios become plain-language behavior descriptions. Implementation details are omitted.
 
 ### Enrichment from Archives
 
@@ -53,10 +54,9 @@ Normal flow variants and expected UX behaviors go in the Behavior section. The E
 
 ## Known Limitations
 
-- Docs are fully regenerated each run — no incremental updates
+- ADRs and the consolidated README are fully regenerated each run; capability docs are read-first and enriched rather than rewritten
 - Initial-spec research data may be too thin for some Rationale sections, in which case the section is omitted
 - Template extraction means format changes require template edits, not SKILL.md edits
-- External links to the old `docs/architecture-overview.md` or `docs/decisions/README.md` will break after regeneration
 
 ## Future Enhancements
 

@@ -44,7 +44,6 @@ If `docs/architecture-overview.md` exists from a previous run, the system delete
 ## Known Limitations
 
 - Does not generate a separate architecture document — all content is embedded in `docs/README.md`
-- External links to the old `docs/architecture-overview.md` will break after the first regeneration
 
 ## Edge Cases
 
