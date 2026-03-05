@@ -1,45 +1,29 @@
-# ADR-021: Skip Checkpoint When Preflight Already Done
+# ADR-021: Skip checkpoint when preflight already done
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-The design review checkpoint (ADR-019, ADR-020) introduces a pause after the design stage in the ff workflow. However, `/opsx:ff` can be used to resume a partially completed pipeline -- for example, if design and preflight are already done and only tasks remain. In resume scenarios, pausing for design review when the user has already reviewed and approved the design (evidenced by preflight completion) would be unnecessary friction.
-
-Three scenarios were identified for resume behavior. First, a fresh run where no artifacts exist: the checkpoint fires after design as intended. Second, a resume where design is done but preflight is not: the checkpoint fires because the user may not have reviewed the design yet. Third, a resume where preflight already exists: the checkpoint is skipped because preflight existence implies the user previously reviewed and approved the design.
-
-Research confirmed that the alternative of always checkpointing, regardless of existing artifacts, would create annoying interruptions in resume cases. Users who have already moved past design and through preflight have implicitly approved the design approach. Forcing them to re-approve adds friction without value.
-
-This edge case handling ensures the checkpoint adds value (catching unreviewed designs) without adding unnecessary friction (interrupting resumed workflows where design was already reviewed).
+The `/opsx:ff` command can be resumed after partial completion — for example, if the user previously ran ff through design and is now resuming to complete the remaining artifacts. In this resume scenario, the design review has already occurred (evidenced by preflight already existing), and pausing again for a design review would create unnecessary friction. The convention needed to handle four scenarios: fresh run (no artifacts), partial resume with design done, partial resume past design, and all artifacts done. Research confirmed that preflight existence is a reliable indicator that design review has already occurred.
 
 ## Decision
-
-Skip checkpoint when preflight already done. Avoids unnecessary friction on resume; preflight existence implies prior design review.
+Skip the design review checkpoint when preflight artifacts already exist, indicating a prior design review has occurred.
 
 ## Rationale
-
-Avoids unnecessary friction on resume; preflight existence implies prior design review.
+Avoids unnecessary friction on resume. Preflight existence implies prior design review.
 
 ## Alternatives Considered
-
-- Always checkpoint (annoying for resume cases)
+- Always checkpoint regardless of resume state — annoying for resume cases where design was already reviewed
 
 ## Consequences
 
 ### Positive
-
 - Resume workflows are not interrupted by redundant review checkpoints
-- The checkpoint fires only when it provides value: when design has not been reviewed
-- Consistent user experience whether starting fresh or resuming
+- Fresh runs still get the full design review pause
 
 ### Negative
-
-- No significant negative consequences identified.
+- No significant negative consequences identified
 
 ## References
-
 - [Spec: artifact-generation](../../openspec/specs/artifact-generation/spec.md)
-- [ADR-019: Constitution Convention Only](adr-019-constitution-convention-only.md)
-- [ADR-020: Checkpoint After Design Specifically](adr-020-checkpoint-after-design-specifically.md)
+- [ADR-020: Checkpoint after design specifically](adr-020-checkpoint-after-design-specifically.md)

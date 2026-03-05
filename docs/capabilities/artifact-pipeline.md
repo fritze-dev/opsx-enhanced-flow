@@ -1,56 +1,57 @@
 ---
 title: "Artifact Pipeline"
 capability: "artifact-pipeline"
-description: "Schema-driven 6-stage artifact pipeline with dependency gating"
+description: "Defines the schema-driven 6-stage artifact pipeline with strict dependency gating and implementation controls."
 lastUpdated: "2026-03-05"
 ---
 
 # Artifact Pipeline
 
-The artifact pipeline defines a strict 6-stage progression from research through to implementation tasks. Each stage produces a verifiable artifact, and no stage can be skipped -- the system enforces dependency order so that every decision is documented before implementation begins.
+The artifact pipeline guides every change through six mandatory stages -- research, proposal, specs, design, preflight, and tasks -- enforcing strict dependency order so that no stage is skipped and implementation is gated by complete planning.
 
 ## Purpose
 
-Without a structured pipeline, critical thinking steps get skipped -- developers jump straight to code without researching alternatives, writing specs, or checking for gaps. The pipeline enforces a deliberate progression that catches problems early, when they are cheapest to fix, rather than during implementation or after release.
+Development teams working with AI assistants need a structured process that prevents jumping straight to code without adequate research, design, and quality review. Without enforced stages, critical thinking steps get skipped, decisions go undocumented, and implementation begins before requirements are fully understood. The artifact pipeline provides a schema-driven sequence of mandatory stages that ensures every change is thoroughly analyzed before a single line of code is written.
 
 ## Rationale
 
-Artifact completion is determined by file existence and non-empty content rather than content quality assessment. This keeps the gating mechanism simple and predictable. The config.yaml is deliberately minimal (just a schema reference and constitution pointer) so that workflow rules live at their authoritative source: the schema for universal rules and the constitution for project-specific rules.
+The pipeline uses a declarative schema rather than hardcoded skill logic so that the workflow structure is transparent and modifiable without touching command code. Each artifact declares its dependencies explicitly, and the OpenSpec CLI enforces these dependencies by checking completion status before allowing generation. The 6-stage design captures the full lifecycle from initial research through implementation-ready tasks, with each stage producing a verifiable file. Config.yaml serves as a minimal bootstrap containing only the schema reference and a constitution pointer, while workflow rules live at their authoritative source -- the schema for universal rules, the constitution for project-specific rules.
 
 ## Features
 
-- Six stages in strict order: research, proposal, specs, design, preflight, tasks
-- Dependency gating prevents skipping stages
-- Each stage produces a verifiable artifact file
-- Implementation (apply phase) is gated by task completion
-- Schema-declared dependencies enforced by the OpenSpec CLI
-- Minimal config.yaml bootstrap -- workflow rules owned by schema and constitution
+- **Six-Stage Pipeline**: Research, proposal, specs, design, preflight, and tasks execute in strict dependency order. Each stage produces a verifiable artifact file that must be complete (exists and is non-empty) before the next stage can begin.
+- **Explicit Dependency Declarations**: Each artifact in the schema declares its dependencies via a `requires` field. The OpenSpec CLI enforces these checks automatically.
+- **Apply Gate**: Implementation is gated by the tasks artifact. The apply phase cannot begin until `tasks.md` exists and is non-empty. During apply, progress is tracked against the task checklist.
+- **Minimal Config Bootstrap**: The `openspec/config.yaml` file contains only the schema reference and a constitution pointer -- no workflow rules or per-artifact rules entries.
+- **Schema-Owned Workflow Rules**: The schema's `tasks.instruction` field contains the Definition of Done rule. The `apply.instruction` field contains the post-apply workflow sequence (`/opsx:verify` then `/opsx:archive` then `/opsx:changelog` then `/opsx:docs` then commit).
 
 ## Behavior
 
-### Pipeline Progression
+### Pipeline Stages Execute in Dependency Order
 
-The six stages execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, and tasks requires preflight. You progress through the pipeline using `/opsx:continue` (one stage at a time) or `/opsx:ff` (all remaining stages).
+When progressing through the pipeline, the system enforces the order: research first, then proposal, then specs, then design, then preflight, then tasks. Attempting to skip a stage -- for example, generating specs before completing the proposal -- is rejected with a message indicating which prerequisite artifact must be completed first. A completed pipeline run produces `research.md`, `proposal.md`, one or more `specs/<capability>/spec.md` files, `design.md`, `preflight.md`, and `tasks.md`.
 
-### Dependency Enforcement
+### Dependency Checks Are Enforced Automatically
 
-Before generating any artifact, the system checks that all prerequisite artifacts are complete. An artifact is considered complete when its file exists and is non-empty. If you try to generate specs before the proposal is done, the system rejects the attempt and tells you what needs to be completed first.
+Before generating any artifact, the system checks that all required predecessor artifacts are complete. An artifact is considered complete when its corresponding file exists and is non-empty. If a dependency check fails, the system reports which artifacts must be completed first. The schema declares these dependencies explicitly so that the enforcement is transparent and inspectable.
 
-### Apply Gate
+### Implementation Is Gated by Task Completion
 
-The implementation phase (`/opsx:apply`) cannot begin until tasks.md exists and is non-empty. Once the apply phase starts, it works through the task checklist, marking items complete as implementation proceeds.
+Invoking `/opsx:apply` before `tasks.md` exists is rejected with a message to generate tasks first. Once all 6 artifacts are complete, apply begins by reading the task checklist from `tasks.md` and working through items sequentially. As each task item is completed, the corresponding checkbox is marked from `- [ ]` to `- [x]`.
 
-### Multi-Capability Specs
+### Config Contains Only Bootstrap Content
 
-If your proposal lists multiple capabilities, the specs stage is not considered complete until a spec file has been generated for each capability listed in the proposal.
+The `config.yaml` file contains a `schema` field referencing the active schema and a `context` field pointing to the project constitution. It contains no other workflow rules or per-artifact rules entries. All workflow logic resides in the schema's instruction fields or in the constitution.
 
-## Known Limitations
+### Schema Owns Universal Workflow Rules
 
-- Artifact completion is based on file existence, not content quality -- an artifact with minimal content still satisfies the dependency check
-- If the schema is modified while a change is in progress, the change continues with the schema version active when it was created
+The `tasks.instruction` field in the schema contains the rule that Definition of Done is emergent from artifacts, referencing Gherkin scenarios, success metrics, preflight findings, and user approval. The `apply.instruction` field contains the post-apply workflow sequence.
 
 ## Edge Cases
 
-- If an artifact file exists but is empty (0 bytes), the system treats it as incomplete.
-- If you manually delete an artifact file mid-pipeline, the system detects the gap and requires regeneration before proceeding.
-- If tasks.md contains no checkbox items (e.g., documentation-only change), the apply phase is still gated by tasks.md existence but reports that there are no implementation tasks.
+- If an artifact file exists but is empty (0 bytes), the system treats it as incomplete and does not satisfy dependency checks.
+- If a user manually deletes an artifact file mid-pipeline, the system detects the gap and requires regeneration before proceeding.
+- If the schema is modified to add a new artifact stage while a change is in progress, the new schema applies to new changes only; in-progress changes continue with the schema version that was active when they were created.
+- If `tasks.md` contains no checkbox items (e.g., a documentation-only change), the apply phase is still gated by `tasks.md` existence but reports that there are no implementation tasks to execute.
+- If multiple spec files are required (one per capability), the specs stage is not considered complete until all capability specs listed in the proposal have been generated.
+- If a project has no constitution file, the `config.yaml` context pointer is harmless -- the AI notes the missing file and proceeds.

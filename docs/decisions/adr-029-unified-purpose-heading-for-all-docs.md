@@ -1,39 +1,31 @@
 # ADR-029: Unified "Purpose" heading for all docs
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-After the v1.0.7 `improve-docs-quality` change, generated capability docs used inconsistent heading names depending on whether they had archive enrichment data. Enriched docs used "Why This Exists" while initial-spec-only docs used a different variant. This created a confusing reading experience where structurally identical sections had different names across docs. The inconsistency also complicated the SKILL.md guidance, which had to reference different heading names for different enrichment scenarios. A unified heading name was needed that would be standard, unambiguous, and appropriate for both enriched and spec-only docs.
+After the v1.0.7 docs quality improvement, a detailed review revealed heading inconsistency across the 18 generated capability docs. Enriched docs used "Why This Exists" while initial-spec-only docs used a different variation. The inconsistency confused readers who expected a uniform structure across all capability documentation. Research identified "Purpose" as the standard, unambiguous term used across technical documentation. The root cause was that SKILL.md instructed agents to derive the section from archive proposal "Why" sections (which describe change motivation like "the init skill was broken") instead of the spec's Purpose section (which describes capability purpose like "without a single initialization command, you'd need to manually...").
 
 ## Decision
-
-Use "Purpose" as the unified heading name for all capability docs, replacing "Why This Exists."
+Use a unified "Purpose" heading for all capability docs, regardless of whether they are enriched with archive data or spec-only.
 
 ## Rationale
-
-"Purpose" is a standard, unambiguous term that eliminates the inconsistency between enriched and spec-only docs. It clearly communicates the section's intent without being informal or change-focused.
+Standard, unambiguous term. Eliminates the inconsistency between enriched and spec-only docs.
 
 ## Alternatives Considered
-
-- Keep "Why This Exists" -- informal and inconsistent with ADR/spec terminology
-- Use "Motivation" -- too change-focused; implies motivation for a specific change rather than the capability's ongoing purpose
+- Keep "Why This Exists" — informal, not standard terminology
+- Use "Motivation" — too change-focused, conflates change motivation with capability purpose
 
 ## Consequences
 
 ### Positive
-
-- All 18 capability docs now use identical heading structure regardless of enrichment level
-- "Purpose" aligns with standard documentation terminology (ADRs, specs)
-- Simpler SKILL.md guidance -- one heading name to reference, not multiple variants
+- Consistent heading structure across all 18 capability docs
+- Standard terminology that readers expect
+- Purpose content is derived from the correct source (spec Purpose section)
 
 ### Negative
-
-- Existing docs required heading renames across all 18 files (one-time migration cost)
+- No significant negative consequences identified
 
 ## References
-
-- [User Documentation spec](../../openspec/specs/user-docs/spec.md)
-- [ADR-017: "Why This Exists" uses newest archive's proposal](adr-017-why-this-exists-uses-newest-archives-proposal.md) -- historical decision using the old naming
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
+- [ADR-030: Unified "Rationale" heading for all docs](adr-030-unified-rationale-heading-for-all-docs.md)

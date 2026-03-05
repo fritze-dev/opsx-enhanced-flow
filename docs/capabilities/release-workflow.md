@@ -1,74 +1,126 @@
 ---
 title: "Release Workflow"
 capability: "release-workflow"
-description: "Version management, changelog generation, and consumer update guidance"
+description: "Version management, changelog generation, and consumer update process."
 lastUpdated: "2026-03-05"
 ---
-
 # Release Workflow
 
-This capability defines the release workflow conventions: automatic patch version bumps on archive, version synchronization between plugin files, manual minor/major release processes, consumer update guidance, and changelog generation from archived changes.
+The release workflow handles version management for the plugin, including automatic patch bumps on archive, version synchronization, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
 
 ## Purpose
 
-Without automated version management, patch versions would need to be bumped manually after every archive, leading to forgotten bumps and version confusion. Without a changelog, users would need to read spec files or commit logs to understand what changed. This capability ensures versions stay current automatically and changes are communicated clearly.
+Without an automated release workflow, version bumps are a manual step that is regularly forgotten, causing consumers to miss updates even after changes are pushed. Additionally, version fields across plugin files can drift out of sync, and there is no structured process for generating changelogs or guiding consumers through updates.
 
 ## Rationale
 
-Patch bumps are automatic on archive because every completed change warrants at least a patch version increment. Minor and major releases are manual because they represent intentional decisions about feature scope or breaking changes that require human judgment. The changelog follows the Keep a Changelog format because it is widely recognized and structures entries by change type.
+The auto-bump is implemented as a constitution convention rather than a skill modification, respecting the principle that skills are shared plugin code and must not contain project-specific behavior. Patch bumps cover the vast majority of changes; minor and major releases are rare enough that a documented manual process suffices. The changelog command reads `openspec/config.yaml` for a `docs_language` setting, allowing teams to generate release notes in their preferred language while keeping dates in ISO format and product names in English.
 
 ## Features
 
-- Automatic patch version bump in plugin.json and marketplace.json after `/opsx:archive`
-- Version synchronization between plugin.json (source of truth) and marketplace.json
-- Manual minor/major release process with git tags and optional GitHub Releases
-- Consumer update guidance: marketplace refresh, plugin update, restart
-- `/opsx:changelog` generates release notes from archived changes in Keep a Changelog format
-- Changelog entries generated in configured `docs_language` with translated section headers
-- Post-archive next steps include changelog generation, push, and local plugin update
-- Skill immutability convention: project-specific behavior lives in the constitution, not in skills
+- **Automatic patch version bump** — the patch version increments automatically after each successful archive
+- **Version synchronization** — `plugin.json` and `marketplace.json` stay in sync automatically
+- **Manual minor/major releases** — documented process for intentional version changes with git tags
+- **Consumer update guidance** — clear steps for consumers to get the latest plugin version
+- **Changelog generation** — `/opsx:changelog` produces release notes from archived changes in Keep a Changelog format
+- **Language-aware changelog** — changelog entries can be generated in the language configured in `docs_language`
+- **Post-archive next steps** — archive output includes guidance for the complete post-archive workflow
 
 ## Behavior
 
-### Automatic Patch Bump
+### Automatic Patch Bump After Archive
 
-When you archive a change via `/opsx:archive`, the system automatically increments the patch version in plugin.json and syncs it to marketplace.json. The archive summary displays the new version. If the two files are out of sync before bumping, plugin.json is used as the source of truth.
+After a successful `/opsx:archive`, the patch version in `.claude-plugin/plugin.json` is incremented automatically (for example, `1.0.3` becomes `1.0.4`). The new version is displayed in the archive summary.
 
-### Manual Minor/Major Releases
+### Version Synchronization
 
-For intentional minor or major version changes, you manually set the version in both plugin.json and marketplace.json, create a git tag (e.g., `v1.1.0`), push the tag, and optionally create a GitHub Release.
+The `version` field in `marketplace.json` always matches `plugin.json`. Both files are updated together during the auto-bump. If they are found out of sync beforehand, they are aligned to the `plugin.json` version first, then the patch bump is applied.
 
-### Consumer Updates
+### Manual Minor and Major Releases
 
-To update the plugin, consumers run the marketplace update command to refresh the listing, then the plugin update command, then restart Claude Code. If an update is not detected, refreshing the marketplace listing first usually resolves it.
+For intentional minor or major version changes, you manually set the version in both `plugin.json` and `marketplace.json`, create a git tag in the format `v<version>`, push the tag, and optionally create a GitHub Release via `gh release create`.
 
-### Changelog Generation
+### Optional GitHub Release
 
-When you run `/opsx:changelog`, the system reads archived changes from `openspec/changes/archive/`, examines each archive's proposal, delta specs, and design artifacts, and produces changelog entries in Keep a Changelog format (Added, Changed, Deprecated, Removed, Fixed, Security). Entries are ordered newest first. If CHANGELOG.md already exists, new entries are added at the top while preserving existing content.
+After creating and pushing a version tag, you can run `gh release create v<version>` with changelog content. Consumers can reference the release by tag.
 
-### Language-Aware Changelog
+### Consumer Update Process
 
-The system reads the `docs_language` field from `openspec/config.yaml`. If the field is missing or commented out, changelog entries are generated in English. When a language is configured, section headers are translated to the target language (e.g., "Added" becomes "Hinzugefuegt" for German) and entry descriptions are written in the configured language. Dates remain in ISO format, product names stay in English, and existing entries in previous languages are preserved as-is.
+When a new plugin version is available, consumers run `claude plugin marketplace update opsx-enhanced-flow` to refresh the listing, then `claude plugin update opsx@opsx-enhanced-flow` to install the update, and restart Claude Code to load the new version.
 
-### Post-Archive Flow
+### Update Not Detected
 
-After a successful archive, the system shows next steps: generate the changelog with `/opsx:changelog`, push to remote, and update the local plugin installation.
+If `claude plugin update` does not detect a new version, first refresh the marketplace listing with `claude plugin marketplace update opsx-enhanced-flow` and retry. As a last resort, uninstall and reinstall the plugin.
+
+### Skill Immutability
+
+Skills in `skills/` are generic plugin code shared across all consumers and are not modified for project-specific behavior. Project-specific workflows and conventions are defined in the constitution.
+
+### Project-Specific Behavior in Constitution
+
+When project-specific post-archive behavior is needed (such as version bumps), it is defined as a convention in `openspec/constitution.md`, not added as a step in the skill file.
+
+### End-to-End Install Flow
+
+The complete install path is: `claude plugin marketplace add` followed by `claude plugin install` followed by `/opsx:init` followed by `/opsx:bootstrap`.
+
+### End-to-End Update Flow
+
+The complete update path is: `claude plugin marketplace update` followed by `claude plugin update`. Running `/opsx:init` again is safe (idempotent) and ensures schema updates are picked up.
+
+### Post-Push Developer Plugin Update
+
+After pushing a version bump to the remote, the developer updates their local plugin installation by running `claude plugin marketplace update` and `claude plugin update` to stay on the latest version during development.
+
+### Archive Output Next Steps
+
+After a successful archive with auto-bump, the output includes next steps: run `/opsx:changelog`, push, and update the local plugin.
+
+### Changelog from Single Archive
+
+Running `/opsx:changelog` reads each archived change directory, examines the proposal, delta specs, and design artifacts, and produces changelog entries summarizing what changed from a user perspective. Entries use the Keep a Changelog format with sections like Added, Changed, and Fixed as applicable.
+
+### Multiple Archives Ordered Newest First
+
+When multiple archives exist, changelog entries are ordered with the newest first.
+
+### Existing Changelog Preserved
+
+If `CHANGELOG.md` already contains manually written entries, new entries are added at the top without modifying or removing existing content.
+
+### No Archives to Process
+
+If the archive directory is empty or does not exist, `/opsx:changelog` informs you that no archived changes were found.
+
+### Internal-Only Changes
+
+If an archived change describes purely internal refactoring with no user-visible impact, it is either omitted or included under a minimal note rather than fabricating user-facing changes.
+
+### Changelog in Configured Language
+
+When `openspec/config.yaml` contains a `docs_language` setting (for example, `German`), `/opsx:changelog` generates section headers and entry descriptions in that language. Dates remain in ISO format and product names stay in English.
+
+### Default Language
+
+When the `docs_language` field is missing or set to `English`, changelog entries are generated in English.
+
+### Language Change Mid-Project
+
+If the documentation language is changed after entries have already been generated, existing entries are preserved in their original language and new entries use the new language.
 
 ## Known Limitations
 
-- Patch bumps are automatic only -- minor and major releases require manual version setting
-- Changelog generation relies on archive artifacts; purely internal refactoring may result in minimal entries
+- Does not support automatic minor or major version bumps — these require a manual process.
+- Does not create git tags automatically — tagging is part of the manual minor/major release process.
+- No CI/CD automation or git hooks — the workflow relies on constitution conventions followed by the agent.
 
 ## Future Enhancements
 
-- Dedicated `/opsx:release` skill for managed minor/major releases (deferred)
-- `/opsx:status` skill showing current version, pending changes, and sync state (separate feature)
-- Git hooks or CI/CD automation for release validation
-- Automatic git tagging on minor/major releases
+- A dedicated `/opsx:release` skill for automated minor/major releases.
+- A `/opsx:status` skill for checking the current project and plugin state.
 
 ## Edge Cases
 
-- If the archive directory is empty or does not exist when running `/opsx:changelog`, the system informs you that no archived changes were found.
-- If an archived change is purely internal refactoring with no user-visible changes, the changelog either omits the entry or includes a minimal "Internal improvements" note.
-- If CHANGELOG.md contains manually written entries, the system preserves them when adding new entries.
-- If `docs_language` is changed mid-project, existing changelog entries remain in their original language while new entries use the new language.
+- If `.claude-plugin/plugin.json` does not exist (consumer projects without plugin manifests), the version bump step is silently skipped.
+- If the version field contains a non-semver value, the system warns and skips the bump rather than producing an invalid version.
+- If the archive directory contains changes with only internal refactoring, the changelog agent either omits the entry or uses a minimal note to avoid fabricating user-facing changes.

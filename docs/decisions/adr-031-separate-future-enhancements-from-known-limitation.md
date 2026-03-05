@@ -1,39 +1,30 @@
 # ADR-031: Separate "Future Enhancements" from "Known Limitations"
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-Before this change, capability docs had a single "Known Limitations" section that mixed two distinct concepts: current technical constraints (e.g., "Does not support incremental updates") and deferred future ideas (e.g., "Tracked in #12"). Readers looking for current limitations had to filter out future plans, and readers looking for the roadmap had to scan through constraint descriptions. Design Non-Goals were the primary source for both types of content, but they serve different audiences: limitations inform current users about what the system cannot do today, while enhancements inform planners about what the system could do tomorrow.
+Capability docs needed to surface two distinct types of information from Non-Goals: current constraints (things the capability deliberately does not do) and deferred features (things planned for the future). These serve different audiences and purposes — limitations help users understand current boundaries, while enhancements help contributors and planners understand the roadmap. Mixing them in a single section obscures both. Research into the archive data showed that Non-Goals consistently fall into these two categories: permanent constraints (e.g., "no CI/CD automation") and deferred features (e.g., "deferred `/opsx:release` skill"). Six or more capabilities had actionable future enhancement items from deferred Non-Goals and tracked GitHub Issues.
 
 ## Decision
-
-Separate "Future Enhancements" into its own section, distinct from "Known Limitations."
+Create a separate "Future Enhancements" section distinct from "Known Limitations" in capability docs.
 
 ## Rationale
-
-Limitations describe current constraints while enhancements describe actionable future ideas. Conflating them confuses readers who have different needs. The separation also allows linking to GitHub Issues for tracked enhancements.
+Limitations describe current constraints; enhancements describe actionable future ideas. They serve different audiences and purposes and should not be conflated.
 
 ## Alternatives Considered
-
-- Merge into a single "Known Limitations" section -- conflates current constraints with future plans
-- Add future items to Edge Cases -- Edge Cases are for surprising behavior, not roadmap items
+- Single "Limitations & Future" section — conflates different types of information for different audiences
+- Embed in Edge Cases — misrepresents future plans as edge cases
 
 ## Consequences
 
 ### Positive
-
-- Clearer separation of "what the system cannot do now" vs "what it could do in the future"
-- Future Enhancements can link to GitHub Issues for traceability
-- Each section stays concise (max 5 bullets each)
+- Clear separation between current constraints and future plans
+- Contributors can quickly find planned improvements
+- Users understand current boundaries without confusion
 
 ### Negative
-
-- No significant negative consequences identified. The additional section adds minimal length to docs.
+- No significant negative consequences identified
 
 ## References
-
-- [User Documentation spec](../../openspec/specs/user-docs/spec.md)
-- [Capability doc template](../../openspec/schemas/opsx-enhanced/templates/docs/capability.md)
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)

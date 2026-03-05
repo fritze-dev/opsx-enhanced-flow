@@ -1,43 +1,29 @@
-# ADR-015: ADRs Fully Regenerated Each Run
+# ADR-015: ADRs fully regenerated each run
 
 ## Status
-
 Accepted (2026-03-04)
 
 ## Context
-
-Architecture Decision Records are generated from the Decisions tables in design.md files across all archived changes. The question was whether to generate ADRs incrementally (only processing new or changed archives) or to fully regenerate all ADRs on every `/opsx:docs` run.
-
-Incremental updates would require tracking which archives have been processed and detecting changes to previously processed archives. This state tracking adds complexity: a metadata file or index would need to be maintained, and edge cases around archive modifications or deletions would need handling. Additionally, ADR numbering would become unstable if archives were reordered or deleted.
-
-Full regeneration avoids all of these problems. Since ADRs are derived deterministically from a chronological sort of archives and their design.md decisions tables, every run produces identical output for identical input. There is no state to track, numbering is always consistent, and the operation is fast because it only involves reading markdown files and writing markdown files.
-
-Research confirmed that the number of archives and decisions tables is small enough that full regeneration completes in seconds. The standard ADR convention uses sequential numbering, which is naturally maintained by processing archives in chronological order.
+ADR generation from design.md decision tables could follow two models: incremental updates (tracking which archives have been processed and only generating new ADRs) or full regeneration (rebuilding all ADRs from scratch each time `/opsx:docs` runs). Incremental updates require state tracking to know which archives were last processed and which ADR numbers were assigned, adding complexity. Full regeneration is stateless and deterministic — the same archives always produce the same numbered ADRs in the same order. Since ADRs are derived entirely from archived design.md files that do not change after archiving, regeneration produces identical results each run.
 
 ## Decision
-
-ADRs fully regenerated each run. Deterministic, no state to track, numbering always consistent.
+ADRs are fully regenerated each time `/opsx:docs` runs, not incrementally updated.
 
 ## Rationale
-
-Deterministic, no state to track, numbering always consistent.
+Deterministic, no state to track, numbering is always consistent. The same input archives always produce the same output.
 
 ## Alternatives Considered
-
-- Incremental updates (requires tracking which archives are processed)
+- Incremental updates — requires tracking which archives are processed, adds state management complexity
 
 ## Consequences
 
 ### Positive
-
-- Deterministic output: same input always produces same ADR set
-- No state or metadata files to maintain between runs
-- ADR numbering is always consistent with the chronological archive order
+- Stateless and deterministic: same archives always produce the same ADRs
+- No tracking state to manage or risk corrupting
+- Numbering is always consistent and sequential
 
 ### Negative
-
-- ADR numbering instability if archives are reordered, though this does not happen in practice since archive directory names include dates.
+- No significant negative consequences identified
 
 ## References
-
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)

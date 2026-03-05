@@ -1,62 +1,70 @@
 ---
 title: "Spec Format"
 capability: "spec-format"
-description: "Format rules for specifications including normative descriptions, scenarios, and delta operations"
+description: "Defines the format rules for specifications including normative descriptions, Gherkin scenarios, delta spec operations, frontmatter metadata, and baseline structure."
 lastUpdated: "2026-03-05"
 ---
 
 # Spec Format
 
-This capability defines the format rules for all specifications: normative descriptions with obligation keywords, Gherkin scenarios, delta spec operations, frontmatter metadata, and baseline spec structure.
+Specifications follow a strict format that ensures consistency, machine-parseability, and clear communication of requirements. Every spec uses normative descriptions with RFC 2119 keywords, Gherkin scenarios for testable behavior, and a standardized structure for both delta changes and baseline state.
 
 ## Purpose
 
-Without consistent format rules, specifications become a patchwork of styles — some with formal requirements, others with vague descriptions, scenarios at wrong heading levels that break parsing. The spec format ensures every specification is structured identically, making them both human-readable and machine-parseable.
+When multiple people and AI agents create and modify specifications, inconsistent formatting leads to misinterpretation, broken parsing, and specs that cannot be reliably merged or verified. The spec format defines precise rules for how requirements, scenarios, and changes are expressed, so that every spec is both human-readable and machine-processable.
 
 ## Rationale
 
-Scenarios use exactly 4 hashtags (`####`) because 3 hashtags would render as a requirement-level heading, silently breaking the relationship between scenarios and their parent requirement. This is a common mistake that causes subtle downstream problems. Delta specs require full content for MODIFIED requirements (not partial diffs) because partial content loses detail when archived into the baseline.
+Normative descriptions using RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) provide unambiguous obligation levels that distinguish mandatory behavior from optional guidance. Gherkin scenarios with strict heading levels (`####` for scenarios) ensure that automated tools can parse scenario blocks without confusion -- using the wrong heading level causes a silent failure where the scenario is misinterpreted as a requirement heading. Delta specs use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED) so the sync process can correctly categorize and merge changes into baselines. Baseline specs omit these prefixes because they represent the current merged state, not a set of changes. YAML frontmatter with `order` and `category` fields enables deterministic, project-specific ordering in generated documentation.
 
 ## Features
 
-- Normative descriptions use RFC 2119 keywords (SHALL, MUST, SHOULD, MAY)
-- Strict ordering: normative description first, then optional User Story
-- Gherkin scenarios with GIVEN/WHEN/THEN clauses as bold-prefixed list items
-- Scenarios must use `#### Scenario:` (exactly 4 hashtags)
-- Delta spec operations: ADDED, MODIFIED, REMOVED, RENAMED
-- Optional YAML frontmatter with `order` and `category` fields for documentation ordering
-- Clean baseline format without delta operation prefixes
+- **Normative Descriptions**: Every requirement has a binding description using RFC 2119 keywords, placed immediately after the requirement header. An optional User Story follows.
+- **Gherkin Scenarios**: Every requirement has at least one scenario using `#### Scenario:` (exactly 4 hashtags) with GIVEN/WHEN/THEN clauses as bold-prefixed list items.
+- **Delta Spec Operations**: Delta specs use `## ADDED Requirements`, `## MODIFIED Requirements`, `## REMOVED Requirements`, and `## RENAMED Requirements` headers to categorize changes.
+- **Baseline Spec Format**: Baseline specs use `## Purpose` followed by `## Requirements` without operation prefixes, representing the current state.
+- **Spec Frontmatter Metadata**: Baseline specs support optional YAML frontmatter with `order` (integer for display position) and `category` (kebab-case workflow phase grouping).
 
 ## Behavior
 
-### Requirement Structure
+### Normative Descriptions Come First
 
-Each requirement starts with a `### Requirement: <name>` header, followed immediately by the normative description using obligation keywords (SHALL, MUST, SHOULD, MAY). An optional User Story may follow using the format: `**User Story:** As a [role] I want [goal], so that [benefit]`. The description must always come before the User Story.
+Each requirement block begins with a normative description using SHALL/MUST keywords immediately after the `### Requirement:` header. An optional User Story in the format `**User Story:** As a [role] I want [goal], so that [benefit]` may follow the description. The description always comes before the User Story -- reversing this order is a format violation flagged during preflight. A requirement with no User Story is valid as long as it has the normative description and scenarios.
 
-### Gherkin Scenarios
+### Gherkin Scenarios Use Strict Heading Levels
 
-Every requirement has at least one scenario using `#### Scenario: <name>` (4 hashtags). Each scenario contains GIVEN (preconditions), WHEN (trigger), and THEN (expected outcome) as bold-prefixed list items. Additional conditions use `- **AND** ...` after the relevant clause.
+Scenarios use the heading `#### Scenario: <name>` with exactly 4 hashtags. Each scenario contains GIVEN, WHEN, and THEN clauses formatted as `- **GIVEN** ...`, `- **WHEN** ...`, `- **THEN** ...`. Additional conditions use `- **AND** ...` after the relevant clause. Using 3 hashtags (`### Scenario:`) is a silent failure -- the scenario renders as a requirement-level heading and the GIVEN/WHEN/THEN content is orphaned from its intended context. Multiple scenarios per requirement are supported, each with a unique name.
 
-### Delta Spec Operations
+### Delta Specs Categorize Changes by Operation
 
-Delta specs (within change workspaces) use operation-prefixed headers:
-- `## ADDED Requirements` for new capabilities
-- `## MODIFIED Requirements` for changes (must include full updated content)
-- `## REMOVED Requirements` for deprecations (must include reason and migration path)
-- `## RENAMED Requirements` using FROM/TO format
+New capabilities appear under `## ADDED Requirements`. Changes to existing capabilities appear under `## MODIFIED Requirements` and include the full updated requirement content (not partial diffs), because partial content loses detail when archived into the baseline. Deprecated capabilities appear under `## REMOVED Requirements` with a `**Reason**` and a `**Migration**` path. Name-only changes appear under `## RENAMED Requirements` using `FROM: <old name>` / `TO: <new name>` format.
 
-### Frontmatter Metadata
+### Baseline Specs Represent Current State
 
-Baseline specs may include YAML frontmatter with `order` (display position in docs) and `category` (workflow phase grouping). The `/opsx:docs` command uses these values for ordering and grouping capabilities.
+Baseline specs at `openspec/specs/<capability>/spec.md` use a `## Purpose` section followed by a `## Requirements` section. They do not use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED) because they represent the merged state of all requirements. Each requirement within the baseline follows the same format as delta specs: `### Requirement:` header, normative description, optional User Story, and `#### Scenario:` blocks.
 
-### Baseline Spec Format
+### Frontmatter Controls Documentation Ordering
 
-Baseline specs use a Purpose section followed by a Requirements section. They do not contain operation prefixes because they represent the current merged state, not a set of changes.
+Baseline specs may include YAML frontmatter at the top of the file with `order` (an integer for display position in the documentation table of contents) and `category` (a kebab-case string for workflow phase grouping). Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. The `/opsx:docs` command reads these values to determine capability ordering and group headers. If `order` is absent, the agent determines ordering. If `category` is absent, the capability appears in an "Other" group. Frontmatter is assigned during spec creation, preserved during sync, and takes precedence from delta specs when intentionally changed.
+
+## Known Limitations
+
+- The sync process is agent-driven and relies on intelligent merging rather than exact programmatic parsing. This means frontmatter handling during sync depends on the agent's ability to preserve markdown structure.
+- The OpenSpec CLI's programmatic archive merge expects baseline specs to use `## Purpose` + `## Requirements` format. Agent-driven sync via `/opsx:sync` is the primary merge path.
+
+## Future Enhancements
+
+- Automated validation of doc output against templates.
+- Incremental documentation generation (docs currently regenerate fully each run).
 
 ## Edge Cases
 
-- If a scenario uses 3 hashtags instead of 4, it renders as a subsection heading instead of a scenario block, breaking automated parsing. Preflight flags this as a format violation.
-- If a User Story is placed before the normative description, preflight flags it as a format violation.
-- If a MODIFIED requirement in a delta only includes partial content, preflight flags this as a risk because archiving would replace the full baseline with incomplete content.
-- If an unrecognized operation prefix is used (e.g., `## UPDATED Requirements`), the sync process flags it as an error.
-- If two specs share the same `order` value, documentation generation uses alphabetical capability name as tiebreaker.
+- If a delta spec contains both ADDED and MODIFIED sections, the sync process handles each operation independently.
+- If a delta spec uses an unrecognized operation prefix (for example, `## UPDATED Requirements`), the sync process flags it as an error and refuses to merge.
+- If a requirement has zero scenarios, the spec is considered invalid and flagged during preflight.
+- If the same requirement name appears in both ADDED and MODIFIED sections of the same delta spec, it is treated as a conflict and flagged during preflight.
+- If a RENAMED requirement's target name conflicts with an existing baseline requirement, the sync process flags the naming collision.
+- If a delta spec includes frontmatter that conflicts with the baseline, the delta values take precedence (the change is intentionally reordering the capability).
+- If two specs share the same `order` value, `/opsx:docs` uses alphabetical capability name as a tiebreaker.
+- If a `category` value is not one of the standard categories, `/opsx:docs` still renders it as a group header using title-case formatting.
+- If a MODIFIED requirement includes only the changed scenario and omits the normative description, preflight flags the partial content as a risk because archiving replaces the full baseline requirement with the incomplete delta.

@@ -1,40 +1,29 @@
 # ADR-033: Manual doc fixes + deferred regeneration
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-After the v1.0.7 content regressions were identified (11 Rationale sections, 4 Purpose sections affected), two paths were available: manually fix the 18 docs immediately and defer regeneration, or fix the SKILL.md guardrails and regenerate immediately. The risk of regenerating immediately was that the same regression could recur if the guardrails were not yet proven effective. Manual fixes were safer because they preserved the known-good content while the guardrails were validated separately. The full regeneration was deferred to friction issue #18, which would serve as the validation pass for the new guardrails.
+After identifying heading inconsistencies and content regressions across the 18 capability docs, the fix could be applied via manual edits to existing docs or by regenerating all docs with the updated SKILL.md. Regeneration would test the fix end-to-end but risked introducing new regressions — the exact problem being solved. Manual fixes are safer because they preserve the established quality baseline while applying targeted corrections (heading renames, new sections). Research showed that a deferred regeneration pass (tracked as friction issue #18) could validate the guardrails separately after they are proven effective. This approach prioritizes safety over automation.
 
 ## Decision
-
-Manually fix the 18 docs and defer full regeneration to friction issue #18.
+Apply manual doc fixes immediately and defer full regeneration to a separate friction issue (#18).
 
 ## Rationale
-
-Manual fixes are safer for this change because they preserve established quality. Regeneration validates guardrails separately, reducing the risk of compounding regressions.
+Safer: preserves established quality and validates guardrails separately. Manual fixes address the immediate problem without risking new regressions.
 
 ## Alternatives Considered
-
-- Regenerate as part of this change -- risks new regressions before the guardrails are proven effective in practice
+- Regenerate now — risks new regressions before guardrails are proven effective
 
 ## Consequences
 
 ### Positive
-
-- Known-good content preserved immediately
-- Guardrails validated separately in a dedicated pass (issue #18)
-- Reduced risk of compounding quality issues
+- Immediate quality improvement without regression risk
+- Guardrails can be validated independently during deferred regeneration
 
 ### Negative
-
-- Current docs are manually curated, not generated -- they may diverge from what `/opsx:docs` would produce until the regeneration pass completes
-- Requires a separate issue (#18) and additional work to complete the validation
+- Current docs are manually curated rather than generated; friction issue #18 tracks the deferred regeneration
+- Manual fixes may miss edge cases; mitigated by systematic diff review of all 18 docs
 
 ## References
-
-- [User Documentation spec](../../openspec/specs/user-docs/spec.md)
-- [GitHub Issue #18](https://github.com/fritze-dev/opsx-enhanced-flow/issues/18) -- the deferred regeneration pass
-- [ADR-032: "Read before write" guardrail](adr-032-read-before-write-guardrail-in-skill-md.md)
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)

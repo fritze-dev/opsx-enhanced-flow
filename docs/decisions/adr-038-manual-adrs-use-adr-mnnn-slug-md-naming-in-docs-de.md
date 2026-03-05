@@ -1,31 +1,31 @@
-# ADR-038: Manual ADRs Use `adr-MNNN-slug.md` Naming in `docs/decisions/`
+# ADR-038: Manual ADRs use adr-MNNN-slug.md naming in docs/decisions/ (same directory)
 
 ## Status
 Accepted (2026-03-05)
 
 ## Context
-A full docs regeneration test (delete all docs → `/opsx:docs` → `git diff`) revealed that manually written ADRs were lost during regeneration. ADR-034 (init-model-invocable) was hand-written during bootstrap recovery and stored in `docs/decisions/` alongside generated ADRs. Since it did not originate from any archived design.md Decisions table, the regeneration process deleted it. The fix-docs-skill-regressions change investigated several approaches: a separate `manual/` subdirectory (adds unnecessary directory complexity), a preservation rule for unmatched ADR filenames (fuzzy matching risks numbering conflicts), and a naming convention with a distinct prefix. The M prefix approach requires no new directories, is unambiguously distinguishable from generated `adr-NNN` files by a simple glob pattern, and keeps all ADRs in a single directory for unified discovery.
+A full docs regeneration test revealed that manually created ADRs (not derived from design.md Decisions tables) were lost during regeneration because the cleanup step removed all ADR files before regenerating. The project had one manual ADR (`adr-M001-init-model-invocable.md`) that needed to survive the regeneration cycle. Three preservation strategies were evaluated: a separate `docs/decisions/manual/` subdirectory (unnecessary complexity, requires README to discover two locations), an `adr-MNNN-slug.md` naming convention in the same directory (M prefix unambiguously distinguishes manual from generated `adr-NNN`, single glob location), and a SKILL.md preservation rule for unmatched ADRs (fuzzy matching risks numbering conflicts). Research confirmed that the M prefix convention is simple, unambiguous, and requires only a single glob pattern for README discovery.
 
 ## Decision
-Manual ADRs use the `adr-MNNN-slug.md` naming convention in the same `docs/decisions/` directory as generated ADRs.
+Manual ADRs use the `adr-MNNN-slug.md` naming convention in the same `docs/decisions/` directory as generated ADRs, with the M prefix distinguishing them.
 
 ## Rationale
-No extra directory needed; M prefix unambiguously distinguishes from generated `adr-NNN`; single glob location for README discovery.
+No extra directory needed. The M prefix unambiguously distinguishes manual ADRs from generated `adr-NNN` files. Single glob location for README discovery.
 
 ## Alternatives Considered
-- Separate `manual/` subdirectory (unnecessary directory complexity, complicates README generation)
-- Preservation rule for unmatched ADR filenames (fuzzy matching, numbering conflicts with generated ADRs)
+- Separate `manual/` subdirectory — unnecessary complexity, requires discovering two locations
+- Preservation rule for unmatched ADRs — fuzzy matching, numbering conflicts with generated range
 
 ## Consequences
 
 ### Positive
-- Manual ADRs survive regeneration without any special handling beyond filename detection
-- Single directory simplifies glob-based discovery in README generation
-- M prefix is visually distinct and unambiguous in file listings
+- Simple naming convention that is easy to understand and implement
+- Single directory for all ADRs simplifies discovery
+- Manual ADRs survive regeneration via the M prefix pattern
 
 ### Negative
-- Slug change from the deterministic algorithm causes ADR file renames in git history, showing churn for existing ADRs even though content is unchanged.
+- No significant negative consequences identified
 
 ## References
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
-- [ADR-039: Deterministic Slug Algorithm](adr-039-deterministic-slug-replace-non-a-z0-9-with-hyphen.md)
+- [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)

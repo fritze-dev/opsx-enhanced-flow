@@ -1,59 +1,59 @@
 ---
 title: "Interactive Discovery"
 capability: "interactive-discovery"
-description: "Standalone interactive research with targeted Q&A for complex features"
+description: "Provides standalone interactive research with targeted Q&A for complex features, generating research.md with coverage assessment and clarification questions."
 lastUpdated: "2026-03-05"
 ---
 
 # Interactive Discovery
 
-The `/opsx:discover` command runs a standalone interactive research session with targeted questions for complex features. It generates only the research.md artifact, then pauses for your answers before stopping.
+Provides a dedicated research phase where you can explore complex features interactively, answer targeted questions, and resolve ambiguities before the artifact pipeline generates specs and design.
 
 ## Purpose
 
-Complex features have ambiguities that generic research cannot resolve. Without an interactive discovery phase, these ambiguities surface late -- during specs, design, or even implementation -- when they are expensive to address. Discovery catches unknowns early by assessing coverage across key categories and asking targeted questions only where gaps exist.
+Jumping straight into spec and design generation for a complex feature often produces artifacts full of assumptions and gaps. Interactive Discovery gives you a structured way to surface unknowns early: it assesses coverage across key categories, asks targeted questions only where information is missing, and records your decisions with rationale -- all before any downstream artifacts are created.
 
 ## Rationale
 
-Questions are limited to a maximum of 5, prioritized by Impact multiplied by Uncertainty. This prevents question fatigue while ensuring the most important unknowns are addressed first. Discovery operates independently from the pipeline -- it only generates research.md and then stops, letting you decide when to continue with the rest of the pipeline.
+Discovery operates independently from the artifact pipeline, producing only `research.md` and then pausing. This separation ensures that research is thorough and deliberate rather than rushed as a side effect of artifact generation. Questions are limited to a maximum of five, prioritized by impact multiplied by uncertainty, so that you focus on the highest-value unknowns first. The system also checks existing baseline specs against the codebase to flag potential staleness, catching drift that could undermine the new change.
 
 ## Features
 
-- Reads the constitution, change directory, and existing baseline specs for context
-- Generates research.md with a coverage assessment rating each category as Clear, Partial, or Missing
-- Asks targeted clarification questions only for Partial or Missing categories (maximum 5)
-- Prioritizes questions by Impact multiplied by Uncertainty
-- Records decisions with rationale after you provide answers
-- Detects stale-spec risks by comparing baseline specs against the current codebase
-- Skips questions entirely when all categories are Clear
+- **Standalone research session** via `/opsx:discover` -- generates `research.md` without advancing the pipeline.
+- **Coverage assessment** -- rates nine categories (Scope, Behavior, Data Model, UX, Integration, Edge Cases, Constraints, Terminology, Non-Functional) as Clear, Partial, or Missing.
+- **Targeted Q&A** -- generates up to 5 clarification questions, only for Partial or Missing categories, prioritized by impact and uncertainty.
+- **Stale-spec detection** -- compares existing baseline specs against the codebase and flags potential drift.
+- **Decision recording** -- captures your answers as numbered decisions with rationale and alternatives considered.
 
 ## Behavior
 
-### Running Discovery
+### Running a Discovery Session
 
-When you run `/opsx:discover`, the system reads your project context and generates research.md with coverage ratings across categories like Scope, Behavior, Data Model, UX, Integration, Edge Cases, Constraints, Terminology, and Non-Functional. For each Partial or Missing category, it formulates targeted questions.
+When you run `/opsx:discover`, the system reads the constitution, the current change directory, and any existing baseline specs. It then generates `research.md` with findings about the domain relevant to your change and rates coverage across nine categories.
 
-### Answering Questions
+If all categories are rated Clear, the system states that no questions are needed, saves `research.md`, and suggests running `/opsx:ff` to proceed. If any categories are Partial or Missing, the system presents targeted questions (up to five) and pauses for your answers.
 
-After presenting questions, the system pauses and waits for your answers. Once you respond, it records each decision in the Decisions section of research.md with the decision text, rationale, and alternatives considered. The system then stops -- it does not generate further artifacts.
+### Answering Questions and Recording Decisions
 
-### All Categories Clear
-
-For straightforward changes (e.g., fixing a typo), all categories may be rated Clear. In this case, the system states that no questions are needed, saves research.md, and suggests running `/opsx:ff` to generate remaining artifacts.
+After you provide answers, the system records each as a decision in the Decisions section of `research.md`, including the decision text, rationale, and alternatives considered. The system then saves the file and stops -- it does not generate proposal, specs, design, or any other artifacts.
 
 ### Stale-Spec Detection
 
-If the system finds that baseline specs reference code elements (like function names) that have changed in the codebase, it notes the stale-spec risk in the coverage assessment.
+If baseline specs reference functions, modules, or patterns that no longer match the codebase, the system notes these as stale-spec risks in the coverage assessment. This helps you identify specs that may need updating as part of the current change.
 
-## Future Enhancements
+### Prerequisite Checks
 
-- Discovery should reference existing ADRs to avoid re-investigating already-decided questions (tracked in [#17](https://github.com/fritze-dev/opsx-enhanced-flow/issues/17))
+The system verifies that a change workspace exists before starting discovery. If no active change is found, it suggests running `/opsx:new` first. If the OpenSpec CLI or schema is not available, it directs you to run `/opsx:init`.
+
+## Known Limitations
+
+- Stale-spec detection is heuristic (keyword-based) and may not catch all cases of code-spec drift.
+- The 5-question limit means exceptionally complex changes may require multiple discovery rounds.
 
 ## Edge Cases
 
-- If you answer some questions but not all, the system records decisions for answered questions and marks unanswered ones as "Deferred -- no answer provided."
+- If you answer only some questions, the system records decisions for the answered ones and marks unanswered questions as "Deferred -- no answer provided."
 - If your answers contradict each other, the system flags the contradiction and asks for clarification before recording.
-- If research.md already exists, the system warns you that existing research will be replaced before overwriting.
-- If no baseline specs exist (e.g., bootstrap scenario), the system proceeds without stale-spec analysis.
-- If you run discover on a completed change, the system allows it but warns that re-running research may invalidate downstream artifacts.
-- If no active change exists, the system tells you to create one with `/opsx:new` first.
+- If `research.md` already exists from a previous session, the system overwrites it with fresh research after warning you.
+- If no baseline specs exist (e.g., during a bootstrap), discovery proceeds without stale-spec analysis.
+- If you run discovery on a change with all artifacts already complete, the system allows it but warns that re-running research may invalidate downstream artifacts.

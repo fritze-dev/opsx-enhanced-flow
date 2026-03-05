@@ -1,40 +1,31 @@
-# ADR-035: Commented-out Field in Init Template for Discoverability
+# ADR-035: Commented-out field in init template for discoverability
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-With the introduction of the `docs_language` config field (ADR-034), the team needed a strategy for surfacing the feature to new projects without forcing it on them. An active field defaulting to English would add unnecessary noise to every new config file and could confuse users who never intend to change the language. Separate configuration documentation would not be discoverable at the point where users actually edit their config. The feature needed to be visible enough that users encounter it naturally during project setup, yet inactive by default so that existing behaviour is preserved. A commented-out entry in the init template strikes this balance: it appears directly in the generated config.yaml where users will see it, includes a brief inline comment explaining its purpose, and does not activate unless the user explicitly uncomments it. This ensures that existing projects created before the feature are completely unaffected.
+The `docs_language` configuration field needed to be discoverable by users setting up new projects via `/opsx:init`, but should not be active by default since most projects start in English. Research considered three approaches: an active field defaulting to English (unnecessary noise in every config.yaml), separate configuration documentation (not discoverable during setup), or a commented-out field in the init template (visible but inactive). The commented-out approach follows a common pattern in configuration files where optional features are documented but disabled by default. Users see the option during initialization and can uncomment it when needed. Existing projects are completely unaffected since the field does not exist in their config.yaml.
 
 ## Decision
-
-Include the `docs_language` field as a commented-out entry in the project-setup init template, with an inline comment describing its purpose and accepted values.
+Include `docs_language` as a commented-out field in the init skill's config template for discoverability.
 
 ## Rationale
-
-Users discover the feature organically while editing config.yaml, without requiring external documentation. The commented-out form has no runtime effect, so new and existing projects behave identically until a user opts in.
+Users discover the feature without it being active by default. Existing projects are unaffected.
 
 ## Alternatives Considered
-
-- Active field defaulting to English: adds unnecessary noise in config for users who never change the language
-- Separate config documentation outside the template: not discoverable at the point of use; users may never find it
+- Active field defaulting to English — unnecessary noise in config for the majority of projects
+- Separate config documentation — not discoverable during setup workflow
 
 ## Consequences
 
 ### Positive
-
-- Zero-friction discoverability — users see the option exactly where they configure their project
-- No behavioural change for projects that do not opt in
-- Self-documenting: the inline comment explains the field without requiring external references
+- Feature is discoverable during project initialization
+- No impact on existing projects or default behavior
+- Common configuration pattern that users understand
 
 ### Negative
-
-- Commented-out fields can accumulate over time, cluttering the template if many optional features follow the same pattern
-- Users unfamiliar with YAML comment syntax may not realise the field is inactive
+- No significant negative consequences identified
 
 ## References
-
-- ../../openspec/specs/project-setup/spec.md
-- adr-034-single-docs-language-field-in-config-yaml.md
+- [Spec: project-setup](../../openspec/specs/project-setup/spec.md)
+- [ADR-034: Single docs_language field in config.yaml](adr-034-single-docs-language-field-in-config-yaml.md)

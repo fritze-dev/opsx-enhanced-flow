@@ -1,32 +1,31 @@
-# ADR-040: Fix Both Specs AND SKILL.md/Templates
+# ADR-040: Fix both specs AND SKILL.md/templates
 
 ## Status
 Accepted (2026-03-05)
 
 ## Context
-The docs skill quality regressions required fixes in both the specification layer (baseline specs defining requirements) and the execution layer (SKILL.md and templates defining runtime behavior). The fix-docs-skill-regressions change investigated whether to fix only SKILL.md/templates (leaving specs to drift from the updated implementation) or only specs (which the agent does not read at runtime — it reads SKILL.md). Both approaches create a consistency gap between the authoritative requirement definition and the actual execution instructions. Since the opsx-enhanced plugin uses a three-layer architecture where specs define requirements and SKILL.md defines execution, both must agree to prevent future drift. Updating only one layer means the other becomes stale, which compounds over time and makes future changes harder to reason about.
+The docs regeneration test revealed 9 actionable regressions across SKILL.md, templates, and specs. The fix could target SKILL.md/templates only (the runtime instruction source), specs only (the requirement definitions), or both together. Research into the project's architecture showed that specs define WHAT should happen (requirements), while SKILL.md defines HOW to do it (execution instructions). At runtime, agents read SKILL.md directly — spec changes alone do not change agent behavior. Conversely, SKILL.md changes alone cause specs to drift from implementation, violating the project's spec-driven principle. Both must agree to prevent future drift and maintain the integrity of the spec-driven workflow.
 
 ## Decision
-Fix both specs AND SKILL.md/templates together for any regression fix.
+Fix both specs AND SKILL.md/templates together to maintain alignment between requirements and execution instructions.
 
 ## Rationale
-Specs define requirements; SKILL.md defines execution; both must agree to prevent future drift.
+Specs define requirements; SKILL.md defines execution. Both must agree to prevent future drift.
 
 ## Alternatives Considered
-- SKILL.md-only fixes (specs drift from implementation, creating a consistency gap)
-- Specs-only fixes (agent reads SKILL.md at runtime, not specs — behavior wouldn't actually change)
+- SKILL.md-only — specs drift from implementation, violating spec-driven principle
+- Specs-only — agent does not read specs at runtime, so behavior does not change
 
 ## Consequences
 
 ### Positive
-- Specs and execution instructions stay synchronized, maintaining the three-layer architecture contract
-- Future contributors can trust that specs accurately describe what the skill does
-- Prevents the accumulation of spec-implementation drift over time
+- Specs and SKILL.md stay aligned, maintaining spec-driven workflow integrity
+- Future regressions are prevented by consistent requirements and execution instructions
 
 ### Negative
-- Template comments increase file size in the schema layer. Templates are only read by the agent at generation time, so no user impact, but the files become longer.
+- Larger change surface with more artifacts to review; accepted for the benefit of consistency
 
 ## References
-- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)

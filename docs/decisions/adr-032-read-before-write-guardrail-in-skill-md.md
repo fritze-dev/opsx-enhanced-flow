@@ -1,39 +1,29 @@
 # ADR-032: "Read before write" guardrail in SKILL.md
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-The v1.0.7 docs regeneration demonstrated that without explicit guidance, the AI agent rewrites capability docs from scratch on each run. This caused quality regressions: 11 Rationale sections replaced carefully written design reasoning with change-event descriptions, and 4 Purpose sections were weakened compared to manually curated originals. The root cause was that the agent treated each run as a fresh generation rather than an update to existing content. Investigation of three approaches (fix SKILL.md only, fix SKILL.md + regenerate, fix SKILL.md + guardrails + manual fixes) led to adding an explicit guardrail that requires reading existing content before writing.
+The v1.0.7 docs regeneration introduced quality regressions where agents rewrote documentation from scratch, losing established tone, quality, and specific content. The root cause was that the SKILL.md had no guardrail preventing agents from ignoring existing documentation. Without a "read before write" rule, agents would generate fresh content based solely on source data, losing the accumulated quality of manually curated sections. Research showed that adding an explicit guardrail to SKILL.md is more effective than template-only guidance because the skill prompt is the primary instruction source agents read at runtime. The guardrail requires agents to read the existing document before generating a replacement.
 
 ## Decision
-
-Add a "read before write" guardrail to the SKILL.md Guardrails section requiring the agent to read existing docs before generating.
+Add a "read before write" guardrail to SKILL.md that requires agents to read existing documentation before generating replacements.
 
 ## Rationale
-
-Prevents quality regression by requiring the agent to read existing doc content before generating. This preserves established tone, phrasing, and structure. The agent only adds or modifies sections where enrichment data provides genuinely new information.
+Prevents quality regression by requiring agents to read existing docs before generating. Preserves established tone and content quality.
 
 ## Alternatives Considered
-
-- Template-only guidance -- too easy to miss; templates define structure, not process behavior
-- No guardrail, rely on template alone -- regression-prone, as demonstrated by v1.0.7
+- Template-only guidance — too easy to miss; agents focus on SKILL.md instructions
+- No guardrail — regression-prone; agents would overwrite curated content
 
 ## Consequences
 
 ### Positive
-
-- Preserves established quality across regeneration runs
-- Agent enriches rather than replaces, building on prior work
-- Reduces risk of content regression from future `/opsx:docs` runs
+- Existing documentation quality is preserved across regeneration cycles
+- Accumulated manual improvements survive automated regeneration
 
 ### Negative
-
-- SKILL.md guidance is advisory, not enforced -- relies on agent compliance with well-written guidance. Mitigated by clear, explicit language and placement in the Guardrails section.
+- SKILL.md guidance is advisory, not enforced; accepted risk since agent compliance with well-written guidance is high
 
 ## References
-
-- [User Documentation spec](../../openspec/specs/user-docs/spec.md)
-- [GitHub Issue #18](https://github.com/fritze-dev/opsx-enhanced-flow/issues/18) -- full docs regeneration after guardrails were added
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)

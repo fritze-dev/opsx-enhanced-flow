@@ -1,44 +1,30 @@
-# ADR-009: Patch-Only Auto-Bump
+# ADR-009: Patch-only auto-bump
 
 ## Status
-
 Accepted (2026-03-04)
 
 ## Context
-
-With the decision to auto-bump versions as part of the archive convention (ADR-008), the question was which semver component to increment automatically. The plugin's changes are overwhelmingly backwards-compatible: skill tweaks, documentation updates, schema adjustments, and convention additions. These correspond to patch-level changes under semver (x.y.Z).
-
-Minor and major version bumps carry semantic meaning -- they signal new features or breaking changes respectively -- and require human judgment to determine when they are appropriate. Automatically detecting the bump type from changelog entries or commit messages was investigated but found to be complex and unreliable, as the distinction between a "tweak" and a "feature" is subjective.
-
-Research confirmed that 95%+ of changes in the plugin's history were patch-level. The rare minor or major bump would be an intentional human decision documented in a dedicated docs page. Auto-detecting bump type would add complexity without sufficient reliability to justify it.
-
-The trade-off was version inflation (many small patches) versus forgotten bumps. Version inflation was the acceptable choice because consumers benefit from always having the latest changes detected by `/plugin update`, while forgotten bumps cause silent update failures.
+With the decision to auto-bump versions on archive (ADR-008), the question arose of which semver component to increment automatically. Research into the project's change history showed that 95%+ of changes are backwards-compatible patches: skill tweaks, documentation updates, and schema adjustments. Minor and major version bumps are rare and intentional, requiring human judgment about the scope and impact of changes. The core problem being solved was forgotten version bumps, not version classification — so automatic patch bumping addresses the root cause while leaving intentional version decisions to humans.
 
 ## Decision
-
-Patch-only auto-bump. 95%+ of changes are patches; minor/major are rare and intentional.
+Auto-bump only the patch version (X.Y.Z -> X.Y.Z+1) on archive. Minor and major bumps remain manual.
 
 ## Rationale
-
-95%+ of changes are patches; minor/major are rare and intentional.
+95%+ of changes are patches; minor/major are rare and intentional. Automatic patch bumping prevents forgotten bumps while preserving human control over significant version changes.
 
 ## Alternatives Considered
-
-- Auto-detect from changelog (complex, unreliable)
+- Auto-detect version component from changelog — complex and unreliable for determining change significance
 
 ## Consequences
 
 ### Positive
-
-- Simple and predictable: every archive produces exactly one patch version increment
-- Eliminates forgotten version bumps, which were the root cause of consumer update failures
-- Minor/major bumps remain intentional human decisions with appropriate documentation
+- Version bumps are never forgotten for routine changes
+- Minor/major version decisions remain under human control
 
 ### Negative
-
-- Version inflation: many small patches accumulate over time. Acceptable trade-off versus the alternative of forgotten bumps causing silent update failures.
+- Version inflation with many small patches; acceptable trade-off versus forgotten bumps
+- No rollback mechanism for bad versions; consumers must wait for the next patch
 
 ## References
-
 - [Spec: release-workflow](../../openspec/specs/release-workflow/spec.md)
-- [ADR-008: Convention in Constitution, Not Skill Modification](adr-008-convention-in-constitution-not-skill-modification.md)
+- [ADR-008: Convention in constitution, not skill modification](adr-008-convention-in-constitution-not-skill-modification.md)

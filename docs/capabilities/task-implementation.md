@@ -1,62 +1,61 @@
 ---
 title: "Task Implementation"
 capability: "task-implementation"
-description: "Systematic implementation of task checklists with progress tracking"
+description: "Handles working through task checklists in tasks.md, with sequential implementation, progress tracking, pause-on-blocker behavior, and session-level progress reporting."
 lastUpdated: "2026-03-05"
 ---
 
 # Task Implementation
 
-The `/opsx:apply` command works through the task checklist in tasks.md, implementing each item sequentially, marking tasks complete as it goes, and pausing when it encounters blockers or ambiguities.
+Works through your task checklist systematically, implementing each item, tracking progress with clear counts, and pausing whenever a blocker or ambiguity is encountered.
 
 ## Purpose
 
-Manually implementing each task from a spec-driven plan is time-consuming and error-prone. Without systematic task execution, developers lose track of progress, skip items, or implement tasks out of the intended order. This capability lets you focus on review and guidance while the AI handles the methodical work of implementing each task.
+Manually implementing a long task list is tedious and error-prone -- items get skipped, progress is hard to track across sessions, and blockers can go unnoticed until they cascade. Task Implementation automates the sequential execution of tasks from `tasks.md`, provides real-time progress counts, and stops immediately when something needs your attention, so you stay informed and in control.
 
 ## Rationale
 
-Tasks are implemented sequentially rather than in parallel to maintain a clear, reviewable progression. The system pauses on ambiguity rather than guessing, because incorrect assumptions during implementation are far more expensive to fix than a brief pause for clarification. Progress tracking uses simple checkbox counting from tasks.md, keeping the mechanism transparent and auditable.
+Tasks are implemented sequentially in the order listed in `tasks.md` because the task list represents the recommended implementation sequence, and each task may depend on changes made by earlier ones. The system reads all context files (proposal, specs, design, tasks) before starting, ensuring every implementation decision is grounded in the approved design. Pause-on-blocker behavior is essential because guessing at unclear requirements leads to rework; instead, the system surfaces the issue and waits for your guidance.
 
 ## Features
 
-- Works through pending tasks in tasks.md sequentially
-- Reads all context files (proposal, specs, design, tasks) before starting
-- Marks each task `- [x]` immediately after completing it
-- Pauses and asks for clarification on ambiguous tasks
-- Pauses when implementation reveals design issues
-- Resumes from where it left off on subsequent runs
-- Displays progress as "N/M tasks complete" at each step
-- Recognizes `[P]` markers as informational parallel-task indicators
+- **Sequential task execution** via `/opsx:apply` -- works through pending checkboxes in order, making code changes for each task.
+- **Automatic progress tracking** -- displays "N/M tasks complete" at session start, after each task, and on pause or completion.
+- **Resume from where you left off** -- skips already-completed tasks and starts from the first pending one.
+- **Pause on blockers** -- stops and asks for clarification when a task is ambiguous, a design issue is discovered, or a technical constraint prevents progress.
 
 ## Behavior
 
-### Starting Implementation
+### Implementing Tasks
 
-When you run `/opsx:apply`, the system reads all context files and checks the current state of tasks.md. It displays the current progress (e.g., "2/7 tasks complete") and begins working from the first pending task.
+When you run `/opsx:apply`, the system reads all context files for the change, then works through each pending task in `tasks.md`. For each task, it reads the description, makes the required code changes, and marks the checkbox from `- [ ]` to `- [x]`. It continues to the next task until all are complete or a blocker is encountered.
 
-### Working Through Tasks
+### Resuming a Partial Session
 
-For each task, the system reads the description, makes the required code changes, and marks the checkbox as complete. It then reports the updated progress and announces which task it will work on next.
+If some tasks are already marked complete (from a previous session or manual work), the system skips them and picks up from the first pending task. It shows how many are already done so you know exactly where things stand.
 
-### Pausing on Problems
+### Pausing on Blockers
 
-The system pauses in two situations: when a task description is ambiguous or could be interpreted multiple ways, and when implementation reveals that the design approach will not work due to a technical constraint. In both cases, it presents the issue, asks specific questions, and waits for your input before continuing.
+The system pauses immediately when it encounters:
 
-### Resuming Partial Work
+- An **ambiguous task** that could be interpreted multiple ways -- it presents the ambiguity with specific questions.
+- A **design issue** discovered during implementation (e.g., the approach in design.md is not technically feasible) -- it reports the issue and suggests which artifact to update.
+- A **missing prerequisite** -- if tasks.md has not been generated yet, it suggests running the artifact pipeline first.
 
-If you run `/opsx:apply` on a partially completed task list, the system skips already-completed tasks and resumes from the first pending one. It reports how many tasks were already done and which task it is starting from.
+In all cases, the system does not guess or proceed with an uncertain approach. It waits for your input.
 
-### Progress Reporting
+### Progress Tracking
 
-Progress is displayed at session start, after each task completion, and when pausing. When all tasks are complete, the system shows a final summary listing all tasks completed during the session and suggests archiving the change.
+Progress is displayed as "N/M tasks complete" at every key moment: when a session starts, after each task is finished, when a pause occurs, and in the final summary. When all tasks are done, the system displays the completion count and suggests archiving the change.
 
-## Future Enhancements
+### All Tasks Already Complete
 
-- Trackable post-implementation steps in every task list (tracked in [#12](https://github.com/fritze-dev/opsx-enhanced-flow/issues/12))
+If every checkbox in `tasks.md` is already marked done, the system reports that all tasks are complete and suggests archiving the change.
 
 ## Edge Cases
 
-- If tasks.md exists but contains no checkbox items, the system reports "0/0 tasks" and suggests the file may need to be regenerated.
-- If tasks.md contains malformed checkboxes (not exactly `- [ ]` or `- [x]`), the system ignores them in the count and notes the discrepancy.
-- If you manually edit tasks.md between sessions (adding, removing, or reordering tasks), the system re-reads the file and computes progress from the current state.
-- If completed tasks appear after pending tasks (out of order), the system still counts correctly and works on pending tasks regardless of position.
+- If `tasks.md` exists but contains no checkbox items, the system reports "0/0 tasks" and suggests the file may need to be regenerated.
+- If checkboxes do not follow the exact `- [ ]` / `- [x]` format, the system ignores them in the count and notes the discrepancy.
+- If you manually edit `tasks.md` between sessions (adding, removing, or reordering tasks), the system re-reads the file and computes progress from the current state.
+- If the tasks artifact does not exist at all, the system reports the missing file and suggests running the artifact pipeline to generate it.
+- If completed tasks appear after pending tasks (out of order), the system still counts correctly and works on pending tasks regardless of their position.

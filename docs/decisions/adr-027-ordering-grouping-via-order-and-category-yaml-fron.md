@@ -1,48 +1,33 @@
-# ADR-027: Ordering and Grouping via order and category YAML Frontmatter
+# ADR-027: Ordering + grouping via order and category YAML frontmatter in baseline specs
 
 ## Status
-
 Accepted (2026-03-05)
 
 ## Context
-
-The consolidated docs README (ADR-024) groups capabilities by category with group headers and orders them within groups. The question was where to define the ordering and grouping metadata for each capability. Four approaches were considered.
-
-Hardcoding a capability table in SKILL.md would make ordering deterministic but violate skill immutability -- the table would need updating every time capabilities are added or renamed, creating project-specific content in a shared skill file. Using a constitution section was rejected because ordering is data, not a governance rule. Letting the agent determine ordering at docs generation time was rejected because it would produce non-deterministic output -- different runs might order capabilities differently.
-
-YAML frontmatter in baseline specs was the chosen approach. Each spec already has a `## Purpose` and `## Requirements` section. Adding `order` (integer) and `category` (string like "Structural", "Operational", "Supporting") to an optional YAML frontmatter block at the top of the spec provides deterministic, project-specific ordering that is set during spec creation, not at docs generation time. This follows the data flow principle: specs are the source of truth, archives capture snapshots, and docs read from specs.
-
-Research confirmed that the spec template (`openspec/schemas/opsx-enhanced/templates/specs/spec.md`) could be extended with optional frontmatter without breaking existing specs. The SKILL.md stays project-independent because it reads frontmatter generically -- it does not need to know which categories or orderings exist.
+The consolidated README needed to present capabilities in a meaningful order grouped by category (Setup, Change Workflow, Development, Finalization, Reference, Meta) rather than alphabetically. The ordering and grouping data needed to be deterministic and project-specific — different projects using the same plugin might want different orderings. Several options were considered: hardcoding a table in SKILL.md (violates skill immutability since SKILL.md is shared plugin code), using a constitution section (mixes data with rules), or letting the agent determine order at docs generation time (non-deterministic). Adding `order` (integer) and `category` (string) YAML frontmatter fields to baseline specs follows the data flow principle: specs contain the metadata, archives preserve it, and docs generation reads it.
 
 ## Decision
-
-Ordering and grouping via `order` and `category` YAML frontmatter in baseline specs. Project-specific, deterministic, set during spec creation; SKILL.md stays project-independent; follows data flow.
+Use `order` and `category` YAML frontmatter fields in baseline specs for deterministic, project-specific capability ordering and grouping in documentation.
 
 ## Rationale
-
-Project-specific, deterministic, set during spec creation (not docs generation); SKILL.md stays project-independent; follows data flow (specs to archive to docs read).
+Project-specific, deterministic, set during spec creation. SKILL.md stays project-independent. Follows the data flow from specs through archives to docs.
 
 ## Alternatives Considered
-
-- Hardcoded table in SKILL.md (rejected: violates skill immutability)
-- Constitution section (rejected: data table, not a rule)
-- Agent-determined at docs time (rejected: non-deterministic)
+- Hardcoded table in SKILL.md — violates skill immutability since SKILL.md is shared plugin code
+- Constitution section — mixes data tables with governance rules
+- Agent-determined ordering at docs time — non-deterministic, may vary between runs
 
 ## Consequences
 
 ### Positive
-
-- Deterministic ordering that is consistent across docs generation runs
-- SKILL.md stays project-independent -- no hardcoded capability lists
-- Follows the data flow principle: specs own their metadata, docs read it
-- All 18 baseline specs get categorized and ordered
+- Deterministic ordering that is consistent across runs
+- Project-specific: different projects can define their own ordering
+- SKILL.md remains generic and shareable
 
 ### Negative
-
-- Every new spec must include frontmatter, adding a small overhead to spec creation. Mitigated by the spec template including frontmatter by default.
+- All 18 baseline specs need frontmatter added; one-time setup cost
 
 ## References
-
 - [Spec: spec-format](../../openspec/specs/spec-format/spec.md)
-- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)
+- [Spec: user-docs](../../openspec/specs/user-docs/spec.md)

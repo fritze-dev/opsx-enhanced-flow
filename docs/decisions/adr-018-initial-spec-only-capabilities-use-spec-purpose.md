@@ -1,44 +1,29 @@
-# ADR-018: Initial-Spec-Only Capabilities Use Spec Purpose
+# ADR-018: initial-spec-only capabilities use spec Purpose
 
 ## Status
-
 Accepted (2026-03-04)
 
 ## Context
-
-Nine of the 18 capabilities in the plugin were created during the initial-spec bootstrap and have never been touched by a subsequent archive. These capabilities have no dedicated proposal explaining their individual motivation -- the initial-spec proposal's "Why" section is about the bootstrapping process itself ("create baseline specs so future development can use the spec-driven workflow"), not about why each individual capability exists.
-
-Using the bootstrap proposal's "Why" section for these capabilities would produce misleading documentation: every initial-spec-only capability would say it exists "to create baseline specs," which is about the bootstrapping process, not about the capability's actual purpose.
-
-Research showed that each baseline spec has a `## Purpose` section that concisely describes what the capability does and why it matters. For capabilities that were part of the initial architecture (documented, not created, during the bootstrap), the spec Purpose provides the most accurate and specific motivation. For example, the quality-gates spec Purpose explains why quality verification matters, which is far more useful than saying it was created as part of the bootstrap.
-
-This creates a two-tier approach: capabilities with post-bootstrap archives use the proposal "Why" (ADR-017), while initial-spec-only capabilities fall back to the spec Purpose.
+Nine of the 15 original capabilities were created during the initial-spec bootstrap and have never been modified by a subsequent change. The initial-spec proposal's "Why" section describes why baseline specifications are being created ("no specs exist, need a foundation for spec-driven development"), not why individual capabilities like `spec-format` or `three-layer-architecture` exist. Using the bootstrap proposal for these capabilities' "Why This Exists" section would be misleading — readers would see generic bootstrapping motivation instead of capability-specific purpose. The spec's Purpose section, however, directly describes what each capability does and why it matters.
 
 ## Decision
-
-Initial-spec-only capabilities use spec Purpose. Bootstrap proposal "Why" is about spec creation, not individual capabilities.
+For capabilities whose only archive is initial-spec, derive "Why This Exists" from the spec Purpose section instead of the proposal "Why" section.
 
 ## Rationale
-
-Bootstrap proposal "Why" is about spec creation, not individual capabilities.
+The bootstrap proposal "Why" is about spec creation, not individual capabilities. The spec Purpose section accurately describes each capability's reason for existence.
 
 ## Alternatives Considered
-
-- Use bootstrap proposal anyway (misleading)
+- Use bootstrap proposal anyway — misleading, provides generic bootstrapping context instead of capability-specific motivation
 
 ## Consequences
 
 ### Positive
-
-- Each capability's "Why This Exists" section accurately describes its individual purpose
-- Avoids misleading content that would attribute all capabilities to the bootstrap process
-- Leverages well-written spec Purpose sections that already exist
+- Each capability's documentation accurately reflects its own purpose
+- No misleading generic bootstrapping language in individual capability docs
 
 ### Negative
-
-- Initial-spec-only capability docs are noticeably less rich than those with dedicated archives, since they lack proposal motivation, research context, and design trade-offs.
+- Missing archive artifacts (e.g., no design.md in fix-init-skill) require graceful fallback; docs skip enrichment from missing artifacts
 
 ## References
-
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
-- [ADR-017: "Why This Exists" Uses Newest Archive's Proposal](adr-017-why-this-exists-uses-newest-archives-proposal.md)
+- [ADR-017: "Why This Exists" uses newest archive's proposal](adr-017-why-this-exists-uses-newest-archive-s-proposal.md)
