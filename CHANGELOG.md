@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-05 — Fix Docs Regeneration Quality
+
+### Fixed
+- ADR Context sections no longer lose depth when regenerated from scratch — Step 4 now independently reads full `design.md`, `research.md`, and `proposal.md` for each archive (closes #28)
+- Capability docs no longer drop Known Limitations and Future Enhancements sections — "space-constrained" priority rule replaced with data-driven section inclusion (closes #29)
+
+### Changed
+- Each `/opsx:docs` step now reads its own source materials independently — no implicit dependencies between steps
+- ADR generation explicitly reads archive Context, Architecture, and Risks sections for richer Consequences
+- ADR References determined by checking each archive's `specs/` subdirectory for affected capabilities
+- Behavior section depth now matches spec scenario count — distinct Gherkin scenario groups are not merged
+
 ## 2026-03-05 — Fix Docs Skill Regressions
 
 ### Fixed

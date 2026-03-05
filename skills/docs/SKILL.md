@@ -79,7 +79,7 @@ For each capability, read its baseline spec's YAML frontmatter (if present) to g
 - "Rationale": max 3-5 sentences
 - "Known Limitations": max 5 bullets
 - "Future Enhancements": max 5 bullets
-- Priority when space-constrained: Features + Behavior (mandatory) > Purpose (preferred) > Rationale + Limitations + Future Enhancements (optional)
+- Include ALL sections from the template when source data exists. Only omit a section when no source data is available for it.
 - Total: still 1-2 pages per capability
 
 #### Mapping Rules
@@ -95,6 +95,8 @@ For each capability, read its baseline spec's YAML frontmatter (if present) to g
 | Implementation details (file paths, configs) | Omitted entirely |
 | User-facing syntax/markers (`<!-- ASSUMPTION -->`, `<!-- REVIEW -->`, `[P]`, etc.) | **Included** — if users need to recognize or use a syntax convention, document it |
 
+**Behavior depth:** Each distinct Gherkin scenario group in the spec should produce at least one Behavior subsection. Do not merge multiple distinct scenarios into fewer subsections than the spec defines.
+
 ### Step 4: Generate Architecture Decision Records
 
 **Language reminder:** If Step 0 determined a non-English `docs_language`, generate all ADR section headings and content in the target language. ADR file names (`adr-NNN-<slug>.md`) remain in English — the slug is always derived from the English Decision column text.
@@ -104,6 +106,8 @@ Read the ADR template at `openspec/schemas/opsx-enhanced/templates/docs/adr.md` 
 Generate formal ADRs from `## Decisions` tables across all archived `design.md` files.
 
 **Discovery:** Glob `openspec/changes/archive/*/design.md`. Sort archives chronologically by their `YYYY-MM-DD` prefix. Skip archives without `design.md`.
+
+**Enrichment:** For each archive, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same archive if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
 
 **Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that archive for ADR generation.
 
@@ -124,6 +128,8 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 - 4-column: `| # | Decision | Rationale | Alternatives Considered |`
 
 **For each decision, generate `docs/decisions/adr-NNN-<slug>.md`** following the template structure. The template includes split Consequences (Positive/Negative) and a References section.
+
+**References:** Determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related. If the `design.md` or `research.md` references GitHub Issues, include those too.
 
 **Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by inline links in the `docs/README.md` Key Design Decisions table.
 
@@ -217,3 +223,4 @@ No specs found in openspec/specs/. Run /opsx:archive first to merge specs.
 - Do NOT generate `docs/architecture-overview.md` or `docs/decisions/README.md` — these are replaced by the consolidated README
 - Use consistent terminology across all generated docs
 - **Internal consistency check**: After generating each doc, verify that the Behavior section and Edge Cases section do not contradict each other. If an edge case qualifies a behavior (e.g., "X is blocked, unless user explicitly confirms"), the behavior section must reflect the nuance — not state an absolute that the edge case then contradicts.
+- **Step independence:** Each step must read its own source materials independently. Do not assume that data loaded during an earlier step is still available — steps may execute in separate contexts. This is especially critical for Step 4 (ADR generation), which needs full archive data independently of Step 2.
