@@ -26,68 +26,36 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 
 | Decision | Rationale | ADR |
 |----------|-----------|-----|
-| 15 capabilities (not one per skill) | Groups related behavior logically; comprehensive coverage without gaps | [ADR-001](decisions/adr-001-15-capabilities-not-one-per-skill.md) |
-| Use `/opsx:sync` for baseline creation | Programmatic merge has format limitations; agent-driven sync handles edge cases | [ADR-002](decisions/adr-002-use-opsx-sync-for-baseline-creation-not-progra.md) |
-| Empty tasks.md (QA loop only) | No code to implement — documentation bootstrap | [ADR-003](decisions/adr-003-empty-tasks-md-qa-loop-only.md) |
-| Schema owns workflow rules | DoD and post-apply sequence apply to all projects using opsx-enhanced | [ADR-004](decisions/adr-004-schema-owns-workflow-rules.md) |
-| Config as bootstrap-only | With rules in schema and project rules in constitution, config just needs pointers | [ADR-005](decisions/adr-005-config-as-bootstrap-only.md) |
-| Remove constitution redundancies | Single source of truth prevents drift and reduces noise | [ADR-006](decisions/adr-006-remove-constitution-redundancies.md) |
-| Init generates minimal config template | Prevents project-specific rules from leaking into consumer projects | [ADR-007](decisions/adr-007-init-generates-minimal-config-template.md) |
-| Convention in constitution, not skill modification | Skills are shared; project-specific behavior belongs in constitution | [ADR-008](decisions/adr-008-convention-in-constitution-not-skill-modification.md) |
-| Patch-only auto-bump | 95%+ of changes are patches; minor/major are rare and intentional | [ADR-009](decisions/adr-009-patch-only-auto-bump.md) |
-| Sync marketplace.json in same convention | One operation prevents version drift between files | [ADR-010](decisions/adr-010-sync-marketplace-json-in-same-convention.md) |
-| Docs page for minor/major releases | Rare enough for a documented manual process | [ADR-011](decisions/adr-011-docs-page-for-minor-major.md) |
-| Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently spec'd and testable | [ADR-012](decisions/adr-012-split-docs-generation-into-user-docs-architectu.md) |
-| All doc types in `/opsx:docs`, no new skills | Single entry point avoids skill proliferation | [ADR-013](decisions/adr-013-all-doc-types-in-opsx-docs-no-new-skills.md) |
-| Direct glob per capability instead of pre-built index | Simpler, no separate step needed, archives are few | [ADR-014](decisions/adr-014-direct-glob-per-capability-instead-of-pre-built-in.md) |
-| ADRs fully regenerated each run | Deterministic, no state to track, numbering always consistent | [ADR-015](decisions/adr-015-adrs-fully-regenerated-each-run.md) |
-| Research context integrated into ADR Context | One place for "why did we decide this?" | [ADR-016](decisions/adr-016-research-context-integrated-into-adr-context-secti.md) |
-| "Why This Exists" uses newest archive's proposal | Most current motivation is most relevant | [ADR-017](decisions/adr-017-why-this-exists-uses-newest-archive-s-proposal.md) |
-| initial-spec-only capabilities use spec Purpose | Bootstrap proposal "Why" is about spec creation, not capabilities | [ADR-018](decisions/adr-018-initial-spec-only-capabilities-use-spec-purpose.md) |
-| Design review checkpoint as constitution convention | Respects skill immutability; constitution is always loaded | [ADR-019](decisions/adr-019-constitution-convention-only.md) |
-| Checkpoint after design specifically | Design finalizes approach — last cheap feedback point | [ADR-020](decisions/adr-020-checkpoint-after-design-specifically.md) |
-| Skip checkpoint when preflight already done | Avoids unnecessary friction on resume | [ADR-021](decisions/adr-021-skip-checkpoint-when-preflight-already-done.md) |
-| Update constitution before spec | Constitution establishes governance rule backing the spec | [ADR-022](decisions/adr-022-update-constitution-before-spec.md) |
-| SKILL.md references templates via Read at runtime | Consistent with pipeline templates; format changes don't require prompt edits | [ADR-023](decisions/adr-023-skill-md-references-templates-via-read-at-runtime.md) |
-| Consolidated README replaces 3 separate files | Eliminates navigation hops; architecture overview IS the entry point | [ADR-024](decisions/adr-024-consolidated-readme-replaces-3-separate-files.md) |
-| Cleanup step deletes stale files | Automated migration from old 3-file to new 1-file structure | [ADR-025](decisions/adr-025-cleanup-step-in-skill-md-deletes-stale-files.md) |
-| ADR generation runs before README generation | README needs ADR file paths for inline links | [ADR-026](decisions/adr-026-adr-generation-runs-before-readme-generation.md) |
-| Ordering/grouping via order and category frontmatter | Project-specific, deterministic, set during spec creation | [ADR-027](decisions/adr-027-ordering-grouping-via-order-and-category-yaml-fron.md) |
-| README shortening is a separate task | Allows independent review of subjective content decisions | [ADR-028](decisions/adr-028-readme-shortening-is-a-separate-implementation-tas.md) |
-| Unified "Purpose" heading for all docs | Standard, unambiguous term across all capability docs | [ADR-029](decisions/adr-029-unified-purpose-heading-for-all-docs.md) |
-| Unified "Rationale" heading for all docs | Standard ADR terminology; covers all design reasoning | [ADR-030](decisions/adr-030-unified-rationale-heading-for-all-docs.md) |
-| Separate Future Enhancements from Known Limitations | Different audiences: constraints vs. actionable future ideas | [ADR-031](decisions/adr-031-separate-future-enhancements-from-known-limitation.md) |
-| "Read before write" guardrail in SKILL.md | Prevents quality regression by preserving existing doc quality | [ADR-032](decisions/adr-032-read-before-write-guardrail-in-skill-md.md) |
-| Manual doc fixes + deferred regeneration | Safer: preserves established quality, validates guardrails separately | [ADR-033](decisions/adr-033-manual-doc-fixes-deferred-regeneration.md) |
-| Single docs_language field in config.yaml | Central, backward-compatible, all skills already read config | [ADR-034](decisions/adr-034-single-docs-language-field-in-config-yaml.md) |
-| Commented-out field in init template | Users discover the feature without it being active by default | [ADR-035](decisions/adr-035-commented-out-field-in-init-template-for-discovera.md) |
-| English enforcement via config context field | Single enforcement point passed to all skills automatically | [ADR-036](decisions/adr-036-english-enforcement-via-config-context-field.md) |
-| Translation at generation time, not in templates | One set of templates for all languages; no proliferation | [ADR-037](decisions/adr-037-translation-at-generation-time-not-in-templates.md) |
-| Manual ADRs use adr-MNNN naming in same directory | M prefix distinguishes from generated ADRs; single glob location | [ADR-038](decisions/adr-038-manual-adrs-use-adr-mnnn-slug-md-naming-in-docs-de.md) |
-| Deterministic slug: replace non-[a-z0-9] with hyphen | Handles all special chars uniformly; consistent across runs | [ADR-039](decisions/adr-039-deterministic-slug-replace-non-a-z0-9-with-hyphen.md) |
-| Fix both specs AND SKILL.md/templates | Both must agree to prevent future drift | [ADR-040](decisions/adr-040-fix-both-specs-and-skill-md-templates.md) |
-| Replace priority rule with section-completeness rule | Positive guidance prevents section dropping; per-section limits remain | [ADR-041](decisions/adr-041-replace-priority-rule-with-section-completeness-ru.md) |
-| Add enrichment reads only to Step 4 | Only Step 4 has the implicit dependency problem | [ADR-042](decisions/adr-042-add-enrichment-reads-only-to-step-4-not-all-steps.md) |
-| Step independence as guardrail, not structural change | Simpler; matches existing SKILL.md structure | [ADR-043](decisions/adr-043-add-step-independence-as-a-guardrail-not-a-structu.md) |
-| Reinforce specs with step independence language | Prevents future drift between spec and skill | [ADR-044](decisions/adr-044-reinforce-specs-with-step-independence-language.md) |
-| Rename init skill to setup | Avoids built-in `/init` conflict; `git mv` preserves history; archives left unchanged | [ADR-045](decisions/adr-045-rename-init-skill-to-setup.md) |
-| All skills are model-invocable, including setup | `disable-model-invocation: true` makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
+| Organize 15 capabilities (not one per skill) | Groups related behavior logically; comprehensive coverage without maintenance burden of 1:1 skill mapping | [ADR-001](decisions/adr-001-initial-spec-organization.md) |
+| Schema owns workflow rules; config reduced to bootstrap-only; remove constitution redundancies | Clear separation of concerns: schema for universal rules, constitution for project-specific rules, config for bootstrap pointers | [ADR-002](decisions/adr-002-workflow-rule-ownership.md) |
+| Split docs-generation into user-docs, architecture-docs, decision-docs; all doc types in /opsx:docs | Each concern independently specifiable and testable; single entry point avoids skill proliferation | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
+| Convention in constitution for release workflow; patch-only auto-bump on archive | Skills remain generic shared code; 95%+ of changes are patches; prevents forgotten version bumps | [ADR-004](decisions/adr-004-release-workflow.md) |
+| Single docs_language field in config.yaml; translation at generation time | Central, backward-compatible; one set of templates for all languages; no template proliferation | [ADR-005](decisions/adr-005-configurable-documentation-language.md) |
+| Design review checkpoint as constitution convention; checkpoint after design specifically | Respects skill immutability; design finalizes approach — last cheap feedback point before quality gates | [ADR-006](decisions/adr-006-design-review-checkpoint.md) |
+| Replace priority rule with section-completeness rule; add enrichment reads to Step 4 | Positive guidance prevents section dropping; only Step 4 has the implicit dependency problem | [ADR-007](decisions/adr-007-fix-docs-regeneration-quality.md) |
+| Manual ADRs use adr-MNNN naming; deterministic slug algorithm; fix specs AND SKILL.md together | M prefix distinguishes from generated ADRs; consistent filenames across runs; prevents drift between layers | [ADR-008](decisions/adr-008-fix-docs-skill-regressions.md) |
+| SKILL.md references templates via Read at runtime; consolidated README replaces 3 separate files | Consistent with pipeline templates; eliminates navigation hops between index documents | [ADR-009](decisions/adr-009-improve-docs-output-quality.md) |
+| Unified "Purpose" and "Rationale" headings; "read before write" guardrail; separate Future Enhancements | Standard terminology across all docs; prevents quality regression; distinct audiences for limitations vs. enhancements | [ADR-010](decisions/adr-010-improve-docs-sections.md) |
+| Rename init skill to setup; use git mv for history preservation | Avoids built-in /init conflict; preserves git history; historical records left unchanged | [ADR-011](decisions/adr-011-rename-init-to-setup.md) |
+| Stateless date comparison for incremental generation; agent-side ADR consolidation heuristics | No state file to maintain; reduces excessive ADR granularity while preserving detail | [ADR-012](decisions/adr-012-incremental-docs-generation.md) |
+| All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 
 ### Notable Trade-offs
 
 - **15 capabilities (ADR-001)**: Significant number of specs to maintain, though each is focused and self-contained.
-- **Schema owns workflow rules (ADR-004)**: Reduced defense-in-depth since rules live in one place instead of being duplicated; accepted because schema enforcement plus skill guardrails are sufficient.
-- **Patch-only auto-bump (ADR-009)**: Version inflation with many small patches; no rollback mechanism for bad versions.
-- **All doc types in /opsx:docs (ADR-013)**: Longer skill prompt with more complex step sequence; mitigated by clear section headers.
-- **Convention in constitution (ADR-008, ADR-019)**: Soft enforcement relying on agent compliance, not hard code enforcement; mitigated by constitution being injected into every prompt.
-- **Consolidated README (ADR-024)**: Breaking external links to previous file locations; low impact since docs are internal.
-- **docs_language translation quality (ADR-034)**: LLM translation quality varies by language; major languages work well, exotic languages may need review.
-- **Deterministic slug renames (ADR-039)**: Slug change causes ADR file renames for existing ADRs; all links regenerate to match.
-- **Section-completeness rule (ADR-041)**: Agent may still drop sections despite rule change; mitigated by imperative language and per-section max limits.
-- **Step independence is advisory (ADR-042, ADR-043)**: Guardrail is not structurally enforced; backed by explicit read instructions in affected steps.
-- **"Read before write" is advisory (ADR-032)**: Agent compliance depends on well-written guidance; not hard-enforced.
-- **Rename to setup (ADR-045)**: Breaking change for existing users who memorized `/opsx:init`; low impact since the old command wasn't working anyway.
+- **Schema owns workflow rules (ADR-002)**: Reduced defense-in-depth since rules live in one place instead of being duplicated; accepted because schema enforcement plus skill guardrails are sufficient.
+- **Patch-only auto-bump (ADR-004)**: Version inflation with many small patches; no rollback mechanism for bad versions.
+- **Convention-based enforcement (ADR-004, ADR-006)**: Soft enforcement relying on agent compliance, not hard code enforcement; mitigated by constitution being injected into every prompt.
+- **Docs language translation quality (ADR-005)**: LLM translation quality varies by language; major languages work well, exotic languages may need review.
+- **Consolidated README (ADR-009)**: Breaking external links to previous file locations; low impact since docs are internal.
+- **Section-completeness rule (ADR-007)**: Agent may still drop sections despite rule change; mitigated by imperative language and per-section max limits.
+- **Step independence is advisory (ADR-007)**: Guardrail is not structurally enforced; backed by explicit read instructions in affected steps.
+- **"Read before write" is advisory (ADR-010)**: Agent compliance depends on well-written guidance; not hard-enforced.
+- **Deterministic slug renames (ADR-008)**: Slug change causes ADR file renames for existing ADRs; all links regenerate to match.
+- **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:init; low impact since the old command was not working anyway.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
+- **Incremental generation date comparison (ADR-012)**: Agent may misinterpret date comparison logic; worst case is unnecessary regeneration, which is a safe failure mode.
+- **ADR consolidation heuristics (ADR-012)**: May misjudge grouping in edge cases; conservative rules minimize false consolidation.
 
 ## Conventions
 
@@ -104,46 +72,46 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization via /opsx:setup with CLI install and schema setup. |
-| [Project Bootstrap](capabilities/project-bootstrap.md) | Initial codebase scanning, constitution generation, and drift detection. |
+| [Project Setup](capabilities/project-setup.md) | One-time project initialization with CLI install and schema setup |
+| [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
 
 ### Change Workflow
 
 | Capability | Description |
 |---|---|
-| [Change Workspace](capabilities/change-workspace.md) | Create, manage, and archive change workspaces with date-prefixed naming. |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | Schema-driven 6-stage artifact pipeline with dependency gating. |
-| [Artifact Generation](capabilities/artifact-generation.md) | Step-by-step and fast-forward commands for generating pipeline artifacts. |
-| [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features. |
+| [Change Workspace](capabilities/change-workspace.md) | Create, manage, and archive change workspaces with date-prefixed naming |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | Schema-driven 6-stage pipeline with dependency gating |
+| [Artifact Generation](capabilities/artifact-generation.md) | Step-by-step and fast-forward artifact generation commands |
+| [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features |
 
 ### Development
 
 | Capability | Description |
 |---|---|
-| [Constitution Management](capabilities/constitution-management.md) | Manages the project constitution lifecycle and global context enforcement. |
-| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation quality checks and post-implementation verification. |
-| [Task Implementation](capabilities/task-implementation.md) | Working through task checklists with sequential implementation and progress tracking. |
-| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with mandatory explicit human approval before archiving. |
+| [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
+| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks and post-implementation verification |
+| [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and pause-on-blocker |
+| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with mandatory explicit human approval before archiving |
 
 ### Finalization
 
 | Capability | Description |
 |---|---|
-| [Spec Sync](capabilities/spec-sync.md) | Agent-driven merging of delta specs into baseline specs. |
-| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer update process. |
+| [Spec Sync](capabilities/spec-sync.md) | Agent-driven merging of delta specs into baseline specs |
+| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer updates |
 
 ### Reference
 
 | Capability | Description |
 |---|---|
-| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | Constitution, Schema, and Skills layers with independent modifiability. |
-| [Spec Format](capabilities/spec-format.md) | Format rules for specifications including normative descriptions and Gherkin scenarios. |
-| [Roadmap Tracking](capabilities/roadmap-tracking.md) | Tracks planned improvements as GitHub Issues with a roadmap label. |
+| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | Constitution, Schema, and Skills layers with independent modifiability |
+| [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions and Gherkin scenarios |
+| [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
 
 ### Meta
 
 | Capability | Description |
 |---|---|
-| [User Docs](capabilities/user-docs.md) | Enriched user-facing capability documentation generated by /opsx:docs. |
-| [Architecture Docs](capabilities/architecture-docs.md) | Cross-cutting architecture overview and documentation entry point. |
-| [Decision Docs](capabilities/decision-docs.md) | Architecture Decision Records generated from archived design decisions. |
+| [User Docs](capabilities/user-docs.md) | Enriched user-facing capability documentation generated by /opsx:docs |
+| [Architecture Docs](capabilities/architecture-docs.md) | Cross-cutting architecture overview and documentation entry point |
+| [Decision Docs](capabilities/decision-docs.md) | Architecture Decision Records generated from archived design decisions |

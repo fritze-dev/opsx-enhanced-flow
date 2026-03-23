@@ -2,7 +2,7 @@
 title: "Architecture Docs"
 capability: "architecture-docs"
 description: "Cross-cutting architecture overview and documentation entry point via /opsx:docs."
-lastUpdated: "2026-03-05"
+lastUpdated: "2026-03-23"
 ---
 # Architecture Docs
 
@@ -14,7 +14,7 @@ Without a central architecture document, understanding the system structure, tec
 
 ## Rationale
 
-The architecture overview is embedded in `docs/README.md` rather than generated as a separate file, eliminating unnecessary navigation between multiple index documents. The Key Design Decisions table links directly to individual ADR files and includes notable trade-offs, so readers can see both the decisions and their consequences without leaving the overview. Capabilities are grouped by workflow category using `order` and `category` metadata from baseline specs, producing a deterministic, project-specific table of contents that the skill itself does not need to hardcode.
+The architecture overview is embedded in `docs/README.md` rather than generated as a separate file, eliminating unnecessary navigation between multiple index documents. The Key Design Decisions table links directly to individual ADR files and includes notable trade-offs, so readers can see both the decisions and their consequences without leaving the overview. Capabilities are grouped by workflow category using `order` and `category` metadata from baseline specs, producing a deterministic, project-specific table of contents that the skill itself does not need to hardcode. The README is only regenerated when capability docs, ADRs, or constitution content actually change, avoiding unnecessary overwrites and false update timestamps.
 
 ## Features
 
@@ -27,6 +27,7 @@ The architecture overview is embedded in `docs/README.md` rather than generated 
 - **Conventions section** — project conventions from the constitution
 - **Category-grouped capabilities** — capabilities ordered by workflow phase using spec frontmatter metadata
 - **Concise capability descriptions** — each description is at most 80 characters or 15 words
+- **Conditional regeneration** — README is only rebuilt when documentation content or constitution sections have changed
 - **Stale file cleanup** — removes `docs/architecture-overview.md` and `docs/decisions/README.md` if they exist from previous runs
 - **Language support** — all content can be generated in the language configured via `docs_language`
 
@@ -54,7 +55,11 @@ If ADR Consequences sections contain significant negative consequences, a Notabl
 
 ### Stale File Cleanup
 
-If `docs/architecture-overview.md` or `docs/decisions/README.md` exist from a previous run, they are deleted during generation.
+If `docs/architecture-overview.md` or `docs/decisions/README.md` exist from a previous run, they are deleted during generation. This cleanup happens regardless of whether the README itself is regenerated.
+
+### Conditional README Regeneration
+
+The README is only regenerated when at least one of the following conditions is met: a capability doc was created or updated in this run, an ADR was created in this run, no `docs/README.md` exists yet (first run), or the constitution content (Tech Stack, Architecture Rules, Conventions) has diverged from the corresponding sections in the existing README. If none of these conditions apply, the README is skipped and a message reports it is up-to-date.
 
 ### Capabilities Grouped by Category
 
@@ -78,8 +83,13 @@ When a non-English language is configured, column headers in the Key Design Deci
 
 ## Known Limitations
 
-- Does not generate `docs/architecture-overview.md` as a separate file — the architecture overview is always part of `docs/README.md`.
-- Does not generate a separate `docs/decisions/README.md` — ADR discovery is handled through inline links in the consolidated README.
+- Does not detect spec-only changes without a new archive — the README is regenerated on the next archive that touches a related capability.
+- Constitution drift detection compares key sections (Tech Stack, Architecture Rules, Conventions) but may miss subtle formatting-only changes.
+- Does not generate a separate `docs/architecture-overview.md` or `docs/decisions/README.md` — the architecture overview and ADR discovery are always part of `docs/README.md`.
+
+## Future Enhancements
+
+- Preflight validation for decision granularity to prevent excessively fine-grained ADR entries at the source.
 
 ## Edge Cases
 
@@ -88,3 +98,4 @@ When a non-English language is configured, column headers in the Key Design Deci
 - If an ADR has not yet been generated for a decision, the SKILL.md step ordering ensures ADRs are generated first, then referenced in the overview.
 - If a manual ADR lacks `## Decision` or `## Rationale`, the agent uses the ADR title as the decision text and leaves the rationale column empty.
 - Constitution content is always in English. The agent translates when generating the overview, not the constitution itself.
+- Stale file cleanup runs even when README regeneration is skipped — the cleanup is independent of the conditional regeneration logic.
