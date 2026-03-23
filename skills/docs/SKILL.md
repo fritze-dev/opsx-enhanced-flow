@@ -9,8 +9,8 @@ disable-model-invocation: false
 > Run this **after** `/opsx:archive` to generate or update user-facing documentation.
 
 **Input**: Optional argument:
-- No argument → regenerate all docs (capability docs, ADRs, consolidated README)
-- A capability name (e.g., `auth`) → regenerate only that capability's doc
+- No argument → incremental update (only regenerate docs for capabilities with newer archives, new ADRs, and README if needed)
+- A capability name (e.g., `auth`) → regenerate only that capability's doc (always regenerated regardless of dates, only reads that capability's archives)
 
 ## Instructions
 
@@ -29,15 +29,27 @@ Read `openspec/config.yaml` and extract the `docs_language` field.
   - Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths remain in English
   - If an existing doc is in a different language than the configured `docs_language`, treat it as a full regeneration rather than an incremental update
 
-### Step 1: Discover Specs
+### Step 1: Discover Specs and Detect Changes
 
 Glob `openspec/specs/*/spec.md` to find all available capabilities. The directory name is the capability ID.
 
-If a capability name argument was given, process only that one (error if not found).
+If a capability name argument was given, process only that one (error if not found). That capability is always marked for regeneration regardless of dates. Only read archives matching that capability's glob pattern — do not read archives for other capabilities.
+
+**Change detection (no argument mode):** For each discovered capability, determine whether regeneration is needed:
+
+1. Check if `docs/capabilities/<capability>.md` exists. If not → mark for regeneration.
+2. If the file exists, read its YAML frontmatter and extract the `lastUpdated` value (format: `YYYY-MM-DD`). If the field is missing or malformed → mark for regeneration.
+3. Glob `openspec/changes/archive/*/specs/<capability>/` to find all archives that touched this capability. Extract the date prefix (`YYYY-MM-DD`) from each archive directory name.
+4. If ANY archive date is newer than or equal to the doc's `lastUpdated` → mark for regeneration. (Use `>=` comparison to handle same-day re-archiving.)
+5. If no archive date is newer → skip this capability entirely.
+
+Build two lists: **capabilities to regenerate** and **capabilities to skip**. Only capabilities marked for regeneration proceed to Steps 2 and 3.
+
+If all capabilities are skipped (no newer archives for any), report: "All capability docs are up-to-date — no changes detected" and proceed to Step 4.
 
 ### Step 2: Look Up Archive Enrichment
 
-For each capability being documented, glob `openspec/changes/archive/*/specs/<capability>/` to find archived changes that touched it.
+For each capability **marked for regeneration**, glob `openspec/changes/archive/*/specs/<capability>/` to find archived changes that touched it. Skip capabilities not marked for regeneration — do not read their archives.
 
 For each archive found, read the following files from the archive root directory (skip any that don't exist):
 - `proposal.md` — extract the `## Why` section (for Rationale context, NOT for Purpose)
@@ -59,11 +71,17 @@ For each archive found, read the following files from the archive root directory
 
 ### Step 3: Generate Enriched Capability Documentation
 
+**Skip unchanged capabilities:** Only generate docs for capabilities marked for regeneration in Step 1. Skip all others entirely — no archive reading, no generation, no file writes.
+
 **Language reminder:** If Step 0 determined a non-English `docs_language`, generate all section headings and content in the target language. YAML frontmatter keys stay English; `title` and `description` values are translated.
 
 Read the capability doc template at `openspec/schemas/opsx-enhanced/templates/docs/capability.md` for the expected output format.
 
-For each capability, read its baseline spec's YAML frontmatter (if present) to get the `order` and `category` values. Write or update `docs/capabilities/<capability>.md` following the template structure.
+For each capability marked for regeneration, read its baseline spec's YAML frontmatter (if present) to get the `order` and `category` values. Generate the doc content following the template structure.
+
+**Content-aware writes:** After generating each capability doc, compare the generated content against the existing file content, **excluding the `lastUpdated` frontmatter field**. If the content is identical (only `lastUpdated` would differ), do NOT write the file and do NOT bump the `lastUpdated` timestamp. Only write the file and set `lastUpdated` to today's date if the content has actually changed. This prevents false timestamp updates when regeneration produces unchanged output.
+
+**Track writes:** Record whether any capability doc was actually written to disk during this step. This flag is needed for Step 5 (conditional README regeneration).
 
 **YAML Frontmatter Fields** (in the generated capability doc):
 
@@ -103,17 +121,44 @@ For each capability, read its baseline spec's YAML frontmatter (if present) to g
 
 Read the ADR template at `openspec/schemas/opsx-enhanced/templates/docs/adr.md` for the expected output format.
 
-Generate formal ADRs from `## Decisions` tables across all archived `design.md` files.
+Generate formal ADRs from `## Decisions` tables across archived `design.md` files.
+
+**Incremental detection:** Before generating ADRs, determine whether new archives need processing:
+
+1. Glob `docs/decisions/adr-[0-9]*.md` to find existing generated ADR files (excluding manual `adr-M*.md`). If none exist → full generation mode (first run).
+2. In full generation mode, process all archives. Otherwise:
+3. Determine the highest existing ADR number from filenames.
+4. For each existing ADR file, check its References section for an `[Archive: ...]` backlink to identify which archive produced it. Build a set of already-processed archives.
+5. If any existing ADR lacks an archive backlink (e.g., legacy files from before this feature), fall back to full generation for this run.
+6. Glob `openspec/changes/archive/*/design.md` and sort chronologically. Identify archives NOT in the already-processed set.
+7. For unprocessed archives, check if they contain valid Decisions tables (see skip rule below).
+8. If no new archives with valid Decisions tables exist → skip ADR generation entirely and report "ADRs are up-to-date."
+9. If new archives exist → generate new ADR files starting from `highest_existing_number + 1`.
+
+**One-time full regeneration for consolidation:** If the existing ADR file count does not match the expected count after applying consolidation heuristics to all archives, perform a full regeneration. This handles the transition when consolidation is first introduced. Delete all existing generated `adr-[0-9]*.md` files (preserve `adr-M*.md`) and regenerate from scratch.
 
 **Discovery:** Glob `openspec/changes/archive/*/design.md`. Sort archives chronologically by their `YYYY-MM-DD` prefix. Skip archives without `design.md`.
 
-**Enrichment:** For each archive, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same archive if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
+**Enrichment:** For each archive being processed, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same archive if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
 
 **Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that archive for ADR generation.
 
-**Numbering:** Assign sequential numbers (zero-padded, 3 digits) across all archives. Within each archive, number decisions in table row order. Example: initial-spec has 3 decisions → ADR-001, ADR-002, ADR-003. release-workflow has 4 → ADR-004 through ADR-007.
+**Consolidation heuristics:** Before assigning numbers, apply these rules to each archive's Decisions table:
 
-**Slug generation:** From the Decision column text, apply this deterministic algorithm:
+1. If the archive's Decisions table has 3 or more rows AND the archive represents a single-topic change (determined by: archive name suggests one topic, all decisions reference the same capabilities) → consolidate all decisions into one ADR.
+2. If decisions within the same archive clearly address different concerns (e.g., one about naming, another about data migration) → keep them as separate ADRs.
+3. For borderline cases (2 rows, or mixed topics) → keep separate (conservative default).
+
+**Consolidated ADR format:** A consolidated ADR uses:
+- **Title**: Derived from the archive name or the most significant decision row (e.g., "Rename init skill to setup")
+- **Slug**: Derived from the consolidated title, not individual sub-decisions
+- **Decision section**: Numbered list of sub-decisions with individual rationale inline
+- **Alternatives Considered**: Merged from all consolidated rows
+- **Consequences**: Combined across all consolidated decisions
+
+**Numbering:** Assign sequential numbers (zero-padded, 3 digits) across all archives, accounting for consolidation. Each consolidated group gets ONE number. Within each archive, unconsolidated decisions are numbered in table row order. Example: initial-spec has 3 separate decisions → ADR-001, ADR-002, ADR-003. rename-init-to-setup has 5 rows consolidated into 1 → ADR-004.
+
+**Slug generation:** From the Decision column text (or consolidated title), apply this deterministic algorithm:
 1. Lowercase the entire string
 2. Replace any character that is NOT in `[a-z0-9]` with a hyphen
 3. Collapse consecutive hyphens into a single hyphen
@@ -127,19 +172,29 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 - 3-column: `| Decision | Rationale | Alternatives |`
 - 4-column: `| # | Decision | Rationale | Alternatives Considered |`
 
-**For each decision, generate `docs/decisions/adr-NNN-<slug>.md`** following the template structure. The template includes split Consequences (Positive/Negative) and a References section.
+**For each decision (or consolidated group), generate `docs/decisions/adr-NNN-<slug>.md`** following the template structure. The template includes split Consequences (Positive/Negative) and a References section.
 
-**References:** Determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related. If the `design.md` or `research.md` references GitHub Issues, include those too.
+**References:** The first reference in every ADR SHALL be the source archive backlink: `[Archive: <short-name>](../../openspec/changes/archive/<archive-dir>/)` where `<short-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the archive link, determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related. If the `design.md` or `research.md` references GitHub Issues, include those too.
 
 **Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by inline links in the `docs/README.md` Key Design Decisions table.
 
 **No archives with design.md:** Skip ADR generation entirely, do not create `docs/decisions/`.
 
-ADRs are fully regenerated on each run (not incremental). Create `docs/decisions/` directory if it does not exist.
+Create `docs/decisions/` directory if it does not exist.
+
+**Track writes:** Record whether any ADR was created during this step. This flag is needed for Step 5 (conditional README regeneration).
 
 **Manual ADR preservation:** Do NOT delete files matching `adr-M*.md` in `docs/decisions/`. These are manual ADRs not generated from archived design.md files. They use the `adr-MNNN-slug.md` naming convention (M prefix + 3-digit zero-padded number) to distinguish them from generated ADRs.
 
 ### Step 5: Generate Consolidated README
+
+**Conditional regeneration:** Only regenerate `docs/README.md` if at least one of these conditions is met:
+1. Any capability doc was written to disk in Step 3 (check the tracking flag).
+2. Any ADR was created in Step 4 (check the tracking flag).
+3. `docs/README.md` does not exist yet (first run).
+4. The content of `openspec/constitution.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. Read the constitution and compare its key content against the README to detect drift.
+
+If none of these conditions are met, skip README regeneration and report: "README is up-to-date — no capability, ADR, or constitution changes detected."
 
 **Language reminder:** If Step 0 determined a non-English `docs_language`, generate all section headings, table headers, and content in the target language. Product names, commands, and file paths remain in English.
 
@@ -159,8 +214,6 @@ Create or update `docs/README.md` as the **single entry point** for all generate
 **No constitution found:** Warn the user and skip architecture overview generation.
 **No archived design.md files:** Omit the Key Design Decisions section.
 
-This file is fully regenerated on each run.
-
 ### Step 6: Cleanup Stale Files + Confirm
 
 **Cleanup:** If `docs/architecture-overview.md` exists (from a previous run), delete it — its content is now part of `docs/README.md`. If `docs/decisions/README.md` exists, delete it — ADR discovery is now via inline links in `docs/README.md`. Never delete files matching `adr-M*.md` in `docs/decisions/` — these are manual ADRs.
@@ -174,26 +227,39 @@ This file is fully regenerated on each run.
 ```
 ## Docs Generated
 
-**Generated**: N capability docs + M ADRs + consolidated README
-**Output**:
-- `docs/capabilities/*.md` (N capability docs)
-- `docs/decisions/adr-*.md` (M ADRs)
-- `docs/README.md` (architecture overview + capabilities + ADR index)
+**Capabilities**: N regenerated, K skipped (no newer archives), J skipped (unchanged content)
+**ADRs**: M new ADRs generated / "up-to-date" (no new archives with decisions)
+**README**: Regenerated / "up-to-date" (no changes detected)
 
-### Capabilities
+**Output**:
+- `docs/capabilities/*.md` (N capability docs updated)
+- `docs/decisions/adr-*.md` (M new ADRs)
+- `docs/README.md` (regenerated / skipped)
+
+### Capabilities — Regenerated
 - [x] Capability Title (capability-id) — enriched / spec-only
 - [x] ...
 
+### Capabilities — Skipped (unchanged content)
+- [ ] Capability Title (capability-id) — regenerated but identical, lastUpdated preserved
+(only shown if any)
+
+### Capabilities — Skipped (no newer archives)
+- [ ] Capability Title (capability-id)
+- [ ] ...
+
 ### Decision Records
-- [x] M ADRs generated from N archived design.md files
+- [x] M new ADRs generated from N new archived design.md files
+(or: "All ADRs are up-to-date — no new archives with decisions")
+
+### README
+- [x] Regenerated (N capability docs + M ADRs changed)
+(or: "Up-to-date — no capability, ADR, or constitution changes detected")
 
 ### Cleaned Up
 - [x] Deleted docs/architecture-overview.md (merged into README)
 - [x] Deleted docs/decisions/README.md (replaced by inline ADR links)
 (only shown if files were deleted)
-
-### Skipped (no changes)
-- ...
 ```
 
 ## Output When No Specs
@@ -219,7 +285,7 @@ No specs found in openspec/specs/. Run /opsx:archive first to merge specs.
 - **Read before write**: If a capability doc already exists, read it FIRST and update/enrich it rather than rewriting from scratch. This preserves established tone, phrasing, and structure. Only add or modify sections where enrichment data provides new information. If existing content is already good, keep it.
 - If a spec has no User Stories and no Requirements section, skip it and warn
 - Preserve existing docs for specs not being regenerated (single-capability mode)
-- `docs/README.md` must always be regenerated — it contains the architecture overview and links all capabilities
+- `docs/README.md` is conditionally regenerated — only when capability docs, ADRs, or constitution/architecture source content changed (see Step 5 conditions)
 - Do NOT generate `docs/architecture-overview.md` or `docs/decisions/README.md` — these are replaced by the consolidated README
 - Use consistent terminology across all generated docs
 - **Internal consistency check**: After generating each doc, verify that the Behavior section and Edge Cases section do not contradict each other. If an edge case qualifies a behavior (e.g., "X is blocked, unless user explicitly confirms"), the behavior section must reflect the nuance — not state an absolute that the edge case then contradicts.

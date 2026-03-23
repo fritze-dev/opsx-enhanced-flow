@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-23 — Improve Docs Efficiency
+
+### Changed
+- `/opsx:docs` now runs incrementally by default — only capabilities with newer archives are regenerated, unchanged capabilities are skipped entirely (closes #22)
+- ADR generation is now incremental — existing ADRs are preserved, only new archives produce new ADR files
+- README is only regenerated when capability docs, ADRs, or constitution content actually changed
+- Capability doc `lastUpdated` timestamps are no longer bumped when regeneration produces identical content (closes #42)
+- Related decisions from the same archive are now consolidated into a single ADR with numbered sub-decisions instead of producing one ADR per table row (closes #44)
+
+### Added
+- ADR References now include a backlink to the source archive directory for traceability (closes #30)
+- Constitution drift detection — README regenerates automatically when constitution content diverges from what's in the README
+- Output summary now shows three categories: regenerated, skipped (unchanged content), and skipped (no newer archives)
+
 ## 2026-03-23 — Rename Init Skill to Setup
 
 ### Changed
