@@ -37,9 +37,18 @@ Each ADR SHALL include:
 - **Consequences**: Split into two subsections:
   - **Positive**: Benefits of this decision, derived from the rationale, context, and positive outcomes
   - **Negative**: Drawbacks, risks, or trade-offs, derived from the `design.md` "Risks & Trade-offs" section filtered to relevance for this specific decision where possible
-- **References**: Links to related resources using semantic link text. The first reference SHALL be the source archive backlink (see "ADR Archive Backlinks" requirement). The agent SHALL use descriptive text like `[Spec: three-layer-architecture](path)`, NOT raw file paths as link text like `[../../openspec/specs/three-layer-architecture/spec.md](path)`. Include the relevant spec file, related ADRs if the decision connects to other decisions, and the GitHub Issue if applicable.
+- **References**: Internal relative links only — no external URLs (GitHub issues, external docs). The first reference SHALL be the source archive backlink (see "ADR Archive Backlinks" requirement). The agent SHALL use descriptive text like `[Spec: three-layer-architecture](path)`, NOT raw file paths as link text like `[../../openspec/specs/three-layer-architecture/spec.md](path)`. Include the relevant spec file and related ADRs if the decision connects to other decisions. The archive backlink provides traceability to GitHub issues via the archive's proposal.md.
 
-**References determination:** The agent SHALL determine which specs are relevant to each decision by checking the archive's `specs/` subdirectory to find which capabilities were affected. The agent SHALL link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. The agent SHALL cross-reference other ADRs from the same archive when decisions are related. If the `design.md` or `research.md` references GitHub Issues, the agent SHALL include those links too.
+**References determination:** The agent SHALL determine which specs are relevant to each decision by checking the archive's `specs/` subdirectory to find which capabilities were affected. The agent SHALL link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. The agent SHALL cross-reference other ADRs from the same archive when decisions are related.
+
+**Reference validation:** After generating the References section for each ADR, the agent SHALL validate all links:
+1. **Spec links**: For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If a linked spec does not exist (e.g., it was renamed or split), the agent SHALL replace the broken link with the correct successor spec(s). If the successor is unknown, the agent SHALL omit the broken link and add a comment `<!-- REVIEW: spec <name> no longer exists -->`.
+2. **Archive links**: For every `[Archive: <name>]` link, verify the archive directory exists under `openspec/changes/archive/`. If the archive does not exist, the agent SHALL add a comment `<!-- REVIEW: archive <name> not found -->`.
+
+**Cross-reference heuristic for related ADRs:** Beyond cross-referencing ADRs from the same archive, the agent SHALL check whether the current ADR modifies, extends, or supersedes a system established by an earlier ADR. Specifically:
+1. If the current archive's `proposal.md` or `design.md` references another change by name (e.g., "supersedes the full regeneration from doc-ecosystem"), the agent SHALL link to the ADR from that referenced change.
+2. If the current archive modifies the same capabilities as an earlier archive's ADR (determined by overlapping `specs/` subdirectories), the agent SHOULD add a cross-reference to the most relevant earlier ADR.
+3. The agent SHALL NOT add cross-references speculatively — only when a clear thematic relationship is evident from the archive content.
 
 The slug SHALL be derived from the Decision column text using this deterministic algorithm:
 1. Lowercase the entire string
@@ -53,7 +62,7 @@ For consolidated ADRs, the slug SHALL be derived from the overarching decision t
 
 **Step independence:** ADR generation SHALL read its own source materials independently. The agent SHALL NOT assume that data loaded during an earlier step (e.g., archive enrichment in Step 2) is still available — steps may execute in separate contexts. This is especially critical for ADR generation, which needs full archive data (design.md, research.md, proposal.md) independently of capability doc generation.
 
-**User Story:** As a developer or contributor I want formal decision records with clear positive and negative consequences and links to related specs, so that I can understand why architectural choices were made, what trade-offs were accepted, and where to find more context.
+**User Story:** As a developer or contributor I want formal decision records with internal-only references that are always valid, so that I can navigate between related decisions, specs, and archives without encountering broken links.
 
 #### Scenario: ADRs generated from single archive with Decisions table
 - **GIVEN** an archived change at `openspec/changes/archive/2026-03-04-release-workflow/` with a `design.md` containing a Decisions table with 4 rows
@@ -143,6 +152,35 @@ For consolidated ADRs, the slug SHALL be derived from the overarching decision t
 - **GIVEN** an archived change at `openspec/changes/archive/2026-03-04-release-workflow/` with `specs/release-workflow/` and `specs/user-docs/` subdirectories
 - **WHEN** the agent generates ADRs for decisions from that archive
 - **THEN** the References section includes `[Spec: release-workflow]` and `[Spec: user-docs]` links pointing to the baseline specs
+
+#### Scenario: References contain only internal links
+- **GIVEN** an archive's design.md references "GitHub Issue #22"
+- **WHEN** the agent generates the References section
+- **THEN** the References section does NOT include a GitHub URL
+- **AND** the archive backlink provides traceability to the issue via the archive's proposal.md
+
+#### Scenario: Spec link validated after generation
+- **GIVEN** an ADR references `[Spec: docs-generation](../../openspec/specs/docs-generation/spec.md)`
+- **AND** `openspec/specs/docs-generation/spec.md` does not exist
+- **WHEN** the agent validates the References section
+- **THEN** the agent replaces the broken link with the correct successor specs (e.g., `user-docs`, `architecture-docs`, `decision-docs`)
+
+#### Scenario: Archive link validated after generation
+- **GIVEN** an ADR references `[Archive: old-feature](../../openspec/changes/archive/2026-01-01-old-feature/)`
+- **AND** the archive directory does not exist
+- **WHEN** the agent validates the References section
+- **THEN** the agent adds `<!-- REVIEW: archive old-feature not found -->`
+
+#### Scenario: Cross-reference to earlier ADR when system is modified
+- **GIVEN** archive `improve-docs-efficiency` modifies the docs system established by archive `doc-ecosystem`
+- **AND** ADR-003 was generated from `doc-ecosystem`
+- **WHEN** the agent generates ADR-012 from `improve-docs-efficiency`
+- **THEN** the References section includes `[ADR-003: Documentation Ecosystem](adr-003-documentation-ecosystem.md)`
+
+#### Scenario: No speculative cross-references
+- **GIVEN** two archives both touch the `user-docs` capability but address unrelated concerns
+- **WHEN** the agent generates ADRs
+- **THEN** the agent does NOT add cross-references between them unless the content explicitly references the other change
 
 ### Requirement: ADR Archive Backlinks
 Each generated ADR SHALL include a link to its source archive directory in the References section. The link SHALL use the format `[Archive: <archive-name>](../../openspec/changes/archive/<archive-dir>/)` where `<archive-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). The archive link SHALL appear as the first reference, before spec links and related ADR links.
@@ -239,6 +277,9 @@ ADR files generated by `/opsx:docs` SHALL respect the `docs_language` setting fr
 - **No related specs identifiable**: If a decision is cross-cutting and not tied to a specific capability spec, the References section SHALL link to the constitution or the most relevant architectural spec.
 - **Manual ADR with missing sections**: If a manual ADR lacks `## Decision` or `## Rationale`, the agent SHALL use the ADR title (from `# ADR-MNNN:` heading) as the decision text and leave the rationale column empty in the README table.
 - **Archive without research.md or proposal.md**: The agent SHALL still generate ADRs using only `design.md` data. Missing enrichment files reduce Context depth but do not prevent generation.
+- **Spec was split into multiple successors**: The agent SHALL replace a broken spec link with all successor spec links (e.g., `docs-generation` → `user-docs` + `architecture-docs` + `decision-docs`).
+- **No earlier ADR exists for the system being modified**: The agent SHALL skip the cross-reference — not all systems have a founding ADR.
+- **Existing ADRs with external URLs**: When regenerating ADRs that previously contained GitHub issue links, the agent SHALL omit those links. The archive backlink is sufficient for traceability.
 - **Incremental detection ambiguity**: If the agent cannot determine which archives produced existing ADRs (e.g., no archive backlink in older ADR files), it SHALL fall back to full ADR regeneration for that run.
 - **Consolidation changes numbering on first run**: When consolidation logic is first applied, existing ADR numbers change. The agent SHALL perform a full ADR regeneration on the first run that applies consolidation (detected by comparing expected consolidated count vs. existing file count).
 - **Slug derivation for consolidated ADRs**: The slug is derived from the overarching title, not individual sub-decisions. If the title exceeds 50 characters after slug conversion, it is truncated per the standard algorithm.
@@ -248,3 +289,4 @@ ADR files generated by `/opsx:docs` SHALL respect the `docs_language` setting fr
 - Archive artifacts (design.md, research.md, proposal.md) follow the templates defined in the opsx-enhanced schema. <!-- ASSUMPTION: Artifacts created by schema-driven workflow -->
 - The ADR template at `openspec/schemas/opsx-enhanced/templates/docs/adr.md` defines the expected output structure. <!-- ASSUMPTION: Template created as part of doc-ecosystem change -->
 - Archives are immutable after archiving — existing archive content does not change, ensuring stable ADR numbering for incremental generation. <!-- ASSUMPTION: Core architectural guarantee from archive workflow -->
+- Spec renames/splits are infrequent and the agent can determine successors from context. <!-- ASSUMPTION: Major spec restructuring is rare -->

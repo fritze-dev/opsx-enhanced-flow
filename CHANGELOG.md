@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-23 — Fix ADR Reference Quality
+
+### Changed
+- ADR References now contain only internal relative links (archive backlinks, spec links, ADR cross-references) — external URLs like GitHub issue links are no longer included, as the archive backlink provides traceability to issues via the archive's proposal.md
+- ADR generation now validates all spec and archive links after writing — broken links to renamed or split specs are automatically replaced with successors
+
+### Added
+- Cross-reference heuristic for related ADRs — when an ADR modifies a system established by an earlier ADR, a back-reference is added automatically
+- Reference validation catches broken spec links (e.g., renamed specs) and missing archive directories
+
 ## 2026-03-23 — Improve Docs Efficiency
 
 ### Changed

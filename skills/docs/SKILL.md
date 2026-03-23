@@ -174,7 +174,15 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 
 **For each decision (or consolidated group), generate `docs/decisions/adr-NNN-<slug>.md`** following the template structure. The template includes split Consequences (Positive/Negative) and a References section.
 
-**References:** The first reference in every ADR SHALL be the source archive backlink: `[Archive: <short-name>](../../openspec/changes/archive/<archive-dir>/)` where `<short-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the archive link, determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related. If the `design.md` or `research.md` references GitHub Issues, include those too.
+**References (internal links only):** References SHALL contain only internal relative links — no external URLs (GitHub issues, external docs). The archive backlink provides traceability to GitHub issues via the archive's proposal.md.
+
+The first reference in every ADR SHALL be the source archive backlink: `[Archive: <short-name>](../../openspec/changes/archive/<archive-dir>/)` where `<short-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the archive link, determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related.
+
+**Reference validation:** After writing each ADR's References, validate all links:
+- For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If it doesn't exist (e.g., renamed or split), replace with the successor spec(s) or add `<!-- REVIEW: spec <name> no longer exists -->`.
+- For every `[Archive: <name>]` link, glob `openspec/changes/archive/*-<name>/` to verify the archive exists. If not found, add `<!-- REVIEW: archive <name> not found -->`.
+
+**Cross-reference heuristic:** Beyond cross-referencing ADRs from the same archive, check if the current ADR's archive modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping `specs/` subdirectories with earlier archives. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the archive content.
 
 **Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by inline links in the `docs/README.md` Key Design Decisions table.
 
