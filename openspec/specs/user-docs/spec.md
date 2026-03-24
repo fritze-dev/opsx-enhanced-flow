@@ -132,7 +132,9 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 
 **First run:** When no capability docs exist yet, all capabilities SHALL be generated (equivalent to full generation).
 
-**Single-capability mode:** When the user provides a capability name argument (e.g., `/opsx:docs auth`), the agent SHALL only read archives matching that capability's glob pattern — not archives for other capabilities. The specified capability SHALL always be regenerated regardless of dates.
+**Single-capability mode:** When the user provides a single capability name argument (e.g., `/opsx:docs auth`), the agent SHALL only read archives matching that capability's glob pattern — not archives for other capabilities. The specified capability SHALL always be regenerated regardless of dates.
+
+**Multi-capability mode:** When the user provides multiple capability names as a comma-separated list (e.g., `/opsx:docs artifact-pipeline,artifact-generation`), the agent SHALL process only the listed capabilities. Each listed capability SHALL always be regenerated regardless of archive dates (same as single-capability mode). The agent SHALL NOT perform the full archive date scan for unlisted capabilities. Archives SHALL only be read for the listed capabilities. If a listed capability does not exist in `openspec/specs/`, the agent SHALL warn and skip it. This mode is designed for the post-archive workflow where the caller already knows which capabilities were affected.
 
 **Content-aware writes:** After generating a capability doc, the agent SHALL compare the generated content against the existing file content, excluding the `lastUpdated` frontmatter field. If the content is identical, the agent SHALL NOT write the file and SHALL NOT bump the `lastUpdated` timestamp. This prevents false timestamp updates when regeneration produces unchanged output.
 
@@ -169,6 +171,19 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 - **WHEN** the agent looks up archive enrichment
 - **THEN** the agent only reads archives matching `openspec/changes/archive/*/specs/release-workflow/`
 - **AND** the agent does NOT read archives for other capabilities
+
+#### Scenario: Multi-capability mode processes only listed capabilities
+- **GIVEN** the developer runs `/opsx:docs artifact-pipeline,artifact-generation`
+- **WHEN** the agent performs change detection
+- **THEN** the agent processes only `artifact-pipeline` and `artifact-generation`
+- **AND** both capabilities are always regenerated regardless of archive dates
+- **AND** the agent does NOT scan archives for the other 16 capabilities
+
+#### Scenario: Multi-capability mode with nonexistent capability
+- **GIVEN** the developer runs `/opsx:docs artifact-pipeline,nonexistent-cap`
+- **WHEN** the agent processes the list
+- **THEN** the agent regenerates `artifact-pipeline`
+- **AND** the agent warns that `nonexistent-cap` does not exist in `openspec/specs/` and skips it
 
 #### Scenario: Output summary shows skipped and unchanged capabilities
 - **GIVEN** 18 capabilities exist, 2 have newer archives, and 1 of those produces identical content
@@ -236,6 +251,9 @@ Translation rules:
 - **Archive date equals lastUpdated**: The agent SHALL regenerate the capability doc (use >= comparison, not strictly >). This handles same-day re-archiving.
 - **Capability doc exists but has no lastUpdated field**: The agent SHALL treat it as needing regeneration.
 - **Capability doc exists but has malformed lastUpdated**: The agent SHALL treat it as needing regeneration.
+- **Empty multi-capability argument**: If an empty string is provided, the agent SHALL treat it as no argument and perform the full incremental scan.
+- **Duplicate capabilities in comma-separated list**: The agent SHALL deduplicate and process each capability only once.
+- **Whitespace in comma-separated list**: The agent SHALL trim whitespace from each capability name (e.g., `auth , export` → `auth`, `export`).
 - **All capabilities skipped (no changes)**: The agent SHALL report "All capability docs are up-to-date — no changes detected" and proceed to ADR/README steps.
 
 ## Assumptions

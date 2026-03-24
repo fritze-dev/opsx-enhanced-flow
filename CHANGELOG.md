@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-24 — Optimize Docs Regeneration
+
+### Added
+- `/opsx:docs` now accepts a comma-separated list of capability names (e.g., `/opsx:docs artifact-pipeline,artifact-generation`) — only the listed capabilities are regenerated, skipping the full archive date scan
+- Multi-capability mode designed for the post-archive workflow where affected capabilities are already known, significantly reducing unnecessary archive scanning
+
+### Changed
+- Change detection in `/opsx:docs` now distinguishes three modes: no argument (full incremental scan), single capability (existing behavior), and multi-capability (new, skips date scan for unlisted capabilities)
+
 ## 2026-03-24 — Consolidation Guidance
 
 ### Added

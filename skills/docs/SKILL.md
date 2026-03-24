@@ -11,6 +11,7 @@ disable-model-invocation: false
 **Input**: Optional argument:
 - No argument → incremental update (only regenerate docs for capabilities with newer archives, new ADRs, and README if needed)
 - A capability name (e.g., `auth`) → regenerate only that capability's doc (always regenerated regardless of dates, only reads that capability's archives)
+- A comma-separated list of capability names (e.g., `artifact-pipeline,artifact-generation`) → regenerate only the listed capabilities (always regenerated regardless of dates, archives only read for listed capabilities). Designed for the post-archive workflow where the caller already knows which capabilities were affected.
 
 ## Instructions
 
@@ -33,7 +34,10 @@ Read `openspec/config.yaml` and extract the `docs_language` field.
 
 Glob `openspec/specs/*/spec.md` to find all available capabilities. The directory name is the capability ID.
 
-If a capability name argument was given, process only that one (error if not found). That capability is always marked for regeneration regardless of dates. Only read archives matching that capability's glob pattern — do not read archives for other capabilities.
+If a capability name argument was given (single or comma-separated list), handle as follows:
+
+- **Single capability** (e.g., `auth`): Process only that one (error if not found). Always marked for regeneration regardless of dates. Only read archives matching that capability's glob pattern.
+- **Comma-separated list** (e.g., `artifact-pipeline,artifact-generation`): Parse the list, trim whitespace from each name, and deduplicate. Validate each name against `openspec/specs/<name>/spec.md` — if a name does not exist, warn and skip it. All valid capabilities are always marked for regeneration regardless of dates. Only read archives for the listed capabilities. Do NOT scan or process unlisted capabilities at all.
 
 **Change detection (no argument mode):** For each discovered capability, determine whether regeneration is needed:
 
