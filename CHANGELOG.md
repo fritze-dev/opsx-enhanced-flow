@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-24 — Visible Assumptions & REVIEW Auto-Resolution
+
+### Changed
+- Assumptions in specs are now always visible in Markdown preview — each assumption appears as a readable list item followed by a machine-parseable tag (closes #46)
+- Preflight quality check now audits both assumption visibility and unresolved REVIEW markers — invisible assumptions and leftover REVIEW markers are flagged as blockers
+- Bootstrap skill now actively resolves uncertain items during constitution generation — each `<!-- REVIEW -->` marker is presented to the user for confirmation and removed after the decision is documented
+- Docs skill now actively resolves broken ADR references instead of leaving invisible markers — broken spec or archive links are fixed interactively with the user
+
+### Added
+- Assumption Marker Format requirement in the spec-format spec — defines the correct format and flags invisible assumptions as violations
+- Review Marker Audit section in the preflight template — scans for unresolved `<!-- REVIEW -->` markers as a separate quality dimension
+- REVIEW auto-resolution step in the bootstrap skill (Step 2b) — iterates markers, asks user, documents decisions, removes markers before proceeding
+
 ## 2026-03-24 — Standard Tasks
 
 ### Added

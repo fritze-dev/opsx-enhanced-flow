@@ -2,7 +2,7 @@
 title: "Decision Docs"
 capability: "decision-docs"
 description: "Architecture Decision Records (ADRs) generated from archived design decisions."
-lastUpdated: "2026-03-23"
+lastUpdated: "2026-03-24"
 ---
 # Decision Docs
 
@@ -59,7 +59,7 @@ Each ADR includes a Consequences section with a Positive subsection listing bene
 
 ### Internal-Only References with Validation
 
-The References section contains only internal relative links — no external URLs (GitHub issues, external docs). The source archive directory link appears as the first reference, using the format `[Archive: <name>]` with the archive name without the date prefix. Additional references include links to related specs (determined by checking the archive's `specs/` subdirectory) and related ADRs, all using descriptive text rather than raw file paths. After generating each ADR, every spec link is verified by globbing for the spec file, and every archive link is verified to point to an existing directory. Broken spec links are replaced with successor specs or flagged for review.
+The References section contains only internal relative links — no external URLs (GitHub issues, external docs). The source archive directory link appears as the first reference, using the format `[Archive: <name>]` with the archive name without the date prefix. Additional references include links to related specs (determined by checking the archive's `specs/` subdirectory) and related ADRs, all using descriptive text rather than raw file paths. After generating each ADR, every spec link is verified by globbing for the spec file, and every archive link is verified to point to an existing directory. Broken spec links are replaced with successor specs when identifiable. When a successor cannot be determined, the agent asks the user to identify the correct spec. Missing archive links are resolved by asking the user whether to remove the reference or provide the correct archive name. No `<!-- REVIEW -->` markers are left in generated ADR files.
 
 ### Cross-Referencing Related ADRs
 
@@ -129,6 +129,6 @@ When `docs_language` is set to a non-English language, ADR section headings (Sta
 - When consolidation logic is first applied, existing ADR numbers change. A full ADR regeneration is performed on the first run that applies consolidation.
 - The slug for consolidated ADRs is derived from the overarching title, not individual sub-decisions. If the title exceeds 50 characters after slug conversion, it is truncated per the standard algorithm.
 - The slug is always derived from the original English Decision column text, never from translated content, ensuring stable file names across language changes.
-- If a referenced spec was renamed or split, the agent replaces the broken link with the correct successor spec(s). If the successor is unknown, the link is omitted and flagged for review.
+- If a referenced spec was renamed or split, the agent replaces the broken link with the correct successor spec(s). If the successor is unknown, the agent asks the user to identify the correct spec.
 - If no earlier ADR exists for the system being modified, the cross-reference is skipped.
 - When regenerating ADRs that previously contained external URLs, those links are omitted. The archive backlink provides traceability to issues via the archive's proposal.md.

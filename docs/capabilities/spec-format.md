@@ -2,7 +2,7 @@
 title: "Spec Format"
 capability: "spec-format"
 description: "Defines the format rules for specifications including normative descriptions, Gherkin scenarios, delta spec operations, frontmatter metadata, and baseline structure."
-lastUpdated: "2026-03-05"
+lastUpdated: "2026-03-24"
 ---
 
 # Spec Format
@@ -11,11 +11,11 @@ Specifications follow a strict format that ensures consistency, machine-parseabi
 
 ## Purpose
 
-When multiple people and AI agents create and modify specifications, inconsistent formatting leads to misinterpretation, broken parsing, and specs that cannot be reliably merged or verified. The spec format defines precise rules for how requirements, scenarios, and changes are expressed, so that every spec is both human-readable and machine-processable.
+When multiple people and AI agents create and modify specifications, inconsistent formatting leads to misinterpretation, broken parsing, and specs that cannot be reliably merged or verified. The spec format defines precise rules for how requirements, scenarios, changes, and assumptions are expressed, so that every spec is both human-readable and machine-processable.
 
 ## Rationale
 
-Normative descriptions using RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) provide unambiguous obligation levels that distinguish mandatory behavior from optional guidance. Gherkin scenarios with strict heading levels (`####` for scenarios) ensure that automated tools can parse scenario blocks without confusion -- using the wrong heading level causes a silent failure where the scenario is misinterpreted as a requirement heading. Delta specs use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED) so the sync process can correctly categorize and merge changes into baselines. Baseline specs omit these prefixes because they represent the current merged state, not a set of changes. YAML frontmatter with `order` and `category` fields enables deterministic, project-specific ordering in generated documentation.
+Normative descriptions using RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) provide unambiguous obligation levels that distinguish mandatory behavior from optional guidance. Gherkin scenarios with strict heading levels (`####` for scenarios) ensure that automated tools can parse scenario blocks without confusion -- using the wrong heading level causes a silent failure where the scenario is misinterpreted as a requirement heading. Delta specs use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED) so the sync process can correctly categorize and merge changes into baselines. Baseline specs omit these prefixes because they represent the current merged state, not a set of changes. YAML frontmatter with `order` and `category` fields enables deterministic, project-specific ordering in generated documentation. Assumptions use a dual-format pattern -- visible list item plus hidden HTML tag -- so that reviewers can audit them in Markdown preview while preflight can still grep for machine-parseable tags.
 
 ## Features
 
@@ -24,6 +24,7 @@ Normative descriptions using RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) provid
 - **Delta Spec Operations**: Delta specs use `## ADDED Requirements`, `## MODIFIED Requirements`, `## REMOVED Requirements`, and `## RENAMED Requirements` headers to categorize changes.
 - **Baseline Spec Format**: Baseline specs use `## Purpose` followed by `## Requirements` without operation prefixes, representing the current state.
 - **Spec Frontmatter Metadata**: Baseline specs support optional YAML frontmatter with `order` (integer for display position) and `category` (kebab-case workflow phase grouping).
+- **Assumption Marker Format**: Assumptions use a visible list item with an HTML comment tag for machine parsing, ensuring assumptions are readable in Markdown preview and auditable by preflight.
 
 ## Behavior
 
@@ -46,6 +47,10 @@ Baseline specs at `openspec/specs/<capability>/spec.md` use a `## Purpose` secti
 ### Frontmatter Controls Documentation Ordering
 
 Baseline specs may include YAML frontmatter at the top of the file with `order` (an integer for display position in the documentation table of contents) and `category` (a kebab-case string for workflow phase grouping). Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. The `/opsx:docs` command reads these values to determine capability ordering and group headers. If `order` is absent, the agent determines ordering. If `category` is absent, the capability appears in an "Other" group. Frontmatter is assigned during spec creation, preserved during sync, and takes precedence from delta specs when intentionally changed.
+
+### Assumptions Use Visible Text With Machine Tags
+
+Assumptions are written as a visible list item followed by an HTML comment tag: `- Visible assumption text. <!-- ASSUMPTION: short tag -->`. The visible text is a complete, readable statement of the assumption. The HTML comment tag is a brief identifier for preflight grep. Assumptions written entirely inside an HTML comment with no visible text are invisible in Markdown preview and are flagged as format violations during preflight. If no assumptions were made, the `## Assumptions` section states "No assumptions made."
 
 ## Known Limitations
 

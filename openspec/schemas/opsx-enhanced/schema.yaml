@@ -139,7 +139,8 @@ artifacts:
       ```
 
       Include an "Edge Cases" section for boundary conditions and error states.
-      Mark every assumption with `<!-- ASSUMPTION: [reason] -->`.
+      Mark every assumption as: `- Visible assumption text. <!-- ASSUMPTION: short tag -->`.
+      The visible text must be a complete readable statement; the HTML comment is a brief tag for preflight grep.
       If zero assumptions were made, state: "No assumptions made."
       Specs should be testable — each scenario is a potential test case.
     requires: [proposal]
@@ -166,7 +167,7 @@ artifacts:
       - **Risks & Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable). Remove section if not needed.
       - **Open Questions**: Outstanding decisions or unknowns to resolve
-      - **Assumptions**: Mark with `<!-- ASSUMPTION: [reason] -->`. If none: "No assumptions made."
+      - **Assumptions**: Format: `- Visible assumption text. <!-- ASSUMPTION: short tag -->`. If none: "No assumptions made."
 
       If this feature introduces new technologies, patterns, or architectural
       changes, update openspec/constitution.md accordingly.

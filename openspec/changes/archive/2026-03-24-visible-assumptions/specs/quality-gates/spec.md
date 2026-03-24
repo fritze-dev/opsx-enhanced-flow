@@ -1,12 +1,4 @@
----
-order: 8
-category: development
----
-## Purpose
-
-Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and `/opsx:verify` for post-implementation verification of completeness, correctness, and coherence.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Preflight Quality Check
 
@@ -142,15 +134,6 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **THEN** the verification report SHALL show 0 CRITICAL issues
 - **AND** the report SHALL reflect the current state of all artifacts (including any specs updated during the fix loop)
 - **AND** the final assessment SHALL be "All checks passed. Ready for archive." or note remaining warnings
-
-## Edge Cases
-
-- **No change selected**: If no change name is provided and multiple changes exist, the system SHALL prompt the user to select one. For preflight, auto-selection is allowed if only one change exists. For verify, the system SHALL always ask.
-- **Preflight on change with no specs**: If the change has no spec files, preflight SHALL abort and report that specs must be created first.
-- **Verify on change with no tasks**: If tasks.md does not exist, verify SHALL report the missing artifact and suggest generating it.
-- **Concurrent modifications**: If the codebase is modified while verify is running, the report reflects the state at the time of each individual check. The system does not lock files.
-- **False positives in keyword search**: Verify uses heuristic search to find implementation evidence. If a requirement keyword matches unrelated code, the system SHALL prefer SUGGESTION severity to avoid false critical issues.
-- **Large codebase**: Verification scans may be slow on very large codebases. The system SHALL focus on files referenced in design.md and recently modified files rather than exhaustive codebase search.
 
 ## Assumptions
 

@@ -2,7 +2,7 @@
 title: "Quality Gates"
 capability: "quality-gates"
 description: "Provides pre-implementation quality checks via /opsx:preflight and post-implementation verification via /opsx:verify."
-lastUpdated: "2026-03-23"
+lastUpdated: "2026-03-24"
 ---
 
 # Quality Gates
@@ -15,7 +15,7 @@ Starting implementation on incomplete or contradictory specs wastes effort and p
 
 ## Rationale
 
-Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and assumptions) because each catches a different category of problem that would be expensive to fix during implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses three dimensions (completeness, correctness, and coherence) and classifies every finding by severity, giving you clear prioritization. Both commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions. The verify command serves as both the initial check and the final check in the QA loop -- no special flags or modes are needed because it always evaluates the current state.
+Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and marker audit) because each catches a different category of problem that would be expensive to fix during implementation. The marker audit dimension checks both assumption format compliance and the presence of unresolved `<!-- REVIEW -->` markers, since either issue indicates unfinished work that should not proceed to implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses three dimensions (completeness, correctness, and coherence) and classifies every finding by severity, giving you clear prioritization. Both commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions. The verify command serves as both the initial check and the final check in the QA loop -- no special flags or modes are needed because it always evaluates the current state.
 
 > **Workflow sequence**: `/opsx:preflight` runs after the design phase and before task creation. `/opsx:verify` runs after implementation as part of the QA loop (steps 3.2 and 3.5 in tasks.md).
 
@@ -24,7 +24,7 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 - **Preflight Quality Check (`/opsx:preflight`)**: A mandatory review across six dimensions before tasks are created, producing a preflight report with a verdict of PASS, PASS WITH WARNINGS, or BLOCKED.
 - **Mandatory Pause on Warnings**: When preflight returns PASS WITH WARNINGS, the system pauses and requires you to review and explicitly acknowledge each warning before proceeding to task creation.
 - **Post-Implementation Verification (`/opsx:verify`)**: A check of the implementation against change artifacts across three dimensions, producing a report with issues classified as CRITICAL, WARNING, or SUGGESTION.
-- **Six Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, and Assumption Audit.
+- **Six Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, and Marker Audit.
 - **Three Verify Dimensions**: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy), and Coherence (design adherence and code pattern consistency).
 - **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
@@ -34,11 +34,19 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 
 #### Preflight Passes With No Issues
 
-When a change has complete specs and design artifacts, all requirements have scenarios, no gaps are detected, and no assumptions are blocking, the preflight produces a report covering all six dimensions with a verdict of "PASS" and a summary showing 0 blockers and 0 warnings.
+When a change has complete specs and design artifacts, all requirements have scenarios, no gaps are detected, all assumptions have visible text, and no REVIEW markers remain, the preflight produces a report covering all six dimensions with a verdict of "PASS" and a summary showing 0 blockers and 0 warnings.
 
 #### Preflight Finds Blocking Issues
 
 When a spec requirement has no scenario or an assumption has not been verified, the traceability matrix flags the requirement gap and the assumption audit rates the unverified assumption as "Needs Clarification." The verdict is "BLOCKED" and the system informs you that issues must be resolved before proceeding to tasks.
+
+#### Preflight Detects Invisible Assumptions
+
+When a spec contains an assumption written entirely inside an HTML comment with no visible list item, the Marker Audit flags it as a format violation. The verdict is "BLOCKED" and the system recommends converting the assumption to the visible format with a list item preceding the HTML tag.
+
+#### Preflight Detects Unresolved REVIEW Markers
+
+When a spec or design artifact contains `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers, the Marker Audit flags each one as "Blocking" because REVIEW markers must be resolved before implementation. The verdict is "BLOCKED."
 
 #### Preflight Detects Constitution Contradictions
 

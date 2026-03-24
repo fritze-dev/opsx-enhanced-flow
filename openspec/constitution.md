@@ -24,7 +24,7 @@
 ## Code Style
 
 - **YAML:** 2-space indentation, `|` for multiline strings
-- **Review markers:** `<!-- REVIEW -->` — for items needing user confirmation
+- **Review markers:** `<!-- REVIEW -->` — transient markers for items needing user confirmation. Skills that write REVIEW markers (bootstrap, docs) must auto-resolve them: iterate each marker, ask the user, document the decision, and remove the marker. No REVIEW markers should persist in final output.
 
 ## Constraints
 

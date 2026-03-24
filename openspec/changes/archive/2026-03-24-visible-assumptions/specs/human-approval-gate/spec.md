@@ -1,12 +1,4 @@
----
-order: 10
-category: development
----
-## Purpose
-
-Defines the QA loop with mandatory explicit human approval before archiving, including success metric validation, fix-verify cycles, and bidirectional feedback between code and specs.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: QA Loop with Mandatory Approval
 
@@ -144,15 +136,6 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 - **WHEN** the developer updates design.md to document the actual architecture
 - **AND** re-runs `/opsx:verify`
 - **THEN** the coherence check passes because design.md now matches the implementation
-
-## Edge Cases
-
-- **Approval without running verify**: If the user has never run `/opsx:verify` for the current change, the QA Loop approval checkbox in tasks.md will not be checked. The system SHALL warn during archive that verification has not been performed.
-- **Stale verification**: If code changes are made after the last verify run, the verification report may be stale. The system does not enforce re-verification automatically but SHALL note the timestamp of the last verify run relative to the most recent code changes when the user requests archive.
-- **No design.md success metrics**: If design.md does not contain explicit success metrics, the QA Loop section SHALL still include the mandatory human approval checkbox but will have no PASS/FAIL metric checkboxes.
-- **User provides partial approval**: If the user responds with something ambiguous (e.g., "looks ok" or "seems fine"), the system SHALL clarify that it needs an explicit "Approved" and SHALL NOT treat ambiguous responses as approval.
-- **All issues are suggestions only**: If verification produces only SUGGESTION-level findings and no CRITICAL or WARNING issues, the system SHALL proceed directly to requesting approval without requiring fixes.
-- **Fix loop with no code changes needed**: If a CRITICAL issue is a false positive (e.g., keyword search matched unrelated code), the user may update the verify heuristics or acknowledge the false positive. Re-running verify with the same code is a valid fix loop iteration.
 
 ## Assumptions
 

@@ -32,4 +32,5 @@ category: [category]
 <!-- Boundary conditions, error states, empty states, concurrency -->
 
 ## Assumptions
-<!-- Mark with <!-- ASSUMPTION: [reason] --> or state "No assumptions made." -->
+<!-- Format: "- Visible assumption text. <!-- ASSUMPTION: short tag -->"
+     If none: state "No assumptions made." -->

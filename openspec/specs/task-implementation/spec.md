@@ -12,8 +12,6 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, specs, design, tasks) before beginning implementation. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
-<!-- ASSUMPTION: tasks.md uses standard markdown checkbox format (- [ ] / - [x]) as defined by the schema -->
-
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
 #### Scenario: Implement all tasks sequentially
@@ -182,8 +180,8 @@ The system SHALL NOT include tasks that modify baseline spec files (`openspec/sp
 
 ## Assumptions
 
-<!-- ASSUMPTION: tasks.md checkbox format is stable and follows the schema template (- [ ] and - [x]) -->
-<!-- ASSUMPTION: Task ordering in tasks.md represents the recommended implementation sequence, though the system may encounter out-of-order completions -->
-<!-- ASSUMPTION: The apply skill has read/write access to both the tasks.md file and all project source files -->
-<!-- ASSUMPTION: Standard tasks in the constitution use the same markdown checkbox format (- [ ]) as implementation tasks -->
-<!-- ASSUMPTION: The agent can distinguish task sections by their ## heading numbers/titles -->
+- tasks.md uses standard markdown checkbox format (- [ ] / - [x]) as defined by the schema. <!-- ASSUMPTION: Checkbox format stability -->
+- Task ordering in tasks.md represents the recommended implementation sequence, though the system may encounter out-of-order completions. <!-- ASSUMPTION: Ordering is recommended not enforced -->
+- The apply skill has read/write access to both the tasks.md file and all project source files. <!-- ASSUMPTION: Skill file access -->
+- Standard tasks in the constitution use the same markdown checkbox format (- [ ]) as implementation tasks. <!-- ASSUMPTION: Constitution checkbox format -->
+- The agent can distinguish task sections by their ## heading numbers/titles. <!-- ASSUMPTION: Section heading parsing -->

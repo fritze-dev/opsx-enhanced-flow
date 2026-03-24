@@ -66,6 +66,17 @@ Write the project constitution to `openspec/constitution.md` with these sections
 - Base every rule on **observed patterns** in the codebase — do not invent rules
 - Mark uncertain items with `<!-- REVIEW -->` for the user to confirm
 
+### Step 2b: Resolve REVIEW Markers
+
+After generating the constitution, iterate through all `<!-- REVIEW -->` markers:
+
+1. For each marker, present the uncertain item to the user with context (e.g., "Indentation convention unclear — both tabs and spaces observed. Which should be the standard?")
+2. Wait for the user's response
+3. Update the constitution entry with the user's decision
+4. Remove the `<!-- REVIEW -->` marker
+
+Continue until zero `<!-- REVIEW -->` markers remain in the constitution. Do not proceed to Step 3 until all markers are resolved.
+
 ### Step 3: Create Initial Change
 
 ```bash
@@ -75,7 +86,7 @@ openspec new change "initial-spec"
 ### Step 4: Hand Off
 
 Tell the user:
-1. Review `openspec/constitution.md` — adjust any `<!-- REVIEW -->` items
+1. Review `openspec/constitution.md` — all uncertain items have been resolved, but a final review is recommended
 2. The initial change workspace is ready at `openspec/changes/initial-spec/`
 3. Continue with the standard pipeline:
    - `/opsx:continue` — generate one artifact at a time (recommended for first bootstrap, allows review between steps)

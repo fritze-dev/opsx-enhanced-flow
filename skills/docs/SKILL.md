@@ -115,7 +115,7 @@ For each capability marked for regeneration, read its baseline spec's YAML front
 | Technical terms (API, DB, etc.) | Replaced with plain-language or omitted |
 | Product names (OpenSpec, Claude Code, etc.) | **Preserved as-is** — never abstract product names into generic terms |
 | Implementation details (file paths, configs) | Omitted entirely |
-| User-facing syntax/markers (`<!-- ASSUMPTION -->`, `<!-- REVIEW -->`, `[P]`, etc.) | **Included** — if users need to recognize or use a syntax convention, document it |
+| User-facing syntax/markers (`<!-- ASSUMPTION -->`, `[P]`, etc.) | **Included** — if users need to recognize or use a syntax convention, document it. `<!-- REVIEW -->` markers are transient and auto-resolved, so do not document them. |
 
 **Behavior depth:** Each distinct Gherkin scenario group in the spec should produce at least one Behavior subsection. Do not merge multiple distinct scenarios into fewer subsections than the spec defines.
 
@@ -187,9 +187,9 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 
 The first reference in every ADR SHALL be the source archive backlink: `[Archive: <short-name>](../../openspec/changes/archive/<archive-dir>/)` where `<short-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the archive link, determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related.
 
-**Reference validation:** After writing each ADR's References, validate all links:
-- For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If it doesn't exist (e.g., renamed or split), replace with the successor spec(s) or add `<!-- REVIEW: spec <name> no longer exists -->`.
-- For every `[Archive: <name>]` link, glob `openspec/changes/archive/*-<name>/` to verify the archive exists. If not found, add `<!-- REVIEW: archive <name> not found -->`.
+**Reference validation with auto-resolution:** After writing each ADR's References, validate all links and actively resolve broken references:
+- For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If it doesn't exist (e.g., renamed or split), search for successor spec(s). If found, replace the broken link. If the successor cannot be determined, ask the user to identify the correct spec. No `<!-- REVIEW -->` markers should be left in the output.
+- For every `[Archive: <name>]` link, glob `openspec/changes/archive/*-<name>/` to verify the archive exists. If not found, ask the user whether to remove the link or provide the correct archive name. No `<!-- REVIEW -->` markers should be left in the output.
 
 **Cross-reference heuristic:** Beyond cross-referencing ADRs from the same archive, check if the current ADR's archive modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping `specs/` subdirectories with earlier archives. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the archive content.
 

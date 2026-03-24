@@ -28,4 +28,5 @@
 <!-- Unresolved design questions — if none, state "No open questions." -->
 
 ## Assumptions
-<!-- Mark with <!-- ASSUMPTION: [reason] --> or state "No assumptions made." -->
+<!-- Format: "- Visible assumption text. <!-- ASSUMPTION: short tag -->"
+     If none: state "No assumptions made." -->

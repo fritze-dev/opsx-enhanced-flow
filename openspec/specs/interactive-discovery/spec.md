@@ -12,8 +12,6 @@ Provides `/opsx:discover` for standalone interactive research with targeted Q&A 
 
 The system SHALL run an interactive discovery session when the user invokes `/opsx:discover`. Discovery SHALL operate independently from the artifact pipeline -- it generates only the `research.md` artifact and then pauses for user answers. It SHALL NOT generate proposal, specs, design, or any downstream artifacts. The discovery process SHALL: (1) read the constitution for project rules, (2) read the current change directory and existing baseline specs, (3) check whether existing specs reflect the current codebase and note stale-spec risks, (4) generate `research.md` with a coverage assessment rating each category as Clear, Partial, or Missing, and (5) generate targeted clarification questions only for Partial or Missing categories, limited to a maximum of 5 questions prioritized by Impact multiplied by Uncertainty. If all categories are Clear, the system SHALL state that and skip questions. After the user provides answers, the system SHALL record decisions with rationale in the Decisions section of research.md and then stop.
 
-<!-- ASSUMPTION: The user has already created a change workspace via /opsx:new before invoking /opsx:discover -->
-
 **User Story:** As a developer I want a dedicated interactive research phase with targeted questions, so that I can explore complex features thoroughly and ensure all ambiguities are resolved before the artifact pipeline generates specs and design.
 
 #### Scenario: Discovery with questions for partial categories
@@ -98,6 +96,7 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 
 ## Assumptions
 
-<!-- ASSUMPTION: The user will answer discovery questions in the same session or a subsequent session before running /opsx:ff -->
-<!-- ASSUMPTION: Stale-spec detection is heuristic (keyword-based) and may not catch all cases of code-spec drift -->
-<!-- ASSUMPTION: The 5-question limit is sufficient for most changes; exceptionally complex changes may require multiple discovery rounds -->
+- The user has already created a change workspace via /opsx:new before invoking /opsx:discover. <!-- ASSUMPTION: Change workspace exists -->
+- The user will answer discovery questions in the same session or a subsequent session before running /opsx:ff. <!-- ASSUMPTION: User answers before ff -->
+- Stale-spec detection is heuristic (keyword-based) and may not catch all cases of code-spec drift. <!-- ASSUMPTION: Heuristic detection -->
+- The 5-question limit is sufficient for most changes; exceptionally complex changes may require multiple discovery rounds. <!-- ASSUMPTION: Question limit sufficient -->

@@ -1,12 +1,4 @@
----
-order: 3
-category: change-workflow
----
-## Purpose
-
-Manages the change lifecycle including workspace creation (`/opsx:new`), schema-defined workspace structure, and change archiving (`/opsx:archive`) with date-prefixed directory naming and sync prompts.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Create Change Workspace
 
@@ -42,34 +34,6 @@ The system SHALL create a scaffolded change workspace when the user invokes `/op
 - **WHEN** the user invokes `/opsx:new add-user-auth`
 - **THEN** the system SHALL NOT create a duplicate workspace
 - **AND** SHALL suggest continuing the existing change instead
-
-### Requirement: Workspace Structure
-
-The created workspace SHALL contain the artifacts defined by the active schema. The workspace MUST include an `.openspec.yaml` manifest that records the schema used and creation metadata. The artifact pipeline sequence SHALL be determined by the schema definition (e.g., research, proposal, specs, design, preflight, tasks for the `opsx-enhanced` schema). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next.
-
-**User Story:** As a developer I want the workspace to be pre-structured according to the workflow schema, so that I know exactly which artifacts need to be produced and in what order.
-
-#### Scenario: Workspace contains schema-defined structure
-
-- **GIVEN** the user creates a new change using the default `opsx-enhanced` schema
-- **WHEN** the workspace is created
-- **THEN** the directory `openspec/changes/<name>/` SHALL exist
-- **AND** an `.openspec.yaml` file SHALL be present recording the schema name and version
-- **AND** `openspec status --change "<name>"` SHALL report all pipeline artifacts as pending
-
-#### Scenario: Artifact dependency gating
-
-- **GIVEN** a workspace created with the `opsx-enhanced` schema
-- **WHEN** the user checks artifact status before creating any artifacts
-- **THEN** only the first artifact in the pipeline (research) SHALL have status "ready"
-- **AND** downstream artifacts (proposal, specs, design, preflight, tasks) SHALL be blocked by unmet dependencies
-
-#### Scenario: Custom schema selection
-
-- **GIVEN** the user explicitly requests a different schema via `--schema <name>`
-- **WHEN** the workspace is created
-- **THEN** the workspace SHALL follow the artifact structure defined by the specified schema
-- **AND** `.openspec.yaml` SHALL record the chosen schema name
 
 ### Requirement: Archive Completed Change
 
@@ -116,14 +80,6 @@ The system SHALL move a completed change workspace to `openspec/changes/archive/
 - **WHEN** the user invokes `/opsx:archive`
 - **THEN** the system SHALL display a warning showing "3/7 tasks complete"
 - **AND** SHALL ask the user to confirm before proceeding
-
-## Edge Cases
-
-- **No active changes**: If `openspec list` returns no active changes when archiving, the system SHALL inform the user and suggest creating a new change.
-- **Multiple active changes**: If multiple changes exist and the user does not specify which to archive, the system SHALL list available changes and ask the user to select one. It SHALL NOT auto-select.
-- **Empty workspace**: A workspace with no artifacts created (all pending) can still be archived if the user confirms the warning.
-- **Interrupted archive**: If the `mv` command fails mid-operation (e.g., disk full), the workspace SHALL remain in its original location. The system SHALL report the error.
-- **Archive directory does not exist**: The system SHALL create `openspec/changes/archive/` if it does not already exist before moving the change.
 
 ## Assumptions
 

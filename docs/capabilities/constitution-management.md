@@ -2,7 +2,7 @@
 title: "Constitution Management"
 capability: "constitution-management"
 description: "Manages the project constitution lifecycle including generation from codebase observation, automatic updates during design, and global context enforcement."
-lastUpdated: "2026-03-23"
+lastUpdated: "2026-03-24"
 ---
 
 # Constitution Management
@@ -15,11 +15,12 @@ AI assistants working on a project need to know the project's real conventions -
 
 ## Rationale
 
-The constitution is generated from observed patterns rather than invented from scratch, ensuring it reflects what the codebase actually does. Uncertain observations are marked with `<!-- REVIEW -->` comments so the user can confirm them, preventing false conventions from being silently adopted. The constitution is referenced by all AI actions through `config.yaml`, making enforcement automatic rather than relying on the user to remind the AI of project rules. Updates during design phases are additive by default -- existing entries are not removed without explicit user approval -- which prevents accidental loss of established conventions. The constitution contains only project-specific rules; rules that belong to the schema (such as pipeline ordering or spec format) are not duplicated.
+The constitution is generated from observed patterns rather than invented from scratch, ensuring it reflects what the codebase actually does. Uncertain observations are actively resolved through direct user questions during bootstrap -- the agent iterates through each uncertain item, asks the user for a decision, and removes the marker, ensuring no invisible `<!-- REVIEW -->` comments persist in the final output. The constitution is referenced by all AI actions through `config.yaml`, making enforcement automatic rather than relying on the user to remind the AI of project rules. Updates during design phases are additive by default -- existing entries are not removed without explicit user approval -- which prevents accidental loss of established conventions. When a design replaces one technology with another, the agent asks the user directly whether to make the change rather than leaving a review marker. The constitution contains only project-specific rules; rules that belong to the schema (such as pipeline ordering or spec format) are not duplicated.
 
 ## Features
 
 - **Bootstrap-Generated Constitution**: The `/opsx:bootstrap` command scans source files, configuration files, directory structures, and dependency manifests to infer the constitution. Every entry is traceable to an observed pattern -- no invented or aspirational rules.
+- **Active Resolution of Uncertain Items**: During bootstrap, the agent iterates through all uncertain items, presents each to the user, documents the decision, and removes the marker. No `<!-- REVIEW -->` markers remain after bootstrap completes.
 - **Global Context Enforcement**: Every skill invocation and artifact generation step reads the constitution before proceeding, configured through `config.yaml`.
 - **Automatic Updates During Design**: When a design introduces new technologies or patterns, the constitution is updated to reflect them. Changes are noted in the design document for visibility during review.
 - **Project-Specific Content Only**: The constitution does not duplicate rules already defined by the schema. It retains Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions.
@@ -29,7 +30,11 @@ The constitution is generated from observed patterns rather than invented from s
 
 ### Constitution Generated from Codebase Scan
 
-When `/opsx:bootstrap` runs on an existing project, it scans source files, configuration files (like `tsconfig.json` and ESLint configs), directory structures, and dependency manifests. The resulting `openspec/constitution.md` includes the detected tech stack, code style rules, architecture patterns, and conventions. Items where the agent is uncertain (for example, inconsistent formatting across files) are marked with `<!-- REVIEW -->` comments. Technologies or frameworks that are not detected in the codebase are not included -- the agent does not invent conventions.
+When `/opsx:bootstrap` runs on an existing project, it scans source files, configuration files (like `tsconfig.json` and ESLint configs), directory structures, and dependency manifests. The resulting `openspec/constitution.md` includes the detected tech stack, code style rules, architecture patterns, and conventions. Technologies or frameworks that are not detected in the codebase are not included -- the agent does not invent conventions.
+
+### Uncertain Items Resolved Through User Interaction
+
+When the agent encounters inconsistent patterns during bootstrap (for example, both tabs and spaces for indentation), it initially marks the entry with `<!-- REVIEW -->`, then immediately presents the inconsistency to the user and asks which should be the standard. After the user responds, the agent updates the entry with the user's decision and removes the marker. By the end of bootstrap, zero `<!-- REVIEW -->` markers remain in the constitution.
 
 ### Constitution Is Read Before Every AI Action
 
@@ -37,7 +42,7 @@ The `config.yaml` references `openspec/constitution.md` as a required context fi
 
 ### Constitution Is Updated During Design Phases
 
-When the design phase introduces a new technology (such as Redis for caching) or a new architectural pattern (such as event-driven messaging), the agent adds the relevant entry to the constitution. Updates are additive by default: if a design replaces one technology with another (for example, Jest with Vitest), the agent does not remove the old entry but instead marks it with `<!-- REVIEW -->` and adds the new one, noting the proposed replacement for user confirmation. All constitution changes made during design are documented in the design artifact.
+When the design phase introduces a new technology (such as Redis for caching) or a new architectural pattern (such as event-driven messaging), the agent adds the relevant entry to the constitution. Updates are additive by default: when a design proposes replacing one technology with another (for example, Jest with Vitest), the agent asks the user directly whether to replace the entry or keep both, and applies the decision without leaving a review marker. All constitution changes made during design are documented in the design artifact.
 
 ### Constitution Does Not Duplicate Schema Rules
 
@@ -54,8 +59,8 @@ The constitution's Conventions section includes a "Workflow friction" entry requ
 
 ## Edge Cases
 
-- Bootstrapping an empty project (no source files or configuration) generates a minimal constitution with placeholder sections, all marked with `<!-- REVIEW -->`.
-- When the codebase contains contradictory patterns (for example, both camelCase and snake_case function names), both observed patterns are documented and marked with `<!-- REVIEW -->` for user resolution.
+- Bootstrapping an empty project (no source files or configuration) generates a minimal constitution with placeholder sections, all marked with `<!-- REVIEW -->`, which are then resolved through user interaction before bootstrap completes.
+- When the codebase contains contradictory patterns (for example, both camelCase and snake_case function names), both observed patterns are documented and the agent asks the user to choose the standard.
 - If a user manually edits the constitution outside of the workflow, the manual edits are treated as authoritative and are not overwritten during subsequent bootstrap or design updates.
 - Sequential design phases each adding to the constitution preserve additions from earlier changes and do not regress them.
 - A monorepo with mixed tech stacks (for example, both Python and TypeScript) results in all observed tech stacks being documented, with notes on which directories each applies to.
