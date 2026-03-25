@@ -61,6 +61,11 @@ Write the project constitution to `openspec/constitution.md` with these sections
 
 ## Conventions
 (Naming, commits, branching, file organization)
+
+## Standard Tasks
+
+<!-- Project-specific extras appended to the universal standard tasks in the schema template.
+     Add checkbox items here for steps that should appear in every tasks.md after the universal steps. -->
 ```
 
 - Base every rule on **observed patterns** in the codebase — do not invent rules

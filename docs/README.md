@@ -45,6 +45,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Consolidation guidance via instruction + template + skill layers | Shift-left consolidation pressure prevents spec fragmentation; template section makes reasoning reviewable | [ADR-017](decisions/adr-017-consolidation-guidance.md) |
 | Two-layer standard tasks: schema (universal) + constitution (extras) | Universal steps available to all projects; project-specific extras stay flexible; no CLI changes | [ADR-018](decisions/adr-018-standard-tasks-two-layer-design.md) |
 | Visible assumptions with machine-parseable tags; REVIEW markers auto-resolved | Preserves preflight tag for auditing; transient markers should never persist in committed files | [ADR-019](decisions/adr-019-visible-assumptions-and-review-auto-resolution.md) |
+| Bootstrap Standard Tasks section after Conventions with HTML comment | Logical grouping; bootstrap should not invent rules, only provide structure | [ADR-020](decisions/adr-020-bootstrap-standard-tasks-section-placement.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 
 ### Notable Trade-offs

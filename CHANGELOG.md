@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — Bootstrap Standard Tasks Section
+
+### Changed
+- Bootstrap now generates a `## Standard Tasks` section in the constitution during first run — new projects are immediately aware of the feature and know where to define project-specific post-implementation steps (closes #47)
+- Constitution management spec updated to recognize Standard Tasks as a retained section alongside Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions
+
 ## 2026-03-24 — Visible Assumptions & REVIEW Auto-Resolution
 
 ### Changed

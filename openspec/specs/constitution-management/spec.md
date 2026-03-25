@@ -91,7 +91,7 @@ The constitution SHALL be updated when the design phase introduces new technolog
 - **THEN** the design document includes a section or note listing the specific constitution changes made
 
 ### Requirement: Constitution Contains Only Project-Specific Rules
-The constitution SHALL contain only rules that are specific to the project and not already defined by the schema or its templates. Rules that duplicate schema instructions, templates, or artifact `requires` chains SHALL be removed. The constitution retains: Tech Stack, Architecture Rules (structure and paths), Code Style (project conventions not in schema), Constraints (principles not enforced by schema mechanics), and Conventions.
+The constitution SHALL contain only rules that are specific to the project and not already defined by the schema or its templates. Rules that duplicate schema instructions, templates, or artifact `requires` chains SHALL be removed. The constitution retains: Tech Stack, Architecture Rules (structure and paths), Code Style (project conventions not in schema), Constraints (principles not enforced by schema mechanics), Conventions, and Standard Tasks (project-specific post-implementation steps appended to the universal standard tasks in the schema template).
 
 **User Story:** As a workflow maintainer I want the constitution free of redundancy, so that each rule lives in exactly one authoritative place and the constitution stays focused on project-specific knowledge.
 
@@ -106,9 +106,10 @@ The constitution SHALL contain only rules that are specific to the project and n
 
 - **GIVEN** the project constitution
 - **WHEN** its sections are inspected
-- **THEN** it SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions
+- **THEN** it SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks
 - **AND** Architecture Rules SHALL include directory paths and structural decisions
 - **AND** Conventions SHALL include commit style, version bump, README accuracy, and friction tracking
+- **AND** Standard Tasks SHALL contain project-specific post-implementation steps (or be empty with an explanatory comment)
 
 ### Requirement: Friction Tracking Convention
 

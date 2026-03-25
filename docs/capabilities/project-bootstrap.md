@@ -2,7 +2,7 @@
 title: "Project Bootstrap"
 capability: "project-bootstrap"
 description: "Provides initial codebase scanning, constitution generation, initial change creation, and recovery mode for detecting drift between code and specs."
-lastUpdated: "2026-03-23"
+lastUpdated: "2026-03-25"
 ---
 
 # Project Bootstrap
@@ -20,7 +20,7 @@ The bootstrap scan analyzes static files (source code, configuration, package ma
 ## Features
 
 - **Automatic codebase scanning** -- identifies tech stack, languages, frameworks, file structure, dependency management, and coding conventions.
-- **Constitution generation** -- creates `openspec/constitution.md` with Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections populated from scan results.
+- **Constitution generation** -- creates `openspec/constitution.md` with Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks sections populated from scan results.
 - **Initial change creation** -- sets up the first change workspace and provides a clear workflow handoff.
 - **Recovery mode** -- detects existing specs and reports drift without overwriting anything.
 
@@ -32,7 +32,7 @@ When you run `/opsx:bootstrap` on a project without an existing constitution, th
 
 ### Constitution Generation
 
-Based on the scan results, the system creates `openspec/constitution.md`. If your project uses TypeScript, React, and Jest, for example, the Tech Stack section lists those technologies. If your code uses 4-space indentation and camelCase, the Code Style section reflects those conventions. The constitution captures your project as it actually is, not as a generic template.
+Based on the scan results, the system creates `openspec/constitution.md`. If your project uses TypeScript, React, and Jest, for example, the Tech Stack section lists those technologies. If your code uses 4-space indentation and camelCase, the Code Style section reflects those conventions. The constitution also includes an empty Standard Tasks section with an explanatory comment, so you know where to define project-specific post-implementation steps. The constitution captures your project as it actually is, not as a generic template.
 
 ### Initial Change Creation and Handoff
 

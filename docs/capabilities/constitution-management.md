@@ -2,7 +2,7 @@
 title: "Constitution Management"
 capability: "constitution-management"
 description: "Manages the project constitution lifecycle including generation from codebase observation, automatic updates during design, and global context enforcement."
-lastUpdated: "2026-03-24"
+lastUpdated: "2026-03-25"
 ---
 
 # Constitution Management
@@ -23,7 +23,7 @@ The constitution is generated from observed patterns rather than invented from s
 - **Active Resolution of Uncertain Items**: During bootstrap, the agent iterates through all uncertain items, presents each to the user, documents the decision, and removes the marker. No `<!-- REVIEW -->` markers remain after bootstrap completes.
 - **Global Context Enforcement**: Every skill invocation and artifact generation step reads the constitution before proceeding, configured through `config.yaml`.
 - **Automatic Updates During Design**: When a design introduces new technologies or patterns, the constitution is updated to reflect them. Changes are noted in the design document for visibility during review.
-- **Project-Specific Content Only**: The constitution does not duplicate rules already defined by the schema. It retains Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions.
+- **Project-Specific Content Only**: The constitution does not duplicate rules already defined by the schema. It retains Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks.
 - **Friction Tracking Convention**: The constitution includes a convention requiring that workflow friction discovered during any workflow run be captured as a GitHub Issue with the `friction` label.
 
 ## Behavior
@@ -46,7 +46,7 @@ When the design phase introduces a new technology (such as Redis for caching) or
 
 ### Constitution Does Not Duplicate Schema Rules
 
-The constitution does not contain rules about spec format, task format, assumption markers, capability naming, or artifact pipeline ordering. Those rules exist only in the schema's instruction fields or templates. The constitution retains Tech Stack, Architecture Rules (including directory paths and structural decisions), Code Style, Constraints, and Conventions (including commit style, version bump, README accuracy, and friction tracking).
+The constitution does not contain rules about spec format, task format, assumption markers, capability naming, or artifact pipeline ordering. Those rules exist only in the schema's instruction fields or templates. The constitution retains Tech Stack, Architecture Rules (including directory paths and structural decisions), Code Style, Constraints, Conventions (including commit style, version bump, README accuracy, and friction tracking), and Standard Tasks (project-specific post-implementation steps, or empty with an explanatory comment if none are defined).
 
 ### Friction Is Tracked as GitHub Issues
 
