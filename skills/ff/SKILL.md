@@ -58,13 +58,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - **instruction**: from YAML frontmatter `instruction:` field (content guidance)
         - **template body**: the markdown after the frontmatter (output structure)
         - **output path**: `openspec/changes/<name>/<generates>`
-      - Perform template variable substitution on the template body:
-        - `{{ change.name }}` → the change directory name
-        - `{{ change.stage }}` → the current artifact ID
-        - `{{ project.name }}` → project name (from repo or WORKFLOW.md)
-        - Unknown `{{ tokens }}` → leave as-is
       - Read any completed dependency files for context
-      - Create the artifact file using the substituted template body as the structure
+      - Create the artifact file using the template body as the structure
       - Apply the instruction as constraints — but do NOT copy it into the file
       - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `post_artifact` field. If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
       - Show brief progress: "Created <artifact-id>"

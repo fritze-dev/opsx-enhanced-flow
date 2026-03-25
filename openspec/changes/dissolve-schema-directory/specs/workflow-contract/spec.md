@@ -50,29 +50,6 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 - **WHEN** all template files are inspected
 - **THEN** every template (pipeline artifacts, docs, constitution) SHALL have YAML frontmatter with at minimum `id` and `description` fields
 
-### Requirement: Template Variable Substitution
-Smart Template bodies SHALL support simple `{{ variable }}` substitution. Supported variables SHALL be: `{{ change.name }}` (current change directory name), `{{ change.stage }}` (current pipeline artifact stage), and `{{ project.name }}` (project name from WORKFLOW.md frontmatter or repository name). Variables SHALL be resolved at skill invocation time via simple string replacement. If a variable is referenced but unavailable (e.g., no active change), it SHALL be replaced with an empty string. Unknown `{{ tokens }}` that do not match supported variables SHALL be left as-is to avoid breaking markdown content.
-
-**User Story:** As a template author I want to use variables like `{{ change.name }}` in template headings, so that generated artifacts automatically include context-specific information.
-
-#### Scenario: Template variable resolves in active change
-- **GIVEN** a Smart Template body containing `# Research: {{ change.name }}`
-- **AND** the current change is `add-user-auth`
-- **WHEN** the skill generates the artifact
-- **THEN** the output heading SHALL be `# Research: add-user-auth`
-
-#### Scenario: Unavailable variable resolves to empty string
-- **GIVEN** a Smart Template body containing `{{ change.name }}`
-- **AND** there is no active change
-- **WHEN** the template is rendered
-- **THEN** `{{ change.name }}` SHALL be replaced with an empty string
-
-#### Scenario: Unknown variable token left as-is
-- **GIVEN** a Smart Template body containing `{{ custom_token }}`
-- **AND** `custom_token` is not a supported variable
-- **WHEN** the template is rendered
-- **THEN** `{{ custom_token }}` SHALL remain unchanged in the output
-
 ### Requirement: Skill Reading Pattern
 Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each artifact in `pipeline`, read `<templates_dir>/<id>.md` to get `generates`, `requires`, and `instruction` from frontmatter and output structure from body, (3) check artifact status via file existence at `openspec/changes/<name>/<generates>`, (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) execute `post_artifact` from WORKFLOW.md after artifact creation.
 
@@ -94,12 +71,10 @@ Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontm
 - **WORKFLOW.md missing**: Skills SHALL report an error and suggest running `/opsx:setup`.
 - **Smart Template missing frontmatter**: Skills SHALL treat the file as a plain template (no instruction, no metadata) and report a warning.
 - **WORKFLOW.md with malformed YAML**: Skills SHALL report a parse error and stop.
-- **Template variable syntax in code blocks**: `{{ }}` inside fenced code blocks is part of the content and SHOULD be left as-is by the substitution (only substitute in rendered markdown context).
 - **Empty `pipeline` array**: Skills SHALL report that no artifacts are defined and stop.
 - **`templates_dir` points to nonexistent directory**: Skills SHALL report the missing directory and suggest running `/opsx:setup`.
 
 ## Assumptions
 
 - Claude natively parses YAML frontmatter from markdown files when instructed to read and interpret them. <!-- ASSUMPTION: Claude YAML frontmatter parsing -->
-- Simple string replacement for `{{ variable }}` is sufficient for initial template rendering; a full template engine is out of scope. <!-- ASSUMPTION: Simple substitution sufficient -->
 No further assumptions beyond those marked above.

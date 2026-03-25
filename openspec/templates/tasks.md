@@ -36,7 +36,7 @@ instruction: |
   "## Standard Tasks" section, append its items after the universal
   steps. Copy constitution items verbatim.
 ---
-# Implementation Tasks: {{ change.name }}
+# Implementation Tasks: [Feature Name]
 
 ## 1. Foundation
 <!-- Shared infrastructure, setup, dependencies — must complete first -->

@@ -29,7 +29,7 @@ instruction: |
   Focus on architecture and approach, not line-by-line implementation.
   Reference the proposal for motivation and specs for requirements.
 ---
-# Technical Design: {{ change.name }}
+# Technical Design: [Feature Name]
 
 ## Context
 <!-- Summary of the feature, current state of affected systems, relevant constraints -->

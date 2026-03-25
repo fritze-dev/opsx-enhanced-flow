@@ -33,7 +33,7 @@ instruction: |
   After the user responds, record decisions with rationale
   in the Decisions section before proceeding.
 ---
-# Research: {{ change.name }}
+# Research: [Feature Name]
 
 ## 1. Current State
 <!-- Affected code, modules, architecture, relevant patterns -->
