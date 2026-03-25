@@ -28,8 +28,8 @@
 - [x] 2.12. [P] Update `skills/sync/SKILL.md`: check for any schema.yaml/config.yaml references
 
 ### Documentation
-- [ ] 2.13. Update `README.md`: plugin structure, skills table (12 not 13), 3-layer diagram, all continue references, path references
-- [ ] 2.14. Close PR #27 with comment (superseded by this change)
+- [x] 2.13. Update `README.md`: plugin structure, skills table (12 not 13), 3-layer diagram, all continue references, path references
+- [x] 2.14. Close PR #27 with comment (superseded by this change)
 
 ## 3. QA Loop & Human Approval
 
