@@ -2,6 +2,7 @@
 id: docs-adr
 description: Architecture Decision Record template
 generates: "docs/decisions/adr-*.md"
+requires: []
 instruction: |
   Generate ADRs from archived design.md Decisions tables.
   Use inline rationale via em-dash in the Decision section.

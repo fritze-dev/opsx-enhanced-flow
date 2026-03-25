@@ -2,6 +2,7 @@
 id: constitution
 description: Project governance template for bootstrap
 generates: CONSTITUTION.md
+requires: []
 instruction: |
   Generate project-specific rules from codebase analysis.
   Fill in each section based on what you discover in the code.

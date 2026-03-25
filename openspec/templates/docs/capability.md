@@ -2,6 +2,7 @@
 id: docs-capability
 description: Capability documentation template
 generates: "docs/capabilities/*.md"
+requires: []
 instruction: |
   Generate user-facing capability documentation from merged baseline specs.
   Derive Purpose from spec Purpose using problem-framing.
