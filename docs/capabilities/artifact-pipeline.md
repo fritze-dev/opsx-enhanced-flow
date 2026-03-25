@@ -15,12 +15,12 @@ Development teams working with AI assistants need a structured process that prev
 
 ## Rationale
 
-The pipeline uses a declarative schema rather than hardcoded skill logic so that the workflow structure is transparent and modifiable without touching command code. Each artifact declares its dependencies explicitly, and the OpenSpec CLI enforces these dependencies by checking completion status before allowing generation. The 6-stage design captures the full lifecycle from initial research through implementation-ready tasks, with each stage producing a verifiable file. Config.yaml serves as a minimal bootstrap containing only the schema reference and a constitution pointer, while workflow rules live at their authoritative source -- the schema for universal rules, the constitution for project-specific rules. PR creation is inlined in the proposal instruction rather than added as a separate artifact, preserving the 6-stage pipeline structure while providing early team visibility through draft PRs.
+The pipeline uses a declarative schema rather than hardcoded skill logic so that the workflow structure is transparent and modifiable without touching command code. Each artifact declares its dependencies explicitly, and skills enforce these dependencies by reading schema.yaml and checking file existence before allowing generation. The 6-stage design captures the full lifecycle from initial research through implementation-ready tasks, with each stage producing a verifiable file. Config.yaml serves as a minimal bootstrap containing only the schema reference and a constitution pointer, while workflow rules live at their authoritative source -- the schema for universal rules, the constitution for project-specific rules. PR creation is inlined in the proposal instruction rather than added as a separate artifact, preserving the 6-stage pipeline structure while providing early team visibility through draft PRs.
 
 ## Features
 
 - **Six-Stage Pipeline**: Research, proposal, specs, design, preflight, and tasks execute in strict dependency order. Each stage produces a verifiable artifact file that must be complete (exists and is non-empty) before the next stage can begin.
-- **Explicit Dependency Declarations**: Each artifact in the schema declares its dependencies via a `requires` field. The OpenSpec CLI enforces these checks automatically.
+- **Explicit Dependency Declarations**: Each artifact in the schema declares its dependencies via a `requires` field. Skills enforce these checks by reading schema.yaml and verifying file existence.
 - **Apply Gate**: Implementation is gated by the tasks artifact. The apply phase cannot begin until `tasks.md` exists and is non-empty. During apply, progress is tracked against the task checklist.
 - **Minimal Config Bootstrap**: The `openspec/config.yaml` file contains only the schema reference and a constitution pointer -- no workflow rules or per-artifact rules entries.
 - **Schema-Owned Workflow Rules**: The `tasks.instruction` field in the schema contains the Definition of Done rule and the standard tasks directive. The `apply.instruction` field contains the post-apply workflow sequence (`/opsx:verify` then `/opsx:archive` then `/opsx:changelog` then `/opsx:docs` then commit, then execute constitution pre-merge standard tasks) and clarifies that standard tasks are not part of apply.
@@ -36,9 +36,9 @@ The pipeline uses a declarative schema rather than hardcoded skill logic so that
 
 When progressing through the pipeline, the system enforces the order: research first, then proposal, then specs, then design, then preflight, then tasks. Attempting to skip a stage -- for example, generating specs before completing the proposal -- is rejected with a message indicating which prerequisite artifact must be completed first. A completed pipeline run produces `research.md`, `proposal.md`, one or more `specs/<capability>/spec.md` files, `design.md`, `preflight.md`, and `tasks.md`.
 
-### Dependency Checks Are Enforced Automatically
+### Dependency Checks Are Enforced via File Existence
 
-Before generating any artifact, the system checks that all required predecessor artifacts are complete. An artifact is considered complete when its corresponding file exists and is non-empty. If a dependency check fails, the system reports which artifacts must be completed first. The schema declares these dependencies explicitly so that the enforcement is transparent and inspectable.
+Before generating any artifact, the system reads schema.yaml and checks that all required predecessor artifacts are complete. An artifact is considered complete when its corresponding file exists and is non-empty. For artifacts with glob patterns in the `generates` field (e.g., `specs/**/*.md`), completion is determined by at least one matching file existing. If a dependency check fails, the system reports which artifacts must be completed first. The schema declares these dependencies explicitly so that the enforcement is transparent and inspectable.
 
 ### Implementation Is Gated by Task Completion
 

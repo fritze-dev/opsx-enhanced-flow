@@ -5,12 +5,10 @@
 
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers-extra/features/claude-code:1": {}
   },
 
   "postCreateCommand": {
-    "openspec": "npm install -g @fission-ai/openspec@^1.2.0",
     "plugin": "claude plugin marketplace add fritze-dev/opsx-enhanced-flow && claude plugin install opsx@opsx-enhanced-flow"
   },
 

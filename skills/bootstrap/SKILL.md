@@ -12,12 +12,7 @@ disable-model-invocation: false
 
 ### Step 0: Verify Setup
 
-Run:
-```bash
-openspec schema which opsx-enhanced --json
-```
-
-If the command fails or `source` is not `"project"`, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 0b: Detect Mode
 
@@ -44,9 +39,8 @@ Analyze the entire project:
 
 Write the project constitution to `openspec/constitution.md`.
 
-Use the constitution template from the active schema's template directory as a starting structure. To find it:
-1. The schema path was resolved in Step 0 via `openspec schema which opsx-enhanced --json` (the `source` field points to the schema root)
-2. Read `templates/constitution.md` from that schema directory for the recommended sections and guidance comments
+Use the constitution template from the schema's template directory as a starting structure:
+- Read `openspec/schemas/opsx-enhanced/templates/constitution.md` for the recommended sections and guidance comments
 
 Adapt the sections to fit the project — add sections the project needs, omit sections that don't apply, rename or restructure as appropriate. Fill in each section based on **observed patterns** in the codebase — do not invent rules
 - Mark uncertain items with `<!-- REVIEW -->` for the user to confirm
@@ -65,7 +59,7 @@ Continue until zero `<!-- REVIEW -->` markers remain in the constitution. Do not
 ### Step 3: Create Initial Change
 
 ```bash
-openspec new change "initial-spec"
+mkdir -p openspec/changes/initial-spec
 ```
 
 ### Step 4: Hand Off

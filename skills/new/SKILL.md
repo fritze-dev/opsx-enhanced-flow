@@ -2,12 +2,6 @@
 name: new
 description: Start a new OpenSpec change using the experimental artifact workflow. Use when the user wants to create a new feature, fix, or modification with a structured step-by-step approach.
 disable-model-invocation: false
-license: MIT
-compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0"
 ---
 
 Start a new change using the experimental artifact-driven approach.
@@ -25,36 +19,29 @@ Start a new change using the experimental artifact-driven approach.
 
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
 
-2. **Determine the workflow schema**
+2. **Verify setup**
 
-   Use the default schema (omit `--schema`) unless the user explicitly requests a different workflow.
-
-   **Use a different schema only if the user mentions:**
-   - A specific schema name → use `--schema <name>`
-   - "show workflows" or "what workflows" → run `openspec schemas --json` and let them choose
-
-   **Otherwise**: Omit `--schema` to use the default.
+   Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
 
 3. **Create the change directory**
    ```bash
-   openspec new change "<name>"
+   mkdir -p openspec/changes/<name>
    ```
-   Add `--schema <name>` only if the user requested a specific workflow.
-   This creates a scaffolded change at `openspec/changes/<name>/` with the selected schema.
+   This creates the change workspace at `openspec/changes/<name>/`.
 
 4. **Show the artifact status**
-   ```bash
-   openspec status --change "<name>"
-   ```
-   This shows which artifacts need to be created and which are ready (dependencies satisfied).
+
+   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact in the `artifacts:` list:
+   - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
+   - **done**: output file exists
+   - **ready**: not done, but all artifacts listed in `requires` are done
+   - **blocked**: not done, and at least one artifact in `requires` is not done
+
+   Display which artifacts need to be created and which are ready.
 
 5. **Get instructions for the first artifact**
-   The first artifact depends on the schema (e.g., `proposal` for spec-driven).
-   Check the status output to find the first artifact with status "ready".
-   ```bash
-   openspec instructions <first-artifact-id> --change "<name>"
-   ```
-   This outputs the template and context for creating the first artifact.
+
+   Find the first artifact with status "ready" in schema.yaml. Read its `instruction` field for content guidance. Read the template file from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
 
 6. **STOP and wait for user direction**
 
@@ -62,7 +49,7 @@ Start a new change using the experimental artifact-driven approach.
 
 After completing the steps, summarize:
 - Change name and location
-- Schema/workflow being used and its artifact sequence
+- Artifact pipeline and its sequence
 - Current status (0/N artifacts complete)
 - The template for the first artifact
 - Prompt: "Ready to create the first artifact? Just describe what this change is about and I'll draft it, or ask me to continue."
@@ -72,4 +59,3 @@ After completing the steps, summarize:
 - Do NOT advance beyond showing the first artifact template
 - If the name is invalid (not kebab-case), ask for a valid name
 - If a change with that name already exists, suggest continuing that change instead
-- Pass --schema if using a non-default workflow

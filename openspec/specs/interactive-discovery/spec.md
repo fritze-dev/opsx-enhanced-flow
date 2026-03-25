@@ -10,7 +10,7 @@ Provides `/opsx:discover` for standalone interactive research with targeted Q&A 
 
 ### Requirement: Standalone Research with Q&A
 
-The system SHALL run an interactive discovery session when the user invokes `/opsx:discover`. Discovery SHALL operate independently from the artifact pipeline -- it generates only the `research.md` artifact and then pauses for user answers. It SHALL NOT generate proposal, specs, design, or any downstream artifacts. The discovery process SHALL: (1) read the constitution for project rules, (2) read the current change directory and existing baseline specs, (3) check whether existing specs reflect the current codebase and note stale-spec risks, (4) generate `research.md` with a coverage assessment rating each category as Clear, Partial, or Missing, and (5) generate targeted clarification questions only for Partial or Missing categories, limited to a maximum of 5 questions prioritized by Impact multiplied by Uncertainty. If all categories are Clear, the system SHALL state that and skip questions. After the user provides answers, the system SHALL record decisions with rationale in the Decisions section of research.md and then stop.
+The system SHALL run an interactive discovery session when the user invokes `/opsx:discover`. Discovery SHALL operate independently from the artifact pipeline -- it generates only the `research.md` artifact and then pauses for user answers. It SHALL NOT generate proposal, specs, design, or any downstream artifacts. The discovery process SHALL: (1) verify that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` exist, (2) read the constitution for project rules, (3) read the current change directory and existing baseline specs, (4) check whether existing specs reflect the current codebase and note stale-spec risks, (5) read the research artifact's `instruction` field from schema.yaml and its template, (6) generate `research.md` with a coverage assessment rating each category as Clear, Partial, or Missing, and (7) generate targeted clarification questions only for Partial or Missing categories, limited to a maximum of 5 questions prioritized by Impact multiplied by Uncertainty. If all categories are Clear, the system SHALL state that and skip questions. After the user provides answers, the system SHALL record decisions with rationale in the Decisions section of research.md and then stop.
 
 **User Story:** As a developer I want a dedicated interactive research phase with targeted questions, so that I can explore complex features thoroughly and ensure all ambiguities are resolved before the artifact pipeline generates specs and design.
 
@@ -79,10 +79,10 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 
 #### Scenario: Prerequisite check fails
 
-- **GIVEN** the OpenSpec CLI is not installed or the opsx-enhanced schema is not registered
+- **GIVEN** the project has not been set up with `/opsx:setup`
 - **WHEN** the user invokes `/opsx:discover`
-- **THEN** the system runs `openspec schema which opsx-enhanced --json`
-- **AND** the command fails
+- **THEN** the system checks for `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml`
+- **AND** one or both files are missing
 - **AND** the system tells the user to run `/opsx:setup` first and stops
 
 ## Edge Cases
@@ -92,11 +92,9 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **Change has pre-existing research.md**: If research.md already exists from a previous discovery or from `/opsx:continue`, the system SHALL overwrite it with fresh research. The user is warned that existing research will be replaced.
 - **No baseline specs exist**: If `openspec/specs/` is empty (as in a bootstrap scenario), the system SHALL proceed without stale-spec analysis and note "No baseline specs to compare against."
 - **User invokes discover on a completed change**: If the change has all artifacts complete, the system SHALL still allow discovery to re-run research, since the user may want to revisit decisions. It SHALL warn that re-running research may invalidate downstream artifacts.
-- **Ambiguous change selection**: If multiple active changes exist and no name is provided, the system SHALL list available changes and ask the user to select one.
+- **Ambiguous change selection**: If multiple active changes exist and no name is provided, the system SHALL list directories under `openspec/changes/` (excluding `archive/`) and ask the user to select one.
 
 ## Assumptions
 
 - The user has already created a change workspace via /opsx:new before invoking /opsx:discover. <!-- ASSUMPTION: Change workspace exists -->
-- The user will answer discovery questions in the same session or a subsequent session before running /opsx:ff. <!-- ASSUMPTION: User answers before ff -->
-- Stale-spec detection is heuristic (keyword-based) and may not catch all cases of code-spec drift. <!-- ASSUMPTION: Heuristic detection -->
-- The 5-question limit is sufficient for most changes; exceptionally complex changes may require multiple discovery rounds. <!-- ASSUMPTION: Question limit sufficient -->
+No further assumptions beyond those marked above.

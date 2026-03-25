@@ -14,14 +14,14 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Run `openspec schema which opsx-enhanced --json`. If it fails, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 1: Select Change
 
 If no change name provided:
 - Infer from conversation context
 - Auto-select if only one active change exists
-- If ambiguous, run `openspec list --json` and ask the user to select
+- If ambiguous, list directories under `openspec/changes/` (exclude `archive/`) and ask the user to select
 
 ### Step 2: Read Context
 
@@ -31,15 +31,11 @@ If no change name provided:
 
 ### Step 3: Get Preflight Instructions
 
-```bash
-openspec instructions preflight --change "<name>" --json
-```
-
-This returns the schema instruction, template, context, and output path. Use the `instruction` field for content guidance and the `template` field for structure.
+Read `openspec/schemas/opsx-enhanced/schema.yaml` and find the artifact with `id: preflight`. Extract its `instruction` field for content guidance. Read the template from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
 
 ### Step 4: Execute Pre-Flight
 
-Create `preflight.md` following the instruction and template from the CLI output. Read all dependency artifacts listed in the response.
+Create `preflight.md` following the instruction and template from schema.yaml. Read all dependency artifacts listed in the `requires` field.
 
 The pre-flight covers:
 - **A. Traceability Matrix** — Every story mapped to scenarios and components
@@ -80,7 +76,7 @@ Verdict: PASS / PASS WITH WARNINGS / BLOCKED
 ## Guardrails
 
 - Always read all change artifacts before running the check
-- Use `openspec instructions` CLI for schema-specific guidance — do not hardcode instruction content
+- Read schema.yaml for artifact instructions and templates — do not hardcode instruction content
 - If required artifacts (spec.md, design.md) are missing, abort with a clear message
 - Do not auto-fix issues — report findings for the user to resolve
 - Do not proceed to task creation — preflight is a review gate, not a generator

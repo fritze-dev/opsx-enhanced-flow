@@ -10,17 +10,15 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 3. **Skills** (`skills/*/SKILL.md`) — 13 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (6: new, continue, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), and documentation (2: changelog, docs). All skills are model-invocable.
 
-Layers are independently modifiable — the schema does not embed skill logic, skills depend on the schema via the OpenSpec CLI, and the constitution does not contain schema-specific artifact definitions.
+Layers are independently modifiable — the schema does not embed skill logic, skills depend on the schema by reading schema.yaml directly at runtime, and the constitution does not contain schema-specific artifact definitions.
 
 ## Tech Stack
 
 - **Primary format:** Markdown (artifacts, specs, skills, documentation)
 - **Configuration:** YAML (schema.yaml, config.yaml)
 - **Shell:** Bash (skill command execution)
-- **Core dependency:** OpenSpec CLI (`@fission-ai/openspec@^1.2.0`)
-- **Runtime:** Node.js + npm (required for OpenSpec CLI)
 - **Platform:** Claude Code plugin system
-- **Package manager:** npm (global installs only — no project-level package.json)
+- **No external dependencies:** Skills read schema.yaml and templates directly — no CLI tools, Node.js, or npm required
 
 ## Key Design Decisions
 
@@ -53,6 +51,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Add mark-before-commit directive to apply.instruction only | Apply instruction owns the post-apply workflow; no other location needed | [ADR-025](decisions/adr-025-add-directive-to-apply-instruction-only.md) |
 | Inline PR integration in proposal step | Preserves 6-stage pipeline; draft PR provides early visibility; graceful degradation for non-GitHub environments | [ADR-026](decisions/adr-026-inline-pr-integration-in-proposal-step.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
+| Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
 
 ### Notable Trade-offs
 
@@ -86,6 +85,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 - **Constitution extras auto-execution (ADR-026)**: Existing constitution extras that were previously manual-only are now auto-executed during post-apply; behavior change for existing projects.
 - **gh CLI dependency for full PR functionality (ADR-026)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
+- **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
 
 ## Conventions
 
@@ -102,7 +102,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization with CLI install and schema setup |
+| [Project Setup](capabilities/project-setup.md) | One-time project initialization with schema file copy and config creation |
 | [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
 
 ### Change Workflow

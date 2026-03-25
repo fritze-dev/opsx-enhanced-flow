@@ -29,7 +29,7 @@ The system SHALL define a 6-stage artifact pipeline with the following stages in
 - **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, and tasks.md
 
 ### Requirement: Artifact Dependencies
-Each artifact in the pipeline SHALL declare its dependencies explicitly in the schema. The dependency declaration SHALL list which preceding artifacts MUST be complete before the artifact can be generated. The OpenSpec CLI SHALL enforce these dependencies by checking artifact completion status before allowing generation of a dependent artifact. An artifact SHALL be considered complete when its corresponding file exists and is non-empty in the change workspace.
+Each artifact in the pipeline SHALL declare its dependencies explicitly in the schema. The dependency declaration SHALL list which preceding artifacts MUST be complete before the artifact can be generated. Skills SHALL enforce these dependencies by reading schema.yaml and checking artifact completion status via file existence before allowing generation of a dependent artifact. An artifact SHALL be considered complete when its corresponding file exists and is non-empty in the change workspace. For artifacts with glob patterns in the `generates` field (e.g., `specs/**/*.md`), completion SHALL be determined by at least one matching file existing.
 
 **User Story:** As a developer I want the system to enforce artifact dependencies automatically, so that I cannot accidentally generate a design before the specs are written.
 
@@ -47,6 +47,11 @@ Each artifact in the pipeline SHALL declare its dependencies explicitly in the s
 - **GIVEN** the `schema.yaml` file
 - **WHEN** the artifact definitions are inspected
 - **THEN** each artifact SHALL have a `requires` field listing its direct dependencies by artifact ID
+
+#### Scenario: Artifact status computed from file existence
+- **GIVEN** a change workspace with research.md and proposal.md present
+- **WHEN** a skill computes artifact status by reading schema.yaml
+- **THEN** research and proposal SHALL be marked as "done", specs as "ready", and design/preflight/tasks as "blocked"
 
 ### Requirement: Apply Gate
 Implementation (the apply phase) SHALL be gated by completion of the tasks artifact. The apply phase SHALL NOT begin until tasks.md exists and is non-empty. The apply phase SHALL track progress against the task checklist in tasks.md, marking items complete as implementation proceeds. The schema SHALL declare this gate via the `apply.requires` field referencing the tasks artifact.
@@ -271,7 +276,6 @@ The specs `instruction` in the schema SHALL include an overlap verification step
 
 - The `gh` CLI, when available, is authenticated and has permission to create PRs on the current repository. <!-- ASSUMPTION: gh CLI authentication -->
 - The change name (kebab-case) is a valid git branch name. <!-- ASSUMPTION: Branch name validity -->
-- The OpenSpec CLI enforces artifact dependency checks before generation. If the CLI does not enforce this natively, skills must implement the checks. <!-- ASSUMPTION: CLI dependency enforcement -->
 - Artifact completion is determined by file existence and non-empty content, not by content validation or quality assessment. <!-- ASSUMPTION: File-existence-based completion -->
 - Agent compliance with instruction-based guidance is sufficient for consolidation enforcement. The Consolidation Check template section provides a reviewable artifact as enforcement. <!-- ASSUMPTION: Agent compliance sufficient -->
 - The constitution is read during task generation via the config.yaml context directive, which already points agents to the constitution. <!-- ASSUMPTION: Config-based constitution loading -->

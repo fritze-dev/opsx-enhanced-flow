@@ -2,12 +2,6 @@
 name: verify
 description: Verify implementation matches change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent before archiving.
 disable-model-invocation: false
-license: MIT
-compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0"
 ---
 
 Verify that an implementation matches the change artifacts (specs, tasks, design).
@@ -18,29 +12,25 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 1. **If no change name provided, prompt for selection**
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   List directories under `openspec/changes/` (exclude `archive/`). Use the **AskUserQuestion tool** to let the user select.
 
-   Show changes that have implementation tasks (tasks artifact exists).
-   Include the schema used for each change if available.
+   Show changes that have implementation tasks (tasks.md exists).
    Mark changes with incomplete tasks as "(In Progress)".
 
    **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
 
-2. **Check status to understand the schema**
-   ```bash
-   openspec status --change "<name>" --json
-   ```
-   Parse the JSON to understand:
-   - `schemaName`: The workflow being used (e.g., "spec-driven")
-   - Which artifacts exist for this change
+2. **Check status**
 
-3. **Get the change directory and load artifacts**
+   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact, check if its output file exists in `openspec/changes/<name>/`. Note which artifacts are available for verification.
 
-   ```bash
-   openspec instructions apply --change "<name>" --json
-   ```
+3. **Load artifacts**
 
-   This returns the change directory and context files. Read all available artifacts from `contextFiles`.
+   Read all available artifact files from the change directory:
+   - `openspec/changes/<name>/research.md`
+   - `openspec/changes/<name>/proposal.md`
+   - `openspec/changes/<name>/specs/*/spec.md`
+   - `openspec/changes/<name>/design.md`
+   - `openspec/changes/<name>/tasks.md`
 
 4. **Initialize verification report structure**
 
@@ -54,7 +44,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 5. **Verify Completeness**
 
    **Task Completion**:
-   - If tasks.md exists in contextFiles, read it
+   - If tasks.md exists, read it
    - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
    - Count complete vs total tasks
    - If incomplete tasks exist:
@@ -93,7 +83,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 7. **Verify Coherence**
 
    **Design Adherence**:
-   - If design.md exists in contextFiles:
+   - If design.md exists:
      - Extract key decisions (look for sections like "Decision:", "Approach:", "Architecture:")
      - Verify implementation follows those decisions
      - If contradiction detected:

@@ -26,6 +26,9 @@ None.
 - `three-layer-architecture`: Update layer separation requirement — skills depend on schema via direct file reads instead of via CLI.
 - `artifact-pipeline`: Update dependency enforcement — artifact status computed by file existence checks instead of CLI enforcement.
 - `artifact-generation`: Update skill descriptions — skills read schema.yaml directly instead of wrapping CLI commands.
+- `change-workspace`: Remove CLI delegation for workspace creation — use `mkdir -p` instead of `openspec new change`.
+- `task-implementation`: Update context loading — read change directory files directly instead of CLI `instructions apply` output.
+- `interactive-discovery`: Update prerequisite check — verify file existence instead of `openspec schema which`.
 
 ### Consolidation Check
 
@@ -63,5 +66,5 @@ N/A — no new specs proposed.
 ## Pull Request
 
 - **Branch**: `remove-cli-dependency`
-- **PR URL**: (created after proposal)
+- **PR URL**: https://github.com/fritze-dev/opsx-enhanced-flow/pull/54
 - **Status**: Draft

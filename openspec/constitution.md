@@ -5,15 +5,12 @@
 - **Primary format:** Markdown (artifacts, specs, skills, documentation)
 - **Configuration:** YAML (schema.yaml, config.yaml)
 - **Shell:** Bash (skill command execution)
-- **Core dependency:** OpenSpec CLI (`@fission-ai/openspec@^1.2.0`)
-- **Runtime:** Node.js + npm (required for OpenSpec CLI)
 - **Platform:** Claude Code plugin system
-- **Package manager:** npm (global installs only — no project-level package.json)
 
 ## Architecture Rules
 
 - **Three-layer architecture:** Constitution (global rules) → Schema (artifact pipeline) → Skills (user commands)
-- Layers are independently modifiable — schema does not embed skill logic, skills depend on schema via CLI
+- Layers are independently modifiable — schema does not embed skill logic, skills depend on schema via direct file reads
 - **Skill immutability:** Skills in `skills/` are generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)
 - Schema source of truth: `openspec/schemas/opsx-enhanced/`

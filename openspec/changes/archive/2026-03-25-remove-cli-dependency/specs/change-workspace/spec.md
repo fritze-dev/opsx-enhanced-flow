@@ -2,11 +2,8 @@
 order: 3
 category: change-workflow
 ---
-## Purpose
 
-Manages the change lifecycle including workspace creation (`/opsx:new`), schema-defined workspace structure, and change archiving (`/opsx:archive`) with date-prefixed directory naming and sync prompts.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Create Change Workspace
 
@@ -60,52 +57,6 @@ The created workspace SHALL contain the artifacts defined by the active schema. 
 - **WHEN** the user checks artifact status before creating any artifacts
 - **THEN** only the first artifact in the pipeline (research) SHALL have status "ready"
 - **AND** downstream artifacts (proposal, specs, design, preflight, tasks) SHALL be blocked by unmet dependencies
-
-### Requirement: Archive Completed Change
-
-The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. Before archiving, the system SHALL assess delta spec sync state and prompt the user to sync if unsynced delta specs exist. The system SHALL NOT silently archive without informing the user of the sync opportunity. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
-
-**User Story:** As a developer I want completed changes archived with a date prefix and a sync prompt, so that the project history is preserved chronologically and baseline specs stay up to date.
-
-#### Scenario: Archive a completed change
-
-- **GIVEN** a change named "add-user-auth" with all artifacts and tasks complete
-- **AND** no delta specs exist in the change
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system moves `openspec/changes/add-user-auth/` to `openspec/changes/archive/2026-03-02-add-user-auth/`
-- **AND** displays a summary including change name, schema, and archive location
-
-#### Scenario: Prompt for sync before archiving
-
-- **GIVEN** a change named "add-user-auth" with delta specs in `openspec/changes/add-user-auth/specs/`
-- **AND** the delta specs have not been synced to baseline
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL analyze delta specs and show a summary of pending changes
-- **AND** SHALL prompt with options: "Sync now (recommended)" or "Archive without syncing"
-- **AND** SHALL proceed to archive regardless of the user's sync choice
-
-#### Scenario: Archive with incomplete artifacts
-
-- **GIVEN** a change with some artifacts not marked as done
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL display a warning listing the incomplete artifacts
-- **AND** SHALL ask the user to confirm before proceeding
-- **AND** SHALL archive if the user confirms
-
-#### Scenario: Archive target already exists
-
-- **GIVEN** a change named "add-user-auth"
-- **AND** an archive already exists at `openspec/changes/archive/2026-03-02-add-user-auth/`
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL fail with an error
-- **AND** SHALL suggest renaming the existing archive or using a different date
-
-#### Scenario: Archive with incomplete tasks
-
-- **GIVEN** a change with a tasks.md containing 3 of 7 checkboxes marked complete
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL display a warning showing "3/7 tasks complete"
-- **AND** SHALL ask the user to confirm before proceeding
 
 ## Edge Cases
 
