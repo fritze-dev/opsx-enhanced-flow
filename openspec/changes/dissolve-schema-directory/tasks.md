@@ -12,20 +12,20 @@
 ## 2. Implementation
 
 ### Skills (heavy changes)
-- [ ] 2.1. Update `skills/ff/SKILL.md`: read WORKFLOW.md + Smart Templates instead of schema.yaml; add change-selection for existing changes; add template variable substitution; remove all schema.yaml/config.yaml references
-- [ ] 2.2. Update `skills/setup/SKILL.md`: complete rewrite — copy templates/, generate WORKFLOW.md, create CONSTITUTION.md placeholder; add legacy migration logic; update validation
-- [ ] 2.3. Update `skills/new/SKILL.md`: verify WORKFLOW.md instead of schema.yaml + config.yaml; update template paths
+- [x] 2.1. Update `skills/ff/SKILL.md`: read WORKFLOW.md + Smart Templates instead of schema.yaml; add change-selection for existing changes; add template variable substitution; remove all schema.yaml/config.yaml references
+- [x] 2.2. Update `skills/setup/SKILL.md`: complete rewrite — copy templates/, generate WORKFLOW.md, create CONSTITUTION.md placeholder; add legacy migration logic; update validation
+- [x] 2.3. Update `skills/new/SKILL.md`: verify WORKFLOW.md instead of schema.yaml + config.yaml; update template paths
 
 ### Skills (path updates)
-- [ ] 2.4. [P] Update `skills/apply/SKILL.md`: schema.yaml → WORKFLOW.md; `/opsx:continue` → `/opsx:ff`
-- [ ] 2.5. [P] Update `skills/verify/SKILL.md`: schema.yaml → WORKFLOW.md
-- [ ] 2.6. [P] Update `skills/archive/SKILL.md`: schema.yaml → WORKFLOW.md
-- [ ] 2.7. [P] Update `skills/preflight/SKILL.md`: schema.yaml → WORKFLOW.md + Smart Template
-- [ ] 2.8. [P] Update `skills/discover/SKILL.md`: schema.yaml → WORKFLOW.md + Smart Template
-- [ ] 2.9. [P] Update `skills/bootstrap/SKILL.md`: constitution.md → CONSTITUTION.md; template path; `/opsx:continue` → `/opsx:ff`
-- [ ] 2.10. [P] Update `skills/changelog/SKILL.md`: docs_language from WORKFLOW.md
-- [ ] 2.11. [P] Update `skills/docs/SKILL.md`: docs_language from WORKFLOW.md; template paths
-- [ ] 2.12. [P] Update `skills/sync/SKILL.md`: check for any schema.yaml/config.yaml references
+- [x] 2.4. [P] Update `skills/apply/SKILL.md`: schema.yaml → WORKFLOW.md; `/opsx:continue` → `/opsx:ff`
+- [x] 2.5. [P] Update `skills/verify/SKILL.md`: schema.yaml → WORKFLOW.md
+- [x] 2.6. [P] Update `skills/archive/SKILL.md`: schema.yaml → WORKFLOW.md
+- [x] 2.7. [P] Update `skills/preflight/SKILL.md`: schema.yaml → WORKFLOW.md + Smart Template
+- [x] 2.8. [P] Update `skills/discover/SKILL.md`: schema.yaml → WORKFLOW.md + Smart Template
+- [x] 2.9. [P] Update `skills/bootstrap/SKILL.md`: constitution.md → CONSTITUTION.md; template path; `/opsx:continue` → `/opsx:ff`
+- [x] 2.10. [P] Update `skills/changelog/SKILL.md`: docs_language from WORKFLOW.md
+- [x] 2.11. [P] Update `skills/docs/SKILL.md`: docs_language from WORKFLOW.md; template paths
+- [x] 2.12. [P] Update `skills/sync/SKILL.md`: check for any schema.yaml/config.yaml references
 
 ### Documentation
 - [ ] 2.13. Update `README.md`: plugin structure, skills table (12 not 13), 3-layer diagram, all continue references, path references

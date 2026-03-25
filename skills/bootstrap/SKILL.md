@@ -12,11 +12,11 @@ disable-model-invocation: false
 
 ### Step 0: Verify Setup
 
-Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 0b: Detect Mode
 
-Check if `openspec/constitution.md` contains actual content (not just the starter template) AND `openspec/specs/` has at least one spec file.
+Check if `openspec/CONSTITUTION.md` contains actual content (not just the starter template) AND `openspec/specs/` has at least one spec file.
 
 - **No specs/constitution:** → First Run (Steps 1–6)
 - **Specs exist:** → Re-Run (Steps 7–9)
@@ -37,10 +37,10 @@ Analyze the entire project:
 
 ### Step 2: Generate Constitution
 
-Write the project constitution to `openspec/constitution.md`.
+Write the project constitution to `openspec/CONSTITUTION.md`.
 
 Use the constitution template from the schema's template directory as a starting structure:
-- Read `openspec/schemas/opsx-enhanced/templates/constitution.md` for the recommended sections and guidance comments
+- Read `openspec/templates/constitution.md` for the recommended sections and guidance comments
 
 Adapt the sections to fit the project — add sections the project needs, omit sections that don't apply, rename or restructure as appropriate. Fill in each section based on **observed patterns** in the codebase — do not invent rules
 - Mark uncertain items with `<!-- REVIEW -->` for the user to confirm
@@ -65,10 +65,10 @@ mkdir -p openspec/changes/initial-spec
 ### Step 4: Hand Off
 
 Tell the user:
-1. Review `openspec/constitution.md` — all uncertain items have been resolved, but a final review is recommended
+1. Review `openspec/CONSTITUTION.md` — all uncertain items have been resolved, but a final review is recommended
 2. The initial change workspace is ready at `openspec/changes/initial-spec/`
 3. Continue with the standard pipeline:
-   - `/opsx:continue` — generate one artifact at a time (recommended for first bootstrap, allows review between steps)
+   - `/opsx:ff` — generate one artifact at a time (recommended for first bootstrap, allows review between steps)
    - `/opsx:ff` — generate all artifacts in one go
 4. After all artifacts are complete, run `/opsx:apply` to execute the QA loop (this is a docs-only change — no code tasks, just quality checks)
 5. When approved, run `/opsx:sync` to merge delta specs into baseline specs at `openspec/specs/`
@@ -88,7 +88,7 @@ Each identified capability becomes its own spec file during archive.
 
 ### Step 7: Drift Detection
 
-1. Read `openspec/constitution.md` and all specs in `openspec/specs/`.
+1. Read `openspec/CONSTITUTION.md` and all specs in `openspec/specs/`.
 2. Scan the codebase for changes not reflected in specs:
    - New files/modules without corresponding specs
    - Modified APIs or interfaces that specs still describe in the old way
@@ -98,7 +98,7 @@ Each identified capability becomes its own spec file during archive.
 ### Step 8: Update Constitution & Specs
 
 Based on drift findings:
-- Update `openspec/constitution.md` if tech stack, patterns, or conventions changed.
+- Update `openspec/CONSTITUTION.md` if tech stack, patterns, or conventions changed.
 - Create delta-spec changes for drifted capabilities via `/opsx:new`.
 
 ### Step 9: Consistency Passes

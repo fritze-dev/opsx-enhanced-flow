@@ -21,7 +21,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 2. **Check status**
 
-   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact, check if its output file exists in `openspec/changes/<name>/`. Note which artifacts are available for verification.
+   Read `openspec/WORKFLOW.md` to get the artifact pipeline from its YAML frontmatter. For each artifact, check if its output file exists in `openspec/changes/<name>/`. Note which artifacts are available for verification.
 
 3. **Load artifacts**
 

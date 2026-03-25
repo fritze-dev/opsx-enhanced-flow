@@ -21,23 +21,21 @@ Implement tasks from an OpenSpec change.
 
 2. **Check status**
 
-   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact in the `artifacts:` list, check if `openspec/changes/<name>/<generates>` exists. Also check the `apply:` section — its `requires` field lists which artifacts must be complete before implementation. Its `tracks` field names the task file (typically `tasks.md`).
+   Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter. For each artifact ID in the `pipeline` array, read the corresponding Smart Template to get its `generates` field and check if `openspec/changes/<name>/<generates>` exists. Also check the `apply:` section — its `requires` field lists which artifacts must be complete before implementation. Its `tracks` field names the task file (typically `tasks.md`).
 
    **Handle states:**
-   - If apply-required artifacts are missing: show message, suggest using `/opsx:continue` or `/opsx:ff`
+   - If apply-required artifacts are missing: show message, suggest using `/opsx:ff`
    - If all tasks are already done: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
 3. **Read context files**
 
-   Read the schema's `apply.instruction` field for apply guidance. Then read all completed artifact files in the change directory as context:
+   Read `openspec/WORKFLOW.md`'s `apply.instruction` field for apply guidance and the `context` field for project-level context instructions. Then read all completed artifact files in the change directory as context:
    - `openspec/changes/<name>/research.md`
    - `openspec/changes/<name>/proposal.md`
    - `openspec/changes/<name>/specs/*/spec.md`
    - `openspec/changes/<name>/design.md`
    - `openspec/changes/<name>/tasks.md`
-
-   Also read `openspec/config.yaml`'s `context:` field for project-level context instructions.
 
 4. **Show current progress**
 

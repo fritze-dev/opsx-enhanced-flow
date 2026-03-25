@@ -14,7 +14,7 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 1: Select Change
 
@@ -25,17 +25,17 @@ If no change name provided:
 
 ### Step 2: Read Context
 
-1. Read `openspec/constitution.md` for project rules and conventions.
+1. Read `openspec/CONSTITUTION.md` for project rules and conventions.
 2. Read all artifacts in the current change directory (`openspec/changes/<change-name>/`).
 3. Read existing specs at `openspec/specs/` for cross-spec consistency.
 
 ### Step 3: Get Preflight Instructions
 
-Read `openspec/schemas/opsx-enhanced/schema.yaml` and find the artifact with `id: preflight`. Extract its `instruction` field for content guidance. Read the template from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
+Read the Smart Template from `openspec/templates/preflight.md`. Extract the `instruction` from its YAML frontmatter for content guidance. Use the template body for the output structure.
 
 ### Step 4: Execute Pre-Flight
 
-Create `preflight.md` following the instruction and template from schema.yaml. Read all dependency artifacts listed in the `requires` field.
+Create `preflight.md` following the instruction and template from the Smart Template. Read all dependency artifacts listed in the `requires` field.
 
 The pre-flight covers:
 - **A. Traceability Matrix** — Every story mapped to scenarios and components
@@ -76,7 +76,7 @@ Verdict: PASS / PASS WITH WARNINGS / BLOCKED
 ## Guardrails
 
 - Always read all change artifacts before running the check
-- Read schema.yaml for artifact instructions and templates — do not hardcode instruction content
+- Read WORKFLOW.md and Smart Templates for artifact instructions and templates — do not hardcode instruction content
 - If required artifacts (spec.md, design.md) are missing, abort with a clear message
 - Do not auto-fix issues — report findings for the user to resolve
 - Do not proceed to task creation — preflight is a review gate, not a generator

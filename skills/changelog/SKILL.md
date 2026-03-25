@@ -14,11 +14,11 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 0: Determine Documentation Language
 
-Read `openspec/config.yaml` and extract the `docs_language` field.
+Read `openspec/WORKFLOW.md` and extract the `docs_language` field from its YAML frontmatter.
 
 - **Missing or "English":** Proceed with English output (default behavior, no change).
 - **Non-English value (e.g., "German", "French"):** Generate all new changelog entry headings and descriptions in the target language in Step 6. Dates remain in ISO format. Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths remain in English.

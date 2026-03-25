@@ -17,11 +17,11 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 0: Determine Documentation Language
 
-Read `openspec/config.yaml` and extract the `docs_language` field.
+Read `openspec/WORKFLOW.md` and extract the `docs_language` field from its YAML frontmatter.
 
 - **Missing or "English":** Proceed with English output (default behavior, no change).
 - **Non-English value (e.g., "German", "French"):** Generate all headings and content in the target language for Steps 3, 4, and 5. Apply these translation rules throughout:
@@ -209,7 +209,7 @@ Create `docs/decisions/` directory if it does not exist.
 1. Any capability doc was written to disk in Step 3 (check the tracking flag).
 2. Any ADR was created in Step 4 (check the tracking flag).
 3. `docs/README.md` does not exist yet (first run).
-4. The content of `openspec/constitution.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. Read the constitution and compare its key content against the README to detect drift.
+4. The content of `openspec/CONSTITUTION.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. Read the constitution and compare its key content against the README to detect drift.
 
 If none of these conditions are met, skip README regeneration and report: "README is up-to-date — no capability, ADR, or constitution changes detected."
 
@@ -218,7 +218,7 @@ If none of these conditions are met, skip README regeneration and report: "READM
 Read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format.
 
 Create or update `docs/README.md` as the **single entry point** for all generated documentation. This file merges the architecture overview and capabilities table into one document, synthesized from:
-- `openspec/constitution.md` — Tech Stack, Architecture Rules, Conventions sections
+- `openspec/CONSTITUTION.md` — Tech Stack, Architecture Rules, Conventions sections
 - `openspec/specs/three-layer-architecture/spec.md` — the three-layer model description
 - All ADR files in `docs/decisions/` (both generated `adr-NNN-*.md` and manual `adr-M*.md`) — for key design decisions
 - All generated capability docs (from Step 3) — for the capabilities table

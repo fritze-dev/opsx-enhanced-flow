@@ -14,7 +14,7 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 1: Select Change
 
@@ -25,17 +25,17 @@ If no change name provided:
 
 ### Step 2: Read Context
 
-1. Read `openspec/constitution.md` for project rules and conventions.
+1. Read `openspec/CONSTITUTION.md` for project rules and conventions.
 2. Read the current change directory (`openspec/changes/<change-name>/`).
 3. Check if `openspec/specs/` reflects the current codebase. If code was changed outside the spec process (hotfixes, dependency updates), note this as stale-spec risk in the research.
 
 ### Step 3: Get Research Instructions
 
-Read `openspec/schemas/opsx-enhanced/schema.yaml` and find the artifact with `id: research`. Extract its `instruction` field for content guidance. Read the template from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
+Read the Smart Template from `openspec/templates/research.md`. Extract the `instruction` from its YAML frontmatter for content guidance. Use the template body for the output structure.
 
 ### Step 4: Generate Research
 
-Create `research.md` following the instruction and template from schema.yaml. Read any dependency files listed in the `requires` field for context.
+Create `research.md` following the instruction and template from the Smart Template. Read any dependency files listed in the `requires` field for context.
 
 ### Step 5: Pause for Q&A
 
@@ -74,7 +74,7 @@ Next: Run `/opsx:ff` to generate remaining artifacts.
 ## Guardrails
 
 - Always read constitution before generating research
-- Read schema.yaml for artifact instructions and templates — do not hardcode instruction content
+- Read WORKFLOW.md and Smart Templates for artifact instructions and templates — do not hardcode instruction content
 - If no active change exists, tell the user to run `/opsx:new` first
 - Do not proceed past research — stop after saving research.md
 - Do not generate proposal, specs, design, or other artifacts

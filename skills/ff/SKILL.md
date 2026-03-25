@@ -10,48 +10,63 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 **Steps**
 
-1. **If no clear input provided, ask what they want to build**
+1. **If no clear input provided, check for existing changes first**
 
-   Use the **AskUserQuestion tool** (open-ended, no preset options) to ask:
-   > "What change do you want to work on? Describe what you want to build or fix."
+   List directories under `openspec/changes/` (exclude `archive/`). If active changes exist, use the **AskUserQuestion tool** to let the user choose:
+   - Present existing changes as options (top 3-4, most recently modified first, mark most recent as "(Recommended)")
+   - Include an option to create a new change
+
+   If no active changes exist, use **AskUserQuestion tool** (open-ended) to ask what they want to build.
 
    From their description, derive a kebab-case name (e.g., "add user authentication" → `add-user-auth`).
 
-   **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
+   **IMPORTANT**: Do NOT proceed without understanding what the user wants to build or which change to continue.
 
-2. **Create the change directory**
+2. **Create the change directory** (if new)
    ```bash
    mkdir -p openspec/changes/<name>
    ```
-   This creates the change workspace at `openspec/changes/<name>/`.
 
 3. **Get the artifact build order**
 
-   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact in the `artifacts:` list:
+   Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter:
+   - `templates_dir`: path to Smart Templates directory
+   - `pipeline`: ordered array of artifact IDs
+   - `apply`: object with `requires` list
+
+   For each artifact ID in `pipeline`, read the corresponding Smart Template at `<templates_dir>/<id>.md` (for specs: `<templates_dir>/specs/spec.md`). From the template's YAML frontmatter, extract:
+   - `generates`: output file path relative to the change directory
+   - `requires`: dependency artifact IDs
+   - `instruction`: AI behavioral constraints
+
+   Check artifact status:
    - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
    - **done**: output file exists
    - **ready**: not done, but all artifacts listed in `requires` are done
    - **blocked**: not done, and at least one artifact in `requires` is not done
 
-   Also read the `apply:` section to determine which artifacts must be complete before implementation (the `requires` list, typically `[tasks]`).
-
 4. **Create artifacts in sequence until apply-ready**
 
    Use the **TodoWrite tool** to track progress through the artifacts.
 
-   Loop through artifacts in dependency order (artifacts with no pending dependencies first):
+   Also read `openspec/WORKFLOW.md`'s `context:` field from its frontmatter for project-level context instructions (typically points to CONSTITUTION.md).
+
+   Loop through artifacts in the `pipeline` order:
 
    a. **For each artifact that is "ready"**:
-      - In schema.yaml, find the artifact by `id`. Extract:
-        - **instruction**: The `instruction:` field text (content guidance)
-        - **template**: Read `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure
+      - Read the Smart Template at `<templates_dir>/<id>.md`:
+        - **instruction**: from YAML frontmatter `instruction:` field (content guidance)
+        - **template body**: the markdown after the frontmatter (output structure)
         - **output path**: `openspec/changes/<name>/<generates>`
-        - **dependencies**: The `requires:` list — read each completed dependency's output file for context
-      - Also read `openspec/config.yaml`'s `context:` field for project-level context instructions.
+      - Perform template variable substitution on the template body:
+        - `{{ change.name }}` → the change directory name
+        - `{{ change.stage }}` → the current artifact ID
+        - `{{ project.name }}` → project name (from repo or WORKFLOW.md)
+        - Unknown `{{ tokens }}` → leave as-is
       - Read any completed dependency files for context
-      - Create the artifact file using the template as the structure
-      - Apply the instruction as constraints - but do NOT copy it into the file
-      - **Post-artifact hook**: Check if schema.yaml contains a top-level `post_artifact` field. If present, read and execute its instructions (typically: commit, push, and on first push create a draft PR). If the field is absent, skip this step silently.
+      - Create the artifact file using the substituted template body as the structure
+      - Apply the instruction as constraints — but do NOT copy it into the file
+      - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `post_artifact` field. If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
       - Show brief progress: "Created <artifact-id>"
 
    b. **Continue until all apply-required artifacts are complete**
@@ -76,11 +91,10 @@ After completing all artifacts, summarize:
 
 **Artifact Creation Guidelines**
 
-- Follow the `instruction` field from schema.yaml for each artifact type
-- The schema defines what each artifact should contain - follow it
+- Read each Smart Template's `instruction` frontmatter field for artifact-specific guidance
 - Read dependency artifacts for context before creating new ones
-- Use the template as the structure for your output file - fill in its sections
-- **IMPORTANT**: The `instruction` field and `config.yaml` context are constraints for YOU, not content for the file
+- Use the template body (after frontmatter) as the structure for your output file — fill in its sections
+- **IMPORTANT**: The `instruction` field and WORKFLOW.md `context` are constraints for YOU, not content for the file
   - Do NOT copy instruction blocks into the artifact
   - These guide what you write, but should never appear in the output
 
@@ -94,8 +108,8 @@ After generating the preflight artifact, check the verdict before proceeding to 
 The design review checkpoint is governed by the project constitution (pause after design for user alignment before preflight). If preflight already exists when ff resumes, skip the design checkpoint.
 
 **Guardrails**
-- Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
+- Create ALL artifacts needed for implementation (as defined by WORKFLOW.md's `apply.requires`)
 - Always read dependency artifacts before creating a new one
-- If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
+- If context is critically unclear, ask the user — but prefer making reasonable decisions to keep momentum
 - If a change with that name already exists, suggest continuing that change instead
 - Verify each artifact file exists after writing before proceeding to next

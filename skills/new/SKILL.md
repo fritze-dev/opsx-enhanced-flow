@@ -21,7 +21,7 @@ Start a new change using the experimental artifact-driven approach.
 
 2. **Verify setup**
 
-   Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
+   Check that `openspec/WORKFLOW.md` exists. If missing, tell the user to run `/opsx:setup` first and stop.
 
 3. **Create the change directory**
    ```bash
@@ -31,7 +31,9 @@ Start a new change using the experimental artifact-driven approach.
 
 4. **Show the artifact status**
 
-   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact in the `artifacts:` list:
+   Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter (`templates_dir` and `pipeline` array). For each artifact ID in `pipeline`, read the corresponding Smart Template at `<templates_dir>/<id>.md` to get its `generates` and `requires` fields.
+
+   For each artifact:
    - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
    - **done**: output file exists
    - **ready**: not done, but all artifacts listed in `requires` are done
@@ -41,7 +43,7 @@ Start a new change using the experimental artifact-driven approach.
 
 5. **Get instructions for the first artifact**
 
-   Find the first artifact with status "ready" in schema.yaml. Read its `instruction` field for content guidance. Read the template file from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
+   Find the first artifact with status "ready". Read its Smart Template's `instruction` frontmatter field for content guidance and the template body for the output structure.
 
 6. **STOP and wait for user direction**
 

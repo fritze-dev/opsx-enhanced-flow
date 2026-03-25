@@ -20,7 +20,7 @@ Archive a completed change in the experimental workflow.
 
 2. **Check artifact completion status**
 
-   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact, check if its output file exists in `openspec/changes/<name>/`.
+   Read `openspec/WORKFLOW.md` to get the artifact pipeline from its YAML frontmatter. For each artifact, check if its output file exists in `openspec/changes/<name>/`.
 
    **If any artifacts are missing:**
    - Display warning listing incomplete artifacts
@@ -82,7 +82,7 @@ Archive a completed change in the experimental workflow.
 
 **Guardrails**
 - Always prompt for change selection if not provided
-- Check artifact completion by verifying output files exist for each artifact defined in schema.yaml
+- Check artifact completion by verifying output files exist for each artifact defined in WORKFLOW.md and Smart Templates
 - Don't block archive on warnings - just inform and confirm
 - Show clear summary of what happened
 - If sync is requested, use opsx:sync approach (agent-driven)
