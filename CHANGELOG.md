@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — Post-Artifact Commit and PR Integration
+
+### Changed
+- **BREAKING**: Draft PR is no longer created during the proposal step — instead, a schema-level `post_artifact` hook commits and pushes after every artifact, with the branch and draft PR created on the first commit (closes #51)
+- **BREAKING**: Proposal template no longer includes a `## Pull Request` section — PR metadata is available on-demand via `gh pr view` from the current branch
+- Every artifact now gets its own commit, providing granular git history and incremental visibility in the draft PR
+- `/opsx:continue` and `/opsx:ff` now read and execute the schema's `post_artifact` instructions after each artifact creation
+
+### Removed
+- PR creation block from proposal instruction in the schema — replaced by the universal `post_artifact` hook
+- `## Pull Request` section from the proposal template
+
 ## 2026-03-25 — Remove CLI Dependency
 
 ### Changed

@@ -49,7 +49,8 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Only modify user-docs spec for multi-capability optimization | Docs skill is a thin wrapper; user-docs spec owns incremental generation logic | [ADR-023](decisions/adr-023-modified-capabilities-user-docs-only.md) |
 | General rule for marking standard tasks before commit | Simpler, less prescriptive; agent decides timing; accurate because all steps completed by commit time | [ADR-024](decisions/adr-024-general-rule-ensure-all-checked-before-commit-rat.md) |
 | Add mark-before-commit directive to apply.instruction only | Apply instruction owns the post-apply workflow; no other location needed | [ADR-025](decisions/adr-025-add-directive-to-apply-instruction-only.md) |
-| Inline PR integration in proposal step | Preserves 6-stage pipeline; draft PR provides early visibility; graceful degradation for non-GitHub environments | [ADR-026](decisions/adr-026-inline-pr-integration-in-proposal-step.md) |
+| ~~Inline PR integration in proposal step~~ | ~~Superseded by ADR-028~~ | [ADR-026](decisions/adr-026-inline-pr-integration-in-proposal-step.md) |
+| Post-artifact commit and PR integration | Schema-level `post_artifact` hook commits after every artifact; branch+PR on first commit; avoids orphaned PRs | [ADR-028](decisions/adr-028-post-artifact-commit-and-pr-integration.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 | Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
 
@@ -81,9 +82,9 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 - **REVIEW auto-resolution adds prompts (ADR-019)**: Bootstrap and docs skill runs may be slower due to interactive user prompts for uncertain items and broken references.
 - **Multi-capability argument requires caller knowledge (ADR-022)**: Caller must know which capabilities were affected; no automatic detection from archive data.
 - **Mark-before-commit partial failure (ADR-024)**: If a post-apply step fails before commit, the agent must be careful to only mark completed steps; relies on natural agent behavior.
-- **PR creation is a side effect of proposal (ADR-026)**: Not independently trackable as a pipeline artifact; side effect rather than first-class pipeline stage.
-- **Constitution extras auto-execution (ADR-026)**: Existing constitution extras that were previously manual-only are now auto-executed during post-apply; behavior change for existing projects.
-- **gh CLI dependency for full PR functionality (ADR-026)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
+- **More commits per change (ADR-028)**: One commit per artifact instead of one bulk commit at proposal; intentional trade-off for better git traceability.
+- **Minimal initial PR body (ADR-028)**: Draft PR body is just "WIP: <name>" until the constitution standard task enriches it post-apply; teams must follow the branch for artifact content.
+- **gh CLI dependency for full PR functionality (ADR-028)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
 

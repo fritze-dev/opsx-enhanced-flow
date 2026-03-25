@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-03-25)
+Superseded by [ADR-028](adr-028-post-artifact-commit-and-pr-integration.md) (2026-03-25)
 
 ## Context
 

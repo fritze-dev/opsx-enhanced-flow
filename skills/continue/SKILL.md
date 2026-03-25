@@ -57,6 +57,7 @@ Continue working on a change by creating the next artifact.
      - Use the template as the structure - fill in its sections
      - Apply the instruction as constraints when writing - but do NOT copy it into the file
      - Write to the output path
+   - **Post-artifact hook**: Check if schema.yaml contains a top-level `post_artifact` field. If present, read and execute its instructions (typically: commit, push, and on first push create a draft PR). If the field is absent, skip this step silently.
    - Show what was created and what's now unlocked
    - STOP after creating ONE artifact
 

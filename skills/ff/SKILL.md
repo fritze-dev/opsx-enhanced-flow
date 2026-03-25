@@ -51,6 +51,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - Read any completed dependency files for context
       - Create the artifact file using the template as the structure
       - Apply the instruction as constraints - but do NOT copy it into the file
+      - **Post-artifact hook**: Check if schema.yaml contains a top-level `post_artifact` field. If present, read and execute its instructions (typically: commit, push, and on first push create a draft PR). If the field is absent, skip this step silently.
       - Show brief progress: "Created <artifact-id>"
 
    b. **Continue until all apply-required artifacts are complete**

@@ -33,10 +33,3 @@
 
 <!-- What is part of this change, what is not? -->
 
-## Pull Request
-
-<!-- Filled automatically after proposal creation.
-     If gh CLI is unavailable, note "Manual PR creation needed" and add the URL later. -->
-- **Branch**: `<change-name>`
-- **PR URL**: <url>
-- **Status**: Draft

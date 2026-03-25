@@ -86,33 +86,47 @@ The `openspec/config.yaml` SHALL serve as a minimal bootstrap file. It SHALL con
 - **AND** a `context` field pointing to the project constitution
 - **AND** no other workflow rules or per-artifact `rules` entries
 
-### Requirement: Proposal PR Integration
-The proposal artifact instruction SHALL include steps for creating a feature branch and draft pull request after writing `proposal.md`. The instruction SHALL direct the agent to: (1) create a feature branch using the change name, (2) stage and commit change artifacts with a WIP commit message, (3) push the branch to the remote, and (4) create a draft PR via `gh pr create --draft` with the proposal content as the PR body. The instruction SHALL direct the agent to append a `## Pull Request` section to `proposal.md` recording the PR URL, branch name, and status. If `gh` CLI is unavailable or not authenticated, the instruction SHALL direct the agent to skip PR creation, record only the branch information, and note that a PR can be created manually.
+### Requirement: Post-Artifact Commit and PR Integration
+The schema SHALL define a top-level `post_artifact` field containing instructions that the `/opsx:continue` and `/opsx:ff` skills execute after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check if a feature branch for the change exists — if not, create one via `git checkout -b <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft` with a minimal WIP body. Subsequent artifact commits SHALL push to the existing branch without creating a new PR. If the `post_artifact` field is absent from the schema (backward compatibility), the skill SHALL skip post-artifact operations silently.
 
-**User Story:** As a developer I want a draft PR created automatically when my proposal is written, so that my team can review and discuss the change on GitHub before implementation begins.
+The proposal artifact instruction SHALL NOT create a branch or PR. The proposal template SHALL NOT include a `## Pull Request` section — PR metadata is available on-demand via `gh pr view` from the current branch.
 
-#### Scenario: Draft PR created after proposal
-- **GIVEN** a change workspace with research.md and proposal.md just created
+**User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
+
+#### Scenario: First artifact triggers branch and PR creation
+- **GIVEN** a change workspace where no feature branch exists yet
 - **AND** the `gh` CLI is installed and authenticated
-- **WHEN** the agent finishes writing proposal.md
+- **WHEN** the agent finishes creating the first artifact (e.g., research.md)
 - **THEN** the agent SHALL create a feature branch named after the change
-- **AND** SHALL commit the change artifacts (research.md, proposal.md)
+- **AND** SHALL commit the artifact with message "WIP: <change-name> — research"
 - **AND** SHALL push the branch to the remote
-- **AND** SHALL create a draft PR with the proposal content as the body
-- **AND** SHALL append a `## Pull Request` section to proposal.md with the PR URL
+- **AND** SHALL create a draft PR with a minimal WIP body
+
+#### Scenario: Subsequent artifacts commit and push only
+- **GIVEN** a change workspace with an existing feature branch and draft PR
+- **WHEN** the agent finishes creating a subsequent artifact (e.g., proposal.md)
+- **THEN** the agent SHALL commit the artifact with message "WIP: <change-name> — proposal"
+- **AND** SHALL push to the existing branch
+- **AND** SHALL NOT create a new PR
 
 #### Scenario: Graceful degradation without gh CLI
-- **GIVEN** a change workspace with proposal.md just created
-- **AND** the `gh` CLI is not installed or not authenticated
-- **WHEN** the agent finishes writing proposal.md
-- **THEN** the agent SHALL create the feature branch and push it
-- **AND** SHALL append a `## Pull Request` section to proposal.md noting "PR not created — gh CLI unavailable"
+- **GIVEN** the `gh` CLI is not installed or not authenticated
+- **WHEN** the agent finishes creating the first artifact
+- **THEN** the agent SHALL create the feature branch and commit
+- **AND** SHALL attempt to push
+- **AND** SHALL skip draft PR creation
 - **AND** SHALL NOT block the pipeline
 
-#### Scenario: Proposal template includes Pull Request section
+#### Scenario: Schema without post_artifact field
+- **GIVEN** a schema.yaml that does not contain a `post_artifact` field
+- **WHEN** the agent finishes creating an artifact
+- **THEN** the agent SHALL skip post-artifact commit/push operations
+- **AND** SHALL proceed normally
+
+#### Scenario: Proposal template does not include Pull Request section
 - **GIVEN** the proposal template at `openspec/schemas/opsx-enhanced/templates/proposal.md`
 - **WHEN** the template is inspected
-- **THEN** it SHALL contain a `## Pull Request` section with placeholders for branch name, PR URL, and status
+- **THEN** it SHALL NOT contain a `## Pull Request` section
 
 ### Requirement: Schema Owns Workflow Rules
 The schema's artifact `instruction` fields SHALL contain workflow rules that apply to all projects using the schema. The `tasks.instruction` SHALL include the Definition of Done rule (emergent from artifacts). The `tasks.instruction` SHALL include a standard tasks directive for including universal post-implementation steps from the template and appending constitution-defined project-specific extras. The `apply.instruction` SHALL include the post-apply workflow sequence. The `apply.instruction` SHALL clarify that standard tasks are not part of the apply phase and are executed separately after apply completes. The `apply.instruction` SHALL direct the agent to execute constitution-defined pre-merge standard tasks after the universal post-apply steps (commit and push), marking each as complete in tasks.md. Post-merge standard tasks SHALL remain unchecked as reminders for manual execution after the PR is merged.
@@ -269,8 +283,10 @@ The specs `instruction` in the schema SHALL include an overlap verification step
 - **Custom section numbering:** If the QA Loop is not section 3 (e.g., due to merged sections), the standard tasks section SHALL use the next available number.
 - **Project without constitution:** Universal template steps still appear; constitution extras are simply absent.
 - **Branch already exists:** If the feature branch already exists (e.g., from a prior attempt), the agent SHALL reuse the existing branch rather than failing.
-- **Network failure during PR creation:** If the push succeeds but `gh pr create` fails, the agent SHALL record the branch info and note the PR creation failure. The pipeline SHALL NOT be blocked.
-- **No remote configured:** If no git remote is configured, the agent SHALL skip push and PR creation and note it in the Pull Request section.
+- **Network failure during PR creation:** If the push succeeds but `gh pr create` fails, the agent SHALL note the PR creation failure. The pipeline SHALL NOT be blocked.
+- **No remote configured:** If no git remote is configured, the agent SHALL skip push and PR creation.
+- **Existing changes created before post_artifact was added:** Changes without a feature branch will have the branch created on the next artifact commit. No retroactive PR creation for already-completed artifacts.
+- **Auto-continue transitions:** When auto-continuing (e.g., research→proposal), the `post_artifact` hook runs after each artifact individually, resulting in separate commits per artifact.
 
 ## Assumptions
 

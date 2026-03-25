@@ -82,22 +82,6 @@ artifacts:
 
       Keep it concise (1-2 pages). Focus on the "why" not the "how" —
       implementation details belong in design.md.
-
-      After writing proposal.md, create a draft pull request:
-      1. Create a feature branch: `git checkout -b <change-name>`
-      2. Stage and commit change artifacts:
-         `git add openspec/changes/<change-name>/` with message
-         "WIP: <change-name> — proposal draft"
-      3. Push the branch: `git push -u origin <change-name>`
-      4. Create a draft PR: `gh pr create --draft --title "<Change Name>"
-         --body "<proposal content formatted as PR description>"`
-      5. Append a `## Pull Request` section to proposal.md with the
-         PR URL, branch name, and status "Draft".
-
-      If `gh` CLI is unavailable or not authenticated, skip PR creation
-      and note "Manual PR creation needed" in the Pull Request section.
-      If the branch already exists, reuse it. If push fails, record
-      branch info locally and continue — do not block the pipeline.
     requires: [research]
 
   - id: specs
@@ -251,6 +235,19 @@ artifacts:
       "## Standard Tasks" section, append its items after the universal
       steps. Copy constitution items verbatim.
     requires: [preflight]
+
+post_artifact: |
+  After creating any artifact, commit and push the change:
+  1. If not on a feature branch (i.e., on main): `git checkout -b <change-name>`
+  2. Stage change artifacts: `git add openspec/changes/<change-name>/`
+  3. Commit: `git commit -m "WIP: <change-name> — <artifact-id>"`
+  4. Push: `git push -u origin <change-name>`
+  5. On FIRST push only (no existing PR for this branch):
+     `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
+
+  If `gh` CLI is unavailable or not authenticated, skip PR creation.
+  If the branch already exists, switch to it (`git checkout <change-name>`).
+  If push fails, continue with local commit — do not block the pipeline.
 
 apply:
   requires: [tasks]
