@@ -1,12 +1,4 @@
----
-order: 6
-category: change-workflow
----
-## Purpose
-
-Provides `/opsx:discover` for standalone interactive research with targeted Q&A for complex features, generating only research.md with coverage assessment and clarification questions before pausing for user input.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Standalone Research with Q&A
 
@@ -17,7 +9,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 **User Story:** As a developer I want a dedicated interactive research phase that is aware of existing architectural decisions, so that I can explore complex features thoroughly, avoid contradicting established decisions, and ensure all ambiguities are resolved before the artifact pipeline generates specs and design.
 
 #### Scenario: Discovery with ADR awareness
-
 - **GIVEN** a change named "add-caching-layer" has been created via `/opsx:new`
 - **AND** `docs/decisions.md` exists with 26 decisions listed
 - **AND** ADR-005 is about "Configurable documentation language" and ADR-002 is about "Schema owns workflow rules"
@@ -27,7 +18,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** the generated research.md includes a "Related Decisions" section referencing the relevant ADRs
 
 #### Scenario: Discovery without decisions index
-
 - **GIVEN** a change has been created
 - **AND** `docs/decisions.md` does not exist (e.g., first project run before `/opsx:docs`)
 - **WHEN** the user invokes `/opsx:discover`
@@ -35,7 +25,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** proceeds with research as before (constitution + specs context only)
 
 #### Scenario: Discovery with no relevant ADRs
-
 - **GIVEN** a change named "fix-typo-in-readme" has been created
 - **AND** `docs/decisions.md` exists with 26 decisions listed
 - **WHEN** the user invokes `/opsx:discover fix-typo-in-readme`
@@ -43,7 +32,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** the "Related Decisions" section in research.md states "No relevant existing decisions identified"
 
 #### Scenario: Discovery with questions for partial categories
-
 - **GIVEN** a change named "add-payment-gateway" has been created via `/opsx:new`
 - **AND** the constitution and existing specs have been read
 - **AND** relevant ADRs have been identified and read
@@ -55,7 +43,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** pauses and waits for the user to answer
 
 #### Scenario: Discovery with all categories clear
-
 - **GIVEN** a change named "fix-typo-in-docs" has been created
 - **AND** the change is straightforward with no ambiguity
 - **WHEN** the user invokes `/opsx:discover fix-typo-in-docs`
@@ -65,7 +52,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** suggests running `/opsx:ff` to generate remaining artifacts
 
 #### Scenario: Record decisions after user answers
-
 - **GIVEN** the system has presented 3 questions to the user
 - **AND** the user has provided answers to all 3 questions
 - **WHEN** the system processes the answers
@@ -75,7 +61,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** the system stops without generating further artifacts
 
 #### Scenario: Maximum 5 questions enforced
-
 - **GIVEN** a complex change where 4 categories are rated Partial and 2 are rated Missing
 - **AND** there are potentially 10+ questions across all categories
 - **WHEN** the system generates questions
@@ -84,7 +69,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** lower-priority questions are omitted or noted as "covered if time permits"
 
 #### Scenario: Detect stale-spec risk
-
 - **GIVEN** existing baseline specs at `openspec/specs/auth/spec.md` reference a function `validateToken()`
 - **AND** the codebase has been modified outside the spec process to rename it to `verifyToken()`
 - **WHEN** the system reads context during discovery
@@ -92,7 +76,6 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** the stale-spec risk is surfaced in the coverage assessment
 
 #### Scenario: No active change exists
-
 - **GIVEN** no active changes exist in `openspec/changes/`
 - **WHEN** the user invokes `/opsx:discover`
 - **THEN** the system SHALL inform the user that no active change exists
@@ -100,14 +83,12 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **AND** SHALL NOT generate any artifacts
 
 #### Scenario: Discovery does not advance past research
-
 - **GIVEN** the user has completed discovery and research.md is saved
 - **WHEN** the discovery session ends
 - **THEN** no proposal.md, spec files, design.md, or other artifacts SHALL have been created
 - **AND** the system suggests running `/opsx:ff` or `/opsx:continue` for remaining artifacts
 
 #### Scenario: Prerequisite check fails
-
 - **GIVEN** the OpenSpec CLI is not installed or the opsx-enhanced schema is not registered
 - **WHEN** the user invokes `/opsx:discover`
 - **THEN** the system runs `openspec schema which opsx-enhanced --json`

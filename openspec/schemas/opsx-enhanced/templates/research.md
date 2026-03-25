@@ -1,5 +1,11 @@
 # Research: [Feature Name]
 
+## 0. Related Decisions
+<!-- Optional: ADRs or past decisions that inform this research.
+     Read docs/decisions.md to identify thematically relevant ADRs,
+     then read specific ADR files for full context.
+     If no docs/decisions.md exists or no relevant ADRs found, state that and skip. -->
+
 ## 1. Current State
 <!-- Affected code, modules, architecture, relevant patterns -->
 

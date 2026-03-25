@@ -8,6 +8,9 @@ artifacts:
     generates: research.md
     template: research.md
     instruction: |
+      If docs/decisions.md exists, read it to identify existing architectural
+      decisions relevant to this change. Deep-dive into specific ADR files
+      for decisions that may constrain or inform the current work.
       If existing specs are present in openspec/specs/, first check whether
       they still reflect the current codebase. Note any stale-spec risks
       from code changed outside the spec process.

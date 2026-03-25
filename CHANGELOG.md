@@ -3,6 +3,21 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — ADR-Aware Docs Restructure
+
+### Changed
+- Documentation entry point `docs/README.md` restructured from a monolithic 148-line document into a compact hub linking to separate architecture and decisions files — the README now focuses on navigation and capability browsing (closes #17)
+- Architecture overview (System Architecture, Tech Stack, Conventions) moved to standalone `docs/architecture.md` with independent conditional regeneration triggered only by constitution drift
+- Key Design Decisions table and Notable Trade-offs moved to standalone `docs/decisions.md` with independent conditional regeneration triggered only by new ADRs
+- `/opsx:discover` now reads existing architectural decisions during research — scans `docs/decisions.md` as a lightweight index and deep-dives into relevant ADR files for full context, avoiding loading all 26+ ADR files
+
+### Added
+- `docs/architecture.md` template in the schema for focused architecture documentation
+- `docs/decisions.md` template in the schema for dedicated decisions index
+- "Related Decisions" section in the research template for capturing ADR context during discovery
+- ADR awareness guidance in the schema's research instruction
+- Per-file conditional regeneration: each documentation file has its own trigger (constitution drift → architecture, ADR changes → decisions, capability/sub-file changes → README)
+
 ## 2026-03-25 — Add PR Step
 
 ### Added

@@ -26,8 +26,14 @@ If no change name provided:
 ### Step 2: Read Context
 
 1. Read `openspec/constitution.md` for project rules and conventions.
-2. Read the current change directory (`openspec/changes/<change-name>/`).
-3. Check if `openspec/specs/` reflects the current codebase. If code was changed outside the spec process (hotfixes, dependency updates), note this as stale-spec risk in the research.
+2. Read existing architectural decisions for context:
+   - If `docs/decisions.md` exists, read it to scan the Key Design Decisions table.
+   - Identify ADRs thematically relevant to the current change (match change topic against decision titles, rationale, and affected capabilities).
+   - For each relevant ADR, read the full file from `docs/decisions/adr-*.md` to extract the `## Decision` and `## Consequences` sections.
+   - Do NOT read all ADR files — only those identified as relevant from the decisions index.
+   - If `docs/decisions.md` does not exist, skip ADR awareness and proceed.
+3. Read the current change directory (`openspec/changes/<change-name>/`).
+4. Check if `openspec/specs/` reflects the current codebase. If code was changed outside the spec process (hotfixes, dependency updates), note this as stale-spec risk in the research.
 
 ### Step 3: Get Research Instructions
 
@@ -78,6 +84,7 @@ Next: Run `/opsx:ff` to generate remaining artifacts.
 ## Guardrails
 
 - Always read constitution before generating research
+- Read `docs/decisions.md` for ADR context when it exists — do not read all ADR files, only relevant ones
 - Use `openspec instructions` CLI for schema-specific guidance — do not hardcode instruction content
 - If no active change exists, tell the user to run `/opsx:new` first
 - Do not proceed past research — stop after saving research.md

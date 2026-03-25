@@ -2,7 +2,7 @@
 title: "Decision Docs"
 capability: "decision-docs"
 description: "Architecture Decision Records (ADRs) generated from archived design decisions."
-lastUpdated: "2026-03-24"
+lastUpdated: "2026-03-25"
 ---
 # Decision Docs
 
@@ -31,7 +31,8 @@ ADRs are generated from design.md Decisions tables because these tables already 
 - **Incremental generation** — only new archives produce new ADR files; existing ADRs are preserved
 - **Deterministic slugs** — file names are derived from the decision text using a consistent algorithm
 - **Manual ADR preservation** — files matching `adr-M*.md` are never deleted or overwritten during regeneration
-- **Manual ADR inclusion** — manual ADRs appear in the docs/README.md Key Design Decisions table
+- **ADR discovery via decisions index** — `docs/decisions.md` is the canonical entry point for browsing all architectural decisions
+- **Manual ADR inclusion** — manual ADRs appear in the docs/decisions.md Key Design Decisions table
 - **Skip rule for invalid Decisions sections** — archives with prose-only Decisions sections or non-Decisions tables are skipped
 - **Language support** — ADR headings and content can be generated in the configured `docs_language`
 
@@ -85,13 +86,17 @@ Slugs are derived from the Decision column text (or the consolidated title for m
 
 Files matching `adr-M*.md` in the `docs/decisions/` directory are never deleted or overwritten during regeneration. They use the `adr-MNNN-slug.md` naming convention (M prefix with 3-digit zero-padded number) to distinguish them from generated ADRs.
 
-### Manual ADRs in README Table
+### ADR Discovery via Decisions Index
 
-Manual ADRs appear in the docs/README.md Key Design Decisions table after all generated ADRs, ordered numerically. The agent extracts the Decision and Rationale from the manual ADR's `## Decision` and `## Rationale` sections.
+All architectural decisions are browsable through `docs/decisions.md`, which lists every decision with its rationale and a link to the full ADR file. This file replaces the previous inline decision table that was embedded in `docs/README.md`.
+
+### Manual ADRs in Decisions Index
+
+Manual ADRs appear in the `docs/decisions.md` Key Design Decisions table after all generated ADRs, ordered numerically. The agent extracts the Decision and Rationale from the manual ADR's `## Decision` and `## Rationale` sections.
 
 ### Stale ADR Index Deleted
 
-If `docs/decisions/README.md` exists from a previous run, it is deleted. ADR discovery is handled through inline links in the consolidated `docs/README.md`.
+If `docs/decisions/README.md` exists from a previous run, it is deleted. ADR discovery is handled through `docs/decisions.md`.
 
 ### Self-Contained Enrichment Reads
 

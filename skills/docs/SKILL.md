@@ -1,6 +1,6 @@
 ---
 name: docs
-description: Generate or update user-facing documentation from merged specs. Run after /opsx:archive to create capability docs, ADRs, and a consolidated README with architecture overview.
+description: Generate or update user-facing documentation from merged specs. Run after /opsx:archive to create capability docs, ADRs, architecture overview, decisions index, and README hub.
 disable-model-invocation: false
 ---
 
@@ -193,51 +193,82 @@ The first reference in every ADR SHALL be the source archive backlink: `[Archive
 
 **Cross-reference heuristic:** Beyond cross-referencing ADRs from the same archive, check if the current ADR's archive modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping `specs/` subdirectories with earlier archives. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the archive content.
 
-**Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by inline links in the `docs/README.md` Key Design Decisions table.
+**Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by `docs/decisions.md` (generated in Step 5b).
 
 **No archives with design.md:** Skip ADR generation entirely, do not create `docs/decisions/`.
 
 Create `docs/decisions/` directory if it does not exist.
 
-**Track writes:** Record whether any ADR was created during this step. This flag is needed for Step 5 (conditional README regeneration).
+**Track writes:** Record whether any ADR was created during this step. This flag is needed for Step 5b (conditional decisions.md regeneration) and Step 5c (conditional README regeneration).
 
 **Manual ADR preservation:** Do NOT delete files matching `adr-M*.md` in `docs/decisions/`. These are manual ADRs not generated from archived design.md files. They use the `adr-MNNN-slug.md` naming convention (M prefix + 3-digit zero-padded number) to distinguish them from generated ADRs.
 
-### Step 5: Generate Consolidated README
+### Step 5: Generate Documentation Files
 
-**Conditional regeneration:** Only regenerate `docs/README.md` if at least one of these conditions is met:
-1. Any capability doc was written to disk in Step 3 (check the tracking flag).
-2. Any ADR was created in Step 4 (check the tracking flag).
-3. `docs/README.md` does not exist yet (first run).
-4. The content of `openspec/constitution.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. Read the constitution and compare its key content against the README to detect drift.
+**Language reminder:** If Step 0 determined a non-English `docs_language`, generate all section headings, table headers, and content in the target language for all sub-steps below. Product names, commands, and file paths remain in English.
 
-If none of these conditions are met, skip README regeneration and report: "README is up-to-date — no capability, ADR, or constitution changes detected."
+#### Step 5a: Generate Architecture Overview
 
-**Language reminder:** If Step 0 determined a non-English `docs_language`, generate all section headings, table headers, and content in the target language. Product names, commands, and file paths remain in English.
+**Conditional regeneration:** Only regenerate `docs/architecture.md` if at least one of these conditions is met:
+1. `docs/architecture.md` does not exist yet (first run).
+2. The content of `openspec/constitution.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/architecture.md`. Read the constitution and compare its key content against the file to detect drift.
 
-Read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format.
+If none of these conditions are met, skip and report: "architecture.md is up-to-date — no constitution changes detected."
 
-Create or update `docs/README.md` as the **single entry point** for all generated documentation. This file merges the architecture overview and capabilities table into one document, synthesized from:
+Read the architecture template at `openspec/schemas/opsx-enhanced/templates/docs/architecture.md` for the expected output format.
+
+Create or update `docs/architecture.md` synthesized from:
 - `openspec/constitution.md` — Tech Stack, Architecture Rules, Conventions sections
 - `openspec/specs/three-layer-architecture/spec.md` — the three-layer model description
-- All ADR files in `docs/decisions/` (both generated `adr-NNN-*.md` and manual `adr-M*.md`) — for key design decisions
-- All generated capability docs (from Step 3) — for the capabilities table
 
-**Key Design Decisions table:** Build the table by reading all ADR files in `docs/decisions/`. For each ADR, extract:
+**No constitution found:** Warn the user and skip architecture overview generation.
+**No three-layer-architecture spec:** Generate a minimal System Architecture section from constitution Architecture Rules only.
+
+**Track writes:** Record whether `docs/architecture.md` was written to disk. This flag is needed for Step 5c.
+
+#### Step 5b: Generate Decisions Index
+
+**Conditional regeneration:** Only regenerate `docs/decisions.md` if at least one of these conditions is met:
+1. Any ADR was created in Step 4 (check the tracking flag).
+2. `docs/decisions.md` does not exist yet (first run).
+
+If none of these conditions are met, skip and report: "decisions.md is up-to-date — no ADR changes detected."
+
+Read the decisions template at `openspec/schemas/opsx-enhanced/templates/docs/decisions.md` for the expected output format.
+
+Create or update `docs/decisions.md` with the **Key Design Decisions table** built by reading all ADR files in `docs/decisions/`. For each ADR, extract:
 - **Decision**: A summary derived from the `## Decision` section content. For consolidated ADRs with numbered sub-decisions, summarize the overarching decision. For single-decision ADRs, use the decision text.
 - **Rationale**: For generated ADRs, extract the inline rationale (the text after the em-dash `—` in the Decision section). For manual ADRs, extract from the `## Rationale` section if present.
 - **ADR link**: Link directly to the ADR file (e.g., `[ADR-001](decisions/adr-001-slug.md)`).
 
 List generated ADRs first (ordered by number), followed by manual ADRs (ordered by M-number). Do NOT read `design.md` archives for this table — ADR files are the single canonical source. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences. Include trade-offs that affect documentation consumers or represent meaningful constraints — every ADR with a substantive negative consequence should be represented.
 
-**Capabilities section:** Group capabilities by the `category` field from baseline spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
+**No ADR files found:** If no ADR files exist in `docs/decisions/`, skip this step entirely — do not create `docs/decisions.md`.
 
-**No constitution found:** Warn the user and skip architecture overview generation.
-**No ADR files found:** If no ADR files exist in `docs/decisions/`, omit the Key Design Decisions section.
+**Track writes:** Record whether `docs/decisions.md` was written to disk. This flag is needed for Step 5c.
+
+#### Step 5c: Generate README Hub
+
+**Conditional regeneration:** Only regenerate `docs/README.md` if at least one of these conditions is met:
+1. Any capability doc was written to disk in Step 3 (check the tracking flag).
+2. `docs/architecture.md` was written in Step 5a (check the tracking flag).
+3. `docs/decisions.md` was written in Step 5b (check the tracking flag).
+4. `docs/README.md` does not exist yet (first run).
+
+If none of these conditions are met, skip README regeneration and report: "README is up-to-date — no changes detected."
+
+Read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format.
+
+Create or update `docs/README.md` as a **compact hub/index** for all generated documentation, containing:
+- A brief project description derived from the constitution or three-layer-architecture spec
+- Navigation links to `docs/architecture.md` and `docs/decisions.md`
+- A capabilities section
+
+**Capabilities section:** Group capabilities by the `category` field from baseline spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
 
 ### Step 6: Cleanup Stale Files + Confirm
 
-**Cleanup:** If `docs/architecture-overview.md` exists (from a previous run), delete it — its content is now part of `docs/README.md`. If `docs/decisions/README.md` exists, delete it — ADR discovery is now via inline links in `docs/README.md`. Never delete files matching `adr-M*.md` in `docs/decisions/` — these are manual ADRs.
+**Cleanup:** If `docs/architecture-overview.md` exists (from a previous run), delete it — its content is now in `docs/architecture.md`. If `docs/decisions/README.md` exists, delete it — ADR discovery is via `docs/decisions.md`. Never delete files matching `adr-M*.md` in `docs/decisions/` — these are manual ADRs.
 
 **Confirm:** Show the user which docs were created/updated and a summary of changes.
 
@@ -250,11 +281,15 @@ List generated ADRs first (ordered by number), followed by manual ADRs (ordered 
 
 **Capabilities**: N regenerated, K skipped (no newer archives), J skipped (unchanged content)
 **ADRs**: M new ADRs generated / "up-to-date" (no new archives with decisions)
+**Architecture**: Regenerated / "up-to-date" (no constitution changes)
+**Decisions**: Regenerated / "up-to-date" (no ADR changes)
 **README**: Regenerated / "up-to-date" (no changes detected)
 
 **Output**:
 - `docs/capabilities/*.md` (N capability docs updated)
 - `docs/decisions/adr-*.md` (M new ADRs)
+- `docs/architecture.md` (regenerated / skipped)
+- `docs/decisions.md` (regenerated / skipped)
 - `docs/README.md` (regenerated / skipped)
 
 ### Capabilities — Regenerated
@@ -273,13 +308,14 @@ List generated ADRs first (ordered by number), followed by manual ADRs (ordered 
 - [x] M new ADRs generated from N new archived design.md files
 (or: "All ADRs are up-to-date — no new archives with decisions")
 
-### README
-- [x] Regenerated (N capability docs + M ADRs changed)
-(or: "Up-to-date — no capability, ADR, or constitution changes detected")
+### Documentation Files
+- [x] docs/architecture.md — Regenerated / "up-to-date"
+- [x] docs/decisions.md — Regenerated / "up-to-date"
+- [x] docs/README.md — Regenerated / "up-to-date"
 
 ### Cleaned Up
-- [x] Deleted docs/architecture-overview.md (merged into README)
-- [x] Deleted docs/decisions/README.md (replaced by inline ADR links)
+- [x] Deleted docs/architecture-overview.md (content now in docs/architecture.md)
+- [x] Deleted docs/decisions/README.md (replaced by docs/decisions.md)
 (only shown if files were deleted)
 ```
 
@@ -306,8 +342,8 @@ No specs found in openspec/specs/. Run /opsx:archive first to merge specs.
 - **Read before write**: If a capability doc already exists, read it FIRST and update/enrich it rather than rewriting from scratch. This preserves established tone, phrasing, and structure. Only add or modify sections where enrichment data provides new information. If existing content is already good, keep it.
 - If a spec has no User Stories and no Requirements section, skip it and warn
 - Preserve existing docs for specs not being regenerated (single-capability mode)
-- `docs/README.md` is conditionally regenerated — only when capability docs, ADRs, or constitution/architecture source content changed (see Step 5 conditions)
-- Do NOT generate `docs/architecture-overview.md` or `docs/decisions/README.md` — these are replaced by the consolidated README
+- `docs/README.md` is conditionally regenerated — only when capability docs or sub-files (architecture.md, decisions.md) changed (see Step 5c conditions)
+- Do NOT generate `docs/architecture-overview.md` or `docs/decisions/README.md` — these are replaced by `docs/architecture.md` and `docs/decisions.md`
 - Use consistent terminology across all generated docs
 - **Internal consistency check**: After generating each doc, verify that the Behavior section and Edge Cases section do not contradict each other. If an edge case qualifies a behavior (e.g., "X is blocked, unless user explicitly confirms"), the behavior section must reflect the nuance — not state an absolute that the edge case then contradicts.
 - **Step independence:** Each step must read its own source materials independently. Do not assume that data loaded during an earlier step is still available — steps may execute in separate contexts. This is especially critical for Step 4 (ADR generation), which needs full archive data independently of Step 2.
