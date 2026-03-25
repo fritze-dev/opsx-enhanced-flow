@@ -4,12 +4,12 @@ category: change-workflow
 ---
 ## Purpose
 
-Defines the schema-driven 6-stage artifact pipeline (research, proposal, specs, design, preflight, tasks) with strict dependency gating that ensures no stage is skipped and implementation is gated by task completion.
+Defines the 6-stage artifact pipeline (research, proposal, specs, design, preflight, tasks) driven by WORKFLOW.md and Smart Templates, with strict dependency gating that ensures no stage is skipped and implementation is gated by task completion.
 
 ## Requirements
 
 ### Requirement: Six-Stage Pipeline
-The system SHALL define a 6-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, and tasks. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, and tasks requires preflight. No stage SHALL be skippable; each MUST complete before the next can begin.
+The system SHALL define a 6-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, and tasks. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, and tasks requires preflight. No stage SHALL be skippable; each MUST complete before the next can begin. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
 
 **User Story:** As a developer I want a structured pipeline that guides me from research through to implementation tasks, so that no critical thinking step is skipped and every decision is documented.
 
@@ -29,7 +29,7 @@ The system SHALL define a 6-stage artifact pipeline with the following stages in
 - **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, and tasks.md
 
 ### Requirement: Artifact Dependencies
-Each artifact in the pipeline SHALL declare its dependencies explicitly in the schema. The dependency declaration SHALL list which preceding artifacts MUST be complete before the artifact can be generated. Skills SHALL enforce these dependencies by reading schema.yaml and checking artifact completion status via file existence before allowing generation of a dependent artifact. An artifact SHALL be considered complete when its corresponding file exists and is non-empty in the change workspace. For artifacts with glob patterns in the `generates` field (e.g., `specs/**/*.md`), completion SHALL be determined by at least one matching file existing.
+Each artifact in the pipeline SHALL declare its dependencies explicitly in the Smart Template's YAML frontmatter `requires` field. Skills SHALL enforce these dependencies by reading WORKFLOW.md and Smart Templates and checking artifact completion status via file existence before allowing generation of a dependent artifact. An artifact SHALL be considered complete when its corresponding file exists and is non-empty in the change workspace. For artifacts with glob patterns in the `generates` field (e.g., `specs/**/*.md`), completion SHALL be determined by at least one matching file existing.
 
 **User Story:** As a developer I want the system to enforce artifact dependencies automatically, so that I cannot accidentally generate a design before the specs are written.
 
@@ -43,18 +43,18 @@ Each artifact in the pipeline SHALL declare its dependencies explicitly in the s
 - **WHEN** the system checks dependencies for the design artifact
 - **THEN** the dependency check SHALL fail and report that proposal and specs must be completed first
 
-#### Scenario: Schema declares dependencies explicitly
-- **GIVEN** the `schema.yaml` file
-- **WHEN** the artifact definitions are inspected
-- **THEN** each artifact SHALL have a `requires` field listing its direct dependencies by artifact ID
+#### Scenario: Smart Template declares dependencies explicitly
+- **GIVEN** a Smart Template file (e.g., `openspec/templates/proposal.md`)
+- **WHEN** its YAML frontmatter is inspected
+- **THEN** it SHALL have a `requires` field listing its direct dependencies by artifact ID (e.g., `[research]`)
 
 #### Scenario: Artifact status computed from file existence
 - **GIVEN** a change workspace with research.md and proposal.md present
-- **WHEN** a skill computes artifact status by reading schema.yaml
+- **WHEN** a skill computes artifact status by reading WORKFLOW.md and Smart Templates
 - **THEN** research and proposal SHALL be marked as "done", specs as "ready", and design/preflight/tasks as "blocked"
 
 ### Requirement: Apply Gate
-Implementation (the apply phase) SHALL be gated by completion of the tasks artifact. The apply phase SHALL NOT begin until tasks.md exists and is non-empty. The apply phase SHALL track progress against the task checklist in tasks.md, marking items complete as implementation proceeds. The schema SHALL declare this gate via the `apply.requires` field referencing the tasks artifact.
+Implementation (the apply phase) SHALL be gated by completion of the tasks artifact. The apply phase SHALL NOT begin until tasks.md exists and is non-empty. The apply phase SHALL track progress against the task checklist in tasks.md, marking items complete as implementation proceeds. WORKFLOW.md SHALL declare this gate via the `apply.requires` field referencing the tasks artifact.
 
 **User Story:** As a project lead I want implementation to be gated by task completion in the pipeline, so that developers cannot start coding before the full analysis and planning cycle is done.
 
@@ -66,102 +66,65 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 #### Scenario: Apply proceeds after tasks completion
 - **GIVEN** a change workspace with all 6 artifacts completed including tasks.md
 - **WHEN** the user invokes `/opsx:apply`
-- **THEN** the system SHALL begin implementation, reading the task checklist from tasks.md and working through items sequentially
+- **THEN** the system SHALL begin implementation, reading the task checklist from tasks.md
 
 #### Scenario: Apply tracks progress in tasks.md
 - **GIVEN** the apply phase is active and tasks.md contains 10 unchecked task items
 - **WHEN** the agent completes a task item
 - **THEN** the system SHALL mark the corresponding `- [ ]` checkbox as `- [x]` in tasks.md
 
-### Requirement: Config Bootstrap
-The `openspec/config.yaml` SHALL serve as a minimal bootstrap file. It SHALL contain only the schema reference and a global `context` pointing to the project constitution. All workflow rules SHALL be owned by the schema (in artifact `instruction` fields) or the constitution (project-specific rules) — not by config.yaml.
+### Requirement: WORKFLOW.md Owns Pipeline Configuration
+`openspec/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `post_artifact` instructions for commit/push/PR, `context` pointing to the constitution, and optionally `docs_language`. Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
 
-**User Story:** As a workflow maintainer I want config.yaml to be minimal, so that workflow rules live at their authoritative source (schema for universal rules, constitution for project rules) instead of being duplicated in config.
+**User Story:** As a workflow maintainer I want pipeline orchestration in a single WORKFLOW.md file, so that configuration is not scattered across schema.yaml and config.yaml.
 
-#### Scenario: Config contains only bootstrap content
-
-- **GIVEN** the `openspec/config.yaml` file
-- **WHEN** its contents are inspected
-- **THEN** it SHALL contain a `schema` field referencing the active schema
-- **AND** a `context` field pointing to the project constitution
-- **AND** no other workflow rules or per-artifact `rules` entries
+#### Scenario: WORKFLOW.md contains pipeline orchestration
+- **GIVEN** the `openspec/WORKFLOW.md` file
+- **WHEN** its frontmatter is inspected
+- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, and `context` fields
 
 ### Requirement: Post-Artifact Commit and PR Integration
-The schema SHALL define a top-level `post_artifact` field containing instructions that the `/opsx:continue` and `/opsx:ff` skills execute after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check if a feature branch for the change exists — if not, create one via `git checkout -b <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft` with a minimal WIP body. Subsequent artifact commits SHALL push to the existing branch without creating a new PR. If the `post_artifact` field is absent from the schema (backward compatibility), the skill SHALL skip post-artifact operations silently.
-
-The proposal artifact instruction SHALL NOT create a branch or PR. The proposal template SHALL NOT include a `## Pull Request` section — PR metadata is available on-demand via `gh pr view` from the current branch.
+WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:ff` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check if a feature branch for the change exists — if not, create one via `git checkout -b <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md (backward compatibility), the skill SHALL skip post-artifact operations silently.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
 #### Scenario: First artifact triggers branch and PR creation
 - **GIVEN** a change workspace where no feature branch exists yet
 - **AND** the `gh` CLI is installed and authenticated
-- **WHEN** the agent finishes creating the first artifact (e.g., research.md)
-- **THEN** the agent SHALL create a feature branch named after the change
-- **AND** SHALL commit the artifact with message "WIP: <change-name> — research"
-- **AND** SHALL push the branch to the remote
-- **AND** SHALL create a draft PR with a minimal WIP body
+- **WHEN** the agent finishes creating the first artifact
+- **THEN** the agent SHALL create a feature branch, commit, push, and create a draft PR
 
 #### Scenario: Subsequent artifacts commit and push only
 - **GIVEN** a change workspace with an existing feature branch and draft PR
-- **WHEN** the agent finishes creating a subsequent artifact (e.g., proposal.md)
-- **THEN** the agent SHALL commit the artifact with message "WIP: <change-name> — proposal"
-- **AND** SHALL push to the existing branch
-- **AND** SHALL NOT create a new PR
+- **WHEN** the agent finishes creating a subsequent artifact
+- **THEN** the agent SHALL commit and push but SHALL NOT create a new PR
 
 #### Scenario: Graceful degradation without gh CLI
 - **GIVEN** the `gh` CLI is not installed or not authenticated
 - **WHEN** the agent finishes creating the first artifact
-- **THEN** the agent SHALL create the feature branch and commit
-- **AND** SHALL attempt to push
-- **AND** SHALL skip draft PR creation
-- **AND** SHALL NOT block the pipeline
+- **THEN** the agent SHALL create the branch, commit, attempt push, and skip PR creation
 
-#### Scenario: Schema without post_artifact field
-- **GIVEN** a schema.yaml that does not contain a `post_artifact` field
+#### Scenario: WORKFLOW.md without post_artifact field
+- **GIVEN** a WORKFLOW.md that does not contain a `post_artifact` field
 - **WHEN** the agent finishes creating an artifact
-- **THEN** the agent SHALL skip post-artifact commit/push operations
-- **AND** SHALL proceed normally
+- **THEN** the agent SHALL skip post-artifact operations and proceed normally
 
-#### Scenario: Proposal template does not include Pull Request section
-- **GIVEN** the proposal template at `openspec/schemas/opsx-enhanced/templates/proposal.md`
-- **WHEN** the template is inspected
-- **THEN** it SHALL NOT contain a `## Pull Request` section
+### Requirement: Smart Templates Own Workflow Rules
+Each Smart Template's `instruction` field SHALL contain workflow rules that apply to its artifact type. The tasks template instruction SHALL include the Definition of Done rule (emergent from artifacts). The tasks template instruction SHALL include a standard tasks directive for including universal post-implementation steps and appending constitution-defined project-specific extras. The apply instruction in WORKFLOW.md SHALL include the post-apply workflow sequence and clarify that standard tasks are executed separately after apply completes.
 
-### Requirement: Schema Owns Workflow Rules
-The schema's artifact `instruction` fields SHALL contain workflow rules that apply to all projects using the schema. The `tasks.instruction` SHALL include the Definition of Done rule (emergent from artifacts). The `tasks.instruction` SHALL include a standard tasks directive for including universal post-implementation steps from the template and appending constitution-defined project-specific extras. The `apply.instruction` SHALL include the post-apply workflow sequence. The `apply.instruction` SHALL clarify that standard tasks are not part of the apply phase and are executed separately after apply completes. The `apply.instruction` SHALL direct the agent to execute constitution-defined pre-merge standard tasks after the universal post-apply steps (commit and push), marking each as complete in tasks.md. Post-merge standard tasks SHALL remain unchecked as reminders for manual execution after the PR is merged.
-
-#### Scenario: Tasks instruction includes DoD rule
-
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `tasks.instruction` field is inspected
+#### Scenario: Tasks template instruction includes DoD rule
+- **GIVEN** the tasks Smart Template at `openspec/templates/tasks.md`
+- **WHEN** its `instruction` frontmatter field is inspected
 - **THEN** it SHALL contain a rule stating that Definition of Done is emergent from artifacts
-- **AND** it SHALL reference Gherkin scenarios, success metrics, preflight findings, and user approval
 
-#### Scenario: Apply instruction includes post-apply workflow
-
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
+#### Scenario: Apply instruction in WORKFLOW.md includes post-apply workflow
+- **GIVEN** `openspec/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL contain the post-apply sequence: `/opsx:verify` → `/opsx:archive` → `/opsx:changelog` → `/opsx:docs` → commit → execute constitution pre-merge standard tasks
-
-#### Scenario: Tasks instruction includes standard tasks directive
-
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `tasks.instruction` field is inspected
-- **THEN** it SHALL contain a directive to always include universal standard tasks from the template
-- **AND** it SHALL instruct the agent to check the constitution for additional project-specific standard tasks
-- **AND** it SHALL instruct the agent to append constitution extras after the universal steps
-
-#### Scenario: Apply instruction clarifies standard tasks scope
-
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL state that standard tasks (post-implementation section) are not part of apply
-- **AND** they are tracked for auditability but executed separately after apply completes
+- **THEN** it SHALL contain the post-apply sequence: `/opsx:verify` → `/opsx:archive` → `/opsx:changelog` → `/opsx:docs`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 
-The schema's `tasks.instruction` SHALL include a standard tasks directive. The tasks template SHALL include a section 4 with universal post-implementation steps (archive, changelog, docs, commit and push) that apply to all opsx-enhanced projects. The `tasks.instruction` SHALL additionally instruct the agent to check the project constitution for a `## Standard Tasks` section. If the constitution defines extra standard tasks, the agent SHALL append them to the template's universal steps in the generated `tasks.md`. If no `## Standard Tasks` section exists in the constitution, the agent SHALL include only the universal steps from the template.
+The tasks Smart Template's `instruction` field SHALL include a standard tasks directive. The tasks template SHALL include a section 4 with universal post-implementation steps (archive, changelog, docs, commit and push) that apply to all opsx-enhanced projects. The `instruction` SHALL additionally instruct the agent to check the project constitution for a `## Standard Tasks` section. If the constitution defines extra standard tasks, the agent SHALL append them to the template's universal steps in the generated `tasks.md`. If no `## Standard Tasks` section exists in the constitution, the agent SHALL include only the universal steps from the template.
 
 **User Story:** As a project maintainer I want universal post-implementation steps automatically in every task list, with the option to add project-specific extras in my constitution, so that all projects get a consistent baseline and each project can extend it.
 
@@ -190,20 +153,17 @@ The schema's `tasks.instruction` SHALL include a standard tasks directive. The t
 
 #### Scenario: Template includes universal standard tasks
 
-- **GIVEN** the tasks template at `openspec/schemas/opsx-enhanced/templates/tasks.md`
+- **GIVEN** the tasks template at `openspec/templates/tasks.md`
 - **WHEN** the template is inspected
 - **THEN** it SHALL contain a section 4 with universal post-implementation steps as checkbox items
 
 ### Requirement: Capability Granularity Guidance
-The proposal `instruction` in the schema SHALL include explicit rules defining what constitutes a capability versus a feature detail. A "capability" SHALL be defined as a cohesive domain of behavior that a user or system exercises independently, typically containing 3-8 requirements and mapping to one testable surface area. A "feature detail" SHALL be defined as a single behavior, option, or edge case within a capability that belongs as a requirement inside an existing spec, not as a separate spec. The instruction SHALL state that if two proposed capabilities share the same actor, trigger, or data model, they are likely one capability and SHOULD be merged. The instruction SHALL state that a proposed capability producing fewer than ~100 lines (1-2 requirements) SHOULD be folded into a related existing capability.
-
-**User Story:** As a developer creating a proposal I want clear rules on what qualifies as a new capability, so that I create cohesive domain specs instead of micro-specs for individual feature details.
+The proposal Smart Template's `instruction` field SHALL include explicit rules defining what constitutes a capability versus a feature detail, including heuristics for merging (shared actor/trigger/data model) and minimum scope (3+ requirements).
 
 #### Scenario: Guidance defines capability vs feature detail
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `proposal.instruction` field is inspected
-- **THEN** it SHALL contain a definition distinguishing capabilities (cohesive behavior domains) from feature details (individual behaviors within a domain)
-- **AND** it SHALL include heuristics for merging (shared actor/trigger/data model) and minimum scope (3+ requirements)
+- **GIVEN** the proposal Smart Template at `openspec/templates/proposal.md`
+- **WHEN** its `instruction` frontmatter field is inspected
+- **THEN** it SHALL contain a definition distinguishing capabilities from feature details and merging heuristics
 
 #### Scenario: Agent consolidates related feature details into one capability
 - **GIVEN** a user requesting three related UX changes (pagination, clickable rows, status labels) for a table view
@@ -211,14 +171,12 @@ The proposal `instruction` in the schema SHALL include explicit rules defining w
 - **THEN** the agent SHALL list one capability (e.g., `table-view`) with the individual changes as requirements, not three separate capabilities
 
 ### Requirement: Mandatory Consolidation Check
-The proposal `instruction` in the schema SHALL include a mandatory consolidation check that the agent MUST perform before finalizing the Capabilities section. The consolidation check SHALL require the agent to: (1) list all existing specs in `openspec/specs/` and read their Purpose sections, (2) for each proposed new capability, check whether an existing spec already covers the domain and use Modified Capabilities if so, (3) for each pair of proposed new capabilities, check whether they share an actor, trigger, or data model and merge them if so, and (4) verify each proposed capability will have 3 or more distinct requirements, folding single-requirement capabilities into related specs.
+The proposal Smart Template's `instruction` field SHALL include a mandatory consolidation check requiring the agent to review existing specs, check domain overlap, check pair-wise overlap between new capabilities, and verify minimum requirement counts.
 
-**User Story:** As a project maintainer I want the proposal stage to enforce a consolidation check against existing specs, so that spec fragmentation is caught at the earliest possible point rather than post-hoc in preflight.
-
-#### Scenario: Consolidation check is present in proposal instruction
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `proposal.instruction` field is inspected
-- **THEN** it SHALL contain a mandatory consolidation check with steps for reviewing existing specs, checking domain overlap, checking pair-wise overlap between new capabilities, and verifying minimum requirement count
+#### Scenario: Consolidation check is present in proposal template instruction
+- **GIVEN** the proposal Smart Template at `openspec/templates/proposal.md`
+- **WHEN** its `instruction` frontmatter field is inspected
+- **THEN** it SHALL contain a mandatory consolidation check with steps for existing spec review, domain overlap, pair-wise overlap, and minimum requirements
 
 #### Scenario: Agent identifies overlap with existing spec
 - **GIVEN** a proposal for a feature that overlaps with the existing `quality-gates` spec
@@ -236,7 +194,7 @@ The proposal template SHALL include a `### Consolidation Check` section between 
 **User Story:** As a reviewer reading a proposal I want to see the agent's consolidation reasoning documented, so that I can verify the capability boundaries are well-considered before specs are created.
 
 #### Scenario: Proposal template includes Consolidation Check section
-- **GIVEN** the proposal template at `openspec/schemas/opsx-enhanced/templates/proposal.md`
+- **GIVEN** the proposal template at `openspec/templates/proposal.md`
 - **WHEN** the template is inspected
 - **THEN** it SHALL contain a `### Consolidation Check` section with instructions for documenting existing specs reviewed, overlap assessment, and merge assessment
 
@@ -251,14 +209,12 @@ The proposal template SHALL include a `### Consolidation Check` section between 
 - **THEN** the Consolidation Check section SHALL contain "N/A — no new specs proposed."
 
 ### Requirement: Specs Overlap Verification
-The specs `instruction` in the schema SHALL include an overlap verification step that the agent MUST perform before creating any spec files. The verification SHALL require the agent to: (1) read the proposal's Consolidation Check section, (2) scan existing specs in `openspec/specs/` for requirements with overlapping scope (same actor, trigger, or data model) for each new capability, and (3) if overlap is found, STOP and reclassify the capability as a Modified Capability on the existing spec before proceeding. The agent SHALL update the proposal's Capabilities section to reflect the reclassification.
+The specs Smart Template's `instruction` field SHALL include an overlap verification step before creating spec files, requiring the agent to read the proposal's Consolidation Check and scan existing specs for overlap.
 
-**User Story:** As a developer I want the specs creation stage to double-check for overlap before creating files, so that any consolidation opportunities missed during proposal creation are caught before spec files are written.
-
-#### Scenario: Overlap verification is present in specs instruction
-- **GIVEN** the opsx-enhanced schema at `openspec/schemas/opsx-enhanced/schema.yaml`
-- **WHEN** the `specs.instruction` field is inspected
-- **THEN** it SHALL contain an overlap verification step before the "Create one spec file per capability" instruction
+#### Scenario: Overlap verification is present in specs template instruction
+- **GIVEN** the specs Smart Template at `openspec/templates/specs/spec.md`
+- **WHEN** its `instruction` frontmatter field is inspected
+- **THEN** it SHALL contain an overlap verification step
 
 #### Scenario: Agent catches overlap during specs creation
 - **GIVEN** a proposal that listed `admin-filters` as a new capability, but the baseline `admin-table-view` spec already covers filter behavior
@@ -267,13 +223,10 @@ The specs `instruction` in the schema SHALL include an overlap verification step
 
 ## Edge Cases
 
-- **Projects without a constitution**: If a project using opsx-enhanced has no constitution file, the config.yaml context pointer is harmless — the AI will note the missing file and proceed.
-- **Migration from old config**: Existing projects with workflow rules in config.yaml context will continue to work — the rules are additive to schema instructions.
-- If an artifact file exists but is empty (0 bytes), the system SHALL treat it as incomplete and not satisfy dependency checks.
-- If a user manually deletes an artifact file mid-pipeline, the system SHALL detect the gap and require regeneration before proceeding.
-- If the schema is modified to add a new artifact stage while a change is in progress, the system SHALL apply the new schema to new changes only; in-progress changes continue with the schema version active when they were created.
-- If tasks.md contains no checkbox items (e.g., documentation-only change), the apply phase SHALL still be gated by tasks.md existence but will report that there are no implementation tasks to execute.
-- If multiple spec files are required (one per capability), the specs stage SHALL not be considered complete until all capability specs listed in the proposal have been generated.
+- If an artifact file exists but is empty (0 bytes), the system SHALL treat it as incomplete.
+- If a user manually deletes an artifact file mid-pipeline, the system SHALL detect the gap and require regeneration.
+- If tasks.md contains no checkbox items (documentation-only change), the apply phase SHALL still be gated by tasks.md existence.
+- If multiple spec files are required, the specs stage SHALL not be considered complete until all capability specs listed in the proposal have been generated.
 - If a project has zero existing specs (greenfield), the consolidation check still applies between proposed new capabilities but skip the existing-spec overlap scan.
 - If an agent determines that an existing spec is too large (exceeding ~500 lines / 10+ requirements), it MAY propose splitting it rather than adding more requirements — but this should be documented as a conscious decision in the Consolidation Check section.
 - If a proposed capability genuinely represents a new domain that shares no actor, trigger, or data model with existing specs, the consolidation check SHALL confirm this rather than force-merging.
@@ -282,18 +235,14 @@ The specs `instruction` in the schema SHALL include an overlap verification step
 - **Empty standard tasks section in constitution:** If the constitution contains `## Standard Tasks` but no checkbox items, only the universal template steps appear (no extras appended).
 - **Custom section numbering:** If the QA Loop is not section 3 (e.g., due to merged sections), the standard tasks section SHALL use the next available number.
 - **Project without constitution:** Universal template steps still appear; constitution extras are simply absent.
-- **Branch already exists:** If the feature branch already exists (e.g., from a prior attempt), the agent SHALL reuse the existing branch rather than failing.
-- **Network failure during PR creation:** If the push succeeds but `gh pr create` fails, the agent SHALL note the PR creation failure. The pipeline SHALL NOT be blocked.
-- **No remote configured:** If no git remote is configured, the agent SHALL skip push and PR creation.
-- **Existing changes created before post_artifact was added:** Changes without a feature branch will have the branch created on the next artifact commit. No retroactive PR creation for already-completed artifacts.
-- **Auto-continue transitions:** When auto-continuing (e.g., research→proposal), the `post_artifact` hook runs after each artifact individually, resulting in separate commits per artifact.
+- **Branch already exists:** The agent SHALL reuse the existing branch rather than failing.
+- **Network failure during PR creation:** The pipeline SHALL NOT be blocked.
+- **Auto-continue transitions:** The `post_artifact` hook runs after each artifact individually.
 
 ## Assumptions
 
-- The `gh` CLI, when available, is authenticated and has permission to create PRs on the current repository. <!-- ASSUMPTION: gh CLI authentication -->
-- The change name (kebab-case) is a valid git branch name. <!-- ASSUMPTION: Branch name validity -->
-- Artifact completion is determined by file existence and non-empty content, not by content validation or quality assessment. <!-- ASSUMPTION: File-existence-based completion -->
-- Agent compliance with instruction-based guidance is sufficient for consolidation enforcement. The Consolidation Check template section provides a reviewable artifact as enforcement. <!-- ASSUMPTION: Agent compliance sufficient -->
-- The constitution is read during task generation via the config.yaml context directive, which already points agents to the constitution. <!-- ASSUMPTION: Config-based constitution loading -->
-- Verbatim copy means the agent transfers the exact markdown text without rewriting, reordering, or interpreting the items. <!-- ASSUMPTION: Verbatim means exact copy -->
+- The `gh` CLI, when available, is authenticated and has permission to create PRs. <!-- ASSUMPTION: gh CLI authentication -->
+- Artifact completion is determined by file existence and non-empty content. <!-- ASSUMPTION: File-existence-based completion -->
+- Agent compliance with instruction-based guidance is sufficient for consolidation enforcement. <!-- ASSUMPTION: Agent compliance sufficient -->
+- The WORKFLOW.md context field reliably enforces constitution loading. <!-- ASSUMPTION: Context-based constitution loading -->
 No further assumptions beyond those marked above.

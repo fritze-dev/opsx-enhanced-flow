@@ -41,11 +41,11 @@
   - No references to `schema.yaml`, `config.yaml`, `/opsx:continue` in skills (grep)
   - `skills/continue/` does not exist
   - `openspec/CONSTITUTION.md` exists
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` — PASS (1 warning fixed: added requires:[] to 4 non-pipeline templates)
+- [x] 3.3. User Testing: Approved by user.
+- [x] 3.4. Fix Loop: Skipped (no issues reported).
+- [x] 3.5. Final Verify: Skipped (3.4 was not entered).
+- [x] 3.6. Approval: User approved ("weiter").
 
 ## 4. Standard Tasks (Post-Implementation)
 

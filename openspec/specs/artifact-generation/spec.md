@@ -4,53 +4,16 @@ category: change-workflow
 ---
 ## Purpose
 
-Provides the step-by-step (`/opsx:continue`) and fast-forward (`/opsx:ff`) commands for generating pipeline artifacts, both delivered as SKILL.md files that read schema.yaml directly.
+Provides the fast-forward (`/opsx:ff`) command for generating pipeline artifacts, delivered as a SKILL.md file that reads WORKFLOW.md and Smart Templates directly.
 
 ## Requirements
 
-### Requirement: Step-by-Step Generation
-The system SHALL provide `/opsx:continue` as the command for generating one artifact at a time. When invoked, continue SHALL determine which artifact is next in the pipeline by reading schema.yaml and checking file existence in the change workspace, then generate exactly that one artifact using the schema's instruction and template. After generation, continue SHALL report what was generated and what the next step is. If all artifacts are already complete, continue SHALL inform the user that the pipeline is finished and suggest proceeding to `/opsx:apply`. At routine transitions (research to proposal, proposal to specs, specs to design, preflight to tasks), continue SHALL auto-continue to the next artifact without pausing for confirmation. At mandatory-pause checkpoints (after design for user review, after preflight with warnings for acknowledgment), continue SHALL pause and wait for explicit user input before proceeding. When creating specs artifacts, continue SHALL verify the proposal's Consolidation Check confirms no overlap with existing specs before creating spec files.
-
-**User Story:** As a developer I want to advance the pipeline one step at a time, so that I can review each artifact and provide feedback before moving to the next stage.
-
-#### Scenario: Generate next artifact in sequence
-- **GIVEN** a change workspace where research.md and proposal.md are complete
-- **WHEN** the user runs `/opsx:continue`
-- **THEN** the system SHALL generate the specs artifact(s) as the next pending stage, then report completion and indicate design as the next step
-
-#### Scenario: All artifacts already complete
-- **GIVEN** a change workspace where all 6 pipeline artifacts have been generated
-- **WHEN** the user runs `/opsx:continue`
-- **THEN** the system SHALL report that all artifacts are complete and suggest running `/opsx:apply` to begin implementation
-
-#### Scenario: Continue respects dependency gating
-- **GIVEN** a change workspace where research.md is complete but proposal.md is missing (e.g., manually deleted)
-- **WHEN** the user runs `/opsx:continue`
-- **THEN** the system SHALL generate proposal.md as the next required artifact, not skip ahead to specs
-
-#### Scenario: Continue auto-continues through routine transitions
-- **GIVEN** a change workspace where research.md has just been generated
-- **WHEN** the user runs `/opsx:continue`
-- **THEN** the system SHALL generate research.md and immediately proceed to generate proposal.md without pausing for confirmation
-- **AND** SHALL report both artifacts as generated
-
-#### Scenario: Continue pauses at design review checkpoint
-- **GIVEN** a change workspace where specs have been generated and design is the next artifact
-- **WHEN** the user runs `/opsx:continue`
-- **THEN** the system SHALL generate design.md
-- **AND** SHALL pause for user review before proceeding to preflight
-- **AND** SHALL display the design for the user to evaluate
-
-#### Scenario: Continue verifies consolidation before creating specs
-- **GIVEN** a change workspace where the proposal lists a new capability that overlaps with an existing spec
-- **WHEN** the user runs `/opsx:continue` and the specs artifact is next
-- **THEN** the system SHALL verify the proposal's Consolidation Check section before creating spec files
-- **AND** SHALL flag any unresolved overlap before proceeding
-
 ### Requirement: Fast-Forward Generation
-The system SHALL provide `/opsx:ff` as the command for generating all remaining artifacts in dependency order. Fast-forward SHALL determine the current pipeline status by reading schema.yaml and checking file existence, identify all pending artifacts, and generate them sequentially following the schema's dependency chain. After completion, ff SHALL report a summary of all generated artifacts. If all artifacts are already complete, ff SHALL inform the user and suggest `/opsx:apply`. The design review checkpoint is governed by the project constitution convention, not by ff skill logic. If the preflight verdict is PASS WITH WARNINGS, ff SHALL pause and require explicit user acknowledgment of the warnings before generating the tasks artifact.
+The system SHALL provide `/opsx:ff` as the sole command for generating pipeline artifacts. Fast-forward SHALL determine the current pipeline status by reading WORKFLOW.md and Smart Templates and checking file existence, identify all pending artifacts, and generate them sequentially following dependency order. After completion, ff SHALL report a summary of all generated artifacts. If all artifacts are already complete, ff SHALL inform the user and suggest `/opsx:apply`. The design review checkpoint is governed by the project constitution convention, not by ff skill logic. If the preflight verdict is PASS WITH WARNINGS, ff SHALL pause and require explicit user acknowledgment before generating tasks.
 
-**User Story:** As a developer working on a straightforward change I want to generate all remaining artifacts in one command, so that I do not have to run continue repeatedly when I trust the AI to handle the full pipeline.
+When invoked without a change name and existing changes are present, ff SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, ff SHALL derive a kebab-case name and create a new change.
+
+**User Story:** As a developer I want a single command that generates all remaining artifacts, so that I can progress the pipeline efficiently whether starting a new change or continuing an existing one.
 
 #### Scenario: Fast-forward from research to tasks
 - **GIVEN** a change workspace where only research.md is complete
@@ -70,59 +33,62 @@ The system SHALL provide `/opsx:ff` as the command for generating all remaining 
 #### Scenario: Fast-forward respects dependency order
 - **GIVEN** a change workspace with no artifacts generated
 - **WHEN** the user runs `/opsx:ff`
-- **THEN** the system SHALL generate artifacts in strict order (research, proposal, specs, design, preflight, tasks) and not attempt parallel generation
+- **THEN** the system SHALL generate artifacts in strict order (research, proposal, specs, design, preflight, tasks)
 
 #### Scenario: Design review checkpoint pauses after design (constitution-governed)
 - **GIVEN** a change workspace where design has just been created or already exists but preflight does not
 - **WHEN** an agent executes `/opsx:ff`
-- **THEN** the agent SHALL pause for user alignment before proceeding to preflight, as required by the constitution's design review checkpoint convention
+- **THEN** the agent SHALL pause for user alignment before proceeding to preflight
 
 #### Scenario: Checkpoint skipped when resuming past design (constitution-governed)
 - **GIVEN** a change workspace where preflight already exists
 - **WHEN** an agent executes `/opsx:ff`
-- **THEN** the agent SHALL skip the design review checkpoint and generate only remaining artifacts, since preflight existence implies prior design review
+- **THEN** the agent SHALL skip the design review checkpoint and generate only remaining artifacts
 
 #### Scenario: Fast-forward pauses on preflight warnings
 - **GIVEN** a change workspace where preflight has just been generated with verdict PASS WITH WARNINGS
 - **WHEN** the agent is about to generate the tasks artifact
-- **THEN** the agent SHALL pause and present the warnings to the user
-- **AND** SHALL require explicit user acknowledgment before generating tasks
-- **AND** SHALL NOT auto-accept warnings
+- **THEN** the agent SHALL pause, present warnings, and require explicit acknowledgment before generating tasks
 
-### Requirement: Unified Skill Delivery for Generation Commands
-Both `/opsx:continue` and `/opsx:ff` SHALL be delivered as plugin SKILL.md files located at `skills/continue/SKILL.md` and `skills/ff/SKILL.md` respectively. These skill files SHALL read `openspec/schemas/opsx-enhanced/schema.yaml` directly for artifact definitions, instructions, and templates, and check file existence in the change workspace for status. Both skills SHALL be model-invocable (not user-only). The skill files SHALL reference the schema's artifact instructions by reading schema.yaml at runtime rather than duplicating instruction content.
+#### Scenario: Change selection for existing changes
+- **GIVEN** existing changes under `openspec/changes/` and the user invokes `/opsx:ff` without specifying a name
+- **WHEN** the skill detects active changes
+- **THEN** it SHALL present a list of active changes using AskUserQuestion
+- **AND** SHALL mark the most recently modified change as recommended
 
-**User Story:** As a plugin maintainer I want continue and ff to read the schema directly, so that updating the schema automatically updates the generation behavior without changing skill files.
+#### Scenario: New change creation via description
+- **GIVEN** the user invokes `/opsx:ff` with a description like "add user authentication"
+- **AND** no change with a matching name exists
+- **WHEN** the skill processes the input
+- **THEN** it SHALL derive a kebab-case name (e.g., `add-user-auth`) and create a new change directory
 
-#### Scenario: Continue skill reads schema.yaml directly
-- **GIVEN** the `skills/continue/SKILL.md` file
-- **WHEN** its content is inspected
-- **THEN** it SHALL contain instructions to read schema.yaml for artifact definitions and check file existence for status, rather than embedding pipeline logic directly
+### Requirement: Skill Delivery for Generation Command
+`/opsx:ff` SHALL be delivered as a plugin SKILL.md file located at `skills/ff/SKILL.md`. The skill file SHALL read `openspec/WORKFLOW.md` for pipeline configuration and Smart Templates for artifact definitions, instructions, and output structure. The skill SHALL be model-invocable. The skill SHALL reference Smart Template instructions by reading template frontmatter at runtime rather than duplicating instruction content.
 
-#### Scenario: FF skill reads schema.yaml directly
+**User Story:** As a plugin maintainer I want ff to read WORKFLOW.md and Smart Templates directly, so that updating the workflow or templates automatically updates generation behavior without changing the skill file.
+
+#### Scenario: FF skill reads WORKFLOW.md and Smart Templates
 - **GIVEN** the `skills/ff/SKILL.md` file
 - **WHEN** its content is inspected
-- **THEN** it SHALL contain instructions to iterate over remaining artifacts by reading schema.yaml and templates, rather than hardcoding artifact names or instructions
+- **THEN** it SHALL contain instructions to read WORKFLOW.md for pipeline configuration and Smart Templates for artifact definitions
 
-#### Scenario: Both skills are model-invocable
-- **GIVEN** the SKILL.md files for continue and ff
-- **WHEN** their YAML frontmatter is inspected
-- **THEN** both SHALL have `disable-model-invocation` set to `false` or absent (defaulting to model-invocable)
+#### Scenario: FF skill is model-invocable
+- **GIVEN** the `skills/ff/SKILL.md` file
+- **WHEN** its YAML frontmatter is inspected
+- **THEN** it SHALL have `disable-model-invocation` set to `false` or absent
 
 ## Edge Cases
 
-- If schema.yaml is unreadable or missing, the skill SHALL report the error to the user and suggest running `/opsx:setup`.
-- If `/opsx:continue` is run when no active change exists, the system SHALL instruct the user to create a change first via `/opsx:new`.
-- If `/opsx:ff` encounters an error mid-pipeline (e.g., fails on the design artifact), it SHALL stop, report the error and the last successfully generated artifact, and not attempt subsequent stages.
-- If the user provides feedback at the design review checkpoint indicating misalignment, the agent SHALL incorporate the feedback by regenerating affected artifacts before proceeding.
-- If the user modifies an artifact file manually after generation, subsequent `/opsx:continue` calls SHALL treat that artifact as complete and move to the next stage, respecting the user's edits.
+- If WORKFLOW.md is unreadable or missing, the skill SHALL report the error and suggest `/opsx:setup`.
+- If `/opsx:ff` is run when no active change exists and no description provided, the skill SHALL ask the user what they want to build.
+- If `/opsx:ff` encounters an error mid-pipeline, it SHALL stop, report the error and last successful artifact, and not attempt subsequent stages.
+- If the user provides feedback at the design review checkpoint indicating misalignment, the agent SHALL incorporate feedback by regenerating affected artifacts.
+- If the user modifies an artifact file manually after generation, subsequent `/opsx:ff` calls SHALL treat that artifact as complete.
 - If multiple capabilities are listed in the proposal, the specs stage SHALL generate one spec file per capability before marking the stage as complete.
-- If preflight returns PASS WITH WARNINGS during ff, and the user rejects or wants to address a warning, the agent SHALL pause ff and allow the user to fix the issue before regenerating preflight and continuing.
-- If the proposal has no Consolidation Check section (e.g., created before this change), the continue skill SHALL proceed without the consolidation verification step and rely on the specs instruction's overlap verification instead.
+- If the proposal has no Consolidation Check section (legacy), the ff skill SHALL proceed without consolidation verification and rely on the specs instruction's overlap verification instead.
 
 ## Assumptions
 
-- Skills can read and interpret YAML natively because they are executed by Claude, which understands YAML structure. <!-- ASSUMPTION: Claude YAML comprehension -->
-- Artifact completion is determined by file existence and non-empty content in the change workspace directory. <!-- ASSUMPTION: File-existence-based completion -->
-- The continue skill's Artifact Creation Guidelines are supplementary to the schema instructions. Both are read by the agent when creating artifacts. <!-- ASSUMPTION: Supplementary guidelines -->
+- Skills can read and interpret YAML frontmatter natively because they are executed by Claude. <!-- ASSUMPTION: Claude YAML comprehension -->
+- Artifact completion is determined by file existence and non-empty content. <!-- ASSUMPTION: File-existence-based completion -->
 No further assumptions beyond those marked above.

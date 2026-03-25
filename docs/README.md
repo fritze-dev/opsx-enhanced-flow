@@ -4,28 +4,28 @@
 
 The opsx-enhanced plugin uses a **three-layer architecture** where each layer has distinct responsibilities and can be modified independently:
 
-1. **Constitution** (`openspec/constitution.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via config.yaml workflow rules. Serves as the single authoritative source for project-wide rules.
+1. **Constitution** (`openspec/CONSTITUTION.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **Schema** (`openspec/schemas/opsx-enhanced/`) — Defines the 6-stage artifact pipeline (research, proposal, specs, design, preflight, tasks) with templates, instructions, and dependency ordering. Single source of truth for pipeline structure.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
 
-3. **Skills** (`skills/*/SKILL.md`) — 13 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (6: new, continue, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), and documentation (2: changelog, docs). All skills are model-invocable.
+3. **Skills** (`skills/*/SKILL.md`) — 12 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (5: new, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), and documentation (2: changelog, docs). All skills are model-invocable.
 
-Layers are independently modifiable — the schema does not embed skill logic, skills depend on the schema by reading schema.yaml directly at runtime, and the constitution does not contain schema-specific artifact definitions.
+Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed skill logic, skills depend on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
 ## Tech Stack
 
 - **Primary format:** Markdown (artifacts, specs, skills, documentation)
-- **Configuration:** YAML (schema.yaml, config.yaml)
+- **Configuration:** YAML (WORKFLOW.md frontmatter, Smart Template frontmatter)
 - **Shell:** Bash (skill command execution)
 - **Platform:** Claude Code plugin system
-- **No external dependencies:** Skills read schema.yaml and templates directly — no CLI tools, Node.js, or npm required
+- **No external dependencies:** Skills read WORKFLOW.md and Smart Templates directly — no CLI tools, Node.js, or npm required
 
 ## Key Design Decisions
 
 | Decision | Rationale | ADR |
 |----------|-----------|-----|
 | Organize 15 capabilities (not one per skill) | Groups related behavior logically; comprehensive coverage without 1:1 skill mapping burden | [ADR-001](decisions/adr-001-initial-spec-organization.md) |
-| Schema owns workflow rules; config reduced to bootstrap-only | Clear separation: schema for universal rules, constitution for project-specific rules | [ADR-002](decisions/adr-002-workflow-rule-ownership.md) |
+| WORKFLOW.md + Smart Templates own workflow rules | Clear separation: WORKFLOW.md and templates for universal rules, constitution for project-specific rules | [ADR-002](decisions/adr-002-workflow-rule-ownership.md) |
 | Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently specifiable and testable; single entry point via /opsx:docs | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
 | Convention in constitution for release workflow; patch-only auto-bump | Skills remain generic shared code; 95%+ of changes are patches; prevents forgotten bumps | [ADR-004](decisions/adr-004-release-workflow.md) |
 | Single docs_language field in config.yaml; translation at generation time | Central, backward-compatible; one set of templates for all languages | [ADR-005](decisions/adr-005-configurable-documentation-language.md) |
@@ -53,6 +53,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Post-artifact commit and PR integration | Schema-level `post_artifact` hook commits after every artifact; branch+PR on first commit; avoids orphaned PRs | [ADR-028](decisions/adr-028-post-artifact-commit-and-pr-integration.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 | Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
+| Dissolve schema directory; WORKFLOW.md + Smart Templates | Clean separation of orchestration and artifact definition; self-describing templates; one-way migration | [ADR-029](decisions/adr-029-dissolve-schema-directory.md) |
 
 ### Notable Trade-offs
 
@@ -103,7 +104,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization with schema file copy and config creation |
+| [Project Setup](capabilities/project-setup.md) | One-time project initialization with WORKFLOW.md generation, Smart Template installation, and legacy migration |
 | [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
 
 ### Change Workflow
@@ -111,8 +112,8 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Capability | Description |
 |---|---|
 | [Change Workspace](capabilities/change-workspace.md) | Create, manage, and archive change workspaces with date-prefixed naming |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | Schema-driven 6-stage pipeline with dependency gating and PR integration |
-| [Artifact Generation](capabilities/artifact-generation.md) | Step-by-step and fast-forward generation with smart checkpoints |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline driven by WORKFLOW.md and Smart Templates with dependency gating and PR integration |
+| [Artifact Generation](capabilities/artifact-generation.md) | Fast-forward generation with smart checkpoints and change selection |
 | [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features |
 
 ### Development
@@ -135,7 +136,8 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 
 | Capability | Description |
 |---|---|
-| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | Constitution, Schema, and Skills layers with independent modifiability |
+| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers with independent modifiability |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format, and skill reading pattern |
 | [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions and Gherkin scenarios |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
 

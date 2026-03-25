@@ -3,6 +3,28 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-26 — Dissolve Schema Directory
+
+### Added
+- `openspec/WORKFLOW.md` — slim pipeline orchestration file with YAML frontmatter replacing `schema.yaml` and `config.yaml`
+- Smart Templates — every template now carries its own instruction, output path, dependencies, and description in YAML frontmatter alongside the output structure
+- Legacy migration in `/opsx:setup` — automatically detects old `schema.yaml` layout and converts to WORKFLOW.md + Smart Templates
+- `/opsx:ff` now supports selecting existing changes (adopted from the removed `/opsx:continue`)
+
+### Changed
+- **BREAKING**: `openspec/schemas/opsx-enhanced/` directory dissolved — pipeline definition moves to WORKFLOW.md, artifact instructions move into Smart Template frontmatter
+- **BREAKING**: `openspec/config.yaml` removed — settings absorbed into WORKFLOW.md frontmatter (`context`, `docs_language`)
+- **BREAKING**: `openspec/constitution.md` renamed to `openspec/CONSTITUTION.md` (caps)
+- **BREAKING**: `/opsx:continue` merged into `/opsx:ff` — ff is now the sole artifact generation command
+- Three-layer architecture updated: CONSTITUTION.md → WORKFLOW.md + Smart Templates → Skills (previously Constitution → Schema → Skills)
+- All 12 skills read WORKFLOW.md and Smart Templates instead of schema.yaml and config.yaml
+- `/opsx:setup` generates WORKFLOW.md + copies Smart Templates instead of schema directory
+
+### Removed
+- `openspec/schemas/opsx-enhanced/` directory (schema.yaml, README.md, templates/)
+- `openspec/config.yaml`
+- `/opsx:continue` skill (merged into `/opsx:ff`)
+
 ## 2026-03-25 — Post-Artifact Commit and PR Integration
 
 ### Changed
