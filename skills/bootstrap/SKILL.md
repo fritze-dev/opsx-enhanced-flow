@@ -42,33 +42,13 @@ Analyze the entire project:
 
 ### Step 2: Generate Constitution
 
-Write the project constitution to `openspec/constitution.md` with these sections:
+Write the project constitution to `openspec/constitution.md`.
 
-```markdown
-# Project Constitution
+Use the constitution template from the active schema's template directory as a starting structure. To find it:
+1. The schema path was resolved in Step 0 via `openspec schema which opsx-enhanced --json` (the `source` field points to the schema root)
+2. Read `templates/constitution.md` from that schema directory for the recommended sections and guidance comments
 
-## Tech Stack
-(Language, Runtime, Framework, Database, Testing, Package Manager)
-
-## Architecture Rules
-(Architectural patterns, module boundaries, dependency direction)
-
-## Code Style
-(Coding conventions, formatting, naming patterns)
-
-## Constraints
-(Limits, requirements, compatibility rules)
-
-## Conventions
-(Naming, commits, branching, file organization)
-
-## Standard Tasks
-
-<!-- Project-specific extras appended to the universal standard tasks in the schema template.
-     Add checkbox items here for steps that should appear in every tasks.md after the universal steps. -->
-```
-
-- Base every rule on **observed patterns** in the codebase — do not invent rules
+Adapt the sections to fit the project — add sections the project needs, omit sections that don't apply, rename or restructure as appropriate. Fill in each section based on **observed patterns** in the codebase — do not invent rules
 - Mark uncertain items with `<!-- REVIEW -->` for the user to confirm
 
 ### Step 2b: Resolve REVIEW Markers

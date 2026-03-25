@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — Constitution Template
+
+### Changed
+- Constitution section structure is now defined by a schema template instead of being hardcoded in the bootstrap skill — enables per-schema constitution variants and is consistent with the existing template system (closes #48)
+- Bootstrap now uses the template as a flexible starting structure — sections can be added, omitted, or restructured to fit each project's needs
+
+### Added
+- Constitution template at `templates/constitution.md` in the schema directory with recommended sections (Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, Standard Tasks)
+
 ## 2026-03-25 — Fix Standard Tasks Commit Order
 
 ### Fixed

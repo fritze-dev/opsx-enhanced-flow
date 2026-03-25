@@ -46,6 +46,7 @@ Layers are independently modifiable — the schema does not embed skill logic, s
 | Two-layer standard tasks: schema (universal) + constitution (extras) | Universal steps available to all projects; project-specific extras stay flexible; no CLI changes | [ADR-018](decisions/adr-018-standard-tasks-two-layer-design.md) |
 | Visible assumptions with machine-parseable tags; REVIEW markers auto-resolved | Preserves preflight tag for auditing; transient markers should never persist in committed files | [ADR-019](decisions/adr-019-visible-assumptions-and-review-auto-resolution.md) |
 | Bootstrap Standard Tasks section after Conventions with HTML comment | Logical grouping; bootstrap should not invent rules, only provide structure | [ADR-020](decisions/adr-020-bootstrap-standard-tasks-section-placement.md) |
+| Constitution template extraction: schema-defined structure with flexible adaptation | Consistent with existing template system; single source of truth; enables per-schema variants | [ADR-021](decisions/adr-021-constitution-template-extraction.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 
 ### Notable Trade-offs
