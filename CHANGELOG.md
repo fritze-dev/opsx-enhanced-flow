@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — Context Loading Guardrails
+
+### Added
+- Research phase now includes context-loading guardrails — explicit guidance on which artifacts to read (baseline specs, docs README), which to consult conditionally (ADRs via the Key Design Decisions index), and which to skip (archived changes, capability docs) to maximize context window efficiency (closes #17)
+
 ## 2026-03-25 — Add PR Step
 
 ### Added
