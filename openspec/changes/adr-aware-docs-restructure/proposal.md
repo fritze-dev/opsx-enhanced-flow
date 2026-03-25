@@ -7,7 +7,7 @@ The `docs/README.md` is a monolithic 148-line auto-generated file where the Key 
 - **README split:** `docs/README.md` becomes a compact hub/index (~40 lines) linking to `docs/architecture.md` (System Architecture, Tech Stack, Conventions) and `docs/decisions.md` (Key Design Decisions table, Notable Trade-offs). Capabilities tables remain in the README as the browsing entry point.
 - **Per-file conditional regeneration:** Each output file gets its own trigger: `architecture.md` on constitution drift, `decisions.md` on ADR changes, `README.md` on capability changes or sub-file changes.
 - **New templates:** `architecture.md` and `decisions.md` templates added to the schema.
-- **Discover ADR awareness:** `/opsx:discover` Step 2 reads `docs/decisions/adr-*.md` for thematic context. Research template gains an optional "Related Decisions" section.
+- **Discover ADR awareness:** `/opsx:discover` Step 2 reads `docs/decisions.md` as decision index to identify thematically relevant ADRs, then deep-dives into specific `docs/decisions/adr-*.md` files as needed. Research template gains an optional "Related Decisions" section.
 - **Schema instruction update:** Research artifact instruction includes ADR awareness guidance.
 - **Supersedes ADR-009** (Consolidated README) — the new structure provides better separation of concerns while maintaining a clear entry point.
 
