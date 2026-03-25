@@ -15,7 +15,7 @@ Manually implementing a long task list is tedious and error-prone -- items get s
 
 ## Rationale
 
-Tasks are implemented sequentially in the order listed because the task list represents the recommended implementation sequence, and each task may depend on changes made by earlier ones. The system reads all context files (proposal, specs, design, tasks) before starting, ensuring every implementation decision is grounded in the approved design. Pause-on-blocker behavior is essential because guessing at unclear requirements leads to rework; instead, the system surfaces the issue and waits for your guidance. Baseline specs are excluded from the implementation scope because there is a single authoritative path for spec changes: delta specs merged via `/opsx:sync`. Allowing direct edits during implementation would create a dual-write pattern that makes sync redundant and undermines traceability.
+Tasks are implemented sequentially in the order listed because the task list represents the recommended implementation sequence, and each task may depend on changes made by earlier ones. The system reads all context files (proposal, specs, design, tasks) from the change directory and the apply instruction from schema.yaml before starting, ensuring every implementation decision is grounded in the approved design. Pause-on-blocker behavior is essential because guessing at unclear requirements leads to rework; instead, the system surfaces the issue and waits for your guidance. Baseline specs are excluded from the implementation scope because there is a single authoritative path for spec changes: delta specs merged via `/opsx:sync`. Allowing direct edits during implementation would create a dual-write pattern that makes sync redundant and undermines traceability.
 
 ## Features
 
@@ -31,7 +31,7 @@ Tasks are implemented sequentially in the order listed because the task list rep
 
 ### Implementing Tasks
 
-When you run `/opsx:apply`, the system reads all context files for the change, then works through each pending task. For each task, it reads the description, makes the required code changes, and marks the checkbox as complete. It continues to the next task until all are complete or a blocker is encountered.
+When you run `/opsx:apply`, the system reads all context files from the change directory and the apply instruction from schema.yaml, then works through each pending task. For each task, it reads the description, makes the required code changes, and marks the checkbox as complete. It continues to the next task until all are complete or a blocker is encountered.
 
 ### Resuming a Partial Session
 

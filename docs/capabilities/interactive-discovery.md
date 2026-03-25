@@ -2,7 +2,7 @@
 title: "Interactive Discovery"
 capability: "interactive-discovery"
 description: "Provides standalone interactive research with targeted Q&A for complex features, generating research.md with coverage assessment and clarification questions."
-lastUpdated: "2026-03-23"
+lastUpdated: "2026-03-25"
 ---
 
 # Interactive Discovery
@@ -29,7 +29,7 @@ Discovery operates independently from the artifact pipeline, producing only `res
 
 ### Running a Discovery Session
 
-When you run `/opsx:discover`, the system reads the constitution, the current change directory, and any existing baseline specs. It then generates `research.md` with findings about the domain relevant to your change and rates coverage across nine categories.
+When you run `/opsx:discover`, the system verifies that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` exist, reads the constitution, the current change directory, and any existing baseline specs. It reads the research artifact's instruction and template from schema.yaml and then generates `research.md` with findings about the domain relevant to your change, rating coverage across nine categories.
 
 If all categories are rated Clear, the system states that no questions are needed, saves `research.md`, and suggests running `/opsx:ff` to proceed. If any categories are Partial or Missing, the system presents targeted questions (up to five) and pauses for your answers.
 
@@ -43,7 +43,7 @@ If baseline specs reference functions, modules, or patterns that no longer match
 
 ### Prerequisite Checks
 
-The system verifies that a change workspace exists before starting discovery. If no active change is found, it suggests running `/opsx:new` first. If the OpenSpec CLI or schema is not available, it directs you to run `/opsx:setup`.
+The system verifies that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` exist before starting discovery. If either file is missing, it directs you to run `/opsx:setup` first. It also verifies that a change workspace exists; if no active change is found, it suggests running `/opsx:new` first.
 
 ## Known Limitations
 

@@ -2,11 +2,8 @@
 order: 1
 category: setup
 ---
-## Purpose
 
-Handles one-time project initialization via `/opsx:setup`, including schema setup, config creation, and post-setup validation.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Install OpenSpec and Schema
 The system SHALL provide `/opsx:setup` as the single entry point for project setup. The setup command SHALL copy the plugin's custom schema files and templates into the project's `openspec/schemas/` directory, create a minimal `openspec/config.yaml` bootstrap (schema reference + constitution pointer + commented-out `docs_language` field + English-enforcement rule for workflow artifacts), and create a constitution placeholder if none exists. The setup command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps and report what was already in place.
@@ -69,6 +66,12 @@ The setup command SHALL validate the project setup after all installation steps 
 - **GIVEN** the setup command completed but the schema copy failed silently
 - **WHEN** the validation phase runs
 - **THEN** the system SHALL detect the missing schema and report which specific validation check failed
+
+## REMOVED Requirements
+
+### Requirement: OpenSpec CLI Prerequisite Check
+**Reason**: The OpenSpec CLI is no longer a dependency. Skills read schema.yaml and templates directly instead of shelling out to CLI commands.
+**Migration**: Setup no longer installs or checks for the CLI. Schema validation is done by reading the local schema.yaml file.
 
 ## Edge Cases
 

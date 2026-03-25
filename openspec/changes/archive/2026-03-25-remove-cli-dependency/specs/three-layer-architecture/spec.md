@@ -2,26 +2,8 @@
 order: 13
 category: reference
 ---
-## Purpose
 
-Defines the three-layer architecture (Constitution, Schema, Skills) that structures the opsx-enhanced plugin. Each layer has distinct responsibilities, separation rules, and interaction patterns that allow independent modification.
-
-## Requirements
-
-### Requirement: Constitution Layer
-The system SHALL have a `constitution.md` file at `openspec/constitution.md` that defines global project rules. The constitution SHALL include sections for Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. All AI actions SHALL read the constitution before performing any work, enforced via `config.yaml` workflow rules. The constitution SHALL serve as the single authoritative source for project-wide rules that apply across all skills and artifacts.
-
-**User Story:** As a project maintainer I want a single constitution file that governs all AI behavior, so that consistency is enforced without repeating rules in every skill.
-
-#### Scenario: Constitution is read before any AI action
-- **GIVEN** a project with `openspec/constitution.md` and `openspec/config.yaml` containing a rule to read the constitution
-- **WHEN** any AI-driven skill is invoked
-- **THEN** the constitution file is read and its rules are applied to the action
-
-#### Scenario: Constitution contains all required sections
-- **GIVEN** a freshly bootstrapped project
-- **WHEN** the constitution is generated
-- **THEN** the file SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections
+## MODIFIED Requirements
 
 ### Requirement: Schema Layer
 The system SHALL use the `opsx-enhanced` schema located at `openspec/schemas/opsx-enhanced/` to define a 6-stage artifact pipeline. The schema SHALL declare artifacts for research, proposal, specs, design, preflight, and tasks, each with a template, instruction, and dependency list. The schema SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read schema.yaml directly to obtain artifact definitions, instructions, and dependency information.
@@ -42,26 +24,6 @@ The system SHALL use the `opsx-enhanced` schema located at `openspec/schemas/ops
 - **GIVEN** the schema with an `apply` section
 - **WHEN** the apply phase configuration is inspected
 - **THEN** it SHALL require the `tasks` artifact to be complete before implementation begins
-
-### Requirement: Skills Layer
-The system SHALL deliver all 13 commands as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills SHALL be categorized as workflow (6: new, continue, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), or documentation (2: changelog, docs). All skills SHALL be model-invocable (disable-model-invocation: false or absent).
-
-**User Story:** As a developer I want every command delivered as a SKILL.md file, so that Claude Code can discover and invoke them through its plugin system.
-
-#### Scenario: All 13 skills are present
-- **GIVEN** a fully installed plugin
-- **WHEN** the `skills/` directory is listed
-- **THEN** it SHALL contain exactly 13 subdirectories, each with a `SKILL.md` file
-
-#### Scenario: Setup is model-invocable
-- **GIVEN** the `skills/setup/SKILL.md` file
-- **WHEN** its YAML frontmatter is inspected
-- **THEN** the `disable-model-invocation` field SHALL be set to `false` so that bootstrap workflows can invoke it programmatically
-
-#### Scenario: All skills are model-invocable
-- **GIVEN** any skill in the `skills/` directory
-- **WHEN** its YAML frontmatter is inspected
-- **THEN** the `disable-model-invocation` field SHALL be set to `false` or be absent (defaulting to false)
 
 ### Requirement: Layer Separation
 The three layers SHALL be independently modifiable. The schema SHALL NOT embed skill logic; instead, skills SHALL depend on the schema by reading `schema.yaml` directly for artifact definitions, instructions, and dependencies. The constitution SHALL NOT contain schema-specific artifact definitions. Modifications to one layer SHALL NOT require changes to another layer unless the interface contract between them changes.
@@ -85,10 +47,8 @@ The three layers SHALL be independently modifiable. The schema SHALL NOT embed s
 
 ## Edge Cases
 
-- If the constitution is missing or empty, skills SHALL report an error rather than proceeding without rules.
 - If the schema is malformed YAML, skills SHALL report a read error rather than proceeding with invalid data.
 - If a skill directory exists but contains no SKILL.md file, the Claude Code plugin system SHALL not register that command.
-- If a new skill is added without updating the constitution's skill count documentation, the system still functions but documentation is stale (detected by `/opsx:verify`).
 
 ## Assumptions
 

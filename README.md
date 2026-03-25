@@ -24,7 +24,7 @@ The AI follows a structured process (research, plan, review, build, QA, document
 Research → Plan → Review → Build → QA → Document
 ```
 
-**Built on:** [OpenSpec](https://github.com/Fission-AI/OpenSpec) (a spec management framework) and inspired by [Spec-Kit](https://github.com/github/spec-kit) (GitHub's specification methodology).
+**Inspired by:** [OpenSpec](https://github.com/Fission-AI/OpenSpec) (a spec management framework) and [Spec-Kit](https://github.com/github/spec-kit) (GitHub's specification methodology).
 
 ---
 
@@ -46,8 +46,6 @@ Research → Plan → Review → Build → QA → Document
 ## Quick Start
 
 ### Install the Plugin
-
-**Prerequisite:** OpenSpec CLI must be installed (`npm install -g @fission-ai/openspec@^1.2.0`).
 
 ```bash
 # 1. Add the marketplace (one-time)

@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-25 — Remove CLI Dependency
+
+### Changed
+- **BREAKING**: The OpenSpec CLI (`@fission-ai/openspec`) is no longer required — all skills now read the schema and templates directly from local files, eliminating the Node.js/npm prerequisite
+- `/opsx:setup` no longer installs external tools — it only copies schema files into the project and creates the config
+- Artifact status is now determined by checking whether output files exist, instead of querying a CLI command
+- Change creation, listing, and archiving use standard filesystem operations (`mkdir`, directory listing, `mv`) instead of CLI wrappers
+
+### Removed
+- Node.js and npm are no longer prerequisites for using the plugin
+- OpenSpec CLI prerequisite check removed from `/opsx:setup`
+- Node.js feature removed from the development container configuration
+
 ## 2026-03-25 — Context Loading Guardrails
 
 ### Added

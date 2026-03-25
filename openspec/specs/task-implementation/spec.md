@@ -10,16 +10,16 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 ### Requirement: Implement Tasks from Task List
 
-The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, specs, design, tasks) before beginning implementation. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
+The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, specs, design, tasks) from the change directory before beginning implementation. The system SHALL read the `apply.instruction` field from schema.yaml for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
 #### Scenario: Implement all tasks sequentially
 
 - **GIVEN** a change named "add-user-auth" with a tasks.md containing 5 pending tasks
-- **AND** all pipeline artifacts (proposal, specs, design) are available as context
+- **AND** all pipeline artifacts (proposal, specs, design) are available as context in the change directory
 - **WHEN** the user invokes `/opsx:apply add-user-auth`
-- **THEN** the system reads all context files listed in `openspec instructions apply` output
+- **THEN** the system reads all context files from the change directory and the apply instruction from schema.yaml
 - **AND** works through each pending task in order
 - **AND** makes the code changes described by each task
 - **AND** marks each task `- [x]` immediately after completing it
@@ -38,31 +38,8 @@ The system SHALL work through pending task checkboxes in the change's `tasks.md`
 - **GIVEN** a task description that is unclear or could be interpreted multiple ways
 - **WHEN** the system encounters this task during apply
 - **THEN** the system SHALL pause implementation
-- **AND** SHALL present the ambiguity to the user with specific questions
-- **AND** SHALL NOT implement the task until the user provides clarification
-
-#### Scenario: Pause on design issue discovered during implementation
-
-- **GIVEN** the system is implementing a task
-- **AND** discovers that the design.md approach will not work due to a technical constraint
-- **WHEN** the issue is identified
-- **THEN** the system SHALL pause and report the issue
-- **AND** SHALL suggest updating the relevant artifact (design.md, specs, or tasks.md)
-- **AND** SHALL NOT continue with an approach that contradicts the design
-
-#### Scenario: All tasks already complete
-
-- **GIVEN** a change where all tasks in tasks.md are marked `- [x]`
-- **WHEN** the user invokes `/opsx:apply`
-- **THEN** the system SHALL report "All tasks complete"
-- **AND** SHALL suggest archiving the change
-
-#### Scenario: Tasks artifact is blocked
-
-- **GIVEN** a change where the tasks artifact has not been created yet (missing prerequisites)
-- **WHEN** the user invokes `/opsx:apply`
-- **THEN** the system SHALL report that apply is blocked due to missing artifacts
-- **AND** SHALL suggest running `/opsx:continue` or `/opsx:ff` to generate the required artifacts
+- **AND** SHALL present the ambiguity to the user with suggested interpretations
+- **AND** SHALL wait for user guidance before proceeding
 
 ### Requirement: Progress Tracking
 
@@ -181,7 +158,7 @@ The system SHALL NOT include tasks that modify baseline spec files (`openspec/sp
 - **Empty tasks.md**: If tasks.md exists but contains no checkbox items, the system SHALL report "0/0 tasks" and suggest the tasks file may need to be regenerated.
 - **Malformed checkboxes**: If tasks.md contains checkbox-like items that do not follow the `- [ ]` / `- [x]` format exactly, the system SHALL ignore them in the count and note the discrepancy.
 - **Tasks modified externally**: If the user manually edits tasks.md between apply invocations (adding, removing, or reordering tasks), the system SHALL re-read the file and compute progress from the current state.
-- **No tasks.md file**: If the tasks artifact does not exist, the system SHALL report the missing artifact and suggest running the artifact pipeline to generate it.
+- If tasks.md does not exist but the change has artifacts, the system SHALL inform the user and suggest running `/opsx:continue` or `/opsx:ff` to generate tasks first.
 - **Mixed checkbox states mid-file**: If completed tasks appear after pending tasks (out of order), the system SHALL still count correctly and work on pending tasks regardless of position.
 - **Single task remaining**: The system SHALL handle the case where only one task remains with the same progress reporting format ("6/7 tasks complete").
 - **No standard tasks in constitution:** If the project constitution does not define a `## Standard Tasks` section, the tasks.md SHALL omit the Post-Implementation section entirely. Apply behavior is unchanged.

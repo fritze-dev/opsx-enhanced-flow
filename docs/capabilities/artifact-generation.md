@@ -2,7 +2,7 @@
 title: "Artifact Generation"
 capability: "artifact-generation"
 description: "Step-by-step and fast-forward commands for generating pipeline artifacts, with smart checkpoints at critical transitions."
-lastUpdated: "2026-03-24"
+lastUpdated: "2026-03-25"
 ---
 
 # Artifact Generation
@@ -15,7 +15,7 @@ Without dedicated generation commands, you would need to manually create each pi
 
 ## Rationale
 
-Two commands serve complementary use cases: `/opsx:continue` generates artifacts incrementally, while `/opsx:ff` generates all remaining artifacts in sequence for straightforward changes. Both commands are thin wrappers around the OpenSpec CLI rather than embedding pipeline logic directly, so updating the schema automatically updates generation behavior. A checkpoint model classifies each pipeline transition as either routine (auto-continue without pausing) or critical (mandatory pause for your input). Routine transitions -- such as research to proposal, or specs to design -- proceed automatically because no user decision is needed. Critical transitions pause at two points: after the design artifact for approach review, and after a preflight that returns warnings for explicit acknowledgment. This reduces friction at obvious steps while ensuring you always review the moments that matter most.
+Two commands serve complementary use cases: `/opsx:continue` generates artifacts incrementally, while `/opsx:ff` generates all remaining artifacts in sequence for straightforward changes. Both commands read schema.yaml directly for artifact definitions, instructions, and templates rather than embedding pipeline logic, so updating the schema automatically updates generation behavior. A checkpoint model classifies each pipeline transition as either routine (auto-continue without pausing) or critical (mandatory pause for your input). Routine transitions -- such as research to proposal, or specs to design -- proceed automatically because no user decision is needed. Critical transitions pause at two points: after the design artifact for approach review, and after a preflight that returns warnings for explicit acknowledgment. This reduces friction at obvious steps while ensuring you always review the moments that matter most.
 
 ## Features
 
@@ -25,7 +25,7 @@ Two commands serve complementary use cases: `/opsx:continue` generates artifacts
 - **Design review checkpoint** -- both commands pause after the design artifact for user alignment before continuing
 - **Preflight warnings checkpoint** -- `/opsx:ff` pauses when preflight returns warnings, requiring your explicit acknowledgment before generating tasks
 - **Consolidation verification** -- when creating specs, verifies the proposal's Consolidation Check confirms no overlap with existing specs before creating files
-- **Thin CLI wrappers** -- both skills query the OpenSpec CLI for status and instructions rather than duplicating logic
+- **Direct schema reads** -- both skills read schema.yaml for artifact definitions and check file existence for status, rather than duplicating pipeline logic
 
 ## Behavior
 
@@ -33,7 +33,7 @@ Two commands serve complementary use cases: `/opsx:continue` generates artifacts
 
 ### Step-by-Step Generation (/opsx:continue)
 
-When you run `/opsx:continue`, the system checks which artifacts already exist and generates the next one in the pipeline. At routine transitions (research to proposal, proposal to specs, specs to design, preflight to tasks), it auto-continues to the next artifact without pausing. At critical checkpoints -- after design generation and after preflight with warnings -- it pauses and waits for your input. After generation, it reports what was created and what comes next. If all artifacts are already complete, it tells you the pipeline is finished and suggests proceeding to `/opsx:apply`.
+When you run `/opsx:continue`, the system reads schema.yaml and checks which artifacts already exist, then generates the next one in the pipeline. At routine transitions (research to proposal, proposal to specs, specs to design, preflight to tasks), it auto-continues to the next artifact without pausing. At critical checkpoints -- after design generation and after preflight with warnings -- it pauses and waits for your input. After generation, it reports what was created and what comes next. If all artifacts are already complete, it tells you the pipeline is finished and suggests proceeding to `/opsx:apply`.
 
 ### Dependency Gating (/opsx:continue)
 
@@ -45,7 +45,7 @@ When all six artifacts have been generated, running `/opsx:continue` informs you
 
 ### Fast-Forward from Any State (/opsx:ff)
 
-Running `/opsx:ff` identifies all pending artifacts and generates them sequentially. If only research is complete, it generates the remaining five. If research, proposal, and specs are done, it generates design, preflight, and tasks.
+Running `/opsx:ff` identifies all pending artifacts by reading schema.yaml and checking file existence, then generates them sequentially. If only research is complete, it generates the remaining five. If research, proposal, and specs are done, it generates design, preflight, and tasks.
 
 ### Fast-Forward Respects Dependency Order (/opsx:ff)
 
@@ -73,11 +73,11 @@ When the specs artifact is next, `/opsx:continue` verifies the proposal's Consol
 
 ### Skill Delivery
 
-Both `/opsx:continue` and `/opsx:ff` are delivered as skill files that wrap the OpenSpec CLI. They query the CLI for current status and next artifact instructions rather than hardcoding artifact names or pipeline logic. Both are model-invocable.
+Both `/opsx:continue` and `/opsx:ff` are delivered as skill files that read schema.yaml directly for artifact definitions, instructions, and templates. They check file existence in the change workspace to determine pipeline status rather than hardcoding artifact names or pipeline logic. Both are model-invocable.
 
 ## Edge Cases
 
-- If the OpenSpec CLI returns an error during generation (for example, schema not found), the skill reports the error and halts rather than producing a malformed artifact.
+- If schema.yaml is unreadable or missing, the skill reports the error and suggests running `/opsx:setup`.
 - If `/opsx:continue` is run when no active change exists, the system instructs you to create one first via `/opsx:new`.
 - If `/opsx:ff` encounters an error mid-pipeline, it stops, reports the error and the last successfully generated artifact, and does not attempt subsequent stages.
 - If you modify an artifact file manually after generation, subsequent `/opsx:continue` calls treat it as complete and move to the next stage.

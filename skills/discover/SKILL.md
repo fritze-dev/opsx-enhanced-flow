@@ -14,14 +14,14 @@ disable-model-invocation: false
 
 ### Prerequisite: Verify Setup
 
-Run `openspec schema which opsx-enhanced --json`. If it fails, tell the user to run `/opsx:setup` first and stop.
+Check that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` both exist. If either is missing, tell the user to run `/opsx:setup` first and stop.
 
 ### Step 1: Select Change
 
 If no change name provided:
 - Infer from conversation context
 - Auto-select if only one active change exists
-- If ambiguous, run `openspec list --json` and ask the user to select
+- If ambiguous, list directories under `openspec/changes/` (exclude `archive/`) and ask the user to select
 
 ### Step 2: Read Context
 
@@ -31,15 +31,11 @@ If no change name provided:
 
 ### Step 3: Get Research Instructions
 
-```bash
-openspec instructions research --change "<name>" --json
-```
-
-This returns the schema instruction, template, context, and output path. Use the `instruction` field for content guidance and the `template` field for structure.
+Read `openspec/schemas/opsx-enhanced/schema.yaml` and find the artifact with `id: research`. Extract its `instruction` field for content guidance. Read the template from `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure.
 
 ### Step 4: Generate Research
 
-Create `research.md` following the instruction and template from the CLI output. Read any dependency files listed in the response for context.
+Create `research.md` following the instruction and template from schema.yaml. Read any dependency files listed in the `requires` field for context.
 
 ### Step 5: Pause for Q&A
 
@@ -78,7 +74,7 @@ Next: Run `/opsx:ff` to generate remaining artifacts.
 ## Guardrails
 
 - Always read constitution before generating research
-- Use `openspec instructions` CLI for schema-specific guidance — do not hardcode instruction content
+- Read schema.yaml for artifact instructions and templates — do not hardcode instruction content
 - If no active change exists, tell the user to run `/opsx:new` first
 - Do not proceed past research — stop after saving research.md
 - Do not generate proposal, specs, design, or other artifacts

@@ -2,12 +2,6 @@
 name: ff
 description: Fast-forward through OpenSpec artifact creation. Use when the user wants to quickly create all artifacts needed for implementation without stepping through each one individually.
 disable-model-invocation: false
-license: MIT
-compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0"
 ---
 
 Fast-forward through artifact creation - generate everything needed to start implementation in one go.
@@ -27,17 +21,19 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 2. **Create the change directory**
    ```bash
-   openspec new change "<name>"
+   mkdir -p openspec/changes/<name>
    ```
-   This creates a scaffolded change at `openspec/changes/<name>/`.
+   This creates the change workspace at `openspec/changes/<name>/`.
 
 3. **Get the artifact build order**
-   ```bash
-   openspec status --change "<name>" --json
-   ```
-   Parse the JSON to get:
-   - `applyRequires`: array of artifact IDs needed before implementation (e.g., `["tasks"]`)
-   - `artifacts`: list of all artifacts with their status and dependencies
+
+   Read `openspec/schemas/opsx-enhanced/schema.yaml` to get the artifact pipeline. For each artifact in the `artifacts:` list:
+   - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
+   - **done**: output file exists
+   - **ready**: not done, but all artifacts listed in `requires` are done
+   - **blocked**: not done, and at least one artifact in `requires` is not done
+
+   Also read the `apply:` section to determine which artifacts must be complete before implementation (the `requires` list, typically `[tasks]`).
 
 4. **Create artifacts in sequence until apply-ready**
 
@@ -45,36 +41,29 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    Loop through artifacts in dependency order (artifacts with no pending dependencies first):
 
-   a. **For each artifact that is `ready` (dependencies satisfied)**:
-      - Get instructions:
-        ```bash
-        openspec instructions <artifact-id> --change "<name>" --json
-        ```
-      - The instructions JSON includes:
-        - `context`: Project background (constraints for you - do NOT include in output)
-        - `rules`: Artifact-specific rules (constraints for you - do NOT include in output)
-        - `template`: The structure to use for your output file
-        - `instruction`: Schema-specific guidance for this artifact type
-        - `outputPath`: Where to write the artifact
-        - `dependencies`: Completed artifacts to read for context
+   a. **For each artifact that is "ready"**:
+      - In schema.yaml, find the artifact by `id`. Extract:
+        - **instruction**: The `instruction:` field text (content guidance)
+        - **template**: Read `openspec/schemas/opsx-enhanced/templates/<template>` for the output structure
+        - **output path**: `openspec/changes/<name>/<generates>`
+        - **dependencies**: The `requires:` list — read each completed dependency's output file for context
+      - Also read `openspec/config.yaml`'s `context:` field for project-level context instructions.
       - Read any completed dependency files for context
-      - Create the artifact file using `template` as the structure
-      - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - Show brief progress: "✓ Created <artifact-id>"
+      - Create the artifact file using the template as the structure
+      - Apply the instruction as constraints - but do NOT copy it into the file
+      - Show brief progress: "Created <artifact-id>"
 
-   b. **Continue until all `applyRequires` artifacts are complete**
-      - After creating each artifact, re-run `openspec status --change "<name>" --json`
-      - Check if every artifact ID in `applyRequires` has `status: "done"` in the artifacts array
-      - Stop when all `applyRequires` artifacts are done
+   b. **Continue until all apply-required artifacts are complete**
+      - After creating each artifact, re-check file existence for all artifacts
+      - Stop when all artifacts listed in `apply.requires` are done
 
    c. **If an artifact requires user input** (unclear context):
       - Use **AskUserQuestion tool** to clarify
       - Then continue with creation
 
 5. **Show final status**
-   ```bash
-   openspec status --change "<name>"
-   ```
+
+   Re-check file existence for all artifacts and display updated status.
 
 **Output**
 
@@ -86,12 +75,12 @@ After completing all artifacts, summarize:
 
 **Artifact Creation Guidelines**
 
-- Follow the `instruction` field from `openspec instructions` for each artifact type
+- Follow the `instruction` field from schema.yaml for each artifact type
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
-- Use `template` as the structure for your output file - fill in its sections
-- **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
-  - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
+- Use the template as the structure for your output file - fill in its sections
+- **IMPORTANT**: The `instruction` field and `config.yaml` context are constraints for YOU, not content for the file
+  - Do NOT copy instruction blocks into the artifact
   - These guide what you write, but should never appear in the output
 
 **Checkpoint Model**

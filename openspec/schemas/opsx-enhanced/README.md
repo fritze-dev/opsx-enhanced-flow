@@ -19,11 +19,7 @@ research → proposal → specs → design → preflight → tasks → [apply]
 
 ## Installation
 
-Use `/opsx:setup` — it handles OpenSpec initialization, schema installation, and config setup automatically.
-
-## Requirements
-
-- [OpenSpec](https://github.com/Fission-AI/OpenSpec) CLI installed (`npm install -g @fission-ai/openspec`)
+Use `/opsx:setup` — it copies the schema files into the project and creates the config. No external dependencies required.
 
 ## Related
 

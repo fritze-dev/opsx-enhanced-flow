@@ -2,12 +2,6 @@
 name: sync
 description: Sync delta specs from a change to main specs. Use when the user wants to update main specs with changes from a delta spec, without archiving the change.
 disable-model-invocation: false
-license: MIT
-compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0"
 ---
 
 Sync delta specs from a change to main specs.
@@ -20,7 +14,7 @@ This is an **agent-driven** operation - you will read delta specs and directly e
 
 1. **If no change name provided, prompt for selection**
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   List directories under `openspec/changes/` (exclude `archive/`). Use the **AskUserQuestion tool** to let the user select.
 
    Show changes that have delta specs (under `specs/` directory).
 

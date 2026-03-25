@@ -2,16 +2,16 @@
 title: "Change Workspace"
 capability: "change-workspace"
 description: "Create, manage, and archive change workspaces with date-prefixed naming"
-lastUpdated: "2026-03-05"
+lastUpdated: "2026-03-25"
 ---
 
 # Change Workspace
 
-Manages the full lifecycle of a change workspace — from creation through archiving — so that every feature or improvement follows a structured, traceable path.
+Manages the full lifecycle of a change workspace -- from creation through archiving -- so that every feature or improvement follows a structured, traceable path.
 
 ## Purpose
 
-Without structured change workspaces, spec-driven development becomes disorganized — artifacts scatter across the project, changes lack clear boundaries, and completed work has no consistent archival pattern. This capability ensures every change has a dedicated workspace with a defined structure, and completed changes are preserved chronologically for future reference.
+Without structured change workspaces, spec-driven development becomes disorganized -- artifacts scatter across the project, changes lack clear boundaries, and completed work has no consistent archival pattern. This capability ensures every change has a dedicated workspace with a defined structure, and completed changes are preserved chronologically for future reference.
 
 ## Rationale
 
@@ -19,22 +19,22 @@ Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe iden
 
 ## Features
 
-- One-command workspace creation via `/opsx:new <change-name>` — delegates to the OpenSpec CLI to scaffold all required artifacts
-- Automatic name derivation — provide a description instead of a kebab-case name and the system converts it
-- Schema-driven structure — the workspace contains exactly the artifacts defined by the active schema, with dependency gating
-- Date-prefixed archiving via `/opsx:archive` — moves completed changes to a chronologically sorted archive
-- Sync prompt before archive — surfaces unsynced delta specs and offers to sync before filing the change away
+- One-command workspace creation via `/opsx:new <change-name>` -- creates the workspace directory and reads schema.yaml to display the artifact pipeline
+- Automatic name derivation -- provide a description instead of a kebab-case name and the system converts it
+- Schema-driven structure -- the workspace contains exactly the artifacts defined by the active schema, with dependency gating
+- Date-prefixed archiving via `/opsx:archive` -- moves completed changes to a chronologically sorted archive
+- Sync prompt before archive -- surfaces unsynced delta specs and offers to sync before filing the change away
 - Warnings for incomplete artifacts or tasks before archiving
 
 ## Behavior
 
 ### Creating a Workspace
 
-When you run `/opsx:new add-user-auth`, the system creates a workspace at `openspec/changes/add-user-auth/` with the schema-defined structure. It displays the artifact status and first artifact template. If you provide a description like "add user authentication" instead of a name, the system derives `add-user-auth` automatically. If the name is invalid (contains uppercase or special characters), the system asks for a valid kebab-case name. If a change with that name already exists, the system suggests continuing the existing change instead.
+When you run `/opsx:new add-user-auth`, the system creates a workspace at `openspec/changes/add-user-auth/` via `mkdir -p` and reads schema.yaml to determine the artifact pipeline, displaying the artifact status and first artifact template. If you provide a description like "add user authentication" instead of a name, the system derives `add-user-auth` automatically. If the name is invalid (contains uppercase or special characters), the system asks for a valid kebab-case name. If a change with that name already exists, the system suggests continuing the existing change instead.
 
 ### Workspace Structure and Dependency Gating
 
-The created workspace includes a manifest recording the schema used and creation metadata. The artifact pipeline sequence is determined by the schema — for the opsx-enhanced schema, the stages are: research, proposal, specs, design, preflight, and tasks. Only the first stage (research) is ready initially; downstream stages are blocked by unmet dependencies. You can specify a custom schema with `--schema <name>` during creation.
+The created workspace is a directory at `openspec/changes/<name>/`. The artifact pipeline sequence is determined by reading `openspec/schemas/opsx-enhanced/schema.yaml` -- for the opsx-enhanced schema, the stages are: research, proposal, specs, design, preflight, and tasks. Only the first stage (research) is ready initially; downstream stages are blocked by unmet dependencies as determined by file existence checks.
 
 ### Archiving a Completed Change
 

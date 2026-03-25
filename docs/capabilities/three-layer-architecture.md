@@ -2,7 +2,7 @@
 title: "Three-Layer Architecture"
 capability: "three-layer-architecture"
 description: "Defines the Constitution, Schema, and Skills layers that structure the plugin, with distinct responsibilities and independent modifiability."
-lastUpdated: "2026-03-05"
+lastUpdated: "2026-03-25"
 ---
 
 # Three-Layer Architecture
@@ -22,7 +22,7 @@ A single-file or monolithic approach to AI workflow configuration quickly become
 - **Constitution Layer**: A single `constitution.md` file at `openspec/constitution.md` defines all project-wide rules, including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Every AI action reads this file before performing work.
 - **Schema Layer**: The `opsx-enhanced` schema at `openspec/schemas/opsx-enhanced/` declares the 6-stage artifact pipeline (research, proposal, specs, design, preflight, tasks). Each artifact has a template, instruction, and dependency list.
 - **Skills Layer**: All 13 commands are delivered as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills are categorized as workflow (6), governance (5), or documentation (2). All skills are model-invocable.
-- **Layer Separation**: Each layer is independently modifiable. The schema does not embed skill logic, and the constitution does not contain schema-specific artifact definitions.
+- **Layer Separation**: Each layer is independently modifiable. The schema does not embed skill logic, and the constitution does not contain schema-specific artifact definitions. Skills depend on the schema by reading `schema.yaml` directly at runtime.
 
 ## Behavior
 
@@ -40,7 +40,7 @@ A fully installed plugin contains exactly 13 skill subdirectories, each with a `
 
 ### Layers Are Independently Modifiable
 
-Updating the schema with a new optional artifact stage does not require changes to existing skills, because skills depend on the OpenSpec CLI rather than the schema directly. Adding a new code style rule to the constitution does not require schema changes, because the schema does not embed constitution rules. Refining a skill's instruction text does not require changes to either the constitution or the schema.
+Updating the schema with a new optional artifact stage does not require changes to existing skills, because skills read schema.yaml dynamically at runtime. Adding a new code style rule to the constitution does not require schema changes, because the schema does not embed constitution rules. Refining a skill's instruction text does not require changes to either the constitution or the schema.
 
 ## Known Limitations
 
@@ -50,6 +50,6 @@ Updating the schema with a new optional artifact stage does not require changes 
 ## Edge Cases
 
 - If the constitution is missing or empty, skills report an error rather than proceeding without rules.
-- If the schema is malformed YAML, the OpenSpec CLI rejects it with a validation error before any artifact generation begins.
+- If the schema is malformed YAML, skills report a read error rather than proceeding with invalid data.
 - If a skill directory exists but contains no `SKILL.md` file, the Claude Code plugin system does not register that command.
 - If a new skill is added without updating the constitution's skill count documentation, the system still functions but documentation becomes stale. This is detected by `/opsx:verify`.

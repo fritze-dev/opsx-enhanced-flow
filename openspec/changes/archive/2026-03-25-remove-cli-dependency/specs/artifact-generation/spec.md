@@ -2,11 +2,8 @@
 order: 5
 category: change-workflow
 ---
-## Purpose
 
-Provides the step-by-step (`/opsx:continue`) and fast-forward (`/opsx:ff`) commands for generating pipeline artifacts, both delivered as SKILL.md files that read schema.yaml directly.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Step-by-Step Generation
 The system SHALL provide `/opsx:continue` as the command for generating one artifact at a time. When invoked, continue SHALL determine which artifact is next in the pipeline by reading schema.yaml and checking file existence in the change workspace, then generate exactly that one artifact using the schema's instruction and template. After generation, continue SHALL report what was generated and what the next step is. If all artifacts are already complete, continue SHALL inform the user that the pipeline is finished and suggest proceeding to `/opsx:apply`. At routine transitions (research to proposal, proposal to specs, specs to design, preflight to tasks), continue SHALL auto-continue to the next artifact without pausing for confirmation. At mandatory-pause checkpoints (after design for user review, after preflight with warnings for acknowledgment), continue SHALL pause and wait for explicit user input before proceeding. When creating specs artifacts, continue SHALL verify the proposal's Consolidation Check confirms no overlap with existing specs before creating spec files.
