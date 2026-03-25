@@ -1,3 +1,13 @@
+---
+id: docs-readme
+description: Documentation entry point with architecture overview
+generates: docs/README.md
+instruction: |
+  Generate the docs README from constitution, specs, and archived changes.
+  Aggregate decisions from all archived design.md tables.
+  Group capabilities by category from spec frontmatter.
+  Include ALL decisions in the Key Design Decisions table.
+---
 # Documentation
 
 ## System Architecture

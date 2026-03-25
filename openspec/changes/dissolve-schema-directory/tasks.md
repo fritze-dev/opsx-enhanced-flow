@@ -2,12 +2,12 @@
 
 ## 1. Foundation
 
-- [ ] 1.1. Create `openspec/WORKFLOW.md` with full pipeline config in YAML frontmatter (templates_dir, pipeline, apply, post_artifact, context, docs_language) and workflow overview in markdown body
-- [ ] 1.2. Create `openspec/templates/` directory and convert all 10 templates from `openspec/schemas/opsx-enhanced/templates/` to Smart Template format (add YAML frontmatter with id, description, generates, requires, instruction from schema.yaml)
-- [ ] 1.3. Rename `openspec/constitution.md` → `openspec/CONSTITUTION.md` and update content (Tech Stack, Architecture Rules, path references)
-- [ ] 1.4. Remove `openspec/schemas/` directory
-- [ ] 1.5. Remove `openspec/config.yaml`
-- [ ] 1.6. Remove `skills/continue/` directory
+- [x] 1.1. Create `openspec/WORKFLOW.md` with full pipeline config in YAML frontmatter (templates_dir, pipeline, apply, post_artifact, context, docs_language) and workflow overview in markdown body
+- [x] 1.2. Create `openspec/templates/` directory and convert all 10 templates from `openspec/schemas/opsx-enhanced/templates/` to Smart Template format (add YAML frontmatter with id, description, generates, requires, instruction from schema.yaml)
+- [x] 1.3. Rename `openspec/constitution.md` → `openspec/CONSTITUTION.md` and update content (Tech Stack, Architecture Rules, path references)
+- [x] 1.4. Remove `openspec/schemas/` directory
+- [x] 1.5. Remove `openspec/config.yaml`
+- [x] 1.6. Remove `skills/continue/` directory
 
 ## 2. Implementation
 

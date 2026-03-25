@@ -1,4 +1,15 @@
 ---
+id: docs-capability
+description: Capability documentation template
+generates: "docs/capabilities/*.md"
+instruction: |
+  Generate user-facing capability documentation from merged baseline specs.
+  Derive Purpose from spec Purpose using problem-framing.
+  Derive Rationale from research.md and design.md in archives.
+  Write in present tense — describe current design, not change history.
+  OMIT empty optional sections entirely.
+---
+---
 title: "[Capability Title]"
 capability: "[capability-id]"
 description: "[One-line summary of what this capability does]"

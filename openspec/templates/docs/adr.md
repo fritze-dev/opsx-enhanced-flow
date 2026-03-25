@@ -1,3 +1,13 @@
+---
+id: docs-adr
+description: Architecture Decision Record template
+generates: "docs/decisions/adr-*.md"
+instruction: |
+  Generate ADRs from archived design.md Decisions tables.
+  Use inline rationale via em-dash in the Decision section.
+  Use semantic link text for references.
+  Context should be minimum 4-6 sentences.
+---
 # ADR-NNN: [Decision Title]
 
 ## Status
