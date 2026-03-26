@@ -40,7 +40,7 @@ N/A — this is an internal workflow enhancement with no external dependencies.
 
 - **Parsing heuristic**: Preflight Section C is free-form markdown (table or list). Parsing needs to be flexible enough to handle different formats.
 - **False positives**: A side-effect might be addressed in code without appearing as a named task. The keyword heuristic approach (already used by verify) should handle this — search codebase for side-effect keywords.
-- **Optional step**: The issue says "optional" — verify should gracefully skip this if preflight.md doesn't exist (consistent with existing graceful degradation).
+- **Always present**: preflight.md is a mandatory pipeline artifact (required before tasks). Verify can assume it exists — no graceful-skip logic needed for the side-effect check.
 - **Low severity default**: Consistent with verify's heuristic philosophy, unmatched side-effects should default to WARNING (not CRITICAL) since the keyword search isn't perfect.
 
 ## 5. Coverage Assessment
@@ -52,7 +52,7 @@ N/A — this is an internal workflow enhancement with no external dependencies.
 | Data Model | Clear | No data model changes — preflight.md is read-only, no new artifacts |
 | UX | Clear | New section in verify report output, consistent with existing format |
 | Integration | Clear | Fits into existing verify step 3 (load artifacts) and adds a sub-step |
-| Edge Cases | Clear | No preflight.md → skip; empty Section C → skip; side-effect in code but not task → pass |
+| Edge Cases | Clear | Empty Section C (no risks) → skip; side-effect in code but not task → pass |
 | Constraints | Clear | Must not break graceful degradation; must follow existing severity heuristics |
 | Terminology | Clear | "Side-effect" is already defined in preflight template |
 | Non-Functional | Clear | One additional file read; negligible performance impact |
@@ -67,4 +67,4 @@ All categories are Clear — no questions needed.
 |---|----------|-----------|------------------------|
 | 1 | Approach A: add preflight.md reading to verify only | Lightest touch, matches issue request, verify is the right safety-net location | B (enforce at tasks boundary), C (both) |
 | 2 | Default severity: WARNING for unmatched side-effects | Consistent with verify's false-positive-avoidance philosophy | CRITICAL (too aggressive for heuristic search) |
-| 3 | Graceful skip when preflight.md absent | Consistent with existing graceful degradation pattern | Require preflight.md (too strict) |
+| 3 | Always read preflight.md (no graceful skip) | preflight.md is mandatory in the pipeline — it's always present when verify runs | Graceful skip (unnecessary since artifact is guaranteed) |
