@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: ['src/.claude-plugin/plugin.json']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version and create release
+        run: |
+          VERSION=$(jq -r .version src/.claude-plugin/plugin.json)
+          echo "Detected version: ${VERSION}"
+
+          # Skip if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}$"; then
+            echo "Tag v${VERSION} already exists, skipping"
+            exit 0
+          fi
+
+          # Extract latest changelog entry (first ## section)
+          if [ -f CHANGELOG.md ]; then
+            NOTES=$(sed -n '/^## /{p;:a;n;/^## /q;p;ba}' CHANGELOG.md)
+          else
+            NOTES="Release v${VERSION}"
+          fi
+
+          # Create tag and release
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "${NOTES}"
+
+          echo "Created release v${VERSION}"
+        env:
+          GH_TOKEN: ${{ github.token }}

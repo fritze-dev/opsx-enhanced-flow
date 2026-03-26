@@ -9,7 +9,7 @@
   },
 
   "postCreateCommand": {
-    "plugin": "claude plugin marketplace add fritze-dev/opsx-enhanced-flow && claude plugin install opsx@opsx-enhanced-flow"
+    "plugin": "claude plugin marketplace add . --scope user && claude plugin install opsx@opsx-enhanced-flow"
   },
 
   "customizations": {

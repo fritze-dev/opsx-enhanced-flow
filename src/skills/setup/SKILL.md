@@ -30,7 +30,7 @@ If both `openspec/WORKFLOW.md` and `openspec/schemas/` exist (partial manual mig
 
 ```bash
 mkdir -p openspec/templates/specs openspec/templates/docs
-cp -r "${CLAUDE_PLUGIN_ROOT}/openspec/templates/." openspec/templates/
+cp -r "${CLAUDE_PLUGIN_ROOT}/templates/." openspec/templates/
 ```
 
 ### 2. Create WORKFLOW.md (skip if exists)
