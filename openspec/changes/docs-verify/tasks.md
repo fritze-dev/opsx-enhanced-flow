@@ -20,16 +20,16 @@
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Check:
-  - [ ] `/opsx:docs-verify` on a fully in-sync project produces CLEAN verdict with 0 issues — PASS / FAIL
-  - [ ] `/opsx:docs-verify` after adding a new spec without regenerating docs produces at least one CRITICAL finding — PASS / FAIL
-  - [ ] Report includes file references for every finding — PASS / FAIL
-  - [ ] Skill completes without error when `docs/` directory is empty or missing — PASS / FAIL
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before archiving.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.1. Metric Check:
+  - [x] `/opsx:docs-verify` on a fully in-sync project produces CLEAN verdict with 0 issues — PASS
+  - [x] `/opsx:docs-verify` after adding a new spec without regenerating docs produces at least one CRITICAL finding — PASS
+  - [x] Report includes file references for every finding — PASS
+  - [x] Skill completes without error when `docs/` directory is empty or missing — PASS
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command). Result: 0 CRITICAL, 1 WARNING (minor edge case — accepted).
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: Skipped — no fixes needed.
+- [x] 3.5. Final Verify: Skipped — 3.4 was not entered.
+- [x] 3.6. Approval: User approved.
 
 ## 4. Standard Tasks (Post-Implementation)
 
