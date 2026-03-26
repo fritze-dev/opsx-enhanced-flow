@@ -55,6 +55,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
 | Dissolve schema directory; WORKFLOW.md + Smart Templates | Clean separation of orchestration and artifact definition; self-describing templates; one-way migration | [ADR-029](decisions/adr-029-dissolve-schema-directory.md) |
 | Verify preflight side-effect cross-check as step 8 with WARNING severity | Additive safety net; consistent with heuristic philosophy; two-pass matching (tasks then codebase) | [ADR-030](decisions/adr-030-verify-preflight-side-effect-cross-check.md) |
+| Plugin source in `src/`, auto GitHub Releases via CI, local marketplace for dev | Clean consumer cache; automated releases; VS Code-compatible dev workflow | [ADR-031](decisions/adr-031-auto-github-releases-and-plugin-source-restr.md) |
 
 ### Notable Trade-offs
 

@@ -3,6 +3,21 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-26 — Auto GitHub Releases
+
+### Added
+- Automatic GitHub Releases — a GitHub Action creates a git tag and release whenever a version bump is pushed to `main`, using the latest changelog entry as the release body
+- Consumer version pinning — consumers can pin to a specific version when adding the marketplace (e.g., `#v1.0.30`)
+- Local marketplace workflow for developers — register the local repo as marketplace source for live plugin development in VS Code and CLI
+- Plugin source directory (`src/`) — plugin files (skills, templates, manifest) are separated from project files (docs, CI, specs); consumer caches contain only plugin files
+
+### Changed
+- **BREAKING**: Plugin source moved from repo root into `src/` — consumers need to run `plugin update` to switch to the new layout
+- Marketplace source changed from `"./"` to `"./src"` — points to the plugin subdirectory
+- `/opsx:setup` template path updated to `${CLAUDE_PLUGIN_ROOT}/templates/` (was `openspec/templates/`)
+- DevContainer now uses local marketplace instead of GitHub clone for development
+- Release process simplified — push triggers automatic tagging and release creation; manual `git tag` + `gh release create` no longer needed for patch releases
+
 ## 2026-03-26 — Verify Preflight Side-Effect Cross-Check
 
 ### Changed

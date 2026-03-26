@@ -9,7 +9,7 @@ Handles one-time project initialization via `/opsx:setup`, including WORKFLOW.md
 ## Requirements
 
 ### Requirement: Install OpenSpec Workflow
-The system SHALL provide `/opsx:setup` as the single entry point for project setup. The setup command SHALL: (1) copy Smart Templates from the plugin's `openspec/templates/` directory into the project's `openspec/templates/` directory, (2) generate `openspec/WORKFLOW.md` with pipeline configuration in YAML frontmatter (templates_dir, pipeline, apply, post_artifact, context, docs_language), and (3) create `openspec/CONSTITUTION.md` placeholder if none exists. The setup command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
+The system SHALL provide `/opsx:setup` as the single entry point for project setup. The setup command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) generate `openspec/WORKFLOW.md` with pipeline configuration in YAML frontmatter (templates_dir, pipeline, apply, post_artifact, context, docs_language), and (3) create `openspec/CONSTITUTION.md` placeholder if none exists. The setup command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
 
 The setup command SHALL NOT install any external CLI tools or require Node.js/npm as prerequisites.
 
@@ -22,7 +22,7 @@ The generated WORKFLOW.md SHALL include a commented-out `docs_language: English`
 #### Scenario: First-time project initialization
 - **GIVEN** a project directory without the opsx-enhanced workflow installed
 - **WHEN** the user runs `/opsx:setup`
-- **THEN** the system SHALL copy Smart Templates to `openspec/templates/`, generate `openspec/WORKFLOW.md`, create `openspec/CONSTITUTION.md` placeholder, and verify the setup
+- **THEN** the system SHALL copy Smart Templates from `${CLAUDE_PLUGIN_ROOT}/templates/` to `openspec/templates/`, generate `openspec/WORKFLOW.md`, create `openspec/CONSTITUTION.md` placeholder, and verify the setup
 
 #### Scenario: Idempotent re-initialization
 - **GIVEN** a project that has already been initialized

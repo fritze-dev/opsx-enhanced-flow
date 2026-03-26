@@ -1,12 +1,12 @@
 ---
 title: "Release Workflow"
 capability: "release-workflow"
-description: "Version management, changelog generation, and consumer update process."
-lastUpdated: "2026-03-23"
+description: "Version management, automated releases, plugin distribution, changelog generation, and consumer update process."
+lastUpdated: "2026-03-26"
 ---
 # Release Workflow
 
-The release workflow handles version management for the plugin, including automatic patch bumps on archive, version synchronization, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
+The release workflow handles version management for the plugin, including automatic patch bumps on archive, automated GitHub Releases via CI, plugin source distribution from the `src/` subdirectory, consumer version pinning, developer local marketplace workflow, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
 
 ## Purpose
 
@@ -20,7 +20,11 @@ The auto-bump is implemented as a constitution convention rather than a skill mo
 
 - **Automatic patch version bump** — the patch version increments automatically after each successful archive
 - **Version synchronization** — `plugin.json` and `marketplace.json` stay in sync automatically
-- **Manual minor/major releases** — documented process for intentional version changes with git tags
+- **Automated GitHub Releases** — a GitHub Action creates git tags and releases automatically when a version bump is pushed to `main`
+- **Plugin source separation** — plugin files live in `src/`, consumer caches contain only plugin files (no docs, CI, or project files)
+- **Consumer version pinning** — consumers can pin to a specific version using a tag reference when adding the marketplace
+- **Developer local marketplace** — developers register the local repo as marketplace source for live plugin development in VS Code and CLI
+- **Manual minor/major releases** — documented process for intentional version changes; the Action handles tagging automatically
 - **Consumer update guidance** — clear steps for consumers to get the latest plugin version
 - **Changelog generation** — `/opsx:changelog` produces release notes from archived changes in Keep a Changelog format
 - **Language-aware changelog** — changelog entries can be generated in the language configured in `docs_language`
@@ -30,19 +34,31 @@ The auto-bump is implemented as a constitution convention rather than a skill mo
 
 ### Automatic Patch Bump After Archive
 
-After a successful `/opsx:archive`, the patch version in `.claude-plugin/plugin.json` is incremented automatically (for example, `1.0.3` becomes `1.0.4`). The new version is displayed in the archive summary.
+After a successful `/opsx:archive`, the patch version in `src/.claude-plugin/plugin.json` is incremented automatically (for example, `1.0.3` becomes `1.0.4`). The `version` field in `.claude-plugin/marketplace.json` is synced to match. The new version is displayed in the archive summary.
+
+### Automated GitHub Releases
+
+When a version bump is pushed to `main`, a GitHub Action automatically creates a git tag (`v<version>`) and a GitHub Release. The release body contains the latest changelog entry from `CHANGELOG.md`. If the tag already exists, the Action skips silently (idempotent).
+
+### Plugin Source Directory
+
+Plugin source code (skills, templates, manifest) lives in the `src/` subdirectory. Consumer plugin caches contain only `src/` contents — documentation, CI workflows, OpenSpec project files, and changelogs are not downloaded. The marketplace uses `source: "./src"` to reference the plugin subdirectory.
+
+### Consumer Version Pinning
+
+Consumers can pin to a specific plugin version by adding the marketplace with a tag reference (for example, `claude plugin marketplace add fritze-dev/opsx-enhanced-flow#v1.0.30`). Pinned marketplaces do not receive updates when new versions are released.
+
+### Developer Local Marketplace
+
+Developers register the local repository path as a marketplace source for live plugin development. This works in both the VS Code extension and CLI, unlike `--plugin-dir` which is CLI-only. Skill changes reload instantly via `/reload-plugins`. Version changes require an explicit `claude plugin update`.
 
 ### Version Synchronization
 
-The `version` field in `marketplace.json` always matches `plugin.json`. Both files are updated together during the auto-bump. If they are found out of sync beforehand, they are aligned to the `plugin.json` version first, then the patch bump is applied.
+The `version` field in `marketplace.json` always matches `src/.claude-plugin/plugin.json`. Both files are updated together during the auto-bump. If they are found out of sync beforehand, they are aligned to the `plugin.json` version first, then the patch bump is applied.
 
 ### Manual Minor and Major Releases
 
-For intentional minor or major version changes, you manually set the version in both `plugin.json` and `marketplace.json`, create a git tag in the format `v<version>`, push the tag, and optionally create a GitHub Release via `gh release create`.
-
-### Optional GitHub Release
-
-After creating and pushing a version tag, you can run `gh release create v<version>` with changelog content. Consumers can reference the release by tag.
+For intentional minor or major version changes, you manually set the version in both `src/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then push to `main`. The GitHub Action automatically creates the git tag and release. For retroactive tagging without a version change, you can manually create and push a tag.
 
 ### Consumer Update Process
 
@@ -70,7 +86,7 @@ The complete update path is: `claude plugin marketplace update` followed by `cla
 
 ### Post-Push Developer Plugin Update
 
-After pushing a version bump to the remote, the developer updates their local plugin installation by running `claude plugin marketplace update` and `claude plugin update` to stay on the latest version during development.
+For developers using the local marketplace, running `claude plugin update opsx@opsx-enhanced-flow` detects the local version change and updates the cached plugin. For developers using the GitHub marketplace, the existing `marketplace update` + `plugin update` flow applies.
 
 ### Archive Output Next Steps
 
@@ -110,17 +126,18 @@ If the documentation language is changed after entries have already been generat
 
 ## Known Limitations
 
-- Does not support automatic minor or major version bumps — these require a manual process.
-- Does not create git tags automatically — tagging is part of the manual minor/major release process.
-- No CI/CD automation or git hooks — the workflow relies on constitution conventions followed by the agent.
+- Does not support automatic minor or major version bumps — these require a manual process (but the Action handles tagging automatically after push).
+- Consumer migration from the old flat layout to the new `src/` layout requires a `plugin update` — there is no automatic migration.
 
 ## Future Enhancements
 
-- A dedicated `/opsx:release` skill for automated minor/major releases.
 - A `/opsx:status` skill for checking the current project and plugin state.
+- Sparse checkout via `git-subdir` for even more efficient consumer downloads.
 
 ## Edge Cases
 
-- If `.claude-plugin/plugin.json` does not exist (consumer projects without plugin manifests), the version bump step is silently skipped.
+- If `src/.claude-plugin/plugin.json` does not exist (consumer projects without plugin manifests), the version bump step is silently skipped.
+- If `CHANGELOG.md` is missing when the release Action runs, the release is created with a minimal body instead of failing.
+- If a consumer adds the marketplace before the `src/` restructuring, the old cache is replaced on the next `plugin update`.
 - If the version field contains a non-semver value, the system warns and skips the bump rather than producing an invalid version.
 - If the archive directory contains changes with only internal refactoring, the changelog agent either omits the entry or uses a minimal note to avoid fabricating user-facing changes.
