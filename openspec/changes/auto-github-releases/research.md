@@ -18,6 +18,15 @@
 - `marketplace.json` uses `source: "./"` (plugin co-located with marketplace)
 - Consumers install via `claude plugin marketplace add fritze-dev/opsx-enhanced-flow`
 - Version field in `plugin.json` drives cache organization and update detection
+- Plugin files (skills, templates) mixed with project files (docs, CI, specs, changelog) at repo root
+- Consumers download entire repo including development-only files
+
+**Repo structure (current — flat):**
+- `.claude-plugin/plugin.json` + `marketplace.json` — both at root
+- `skills/` — 12 skills at repo root
+- `openspec/templates/` — templates at repo root (shared between plugin source and project copy)
+- `openspec/specs/`, `openspec/changes/` — project-specific
+- `docs/`, `.github/`, `.devcontainer/` — development-only
 
 **Developer workflow (validated through testing):**
 - Local marketplace (`claude plugin marketplace add <local-path>`) reads directly from filesystem
@@ -43,6 +52,14 @@
 - Changing source from `"./"` to GitHub ref breaks local marketplace — mutually exclusive
 - Consumer version pinning works via `#ref` at marketplace add time, not via marketplace.json source field
 
+**Plugin subdirectory distribution (validated via docs):**
+- `source: "./src"` in marketplace.json resolves relative to repo root
+- Claude Code caches ONLY the referenced subdirectory, not the entire repo
+- Works with both local path (`marketplace add /local/path`) and GitHub (`marketplace add owner/repo`)
+- `git-subdir` source type exists for sparse checkout but uses URLs (incompatible with local dev)
+- Relative path `"./src"` achieves clean caching without sparse checkout complexity
+- Setup skill references `${CLAUDE_PLUGIN_ROOT}/openspec/templates/` — needs update to `${CLAUDE_PLUGIN_ROOT}/templates/`
+
 **GitHub Actions:**
 - `paths` filter supports triggering on specific file changes (e.g., `.claude-plugin/plugin.json`)
 - `gh release create` available in Actions via `GITHUB_TOKEN`
@@ -59,7 +76,8 @@
 
 ## 4. Risks & Constraints
 
-- **marketplace.json must keep `source: "./"` on main** — changing to GitHub ref breaks local dev marketplace
+- **marketplace.json uses `source: "./src"`** — relative path that works for both local and GitHub marketplace
+- **Repo restructuring** — moving skills and templates to `src/` is a significant change; all path references must be updated
 - **No existing tags** — first release will be the first tag ever in the repo
 - **Action must be idempotent** — re-running on same version must not fail
 - **CHANGELOG.md must exist** when Action runs — changelog is generated before push in the post-apply workflow
@@ -90,7 +108,9 @@ All Clear — no questions.
 | # | Decision | Rationale | Alternatives Considered |
 |---|----------|-----------|------------------------|
 | 1 | GitHub Action for tag + release creation | Fully automated, no local dependencies, consistent, project already uses Actions | post_changelog hook (requires local gh), dedicated skill (not automatic), constitution convention (not automated) |
-| 2 | Keep marketplace.json `source: "./"` unchanged | Required for local marketplace development workflow (validated through testing) | GitHub source with ref (breaks local dev) |
+| 2 | Plugin source in `src/` subdirectory with `source: "./src"` | Clean consumer cache (only plugin files); works for both local and GitHub marketplace | Flat structure with `source: "./"` (consumers download everything), `git-subdir` (incompatible with local dev) |
 | 3 | Consumer version pinning via `#ref` at add-time | Works without marketplace.json changes; clean separation of dev vs consumer | ref field in marketplace.json source (mutually exclusive with local dev) |
-| 4 | DevContainer uses local marketplace | Developers working in the repo should use local filesystem, not GitHub clone | Keep GitHub marketplace (would load cached/outdated version) |
-| 5 | Update README developer docs | Current docs only mention `--plugin-dir` which doesn't work in VS Code | Leave as-is (inaccurate for VS Code users) |
+| 4 | Templates at `src/templates/` (flat, not `src/openspec/templates/`) | Cleaner plugin structure; setup skill path simplified | Keep `openspec/templates/` nesting (unnecessary depth inside plugin) |
+| 5 | CLAUDE.md stays at repo root, not in `src/` | CLAUDE.md is project config, not plugin code | CLAUDE.md in src/ (consumers don't need project rules) |
+| 6 | DevContainer uses local marketplace | Developers working in the repo should use local filesystem, not GitHub clone | Keep GitHub marketplace (would load cached/outdated version) |
+| 7 | Update README developer docs | Current docs only mention `--plugin-dir` which doesn't work in VS Code | Leave as-is (inaccurate for VS Code users) |
