@@ -16,21 +16,20 @@ GitHub Releases are currently a manual step after `/opsx:changelog`. Every archi
 
 ### New Capabilities
 
-- `plugin-distribution`: Defines the `src/` subdirectory structure for clean consumer distribution, marketplace source configuration, and the setup skill's template resolution from the plugin root.
+None.
 
 ### Modified Capabilities
 
-- `release-workflow`: Adding automated GitHub Release creation via CI, consumer version pinning, developer local marketplace workflow
+- `release-workflow`: Adding automated GitHub Release creation via CI, consumer version pinning, developer local marketplace workflow, plugin source directory structure (`src/`), marketplace source configuration, and repository layout separation
 - `project-setup`: Template copy path changes from `openspec/templates/` to `templates/` relative to plugin root
 
 ### Consolidation Check
 
 1. Existing specs reviewed: `release-workflow`, `workflow-contract`, `artifact-generation`, `project-setup`, `artifact-pipeline`, `three-layer-architecture`
 2. Overlap assessment:
-   - `release-workflow` covers version bumping, manual releases, consumer updates — auto-release extends this
+   - `release-workflow` covers version bumping, manual releases, consumer updates — auto-release, directory structure, and marketplace config all extend the same consumer distribution domain (same actor, trigger, data model)
    - `project-setup` covers `/opsx:setup` behavior — template path change modifies this
-   - `plugin-distribution` is a new concern (repo structure, consumer caching) not covered by any existing spec. Closest is `three-layer-architecture` but that covers the CONSTITUTION → WORKFLOW → Skills layering, not physical file distribution. 3+ requirements identified: directory structure, marketplace source config, consumer cache isolation.
-3. Merge assessment: `plugin-distribution` is distinct from existing specs — different actor (marketplace system), different trigger (plugin install), different data model (file paths, cache layout).
+3. Merge assessment: Directory structure + marketplace source + layout separation folded into `release-workflow` — they share actor (maintainer/consumer), trigger (plugin install/update), and data model (marketplace.json, plugin.json, file paths). No new spec needed.
 
 ## Impact
 
