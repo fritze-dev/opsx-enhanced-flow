@@ -54,6 +54,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 | Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
 | Dissolve schema directory; WORKFLOW.md + Smart Templates | Clean separation of orchestration and artifact definition; self-describing templates; one-way migration | [ADR-029](decisions/adr-029-dissolve-schema-directory.md) |
+| Verify preflight side-effect cross-check as step 8 with WARNING severity | Additive safety net; consistent with heuristic philosophy; two-pass matching (tasks then codebase) | [ADR-030](decisions/adr-030-verify-preflight-side-effect-cross-check.md) |
 
 ### Notable Trade-offs
 
@@ -86,6 +87,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **More commits per change (ADR-028)**: One commit per artifact instead of one bulk commit at proposal; intentional trade-off for better git traceability.
 - **Minimal initial PR body (ADR-028)**: Draft PR body is just "WIP: <name>" until the constitution standard task enriches it post-apply; teams must follow the branch for artifact content.
 - **gh CLI dependency for full PR functionality (ADR-028)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
+- **Free-form Section C parsing (ADR-030)**: Preflight side-effect analysis uses free-form markdown; parsing is inherently fragile. Generic side-effect descriptions are marked inconclusive rather than producing false warnings.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
 
