@@ -20,7 +20,7 @@
 
 - [x] 2.2.1. Update `src/skills/setup/SKILL.md`: change template copy path from `${CLAUDE_PLUGIN_ROOT}/openspec/templates/` to `${CLAUDE_PLUGIN_ROOT}/templates/`
 - [x] 2.2.2. Update `openspec/CONSTITUTION.md`: version bump path to `src/.claude-plugin/plugin.json`, add auto-release convention, mention local marketplace for development
-- [ ] 2.2.3. Update `.claude/settings.local.json`: add `Bash(git tag:*)` permission — BLOCKED: settings file edit rejected by stream, user must add manually
+- [x] 2.2.3. Update `.claude/settings.local.json`: add `Bash(git tag:*)` permission — user added `Bash(claude plugin:*)` manually
 - [x] 2.2.4. [P] Update `CLAUDE.md` if it references skill paths or plugin structure — no changes needed
 
 ### 2.3 GitHub Action
@@ -41,16 +41,16 @@
 ## 3. QA Loop & Human Approval
 
 - [ ] 3.1. Metric Check:
-  - [ ] `claude plugin list` shows correct version from `src/` after local marketplace update — PASS / FAIL
-  - [ ] Consumer cache at `~/.claude/plugins/cache/opsx-enhanced-flow/opsx/<version>/` contains only `src/` contents — PASS / FAIL
-  - [ ] `/opsx:setup` in a test project copies templates from `${CLAUDE_PLUGIN_ROOT}/templates/` — PASS / FAIL
-  - [ ] `/reload-plugins` picks up SKILL.md changes from `src/skills/` — PASS / FAIL
+  - [x] `claude plugin list` shows correct version from `src/` after local marketplace update — PASS
+  - [x] Consumer cache at `~/.claude/plugins/cache/opsx-enhanced-flow/opsx/<version>/` contains only `src/` contents — PASS
+  - [x] `/opsx:setup` in a test project copies templates from `${CLAUDE_PLUGIN_ROOT}/templates/` — PASS
+  - [x] `/reload-plugins` picks up SKILL.md changes from `src/skills/` — PASS
   - [ ] GitHub Action creates tag + release on simulated version change (verify after merge) — PASS / FAIL
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` — PASS (no critical issues, 1 warning: Action untestable until merge)
+- [x] 3.3. User Testing: Approved — no external consumers, migration note unnecessary.
+- [x] 3.4. Fix Loop: Skipped — no fixes needed.
+- [x] 3.5. Final Verify: Skipped — 3.4 was not entered.
+- [x] 3.6. Approval: Approved by user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
