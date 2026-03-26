@@ -2,11 +2,11 @@
 
 ## 1. Foundation
 
-- [ ] 1.1. Create `skills/docs-verify/` directory structure
+- [x] 1.1. Create `skills/docs-verify/` directory structure
 
 ## 2. Implementation
 
-- [ ] 2.1. Create `skills/docs-verify/SKILL.md` with full skill definition:
+- [x] 2.1. Create `skills/docs-verify/SKILL.md` with full skill definition:
   - Frontmatter (name, description, disable-model-invocation: false)
   - Input section (no arguments — operates on entire project)
   - Step 1: Prerequisite check (verify `openspec/WORKFLOW.md` exists)
