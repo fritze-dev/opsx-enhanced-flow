@@ -30,6 +30,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - `openspec/changes/<name>/proposal.md`
    - `openspec/changes/<name>/specs/*/spec.md`
    - `openspec/changes/<name>/design.md`
+   - `openspec/changes/<name>/preflight.md`
    - `openspec/changes/<name>/tasks.md`
 
 4. **Initialize verification report structure**
@@ -98,18 +99,35 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Add SUGGESTION: "Code pattern deviation: <details>"
      - Recommendation: "Consider following project pattern: <example>"
 
-8. **Generate Verification Report**
+8. **Verify Preflight Side-Effects**
+
+   Cross-check side-effects from preflight against tasks and implementation:
+   - Read `preflight.md` Section C (Side-Effect Analysis)
+   - Extract side-effect entries from tables or lists (look for risk descriptions with assessments)
+   - Filter out entries assessed as "NONE", "Zero", or similar (no actual risk identified)
+   - For each remaining side-effect:
+     1. Search `tasks.md` for a keyword match against the side-effect description
+     2. If no task match: search codebase for keyword evidence of the side-effect being addressed
+     3. If neither task nor code evidence found:
+        - Add WARNING: "Preflight side-effect not addressed: <side-effect description>"
+        - Recommendation: "Add a task or verify that this side-effect is handled in the implementation"
+     4. If task or code evidence found: mark as addressed, no issue raised
+   - If Section C contains no actionable side-effects (all NONE or empty): skip and note "No preflight side-effects to verify"
+   - If a side-effect description is too generic for meaningful keyword matching: skip that entry and note as inconclusive
+
+9. **Generate Verification Report**
 
    **Summary Scorecard**:
    ```
    ## Verification Report: <change-name>
 
    ### Summary
-   | Dimension    | Status           |
-   |--------------|------------------|
-   | Completeness | X/Y tasks, N reqs|
-   | Correctness  | M/N reqs covered |
-   | Coherence    | Followed/Issues  |
+   | Dimension      | Status           |
+   |----------------|------------------|
+   | Completeness   | X/Y tasks, N reqs|
+   | Correctness    | M/N reqs covered |
+   | Coherence      | Followed/Issues  |
+   | Side-Effects   | N checked, M unaddressed |
    ```
 
    **Issues by Priority**:
@@ -122,6 +140,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    2. **WARNING** (Should fix):
       - Spec/design divergences
       - Missing scenario coverage
+      - Unaddressed preflight side-effects
       - Each with specific recommendation
 
    3. **SUGGESTION** (Nice to fix):
@@ -139,6 +158,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 - **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
 - **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
 - **Coherence**: Look for glaring inconsistencies, don't nitpick style
+- **Side-Effects**: Use keyword matching from preflight Section C against tasks and codebase — skip entries that are too generic for meaningful matching
 - **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
 - **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
 

@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-26 — Verify Preflight Side-Effect Cross-Check
+
+### Changed
+- `/opsx:verify` now reads `preflight.md` and cross-checks side-effects from Section C against task entries and codebase evidence — side-effects that were documented in preflight but never captured as tasks are now caught as WARNING issues (closes #53)
+- Verification report summary scorecard includes a new "Side-Effects" row showing how many were checked and how many remain unaddressed
+- Side-effects assessed as "NONE" in the preflight are automatically filtered out — no false warnings for non-risks
+
 ## 2026-03-26 — Dissolve Schema Directory
 
 ### Added

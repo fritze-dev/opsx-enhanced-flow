@@ -2,7 +2,7 @@
 title: "Quality Gates"
 capability: "quality-gates"
 description: "Provides pre-implementation quality checks via /opsx:preflight and post-implementation verification via /opsx:verify."
-lastUpdated: "2026-03-24"
+lastUpdated: "2026-03-26"
 ---
 
 # Quality Gates
@@ -26,6 +26,7 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 - **Post-Implementation Verification (`/opsx:verify`)**: A check of the implementation against change artifacts across three dimensions, producing a report with issues classified as CRITICAL, WARNING, or SUGGESTION.
 - **Six Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, and Marker Audit.
 - **Three Verify Dimensions**: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy), and Coherence (design adherence and code pattern consistency).
+- **Preflight Side-Effect Cross-Check**: After checking the three dimensions, verify reads `preflight.md` Section C and cross-checks each identified side-effect against task entries and codebase evidence. Unaddressed side-effects are flagged as WARNINGs.
 - **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
 ## Behavior
@@ -82,6 +83,10 @@ When a new file does not follow the project's established naming convention (for
 
 When a change has only tasks but no specs or design, verification checks task completion only, skips spec coverage and design adherence checks, and notes in the report which checks were skipped and why. When a change has tasks but no delta specs (for example, a documentation-only change), the system skips requirement-level verification and focuses on task completion and code pattern coherence.
 
+#### Verification Catches Unaddressed Preflight Side-Effects
+
+After checking the three core dimensions, verify reads the preflight report's Side-Effect Analysis (Section C) and cross-checks each identified side-effect against your task list and the codebase. If a side-effect has a matching task or detectable implementation evidence, no issue is raised. If a side-effect has neither, the report includes a WARNING recommending you add a task or verify that the side-effect is handled. When all side-effects in Section C are assessed as having no risk, the cross-check is skipped and noted in the report.
+
 #### Final Verify Confirms Fix Loop Resolution
 
 When invoked as the final verification step after you have fixed all issues from the initial verify, the report reflects the current state of all artifacts -- including any specs updated during the fix loop -- and confirms whether all critical issues have been resolved.
@@ -90,6 +95,7 @@ When invoked as the final verification step after you have fixed all issues from
 
 - Verify uses heuristic keyword-based code search to find implementation evidence. If a requirement keyword matches unrelated code, the system prefers SUGGESTION severity to avoid false critical issues.
 - On very large codebases, verification scans focus on files referenced in the design and recently modified files rather than performing an exhaustive codebase search.
+- When a preflight side-effect description is too generic to produce meaningful keyword matches, the system skips that entry and notes it as inconclusive rather than raising a false warning.
 - All change artifacts (specs, design) are assumed to be available and up to date when preflight is invoked.
 
 ## Edge Cases
