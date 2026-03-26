@@ -1,23 +1,23 @@
 ---
 title: "Quality Gates"
 capability: "quality-gates"
-description: "Provides pre-implementation quality checks via /opsx:preflight and post-implementation verification via /opsx:verify."
+description: "Provides pre-implementation quality checks via /opsx:preflight, post-implementation verification via /opsx:verify, and documentation drift detection via /opsx:docs-verify."
 lastUpdated: "2026-03-26"
 ---
 
 # Quality Gates
 
-Two commands guard the quality of every change: `/opsx:preflight` checks your specs and design before implementation begins, and `/opsx:verify` checks your implementation against those specs after coding is done.
+Three commands guard the quality of every change: `/opsx:preflight` checks your specs and design before implementation begins, `/opsx:verify` checks your implementation against those specs after coding is done, and `/opsx:docs-verify` checks that your generated documentation still matches the current specs.
 
 ## Purpose
 
-Starting implementation on incomplete or contradictory specs wastes effort and produces code that does not match requirements. Similarly, finishing implementation without checking it against the specs risks shipping gaps and divergences. Quality gates address both risks -- preflight catches problems before any code is written, and verify catches problems before the change is archived.
+Starting implementation on incomplete or contradictory specs wastes effort and produces code that does not match requirements. Similarly, finishing implementation without checking it against the specs risks shipping gaps and divergences. And generated documentation can silently drift from specs after manual edits, multiple archive cycles, or hotfixes outside the spec process. Quality gates address all three risks -- preflight catches problems before any code is written, verify catches problems before the change is archived, and docs-verify catches documentation drift before it causes confusion.
 
 ## Rationale
 
-Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and marker audit) because each catches a different category of problem that would be expensive to fix during implementation. The marker audit dimension checks both assumption format compliance and the presence of unresolved `<!-- REVIEW -->` markers, since either issue indicates unfinished work that should not proceed to implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses three dimensions (completeness, correctness, and coherence) and classifies every finding by severity, giving you clear prioritization. Both commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions. The verify command serves as both the initial check and the final check in the QA loop -- no special flags or modes are needed because it always evaluates the current state.
+Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and marker audit) because each catches a different category of problem that would be expensive to fix during implementation. The marker audit dimension checks both assumption format compliance and the presence of unresolved `<!-- REVIEW -->` markers, since either issue indicates unfinished work that should not proceed to implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses three dimensions (completeness, correctness, and coherence) and classifies every finding by severity, giving you clear prioritization. Docs-verify uses semantic checks rather than diff-based regeneration because comparing structural elements (Purpose, requirement names, capability listings) is cheaper and produces more actionable output than regenerating docs in memory. All three commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions.
 
-> **Workflow sequence**: `/opsx:preflight` runs after the design phase and before task creation. `/opsx:verify` runs after implementation as part of the QA loop (steps 3.2 and 3.5 in tasks.md).
+> **Workflow sequence**: `/opsx:preflight` runs after the design phase and before task creation. `/opsx:verify` runs after implementation as part of the QA loop (steps 3.2 and 3.5 in tasks.md). `/opsx:docs-verify` runs anytime to check documentation freshness.
 
 ## Features
 
@@ -27,7 +27,8 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 - **Six Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, and Marker Audit.
 - **Three Verify Dimensions**: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy), and Coherence (design adherence and code pattern consistency).
 - **Preflight Side-Effect Cross-Check**: After checking the three dimensions, verify reads `preflight.md` Section C and cross-checks each identified side-effect against task entries and codebase evidence. Unaddressed side-effects are flagged as WARNINGs.
-- **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
+- **Documentation Drift Detection (`/opsx:docs-verify`)**: A check of generated documentation against current specs across three dimensions, producing a drift report with issues classified as CRITICAL, WARNING, or INFO and a verdict of CLEAN, DRIFTED, or OUT OF SYNC.
+- **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL). Docs-verify similarly prefers INFO over WARNING when uncertain.
 
 ## Behavior
 
@@ -91,12 +92,52 @@ After checking the three core dimensions, verify reads the preflight report's Si
 
 When invoked as the final verification step after you have fixed all issues from the initial verify, the report reflects the current state of all artifacts -- including any specs updated during the fix loop -- and confirms whether all critical issues have been resolved.
 
+### Docs-Verify: `/opsx:docs-verify`
+
+#### All Documentation Is In Sync
+
+When every spec has a corresponding capability doc, all archived design decisions have corresponding ADRs, and the README lists all capabilities with valid ADR references, the drift report shows no issues across all three dimensions. The verdict is "CLEAN."
+
+#### Capability Doc Missing For a Spec
+
+When a spec exists but no corresponding capability doc is found, the report includes a CRITICAL issue identifying the missing doc and recommending you run `/opsx:docs <capability-name>` to generate it. The verdict is "OUT OF SYNC."
+
+#### Capability Doc Omits a Requirement
+
+When a capability doc exists but does not cover a requirement present in the spec, the report includes a WARNING identifying the missing requirement and recommending regeneration. The verdict is "DRIFTED."
+
+#### README Missing a Capability
+
+When the README capabilities table does not list a spec that exists, the report includes a CRITICAL issue and recommends running `/opsx:docs` to regenerate the README.
+
+#### Stale ADR Reference in README
+
+When the README Key Design Decisions table references an ADR file that does not exist, the report includes a WARNING identifying the stale reference.
+
+#### Documentation Directory Does Not Exist
+
+When the docs directory has not been created yet, the system reports each spec as a missing capability doc (CRITICAL) without erroring, and recommends running `/opsx:docs` to generate initial documentation.
+
+#### No Archived Design Decisions to Check
+
+When no archives exist, the system skips the ADR dimension, notes it in the report, and still checks the other two dimensions.
+
+#### Manual ADR Without Design Decision Is Not Flagged
+
+Manual ADRs (files with the `adr-MNNN` prefix) are recognized and excluded from the cross-check against archived design decisions. No issue is raised for manual ADRs.
+
 ## Known Limitations
 
 - Verify uses heuristic keyword-based code search to find implementation evidence. If a requirement keyword matches unrelated code, the system prefers SUGGESTION severity to avoid false critical issues.
 - On very large codebases, verification scans focus on files referenced in the design and recently modified files rather than performing an exhaustive codebase search.
 - When a preflight side-effect description is too generic to produce meaningful keyword matches, the system skips that entry and notes it as inconclusive rather than raising a false warning.
 - All change artifacts (specs, design) are assumed to be available and up to date when preflight is invoked.
+- Docs-verify does not perform deep content comparison -- it checks structural alignment (presence of requirements, capabilities, ADRs), not prose-level semantic equivalence.
+
+## Future Enhancements
+
+- Auto-fixing drifted docs (deferred -- currently detection and reporting only; use `/opsx:docs` to regenerate)
+- Docs language consistency checking (deferred -- already handled by `/opsx:docs` generation logic)
 
 ## Edge Cases
 
@@ -104,3 +145,6 @@ When invoked as the final verification step after you have fixed all issues from
 - If a change has no spec files, preflight aborts and reports that specs must be created first.
 - If the tasks artifact does not exist, verify reports the missing artifact and suggests generating it.
 - If the codebase is modified while verify is running, the report reflects the state at the time of each individual check. The system does not lock files.
+- If a spec directory uses a different naming convention than the capability doc filename, docs-verify attempts to match by reading the doc's frontmatter or first heading before reporting it as missing.
+- If a capability doc exists but has no meaningful content, docs-verify classifies it as WARNING.
+- Docs-verify only checks the capabilities table and Key Design Decisions table within the README, not custom project-specific sections.

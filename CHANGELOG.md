@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-26 — Documentation Drift Verification
+
+### Added
+- `/opsx:docs-verify` command that checks generated documentation against current specs and reports drift — capability docs are verified against spec Purpose and Requirements, ADRs against archived design decisions, and the README against the constitution and capabilities list (closes #32)
+- Three-level severity classification (CRITICAL/WARNING/INFO) with verdicts: CLEAN, DRIFTED, or OUT OF SYNC
+- Graceful handling of missing documentation directories — the skill reports what's missing instead of erroring
+
+### Changed
+- Quality gates spec extended with a third gate — documentation drift verification joins preflight (pre-implementation) and verify (post-implementation) as the post-docs-generation quality check
+
 ## 2026-03-26 — Auto GitHub Releases
 
 ### Added

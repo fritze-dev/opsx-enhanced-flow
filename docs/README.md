@@ -8,7 +8,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
 
-3. **Skills** (`skills/*/SKILL.md`) — 12 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (5: new, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), and documentation (2: changelog, docs). All skills are model-invocable.
+3. **Skills** (`skills/*/SKILL.md`) — 13 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (5: new, ff, apply, verify, archive), governance (6: setup, bootstrap, discover, preflight, sync, docs-verify), and documentation (2: changelog, docs). All skills are model-invocable.
 
 Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed skill logic, skills depend on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
@@ -56,6 +56,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Dissolve schema directory; WORKFLOW.md + Smart Templates | Clean separation of orchestration and artifact definition; self-describing templates; one-way migration | [ADR-029](decisions/adr-029-dissolve-schema-directory.md) |
 | Verify preflight side-effect cross-check as step 8 with WARNING severity | Additive safety net; consistent with heuristic philosophy; two-pass matching (tasks then codebase) | [ADR-030](decisions/adr-030-verify-preflight-side-effect-cross-check.md) |
 | Plugin source in `src/`, auto GitHub Releases via CI, local marketplace for dev | Clean consumer cache; automated releases; VS Code-compatible dev workflow | [ADR-031](decisions/adr-031-auto-github-releases-and-plugin-source-restr.md) |
+| Documentation drift verification via semantic checks with CLEAN/DRIFTED/OUT OF SYNC verdicts | Structural element comparison is cheaper and more actionable than diff-based regeneration; three-tier severity matches existing quality gate patterns | [ADR-032](decisions/adr-032-documentation-drift-verification.md) |
 
 ### Notable Trade-offs
 
@@ -89,6 +90,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Minimal initial PR body (ADR-028)**: Draft PR body is just "WIP: <name>" until the constitution standard task enriches it post-apply; teams must follow the branch for artifact content.
 - **gh CLI dependency for full PR functionality (ADR-028)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
 - **Free-form Section C parsing (ADR-030)**: Preflight side-effect analysis uses free-form markdown; parsing is inherently fragile. Generic side-effect descriptions are marked inconclusive rather than producing false warnings.
+- **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
 
@@ -124,7 +126,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Capability | Description |
 |---|---|
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
-| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks and post-implementation verification |
+| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks, post-implementation verification, and documentation drift detection |
 | [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and pause-on-blocker |
 | [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with mandatory explicit human approval before archiving |
 
