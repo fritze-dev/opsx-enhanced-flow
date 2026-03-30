@@ -78,7 +78,7 @@ Tell the user:
 - **Structural Components** — Architecture layers, module boundaries, data model
 - **Operational Features** — Commands, workflows, user-facing functionality
 
-Each identified capability becomes its own spec file during archive.
+Each identified capability becomes its own spec file at `openspec/specs/<capability>/spec.md`.
 
 ---
 
@@ -97,7 +97,7 @@ Each identified capability becomes its own spec file during archive.
 
 Based on drift findings:
 - Update `openspec/CONSTITUTION.md` if tech stack, patterns, or conventions changed.
-- Create delta-spec changes for drifted capabilities via `/opsx:new`.
+- Create changes for drifted capabilities via `/opsx:new`.
 
 ### Step 9: Consistency Passes
 

@@ -40,7 +40,7 @@
 ## Standard Tasks
 
 <!-- Project-specific extras appended to the universal standard tasks in the schema template.
-     These items are added after the universal steps (archive, changelog, docs, push) in every tasks.md.
+     These items are added after the universal steps (changelog, docs, version bump, push) in every tasks.md.
      Pre-merge tasks are executed during post-apply workflow.
      Post-merge tasks are reminders — executed manually after the PR is merged. -->
 

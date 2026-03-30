@@ -77,7 +77,7 @@ For each relevant change found, read the following files from the change directo
 
 ### Step 3: Generate Enriched Capability Documentation
 
-**Skip unchanged capabilities:** Only generate docs for capabilities marked for regeneration in Step 1. Skip all others entirely — no archive reading, no generation, no file writes.
+**Skip unchanged capabilities:** Only generate docs for capabilities marked for regeneration in Step 1. Skip all others entirely — no change reading, no generation, no file writes.
 
 **Language reminder:** If Step 0 determined a non-English `docs_language`, generate all section headings and content in the target language. YAML frontmatter keys stay English; `title` and `description` values are translated.
 
@@ -149,7 +149,7 @@ Generate formal ADRs from `## Decisions` tables across completed changes' `desig
 
 **Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that change for ADR generation.
 
-**Consolidation heuristics:** Before assigning numbers, apply these rules to each archive's Decisions table:
+**Consolidation heuristics:** Before assigning numbers, apply these rules to each change's Decisions table:
 
 1. If the change's Decisions table has 3 or more rows AND the change represents a single-topic change (determined by: change name suggests one topic, all decisions reference the same capabilities) → consolidate all decisions into one ADR.
 2. If decisions within the same change clearly address different concerns (e.g., one about naming, another about data migration) → keep them as separate ADRs.
@@ -161,7 +161,7 @@ Generate formal ADRs from `## Decisions` tables across completed changes' `desig
 - **Single-decision ADRs**: `**Decision text** — rationale`
 
 **Consolidated ADR format:** A consolidated ADR uses:
-- **Title**: Derived from the archive name or the most significant decision row (e.g., "Rename init skill to setup")
+- **Title**: Derived from the change name or the most significant decision row (e.g., "Rename init skill to setup")
 - **Slug**: Derived from the consolidated title, not individual sub-decisions
 - **Decision section**: Numbered list of sub-decisions with individual rationale inline (em-dash pattern)
 - **Alternatives Considered**: Merged from all consolidated rows
@@ -185,7 +185,7 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 
 **For each decision (or consolidated group), generate `docs/decisions/adr-NNN-<slug>.md`** following the template structure. The template includes split Consequences (Positive/Negative) and a References section.
 
-**References (internal links only):** References SHALL contain only internal relative links — no external URLs (GitHub issues, external docs). The archive backlink provides traceability to GitHub issues via the archive's proposal.md.
+**References (internal links only):** References SHALL contain only internal relative links — no external URLs (GitHub issues, external docs). The change backlink provides traceability to GitHub issues via the change's proposal.md.
 
 The first reference in every ADR SHALL be the source change backlink: `[Change: <short-name>](../../openspec/changes/<change-dir>/)` where `<short-name>` is the change directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the change link, determine which specs are relevant to each decision. Read the change's `proposal.md` Capabilities section to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same change when decisions are related.
 
@@ -230,7 +230,7 @@ Create or update `docs/README.md` as the **single entry point** for all generate
 - **Rationale**: For generated ADRs, extract the inline rationale (the text after the em-dash `—` in the Decision section). For manual ADRs, extract from the `## Rationale` section if present.
 - **ADR link**: Link directly to the ADR file (e.g., `[ADR-001](decisions/adr-001-slug.md)`).
 
-List generated ADRs first (ordered by number), followed by manual ADRs (ordered by M-number). Do NOT read `design.md` archives for this table — ADR files are the single canonical source. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences. Include trade-offs that affect documentation consumers or represent meaningful constraints — every ADR with a substantive negative consequence should be represented.
+List generated ADRs first (ordered by number), followed by manual ADRs (ordered by M-number). Do NOT read `design.md` from change directories for this table — ADR files are the single canonical source. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences. Include trade-offs that affect documentation consumers or represent meaningful constraints — every ADR with a substantive negative consequence should be represented.
 
 **Capabilities section:** Group capabilities by the `category` field from baseline spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
 
@@ -312,4 +312,4 @@ No specs found in openspec/specs/. Run /opsx:ff to create specs first.
 - Do NOT generate `docs/architecture-overview.md` or `docs/decisions/README.md` — these are replaced by the consolidated README
 - Use consistent terminology across all generated docs
 - **Internal consistency check**: After generating each doc, verify that the Behavior section and Edge Cases section do not contradict each other. If an edge case qualifies a behavior (e.g., "X is blocked, unless user explicitly confirms"), the behavior section must reflect the nuance — not state an absolute that the edge case then contradicts.
-- **Step independence:** Each step must read its own source materials independently. Do not assume that data loaded during an earlier step is still available — steps may execute in separate contexts. This is especially critical for Step 4 (ADR generation), which needs full archive data independently of Step 2.
+- **Step independence:** Each step must read its own source materials independently. Do not assume that data loaded during an earlier step is still available — steps may execute in separate contexts. This is especially critical for Step 4 (ADR generation), which needs full change data independently of Step 2.

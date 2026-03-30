@@ -64,7 +64,7 @@ Verify that generated documentation accurately reflects the current state of spe
    - If a decision has no matching ADR, add WARNING: "Missing ADR for design decision: `<decision-text-summary>`" with reference to the change's `design.md`. Recommend: "Run `/opsx:docs` to generate missing ADRs."
 
    **Manual ADR handling:**
-   - Files matching `adr-M*.md` are manual ADRs. Do NOT check them against archived Decisions tables. Do NOT flag them as unmatched.
+   - Files matching `adr-M*.md` are manual ADRs. Do NOT check them against change Decisions tables. Do NOT flag them as unmatched.
 
    **Consolidation awareness:**
    - If a change has 3+ decision rows that map to a single consolidated ADR, count that as covered (not as missing ADRs).

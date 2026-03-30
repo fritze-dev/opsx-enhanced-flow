@@ -141,7 +141,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
    **Issues by Priority**:
 
-   1. **CRITICAL** (Must fix before archive):
+   1. **CRITICAL** (Must fix before proceeding):
       - Incomplete tasks
       - Missing requirement implementations
       - Each with specific, actionable recommendation

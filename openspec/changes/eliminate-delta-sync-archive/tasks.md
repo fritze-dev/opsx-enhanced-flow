@@ -34,7 +34,7 @@
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Checks:
+- [x] 3.1. Metric Checks:
   - `/opsx:ff` edits specs directly — no `specs/` subdir in change dir: PASS / FAIL
   - `src/skills/sync/SKILL.md` and `src/skills/archive/SKILL.md` deleted: PASS / FAIL
   - `/opsx:changelog` finds completed changes in `openspec/changes/*/`: PASS / FAIL
