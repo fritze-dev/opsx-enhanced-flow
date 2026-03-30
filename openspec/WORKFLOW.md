@@ -44,10 +44,10 @@ post_artifact: |
   If `gh` CLI is unavailable or not authenticated, skip PR creation.
   If push fails, continue with local commit — do not block the pipeline.
 
-# worktree:
-#   enabled: false
-#   path_pattern: .claude/worktrees/{change}
-#   auto_cleanup: false
+worktree:
+  enabled: true
+  path_pattern: .claude/worktrees/{change}
+  auto_cleanup: false
 
 context: |
   Always read and follow openspec/CONSTITUTION.md before proceeding.
