@@ -8,7 +8,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
 
-3. **Skills** (`skills/*/SKILL.md`) — 13 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (5: new, ff, apply, verify, archive), governance (6: setup, bootstrap, discover, preflight, sync, docs-verify), and documentation (2: changelog, docs). All skills are model-invocable.
+3. **Skills** (`skills/*/SKILL.md`) — Commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (new, ff, apply, verify, archive), governance (setup, bootstrap, discover, preflight, sync, docs-verify), and documentation (changelog, docs). All skills are model-invocable.
 
 Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed skill logic, skills depend on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
