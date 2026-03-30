@@ -10,7 +10,7 @@ Provides `/opsx:preflight` for pre-implementation quality checks across six dime
 
 ### Requirement: Preflight Quality Check
 
-The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:preflight`. The preflight check SHALL cover six dimensions: (A) Traceability Matrix -- mapping every requirement to scenarios and components, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, and (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md. The Marker Audit SHALL:
+The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:preflight`. The preflight check SHALL cover six dimensions: (A) Traceability Matrix -- mapping each capability listed in the proposal to its corresponding baseline spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, and (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md. The Marker Audit SHALL:
 1. Collect all `<!-- ASSUMPTION: ... -->` tags and verify each has an accompanying visible list item. Assumptions written entirely inside HTML comments (no visible text) SHALL be flagged as format violations.
 2. Rate each valid assumption as Acceptable Risk, Needs Clarification, or Blocking.
 3. Scan for any remaining `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers. Any REVIEW marker found SHALL be rated as Blocking, because REVIEW markers must be resolved before implementation.
@@ -76,7 +76,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 ### Requirement: Post-Implementation Verification
 
-The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess three dimensions: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy and scenario coverage), and Coherence (design adherence and code pattern consistency). Each issue found SHALL be classified as CRITICAL (must fix before archive), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
+The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess three dimensions: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy and scenario coverage), and Coherence (design adherence and code pattern consistency). The system SHALL read baseline specs at `openspec/specs/<capability>/spec.md` for the capabilities listed in the change's proposal to verify implementation against. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
 The system SHALL additionally read `preflight.md` and cross-check each side-effect identified in Section C (Side-Effect Analysis) against `tasks.md` entries and codebase implementation evidence. For each side-effect, the system SHALL search for a corresponding task in `tasks.md` (keyword match) or implementation evidence in the codebase (keyword heuristic). If a side-effect has neither a matching task nor detectable implementation evidence, the system SHALL report a WARNING issue with an actionable recommendation. If Section C contains no side-effects (e.g., all risks assessed as NONE), the system SHALL skip the cross-check and note it in the report.
 
@@ -93,7 +93,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **AND** the Completeness dimension shows all tasks and requirements covered
 - **AND** the Correctness dimension shows all scenarios satisfied
 - **AND** the Coherence dimension shows design adherence
-- **AND** the final assessment is "All checks passed. Ready for archive."
+- **AND** the final assessment is "All checks passed. Ready to proceed."
 
 #### Scenario: Verification finds critical issues
 
@@ -102,7 +102,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **WHEN** the user invokes `/opsx:verify`
 - **THEN** the report lists 2 CRITICAL issues: incomplete tasks and missing requirement implementation
 - **AND** each issue includes a specific recommendation (e.g., "Complete task: Add rate limiting middleware" and "Implement requirement: Session Timeout -- no session timeout logic found in auth module")
-- **AND** the final assessment states "2 critical issue(s) found. Fix before archiving."
+- **AND** the final assessment states "2 critical issue(s) found. Fix before proceeding."
 
 #### Scenario: Verification finds implementation diverging from spec
 
@@ -128,13 +128,12 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **AND** skips spec coverage and design adherence checks
 - **AND** notes in the report which checks were skipped and why
 
-#### Scenario: Verification with no delta specs
+#### Scenario: Verification with no spec changes
 
-- **GIVEN** a change that has tasks but no delta specs (e.g., a documentation-only change)
+- **GIVEN** a change that has tasks but the proposal lists no capability modifications
 - **WHEN** the user invokes `/opsx:verify`
 - **THEN** the system skips requirement-level verification
 - **AND** focuses on task completion and code pattern coherence
-- **AND** notes "No delta specs to verify against"
 
 #### Scenario: Final verify confirms fix loop resolved all issues
 
@@ -176,7 +175,7 @@ The system SHALL verify that generated documentation accurately reflects the cur
 
 1. **Capability Docs vs Specs** — For each spec in `openspec/specs/*/spec.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
 
-2. **ADRs vs Design Decisions** — The system SHALL scan all archived `design.md` files in `openspec/changes/archive/*/design.md` for Decisions tables and verify that each decision has a corresponding ADR in `docs/decisions/`. Missing ADRs SHALL be classified as WARNING. The system SHALL recognize manual ADRs (prefix `adr-MNNN`) and skip them during the cross-check, since they have no corresponding design.md entry.
+2. **ADRs vs Design Decisions** — The system SHALL scan all completed change directories' `design.md` files in `openspec/changes/*/design.md` for Decisions tables and verify that each decision has a corresponding ADR in `docs/decisions/`. Missing ADRs SHALL be classified as WARNING. The system SHALL recognize manual ADRs (prefix `adr-MNNN`) and skip them during the cross-check, since they have no corresponding design.md entry.
 
 3. **README vs Current State** — The system SHALL verify that `docs/README.md` lists all current capabilities from `openspec/specs/` in its capabilities table, that the Key Design Decisions table references existing ADRs, and that the architecture overview is consistent with `openspec/CONSTITUTION.md`. Missing capabilities in the README SHALL be classified as CRITICAL. Stale ADR references (pointing to deleted or renamed ADRs) SHALL be classified as WARNING.
 

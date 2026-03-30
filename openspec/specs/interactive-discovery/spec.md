@@ -92,7 +92,7 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 - **Change has pre-existing research.md**: If research.md already exists from a previous discovery or from `/opsx:continue`, the system SHALL overwrite it with fresh research. The user is warned that existing research will be replaced.
 - **No baseline specs exist**: If `openspec/specs/` is empty (as in a bootstrap scenario), the system SHALL proceed without stale-spec analysis and note "No baseline specs to compare against."
 - **User invokes discover on a completed change**: If the change has all artifacts complete, the system SHALL still allow discovery to re-run research, since the user may want to revisit decisions. It SHALL warn that re-running research may invalidate downstream artifacts.
-- **Ambiguous change selection**: If multiple active changes exist and no name is provided, the system SHALL list directories under `openspec/changes/` (excluding `archive/`) and ask the user to select one.
+- **Ambiguous change selection**: If multiple active changes exist and no name is provided, the system SHALL list active change directories under `openspec/changes/` (those with unchecked tasks or no tasks.md) and ask the user to select one.
 
 ## Assumptions
 

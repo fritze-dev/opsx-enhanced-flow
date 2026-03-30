@@ -4,28 +4,30 @@ category: change-workflow
 ---
 ## Purpose
 
-Manages the change lifecycle including workspace creation (`/opsx:new`), schema-defined workspace structure, and change archiving (`/opsx:archive`) with date-prefixed directory naming and automatic spec sync.
+Manages the change lifecycle including workspace creation (`/opsx:new`), date-prefixed workspace structure, worktree isolation, worktree context detection, lazy worktree cleanup, and active/completed change detection based on task status.
 
 ## Requirements
 
 ### Requirement: Create Change Workspace
 
-The system SHALL create a change workspace when the user invokes `/opsx:new <change-name>`. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement). Otherwise, the workspace SHALL be created by running `mkdir -p openspec/changes/<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
+The system SHALL create a change workspace when the user invokes `/opsx:new <change-name>`. The workspace directory SHALL use a creation-date prefix in the format `YYYY-MM-DD-<change-name>`, set at creation time and never changed. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement). Otherwise, the workspace SHALL be created by running `mkdir -p openspec/changes/YYYY-MM-DD-<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
 
-**User Story:** As a developer I want to create a new change workspace with a single command, so that I can immediately begin the spec-driven workflow without manual directory setup.
+**User Story:** As a developer I want to create a new change workspace with a date-prefixed directory, so that changes are chronologically ordered from creation and I can immediately begin the spec-driven workflow.
 
-#### Scenario: Create workspace with explicit name
+#### Scenario: Create workspace with date prefix
 
 - **GIVEN** no change named "add-user-auth" exists
+- **AND** today's date is 2026-04-01
 - **WHEN** the user invokes `/opsx:new add-user-auth`
-- **THEN** the system creates the workspace (worktree if enabled, directory otherwise)
-- **AND** the system reads WORKFLOW.md to determine the artifact pipeline and displays the artifact status and first artifact template
+- **THEN** the system creates the workspace at `openspec/changes/2026-04-01-add-user-auth/`
+- **AND** reads WORKFLOW.md to determine the artifact pipeline and displays the artifact status
 
 #### Scenario: Derive name from description
 
 - **WHEN** the user invokes `/opsx:new` and provides the description "add user authentication"
+- **AND** today's date is 2026-04-01
 - **THEN** the system derives the kebab-case name `add-user-auth`
-- **AND** creates the workspace at `openspec/changes/add-user-auth/`
+- **AND** creates the workspace at `openspec/changes/2026-04-01-add-user-auth/`
 
 #### Scenario: Reject invalid name format
 
@@ -36,106 +38,34 @@ The system SHALL create a change workspace when the user invokes `/opsx:new <cha
 
 #### Scenario: Change name already exists
 
-- **GIVEN** a change named "add-user-auth" already exists at `openspec/changes/add-user-auth/`
+- **GIVEN** a change directory matching `*-add-user-auth` already exists under `openspec/changes/`
 - **WHEN** the user invokes `/opsx:new add-user-auth`
 - **THEN** the system SHALL NOT create a duplicate workspace
 - **AND** SHALL suggest continuing the existing change instead
 
 ### Requirement: Workspace Structure
 
-The created workspace SHALL contain the artifacts defined by the active schema. The artifact pipeline sequence SHALL be determined by the schema definition in `openspec/schemas/opsx-enhanced/schema.yaml` (e.g., research, proposal, specs, design, preflight, tasks for the `opsx-enhanced` schema). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next.
+The created workspace SHALL contain the artifacts defined by the pipeline in WORKFLOW.md. The artifact pipeline sequence SHALL be determined by the `pipeline` array in `openspec/WORKFLOW.md` frontmatter (e.g., research, proposal, specs, design, preflight, tasks). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next. The workspace SHALL NOT contain a `specs/` subdirectory — spec changes are made directly to baseline specs in `openspec/specs/`.
 
-**User Story:** As a developer I want the workspace to be pre-structured according to the workflow schema, so that I know exactly which artifacts need to be produced and in what order.
+**User Story:** As a developer I want the workspace to be pre-structured according to the workflow pipeline, so that I know exactly which artifacts need to be produced and in what order.
 
-#### Scenario: Workspace contains schema-defined structure
+#### Scenario: Workspace contains pipeline-defined structure
 
 - **GIVEN** the user creates a new change
 - **WHEN** the workspace is created
-- **THEN** the directory `openspec/changes/<name>/` SHALL exist
-- **AND** reading schema.yaml and checking file existence SHALL report all pipeline artifacts as pending
+- **THEN** the directory `openspec/changes/YYYY-MM-DD-<name>/` SHALL exist
+- **AND** reading WORKFLOW.md and checking file existence SHALL report all pipeline artifacts as pending
 
 #### Scenario: Artifact dependency gating
 
-- **GIVEN** a workspace created with the `opsx-enhanced` schema
+- **GIVEN** a workspace created with the standard pipeline
 - **WHEN** the user checks artifact status before creating any artifacts
 - **THEN** only the first artifact in the pipeline (research) SHALL have status "ready"
 - **AND** downstream artifacts (proposal, specs, design, preflight, tasks) SHALL be blocked by unmet dependencies
 
-### Requirement: Archive Completed Change
-
-The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. The move operation SHALL stage both the new archive path and the old change directory deletions in Git, ensuring a clean working tree after the archive commit. Before archiving, the system SHALL automatically sync delta specs to baseline specs if unsynced delta specs exist, showing a summary of applied changes. The system SHALL NOT prompt the user to choose between syncing and archiving. When sync is delegated to a subagent, the subagent prompt SHALL convey that sync is a blocking prerequisite for archive and that the result MUST be returned before the workflow continues. After the sync agent returns, the archive skill SHALL validate sync completion by checking file system state: for each delta spec capability at `openspec/changes/<name>/specs/<capability>/`, a corresponding baseline spec MUST exist at `openspec/specs/<capability>/spec.md`. The system SHALL NOT proceed to archive unless all delta spec capabilities have corresponding baseline specs. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
-
-**User Story:** As a developer I want completed changes archived with a date prefix and automatic spec sync, so that the project history is preserved chronologically and baseline specs stay up to date without unnecessary prompts.
-
-#### Scenario: Archive a completed change
-
-- **GIVEN** a change named "add-user-auth" with all artifacts and tasks complete
-- **AND** no delta specs exist in the change
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system moves `openspec/changes/add-user-auth/` to `openspec/changes/archive/2026-03-02-add-user-auth/`
-- **AND** displays a summary including change name, schema, and archive location
-
-#### Scenario: Archive stages both new and old paths
-
-- **GIVEN** a change named "add-user-auth" with committed artifacts
-- **WHEN** the system performs the archive move
-- **THEN** the new archive path `openspec/changes/archive/2026-03-02-add-user-auth/` SHALL be staged in Git
-- **AND** the old change path `openspec/changes/add-user-auth/` deletions SHALL be staged in Git
-- **AND** the working tree SHALL be clean after the archive commit
-
-#### Scenario: Auto-sync before archiving
-
-- **GIVEN** a change named "add-user-auth" with delta specs in `openspec/changes/add-user-auth/specs/`
-- **AND** the delta specs have not been synced to baseline
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL invoke sync via a subagent whose prompt conveys that sync is a blocking prerequisite
-- **AND** SHALL wait for the sync agent to return its result
-- **AND** SHALL validate sync completion by checking that `openspec/specs/user-auth/spec.md` exists
-- **AND** SHALL display a summary of applied changes (additions, modifications, removals)
-- **AND** SHALL proceed to archive only after validation passes
-
-#### Scenario: State-based validation prevents premature archive
-
-- **GIVEN** a change with delta specs for capabilities "user-auth" and "data-export"
-- **WHEN** the sync subagent returns
-- **THEN** the archive skill SHALL check that `openspec/specs/user-auth/spec.md` exists
-- **AND** SHALL check that `openspec/specs/data-export/spec.md` exists
-- **AND** SHALL NOT proceed to the archive step (mv to archive directory) until all checks pass
-
-#### Scenario: Baseline spec missing after sync
-
-- **GIVEN** a change with a delta spec for capability "user-auth"
-- **WHEN** the sync subagent returns
-- **AND** `openspec/specs/user-auth/spec.md` does not exist
-- **THEN** the archive skill SHALL report which capabilities are missing baseline specs
-- **AND** SHALL NOT proceed to archive
-
-#### Scenario: Archive with incomplete artifacts
-
-- **GIVEN** a change with some artifacts not marked as done
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL display a warning listing the incomplete artifacts
-- **AND** SHALL ask the user to confirm before proceeding
-- **AND** SHALL archive if the user confirms
-
-#### Scenario: Archive target already exists
-
-- **GIVEN** a change named "add-user-auth"
-- **AND** an archive already exists at `openspec/changes/archive/2026-03-02-add-user-auth/`
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL fail with an error
-- **AND** SHALL suggest renaming the existing archive or using a different date
-
-#### Scenario: Archive with incomplete tasks
-
-- **GIVEN** a change with a tasks.md containing 3 of 7 checkboxes marked complete
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL display a warning showing "3/7 tasks complete"
-- **AND** SHALL ask the user to confirm before proceeding
-
 ### Requirement: Create Worktree-Based Workspace
 
-The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name. The system SHALL run `git worktree add <path> -b <change-name>` to create the worktree and then `mkdir -p openspec/changes/<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
+The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). The system SHALL run `git worktree add <path> -b <change-name>` to create the worktree and then `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
 
 **User Story:** As a developer I want each change to be created in its own git worktree, so that parallel changes are fully isolated and cannot conflict with each other.
 
@@ -143,9 +73,10 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 
 - **GIVEN** WORKFLOW.md has `worktree.enabled: true` and `worktree.path_pattern: .claude/worktrees/{change}`
 - **AND** no worktree for "add-user-auth" exists
+- **AND** today's date is 2026-04-01
 - **WHEN** the user invokes `/opsx:new add-user-auth`
 - **THEN** the system runs `git worktree add .claude/worktrees/add-user-auth -b add-user-auth`
-- **AND** creates `openspec/changes/add-user-auth/` inside the worktree
+- **AND** creates `openspec/changes/2026-04-01-add-user-auth/` inside the worktree
 - **AND** reports the worktree path and branch name
 
 #### Scenario: Worktree already exists
@@ -159,21 +90,22 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 #### Scenario: Worktree disabled falls back to directory creation
 
 - **GIVEN** WORKFLOW.md does not have `worktree.enabled: true` (absent or false)
+- **AND** today's date is 2026-04-01
 - **WHEN** the user invokes `/opsx:new add-user-auth`
-- **THEN** the system SHALL create `openspec/changes/add-user-auth/` in the current working tree (existing behavior)
+- **THEN** the system SHALL create `openspec/changes/2026-04-01-add-user-auth/` in the current working tree
 
 ### Requirement: Worktree Context Detection
 
-All change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discover`, `preflight`) SHALL detect the active change from worktree context before falling through to directory-based detection. The detection SHALL: (1) check if the current working directory is inside a git worktree by inspecting `git rev-parse --git-dir` for a path containing `/worktrees/`, (2) derive the change name from the current branch via `git rev-parse --abbrev-ref HEAD`, (3) verify that `openspec/changes/<branch-name>/` exists in the current working tree. If all checks pass, the skill SHALL auto-select this change and announce: "Detected worktree context: using change '<name>'". If the directory does not exist, the skill SHALL fall through to normal detection logic.
+All change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) SHALL detect the active change from worktree context before falling through to directory-based detection. The detection SHALL: (1) check if the current working directory is inside a git worktree by inspecting `git rev-parse --git-dir` for a path containing `/worktrees/`, (2) derive the change name from the current branch via `git rev-parse --abbrev-ref HEAD`, (3) search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree. If a match is found, the skill SHALL auto-select this change and announce: "Detected worktree context: using change '<name>'". If no matching directory exists, the skill SHALL fall through to normal detection logic.
 
 **User Story:** As a developer working in a worktree I want skills to automatically know which change I'm working on, so that I don't have to specify the change name every time.
 
 #### Scenario: Auto-detect change from worktree
 
 - **GIVEN** the user is in a git worktree on branch `add-user-auth`
-- **AND** `openspec/changes/add-user-auth/` exists in the worktree
+- **AND** `openspec/changes/2026-04-01-add-user-auth/` exists in the worktree
 - **WHEN** any change-detecting skill is invoked without an explicit change name
-- **THEN** the skill SHALL auto-select "add-user-auth"
+- **THEN** the skill SHALL auto-select "2026-04-01-add-user-auth"
 - **AND** announce "Detected worktree context: using change 'add-user-auth'"
 
 #### Scenario: Fall through when not in worktree
@@ -185,7 +117,7 @@ All change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discov
 #### Scenario: Fall through when change directory missing
 
 - **GIVEN** the user is in a git worktree on branch `some-branch`
-- **AND** `openspec/changes/some-branch/` does NOT exist
+- **AND** no directory matching `openspec/changes/*-some-branch/` exists
 - **WHEN** any change-detecting skill is invoked
 - **THEN** the skill SHALL fall through to normal detection logic
 
@@ -195,77 +127,81 @@ All change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discov
 - **WHEN** a skill is invoked with explicit argument `other-change`
 - **THEN** the skill SHALL use "other-change" regardless of worktree context
 
-### Requirement: Worktree Cleanup After Archive
+### Requirement: Lazy Worktree Cleanup at Change Creation
 
-The `/opsx:archive` skill SHALL offer worktree cleanup after archiving when the session is in a worktree. The skill SHALL read `worktree.auto_cleanup` from WORKFLOW.md. If `auto_cleanup` is `true`, the system SHALL navigate to the main repository, run `git worktree remove <path>`, and delete the branch. To determine whether the branch has been merged, the system SHALL first check the PR merge status via `gh pr view <branch> --json state`. If the PR state is `MERGED`, the system SHALL use `git branch -D <branch>` (force delete). If `gh` is unavailable, not authenticated, or no PR exists for the branch, the system SHALL fall back to `git branch -d <branch>`. If `auto_cleanup` is `false` or absent, the system SHALL inform the user how to clean up manually (`git worktree remove <path>`).
+The `/opsx:new` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), check whether the associated branch has been merged by running `gh pr view <branch-name> --json state --jq '.state'`. If the PR state is `MERGED`, the system SHALL automatically remove the worktree via `git worktree remove <path>` and delete the branch via `git branch -D <branch-name>`. If `gh` is unavailable or no PR exists, the system SHALL fall back to `git branch -d <branch-name>` (which only deletes if merged). The system SHALL report cleaned-up worktrees before proceeding with new change creation.
 
-**User Story:** As a developer I want worktrees cleaned up after archiving, so that stale worktrees don't accumulate on disk.
+**User Story:** As a developer I want stale worktrees cleaned up automatically when I start a new change, so that merged branches don't accumulate on disk.
 
-#### Scenario: Auto-cleanup after archive
+#### Scenario: Cleanup merged worktree at new change creation
 
-- **GIVEN** the user is in a worktree at `.claude/worktrees/add-user-auth`
-- **AND** WORKFLOW.md has `worktree.auto_cleanup: true`
-- **WHEN** the user completes `/opsx:archive`
-- **THEN** the system navigates to the main repository
-- **AND** runs `git worktree remove .claude/worktrees/add-user-auth`
-- **AND** deletes the merged branch `add-user-auth`
+- **GIVEN** a worktree exists at `.claude/worktrees/fix-auth` on branch `fix-auth`
+- **AND** the PR for `fix-auth` has state "MERGED"
+- **WHEN** the user invokes `/opsx:new add-logging`
+- **THEN** the system runs `git worktree remove .claude/worktrees/fix-auth`
+- **AND** runs `git branch -D fix-auth`
+- **AND** reports "Cleaned up stale worktree: fix-auth (merged)"
+- **AND** proceeds to create the new change
 
-#### Scenario: Branch deletion after squash merge
+#### Scenario: No stale worktrees
 
-- **GIVEN** the user is in a worktree on branch `add-user-auth`
-- **AND** the PR for `add-user-auth` was squash-merged to main
-- **AND** WORKFLOW.md has `worktree.auto_cleanup: true`
-- **WHEN** the system attempts to delete the branch during cleanup
-- **THEN** the system runs `gh pr view add-user-auth --json state`
-- **AND** the result shows `"state": "MERGED"`
-- **AND** the system runs `git branch -D add-user-auth`
+- **GIVEN** no worktrees exist besides the main working tree
+- **WHEN** the user invokes `/opsx:new add-logging`
+- **THEN** the system proceeds directly to change creation without cleanup messages
 
-#### Scenario: Branch deletion without gh CLI
+#### Scenario: Worktree with unmerged branch preserved
 
-- **GIVEN** the user is in a worktree on branch `add-user-auth`
-- **AND** `gh` CLI is unavailable or not authenticated
-- **AND** WORKFLOW.md has `worktree.auto_cleanup: true`
-- **WHEN** the system attempts to delete the branch during cleanup
-- **THEN** the system falls back to `git branch -d add-user-auth`
+- **GIVEN** a worktree exists at `.claude/worktrees/wip-feature` on branch `wip-feature`
+- **AND** the PR for `wip-feature` is still open (state "OPEN")
+- **WHEN** the user invokes `/opsx:new add-logging`
+- **THEN** the system SHALL NOT remove the `wip-feature` worktree
+- **AND** proceeds to create the new change
 
-#### Scenario: Branch deletion without PR
+#### Scenario: Cleanup without gh CLI
 
-- **GIVEN** the user is in a worktree on branch `add-user-auth`
-- **AND** no PR exists for branch `add-user-auth`
-- **AND** WORKFLOW.md has `worktree.auto_cleanup: true`
-- **WHEN** the system attempts to delete the branch during cleanup
-- **THEN** the system falls back to `git branch -d add-user-auth`
+- **GIVEN** a worktree exists on branch `fix-auth`
+- **AND** `gh` CLI is unavailable
+- **WHEN** the system attempts cleanup
+- **THEN** the system falls back to `git branch -d fix-auth`
+- **AND** if the branch was fully merged to main, it is deleted and the worktree removed
+- **AND** if the branch was NOT merged, `git branch -d` fails and the worktree is preserved
 
-#### Scenario: Manual cleanup instructions
+### Requirement: Active vs Completed Change Detection
 
-- **GIVEN** the user is in a worktree
-- **AND** WORKFLOW.md has `worktree.auto_cleanup: false` or the field is absent
-- **WHEN** the user completes `/opsx:archive`
-- **THEN** the system informs the user: "Worktree at <path> still exists. Run `git worktree remove <path>` to clean up."
+Skills SHALL distinguish active from completed changes based on task completion status. A change is considered **active** if its `tasks.md` contains at least one unchecked item (`- [ ]`) or if `tasks.md` does not exist (artifacts still in progress). A change is considered **completed** if its `tasks.md` exists and all items are checked (`- [x]`). Skills that operate on active changes (apply, ff, verify, discover, preflight) SHALL filter to active changes when listing available changes. Skills that operate on completed changes (changelog, docs) SHALL filter to completed changes.
 
-#### Scenario: Not in worktree — no cleanup
+**User Story:** As a developer I want the system to automatically distinguish between active and completed changes, so that skills operate on the right set of changes without manual tagging.
 
-- **GIVEN** the user is in the main working tree
-- **WHEN** the user completes `/opsx:archive`
-- **THEN** the system SHALL NOT mention worktree cleanup (existing behavior)
+#### Scenario: Active change has unchecked tasks
+
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with tasks.md containing 3 unchecked items
+- **WHEN** `/opsx:apply` lists available changes
+- **THEN** the change is shown as available for implementation
+
+#### Scenario: Completed change has all tasks checked
+
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with tasks.md where all items are `- [x]`
+- **WHEN** `/opsx:changelog` lists available changes
+- **THEN** the change is included in changelog generation
+
+#### Scenario: Change without tasks.md is active
+
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with research.md and proposal.md but no tasks.md
+- **WHEN** `/opsx:ff` lists available changes
+- **THEN** the change is shown as available for artifact generation
 
 ## Edge Cases
 
-- **No active changes**: If no active changes exist when archiving, the system SHALL inform the user and suggest creating a new change.
-- **Multiple active changes**: If multiple changes exist and the user does not specify which to archive, the system SHALL list available changes and ask the user to select one. It SHALL NOT auto-select.
+- **Date collision**: If two changes are created on the same day with the same name (e.g., after deleting and recreating), the system SHALL detect the existing directory and suggest continuing instead.
 - **Branch already exists**: If `git worktree add` fails because the branch already exists, try `git worktree add <path> <branch>` to reuse the existing branch.
 - **Worktree path exists but is not a git worktree**: Fail with error — do not overwrite arbitrary directories.
-- **Dirty worktree during cleanup**: `git worktree remove` fails on dirty worktrees. Report the error and suggest `--force` or committing changes first.
-- **`gh` CLI unavailable during branch deletion**: Fall back to `git branch -d`. If that also fails (squash merge without `gh`), report the error and suggest `git branch -D <branch>` manually.
+- **Dirty worktree during cleanup**: `git worktree remove` fails on dirty worktrees. Report the error and skip this worktree.
+- **`gh` CLI unavailable during cleanup**: Fall back to `git branch -d`. If that also fails, skip this worktree and continue.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
-- **Untracked files in change directory:** If the change directory contains files not yet tracked by Git, the `git add` of the old path records only tracked file deletions. Untracked files are removed by the `mv` but produce no Git diff — this is acceptable since they were never committed.
-- **Baseline spec already existed before sync:** If the baseline spec already existed (e.g., MODIFIED delta), the existence check still passes — the sync updated it in place. The check validates that sync didn't fail to create new specs, not that it modified existing ones correctly (content correctness is the sync skill's responsibility).
-- **Delta specs already synced:** When delta specs exist but are already in sync with baseline, the auto-sync is a no-op. The system proceeds to archive without additional output.
-- **Sync failure:** If the sync operation fails, the system SHALL report the error and stop. It SHALL NOT proceed to archive with unsynced specs.
+- **Legacy archive directories**: After migration, no `openspec/changes/archive/` directory should exist. If found, skills SHALL treat contents as regular completed changes.
 
 ## Assumptions
 
 - The system clock provides the correct date for the YYYY-MM-DD prefix. <!-- ASSUMPTION: System clock accuracy -->
-- The file system supports the mv operation atomically within the same mount point. <!-- ASSUMPTION: Atomic mv -->
 No further assumptions beyond those marked above.

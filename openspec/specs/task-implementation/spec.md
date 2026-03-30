@@ -10,7 +10,7 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 ### Requirement: Implement Tasks from Task List
 
-The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, specs, design, tasks) from the change directory before beginning implementation. The system SHALL read the `apply.instruction` field from schema.yaml for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
+The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, design, tasks) from the change directory and baseline specs from `openspec/specs/` for the capabilities listed in the proposal before beginning implementation. The system SHALL read the `apply.instruction` field from WORKFLOW.md for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
@@ -85,7 +85,7 @@ The system SHALL report implementation progress using checkbox counts from the t
 
 ### Requirement: Standard Tasks Exclusion from Apply Scope
 
-The system SHALL distinguish between implementation tasks (Foundation, Implementation, QA Loop sections) and standard tasks (Post-Implementation section) in the generated `tasks.md`. During `/opsx:apply`, the system SHALL only process tasks in the implementation and QA sections. Standard tasks in the Post-Implementation section SHALL NOT be executed by the apply phase. Standard tasks SHALL remain as unchecked `- [ ]` items after apply completes. The standard tasks section SHALL be included in the total checkbox count for progress reporting, reflecting the full workflow completion state. The `/opsx:archive` incomplete-task check SHALL detect unchecked standard tasks, providing a safety net against forgotten post-implementation steps. During the post-apply workflow, the system SHALL mark all standard task checkboxes as complete in `tasks.md` — including universal steps and constitution-defined pre-merge extras — before creating the final commit, so that the committed file reflects the fully-checked state. Constitution-defined post-merge tasks SHALL remain unchecked as reminders for manual execution after the PR is merged.
+The system SHALL distinguish between implementation tasks (Foundation, Implementation, QA Loop sections) and standard tasks (Post-Implementation section) in the generated `tasks.md`. During `/opsx:apply`, the system SHALL only process tasks in the implementation and QA sections. Standard tasks in the Post-Implementation section SHALL NOT be executed by the apply phase. Standard tasks SHALL remain as unchecked `- [ ]` items after apply completes. The standard tasks section SHALL be included in the total checkbox count for progress reporting, reflecting the full workflow completion state. During the post-apply workflow, the system SHALL mark all standard task checkboxes as complete in `tasks.md` — including universal steps and constitution-defined pre-merge extras — before creating the final commit, so that the committed file reflects the fully-checked state. Constitution-defined post-merge tasks SHALL remain unchecked as reminders for manual execution after the PR is merged.
 
 **User Story:** As a developer I want post-implementation workflow steps tracked as checkboxes in my task list but not executed by apply, so that I have a visible, auditable checklist for post-apply steps without conflating them with implementation work.
 
@@ -104,16 +104,9 @@ The system SHALL distinguish between implementation tasks (Foundation, Implement
 - **THEN** the system SHALL display "5/8 tasks complete"
 - **AND** SHALL indicate that standard tasks remain for post-apply workflow
 
-#### Scenario: Archive warns on unchecked standard tasks
-
-- **GIVEN** a tasks.md with all implementation tasks complete but 2 standard tasks unchecked
-- **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL warn that 2 tasks remain incomplete
-- **AND** SHALL list the unchecked standard tasks
-
 #### Scenario: All standard tasks marked before commit
 
-- **GIVEN** a tasks.md with all implementation tasks complete and standard tasks including universal steps (archive, changelog, docs, commit and push), pre-merge extras (e.g., update PR), and post-merge extras (e.g., update plugin) unchecked
+- **GIVEN** a tasks.md with all implementation tasks complete and standard tasks including universal steps (changelog, docs, version bump, commit and push), pre-merge extras (e.g., update PR), and post-merge extras (e.g., update plugin) unchecked
 - **AND** the post-apply workflow has completed all steps including pre-merge constitution extras
 - **WHEN** the system is about to create the final commit
 - **THEN** the system SHALL mark universal and pre-merge standard task checkboxes as `- [x]` in tasks.md
@@ -121,40 +114,29 @@ The system SHALL distinguish between implementation tasks (Foundation, Implement
 - **AND** the committed tasks.md SHALL reflect the pre-merge/post-merge distinction
 - **AND** no extra follow-up commit SHALL be needed for pre-merge standard task checkboxes
 
-### Requirement: Baseline Spec Exclusion from Implementation Scope
+### Requirement: Baseline Spec Edits During Implementation
 
-The system SHALL NOT include tasks that modify baseline spec files (`openspec/specs/`) in the generated task list. Baseline spec changes SHALL flow exclusively through delta specs and `/opsx:sync`. During task generation, the system SHALL exclude any edits to files matching `openspec/specs/**/*` from implementation tasks. During `/opsx:apply`, the system SHALL NOT modify any file under `openspec/specs/` as part of task implementation. If a task description references baseline spec edits, the system SHALL skip that edit and note that spec changes are handled by `/opsx:sync`. Implementation tasks (sections 1-2) SHALL NOT include sync, archive, or other post-apply workflow steps. These steps MAY appear in the Standard Tasks section if defined in the project constitution.
+The system SHALL allow implementation tasks to modify baseline spec files (`openspec/specs/`) when required by the task description. Specs are edited directly during the specs stage and may need refinements during implementation. Implementation tasks (sections 1-2) SHALL NOT include post-apply workflow steps (changelog, docs, version bump). These steps SHALL appear in the Standard Tasks section.
 
-**User Story:** As a developer I want baseline specs to only be updated via the sync pipeline, so that there is a single authoritative path for spec changes and delta specs remain meaningful.
+**User Story:** As a developer I want to be able to refine specs during implementation if needed, so that specs stay accurate as implementation reveals edge cases.
 
-#### Scenario: Task generation excludes baseline spec edits
+#### Scenario: Task refines a baseline spec during implementation
 
-- **GIVEN** a change with delta specs that modify existing capabilities
-- **AND** the design includes both code changes and spec requirement changes
-- **WHEN** the tasks artifact is generated
-- **THEN** the generated tasks SHALL include implementation tasks for code, skills, docs, and other non-spec files
-- **AND** the generated tasks SHALL NOT include tasks to edit files under `openspec/specs/`
-- **AND** the tasks SHALL note that spec changes will be applied automatically during `/opsx:sync`
-
-#### Scenario: Apply skips baseline spec edits encountered during implementation
-
-- **GIVEN** a task list that references updating a baseline spec (e.g., from a manually edited tasks.md)
-- **WHEN** the system encounters a task that would modify a file under `openspec/specs/`
-- **THEN** the system SHALL skip the baseline spec edit
-- **AND** SHALL log that spec changes are deferred to `/opsx:sync`
-- **AND** SHALL continue with the next non-spec task
+- **GIVEN** a task that says "Add edge case for empty input to user-auth spec"
+- **WHEN** the system implements this task
+- **THEN** the system SHALL edit `openspec/specs/user-auth/spec.md` to add the edge case
+- **AND** SHALL mark the task as complete
 
 #### Scenario: Implementation tasks exclude post-apply workflow steps
 
 - **GIVEN** a change being processed through the artifact pipeline
 - **WHEN** the tasks artifact is generated
-- **THEN** implementation task sections (Foundation, Implementation) SHALL NOT include sync, archive, changelog, docs, or push steps
-- **AND** these steps MAY appear in the Standard Tasks section if defined in the constitution
+- **THEN** implementation task sections (Foundation, Implementation) SHALL NOT include changelog, docs, or version bump steps
+- **AND** these steps SHALL appear in the Standard Tasks section
 
 ## Edge Cases
 
-- **Change with only spec modifications (no code):** If a change modifies only specs and has no code implementation, the tasks list implementation sections may be empty. The QA loop alone is sufficient, and `/opsx:sync` handles the spec updates.
-- **Delta spec files ARE in scope:** Tasks may reference delta spec files under `openspec/changes/<name>/specs/` — these are part of the change workspace and are distinct from baseline specs.
+- **Change with only spec modifications (no code):** If a change modifies only specs and has no code implementation, the tasks list implementation sections may contain only spec-editing tasks. The QA loop still applies.
 - **Empty tasks.md**: If tasks.md exists but contains no checkbox items, the system SHALL report "0/0 tasks" and suggest the tasks file may need to be regenerated.
 - **Malformed checkboxes**: If tasks.md contains checkbox-like items that do not follow the `- [ ]` / `- [x]` format exactly, the system SHALL ignore them in the count and note the discrepancy.
 - **Tasks modified externally**: If the user manually edits tasks.md between apply invocations (adding, removing, or reordering tasks), the system SHALL re-read the file and compute progress from the current state.
@@ -163,7 +145,7 @@ The system SHALL NOT include tasks that modify baseline spec files (`openspec/sp
 - **Single task remaining**: The system SHALL handle the case where only one task remains with the same progress reporting format ("6/7 tasks complete").
 - **No standard tasks in constitution:** If the project constitution does not define a `## Standard Tasks` section, the tasks.md SHALL omit the Post-Implementation section entirely. Apply behavior is unchanged.
 - **Standard tasks manually checked:** If a user manually marks standard tasks as `- [x]` before archive, the system SHALL count them as complete in progress totals.
-- **Apply re-invoked after standard tasks complete:** If all tasks including standard tasks are marked complete, the system SHALL report "All tasks complete" and suggest archiving.
+- **Apply re-invoked after standard tasks complete:** If all tasks including standard tasks are marked complete, the system SHALL report "All tasks complete" and suggest running the post-apply workflow.
 - **Pre-merge extras executed during post-apply:** Constitution-defined pre-merge standard tasks (e.g., "Update PR") SHALL be executed during the post-apply workflow after commit and push. Post-merge tasks (e.g., "Update plugin") SHALL remain unchecked — they are executed manually after the PR is merged.
 - **Constitution extra fails:** If a constitution extra fails (e.g., `gh pr ready` fails due to network), the agent SHALL note the failure, skip marking that task as complete, and continue with remaining extras. The failed task remains as `- [ ]` for manual resolution.
 - **Partial post-apply workflow:** If the post-apply workflow is interrupted (e.g., changelog fails), only the steps that actually completed should be marked. The commit step should not be marked if the commit does not happen.

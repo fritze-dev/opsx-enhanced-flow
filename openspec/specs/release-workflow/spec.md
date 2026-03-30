@@ -10,7 +10,7 @@ Define the release workflow conventions for the plugin, including automatic patc
 
 ### Requirement: Post-Archive Auto Patch Bump Convention
 
-The project constitution SHALL define a convention that instructs `/opsx:archive` to automatically increment the patch version in `.claude-plugin/plugin.json` after a successful archive. The convention SHALL also require syncing the `version` field in `.claude-plugin/marketplace.json` to match. The archive output SHALL display the new version.
+The project constitution SHALL define a convention that instructs the post-apply workflow to automatically increment the patch version in `.claude-plugin/plugin.json` after a successful change completion. The convention SHALL also require syncing the `version` field in `.claude-plugin/marketplace.json` to match. The output SHALL display the new version.
 
 **User Story:** As a plugin maintainer I want the patch version to auto-increment on archive, so that consumers can detect updates without manual version bumps.
 
@@ -18,11 +18,11 @@ The project constitution SHALL define a convention that instructs `/opsx:archive
 
 - **GIVEN** a plugin project with `.claude-plugin/plugin.json` containing version `1.0.3`
 - **AND** `.claude-plugin/marketplace.json` containing version `1.0.3`
-- **AND** the constitution defines the post-archive auto-bump convention
-- **WHEN** the user archives a completed change via `/opsx:archive`
+- **AND** the constitution defines the post-completion auto-bump convention
+- **WHEN** the post-apply workflow runs for a completed change
 - **THEN** the system SHALL increment the patch version to `1.0.4` in `plugin.json`
 - **AND** SHALL update `marketplace.json` to version `1.0.4`
-- **AND** SHALL display the new version in the archive summary
+- **AND** SHALL display the new version
 
 ### Requirement: Version Sync Between Plugin Files
 
@@ -136,23 +136,25 @@ After pushing a version bump to the remote, the developer's local plugin install
 
 ### Requirement: Archive Output Includes Next Steps
 
-The archive summary output SHALL include a "Next steps" section guiding the user through the complete post-archive workflow: generate changelog, push, and update the local plugin. This is defined via the constitution convention.
+The post-apply workflow output SHALL include a "Next steps" section guiding the user through the complete post-completion workflow: generate changelog, generate docs, version bump, push, and update the local plugin. This is defined via the constitution convention.
 
-#### Scenario: Next steps shown after archive
+#### Scenario: Next steps shown after verification
 
-- **GIVEN** a successful archive with auto-bump
-- **WHEN** the archive summary is displayed
-- **THEN** the output SHALL include next steps: `/opsx:changelog` → push → update plugin
+- **GIVEN** a successful verification of a completed change
+- **WHEN** the verification summary is displayed
+- **THEN** the output SHALL include next steps: `/opsx:changelog` → `/opsx:docs` → version bump → push → update plugin
 
 ### Requirement: Generate Changelog from Archives
-The `/opsx:changelog` command SHALL generate release notes from the archived spec changes located in `openspec/changes/archive/`. The agent SHALL read each archived change directory (named `YYYY-MM-DD-<feature>`), examine the proposal, delta specs, and design artifacts, and produce a changelog entry that summarizes what changed from the user's perspective. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for archives not yet represented, preserving existing manually written entries.
+The `/opsx:changelog` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories (named `YYYY-MM-DD-<feature>`) and identify completed changes (all tasks checked). For each completed change not yet in the changelog, the agent SHALL read `proposal.md` from the change directory for motivation and capabilities, and read the current baseline specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles of the affected capabilities. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for archives not yet represented, preserving existing manually written entries.
 
 **User Story:** As a user of the project I want a changelog that tells me what changed and when, so that I can understand the impact of updates without reading spec files or commit logs.
 
 #### Scenario: Changelog generated from single archived change
-- **GIVEN** one archived change at `openspec/changes/archive/2025-01-15-user-auth/` containing a proposal describing a new authentication feature and delta specs with ADDED requirements
+- **GIVEN** a completed change at `openspec/changes/2025-01-15-user-auth/` containing a proposal describing a new authentication feature
+- **AND** the proposal lists capability `user-auth` as new
+- **AND** `openspec/specs/user-auth/spec.md` contains user stories and scenarios
 - **WHEN** the developer runs `/opsx:changelog`
-- **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 under the "Added" section describing the new authentication feature in user-facing language
+- **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 describing the new authentication feature using user stories from the baseline spec
 
 #### Scenario: Multiple archives ordered newest first
 - **GIVEN** three archived changes dated 2025-01-10, 2025-02-05, and 2025-03-20
@@ -166,9 +168,9 @@ The `/opsx:changelog` command SHALL generate release notes from the archived spe
 - **THEN** the agent adds the new entry at the top of the changelog without modifying or removing the existing 1.0 and 1.1 entries
 
 #### Scenario: No archives to process
-- **GIVEN** the `openspec/changes/archive/` directory is empty or does not exist
+- **GIVEN** no completed changes exist under `openspec/changes/`
 - **WHEN** the developer runs `/opsx:changelog`
-- **THEN** the agent informs the user that no archived changes were found and no changelog entries were generated
+- **THEN** the agent informs the user that no completed changes were found and no changelog entries were generated
 
 #### Scenario: Change with only internal refactoring
 - **GIVEN** an archived change whose proposal and specs describe purely internal refactoring with no user-visible changes
