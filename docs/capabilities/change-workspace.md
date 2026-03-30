@@ -49,7 +49,7 @@ The created workspace is a directory at `openspec/changes/<name>/`. The artifact
 
 ### Archiving a Completed Change (/opsx:archive)
 
-When you run `/opsx:archive`, the system moves the workspace to the archive directory with a date prefix (e.g., `2026-03-02-add-user-auth/`). Before archiving:
+When you run `/opsx:archive`, the system moves the workspace to the archive directory with a date prefix (e.g., `2026-03-02-add-user-auth/`). The move stages both the new archive path and the old change directory deletions in Git, ensuring a clean working tree after the archive commit. Before archiving:
 
 - If unsynced delta specs exist, the system automatically syncs them to baseline and displays a summary of applied changes.
 - If artifacts or tasks are incomplete, the system displays a warning with details and asks you to confirm.

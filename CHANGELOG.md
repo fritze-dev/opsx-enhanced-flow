@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Fix Archive Unstaged Deletions
+
+### Fixed
+- `/opsx:archive` now stages the old change directory deletions after moving to archive — previously, the `mv` command left unstaged deletions in the working tree requiring a manual follow-up commit
+
 ## 2026-03-30 — Fix Issue Reference in PR Body
 
 ### Fixed

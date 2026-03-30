@@ -63,7 +63,7 @@ The created workspace SHALL contain the artifacts defined by the active schema. 
 
 ### Requirement: Archive Completed Change
 
-The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. Before archiving, the system SHALL automatically sync delta specs to baseline specs if unsynced delta specs exist, showing a summary of applied changes. The system SHALL NOT prompt the user to choose between syncing and archiving. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
+The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. The move operation SHALL stage both the new archive path and the old change directory deletions in Git, ensuring a clean working tree after the archive commit. Before archiving, the system SHALL automatically sync delta specs to baseline specs if unsynced delta specs exist, showing a summary of applied changes. The system SHALL NOT prompt the user to choose between syncing and archiving. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
 
 **User Story:** As a developer I want completed changes archived with a date prefix and automatic spec sync, so that the project history is preserved chronologically and baseline specs stay up to date without unnecessary prompts.
 
@@ -74,6 +74,14 @@ The system SHALL move a completed change workspace to `openspec/changes/archive/
 - **WHEN** the user invokes `/opsx:archive`
 - **THEN** the system moves `openspec/changes/add-user-auth/` to `openspec/changes/archive/2026-03-02-add-user-auth/`
 - **AND** displays a summary including change name, schema, and archive location
+
+#### Scenario: Archive stages both new and old paths
+
+- **GIVEN** a change named "add-user-auth" with committed artifacts
+- **WHEN** the system performs the archive move
+- **THEN** the new archive path `openspec/changes/archive/2026-03-02-add-user-auth/` SHALL be staged in Git
+- **AND** the old change path `openspec/changes/add-user-auth/` deletions SHALL be staged in Git
+- **AND** the working tree SHALL be clean after the archive commit
 
 #### Scenario: Auto-sync before archiving
 
@@ -233,6 +241,7 @@ The `/opsx:archive` skill SHALL offer worktree cleanup after archiving when the 
 - **`gh` CLI unavailable during branch deletion**: Fall back to `git branch -d`. If that also fails (squash merge without `gh`), report the error and suggest `git branch -D <branch>` manually.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
+- **Untracked files in change directory:** If the change directory contains files not yet tracked by Git, the `git add` of the old path records only tracked file deletions. Untracked files are removed by the `mv` but produce no Git diff — this is acceptable since they were never committed.
 - **Delta specs already synced:** When delta specs exist but are already in sync with baseline, the auto-sync is a no-op. The system proceeds to archive without additional output.
 - **Sync failure:** If the sync operation fails, the system SHALL report the error and stop. It SHALL NOT proceed to archive with unsynced specs.
 
