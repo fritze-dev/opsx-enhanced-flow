@@ -137,7 +137,7 @@ When the user opts in during setup and `gh` CLI is available, the system SHALL c
 
 ## Edge Cases
 
-- **Workflow template missing from plugin**: If `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` does not exist, fall back to inline generation (backward compatibility with older plugin versions).
+- **Workflow template missing from plugin**: If `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` does not exist, report an error and suggest reinstalling the plugin.
 - **gh CLI installed but not authenticated**: Report "gh CLI: installed but not authenticated" and skip worktree opt-in.
 - **User declines worktree mode**: Leave WORKFLOW.md with commented-out `worktree:` section — no changes needed.
 

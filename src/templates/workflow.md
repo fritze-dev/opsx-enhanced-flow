@@ -26,7 +26,8 @@ apply:
 
     Before committing, mark all standard task checkboxes in tasks.md
     as complete — including the commit step itself — EXCEPT post-merge
-    tasks, which remain unchecked.
+    tasks, which remain unchecked. No extra follow-up commit should be
+    needed for pre-merge standard task checkboxes.
 
 post_artifact: |
   After creating any artifact, commit and push the change:
