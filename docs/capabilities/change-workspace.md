@@ -26,7 +26,7 @@ Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe iden
 - **Worktree context detection** -- all 7 change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discover`, `preflight`) auto-detect the active change from worktree branch context before falling through to directory-based detection
 - Date-prefixed archiving via `/opsx:archive` -- moves completed changes to a chronologically sorted archive
 - **Worktree cleanup after archive** -- offers automatic or manual worktree removal based on `worktree.auto_cleanup` configuration
-- Automatic spec sync before archive -- unsynced delta specs are automatically applied to baseline specs during archiving
+- Automatic spec sync before archive -- unsynced delta specs are automatically applied to baseline specs during archiving, with validation that all synced specs exist before proceeding
 - Warnings for incomplete artifacts or tasks before archiving
 
 ## Behavior
@@ -51,7 +51,7 @@ The created workspace is a directory at `openspec/changes/<name>/`. The artifact
 
 When you run `/opsx:archive`, the system moves the workspace to the archive directory with a date prefix (e.g., `2026-03-02-add-user-auth/`). The move stages both the new archive path and the old change directory deletions in Git, ensuring a clean working tree after the archive commit. Before archiving:
 
-- If unsynced delta specs exist, the system automatically syncs them to baseline and displays a summary of applied changes.
+- If unsynced delta specs exist, the system automatically syncs them to baseline, validates that all delta spec capabilities have corresponding baseline specs, and displays a summary of applied changes. If any baseline specs are missing after sync, the archive is blocked and the missing capabilities are reported.
 - If artifacts or tasks are incomplete, the system displays a warning with details and asks you to confirm.
 - If the archive target directory already exists, the system fails with an error and suggests a resolution.
 
@@ -77,4 +77,5 @@ When tasks are partially complete (e.g., 3 of 7 checkboxes marked), the system d
 - If `gh` CLI is unavailable during branch deletion and the PR was squash-merged, the standard deletion fails. The system reports the error and suggests manual force deletion.
 - If WORKFLOW.md has no `worktree` section, worktree mode is disabled.
 - If delta specs exist but are already in sync with baseline, the auto-sync is a no-op and archiving proceeds normally.
+- If a baseline spec already existed before sync (e.g., a MODIFIED delta), the validation check still passes -- the existence check confirms sync didn't fail to create new specs, not that it modified existing ones correctly.
 - If the sync operation fails during archive, the system reports the error and stops -- it does not proceed to archive with unsynced specs.

@@ -56,9 +56,10 @@ Archive a completed change in the experimental workflow.
    - Compare each delta spec with its corresponding main spec at `openspec/specs/<capability>/spec.md`
    - Determine what changes would be applied (adds, modifications, removals, renames)
    - Show a combined summary of pending changes
-   - Automatically invoke sync using Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke opsx:sync for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>")
+   - Automatically invoke sync using Task tool (subagent_type: "general-purpose", prompt: "BLOCKING PREREQUISITE: Sync must complete before archive can proceed. Sync writes changes to openspec/specs/ that must be included in the archive commit. Use Skill tool to invoke opsx:sync for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>.")
    - If sync fails, report the error and stop — do NOT proceed to archive with unsynced specs
-   - Proceed to archive after sync completes
+   - **Validate sync completion**: For each delta spec capability at `openspec/changes/<name>/specs/<capability>/`, verify that a corresponding baseline spec exists at `openspec/specs/<capability>/spec.md`. If any baseline specs are missing, report which capabilities lack them and stop — do NOT proceed to archive.
+   - Proceed to archive after validation passes
 
 5. **Perform the archive**
 

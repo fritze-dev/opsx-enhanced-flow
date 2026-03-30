@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 - `/opsx:archive` now stages the old change directory deletions after moving to archive — previously, the `mv` command left unstaged deletions in the working tree requiring a manual follow-up commit
 
+## 2026-03-30 — Fix Background Sync Race Condition
+
+### Fixed
+- Spec sync during `/opsx:archive` no longer races with the archive commit — the sync subagent prompt now conveys that sync is a blocking prerequisite, preventing background or parallel execution
+- Archive now validates that all delta spec capabilities have corresponding baseline specs before proceeding — if any are missing, archive is blocked and the missing capabilities are reported
+
 ## 2026-03-30 — Fix Issue Reference in PR Body
 
 ### Fixed
