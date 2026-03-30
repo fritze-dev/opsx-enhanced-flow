@@ -110,7 +110,7 @@ No open questions.
 
 ## Assumptions
 
-- Git 2.5+ is available (worktree support). <!-- ASSUMPTION: Git version -->
-- `.claude/` gitignore entry covers `.claude/worktrees/`. <!-- ASSUMPTION: Gitignore coverage -->
 - `${CLAUDE_PLUGIN_ROOT}` resolves correctly from worktree CWD. <!-- ASSUMPTION: Plugin root resolution -->
 No further assumptions beyond those marked above.
+
+Note: Git version (2.5+) and `.gitignore` coverage are verified during `/opsx:setup`, not assumed.

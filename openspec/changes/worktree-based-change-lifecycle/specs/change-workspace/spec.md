@@ -135,6 +135,4 @@ The system SHALL create a change workspace when the user invokes `/opsx:new <cha
 
 ## Assumptions
 
-- Git version supports worktree commands (git 2.5+). <!-- ASSUMPTION: Git worktree support -->
-- The `.claude/` directory in `.gitignore` covers `.claude/worktrees/`. <!-- ASSUMPTION: Gitignore coverage -->
-No further assumptions beyond those marked above.
+No assumptions made. Git version and `.gitignore` coverage are verified during `/opsx:setup`.

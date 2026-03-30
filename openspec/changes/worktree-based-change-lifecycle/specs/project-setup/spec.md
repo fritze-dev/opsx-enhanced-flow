@@ -68,7 +68,7 @@ The plugin SHALL include a workflow template file at `${CLAUDE_PLUGIN_ROOT}/temp
 
 ### Requirement: Environment Checks During Setup
 
-The setup command SHALL check the environment for `gh` CLI availability by running `gh --version`. If the command succeeds, the system SHALL check authentication by running `gh auth status`. The results SHALL be reported in the setup summary. The environment checks SHALL NOT block setup — they only inform which optional features (worktree mode, PR creation, merge strategy) are available.
+The setup command SHALL check the environment for: (1) `gh` CLI availability by running `gh --version` and authentication by running `gh auth status`, (2) git version by running `git --version` and verifying it is 2.5+ (required for worktree support), (3) `.gitignore` contains a `/.claude/` entry (required for worktree paths to be excluded from version control). The results SHALL be reported in the setup summary. The environment checks SHALL NOT block setup — they only inform which optional features (worktree mode, PR creation, merge strategy) are available. If git version is below 2.5, the system SHALL skip the worktree opt-in question and report that worktree mode requires git 2.5+. If `/.claude/` is not in `.gitignore`, the system SHALL offer to add it when the user opts into worktree mode.
 
 **User Story:** As a user I want setup to detect my environment capabilities, so that I know which features are available without manual checking.
 
@@ -85,6 +85,33 @@ The setup command SHALL check the environment for `gh` CLI availability by runni
 - **WHEN** the user runs `/opsx:setup`
 - **THEN** the system reports "gh CLI: not found"
 - **AND** skips worktree and merge strategy options
+
+#### Scenario: Git version supports worktrees
+
+- **GIVEN** git version is 2.5 or higher
+- **WHEN** the user runs `/opsx:setup`
+- **THEN** the system reports "git: version X.Y (worktree support: yes)"
+
+#### Scenario: Git version too old for worktrees
+
+- **GIVEN** git version is below 2.5
+- **WHEN** the user runs `/opsx:setup`
+- **THEN** the system reports "git: version X.Y (worktree support: no — requires 2.5+)"
+- **AND** skips the worktree opt-in question
+
+#### Scenario: Gitignore missing .claude/ entry
+
+- **GIVEN** `.gitignore` does not contain `/.claude/`
+- **AND** the user opts into worktree mode
+- **WHEN** setup configures worktree mode
+- **THEN** the system SHALL offer to add `/.claude/` to `.gitignore`
+- **AND** if the user agrees, append the entry to `.gitignore`
+
+#### Scenario: Gitignore already has .claude/ entry
+
+- **GIVEN** `.gitignore` already contains `/.claude/`
+- **WHEN** the user runs `/opsx:setup`
+- **THEN** the system reports ".gitignore: /.claude/ entry present"
 
 ### Requirement: GitHub Merge Strategy Configuration
 
@@ -118,4 +145,5 @@ When the user opts in during setup and `gh` CLI is available, the system SHALL c
 
 - The `gh` CLI `--version` command returns exit code 0 when installed. <!-- ASSUMPTION: gh version check -->
 - The `gh auth status` command returns exit code 0 when authenticated. <!-- ASSUMPTION: gh auth check -->
+- `git --version` output contains a parseable version number (e.g., "git version 2.43.0"). <!-- ASSUMPTION: git version parseable -->
 No further assumptions beyond those marked above.
