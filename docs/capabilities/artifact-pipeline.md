@@ -1,8 +1,8 @@
 ---
 title: "Artifact Pipeline"
 capability: "artifact-pipeline"
-description: "Defines the 6-stage artifact pipeline driven by WORKFLOW.md and Smart Templates, with strict dependency gating, incremental commits, PR integration, and implementation controls."
-lastUpdated: "2026-03-26"
+description: "6-stage artifact pipeline driven by WORKFLOW.md and Smart Templates with dependency gating, incremental commits, and worktree-aware PR integration"
+lastUpdated: "2026-03-30"
 ---
 
 # Artifact Pipeline
@@ -15,7 +15,7 @@ Development teams working with AI assistants need a structured process that prev
 
 ## Rationale
 
-The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. WORKFLOW.md declares the pipeline order, apply gate, and post-artifact hook in YAML frontmatter, while each Smart Template carries its own instruction, output path, and dependencies. Skills enforce dependencies by reading these files and checking artifact existence before allowing generation. The 6-stage design captures the full lifecycle from initial research through implementation-ready tasks, with each stage producing a verifiable file. A `post_artifact` hook in WORKFLOW.md handles commit, push, and PR creation after every artifact -- WORKFLOW.md owns the rule, skills execute it. This avoids coupling PR creation to any single artifact stage and ensures every artifact is tracked in version control.
+The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. WORKFLOW.md declares the pipeline order, apply gate, post-artifact hook, and optional worktree configuration in YAML frontmatter, while each Smart Template carries its own instruction, output path, and dependencies. Skills enforce dependencies by reading these files and checking artifact existence before allowing generation. The 6-stage design captures the full lifecycle from initial research through implementation-ready tasks, with each stage producing a verifiable file. A `post_artifact` hook in WORKFLOW.md handles commit, push, and PR creation after every artifact -- WORKFLOW.md owns the rule, skills execute it. The hook is worktree-aware: when already on a feature branch (as in a worktree), branch creation is skipped. This avoids coupling PR creation to any single artifact stage and ensures every artifact is tracked in version control.
 
 ## Features
 
@@ -23,7 +23,8 @@ The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates 
 - **Explicit Dependency Declarations**: Each Smart Template declares its dependencies via a `requires` field in YAML frontmatter. Skills enforce these checks by reading WORKFLOW.md and Smart Templates and verifying file existence.
 - **Apply Gate**: Implementation is gated by the tasks artifact. The apply phase cannot begin until `tasks.md` exists and is non-empty. During apply, progress is tracked against the task checklist.
 - **WORKFLOW.md-Owned Workflow Rules**: The tasks Smart Template's `instruction` field contains the Definition of Done rule and the standard tasks directive. The `apply.instruction` field in WORKFLOW.md contains the post-apply workflow sequence (`/opsx:verify` then `/opsx:archive` then `/opsx:changelog` then `/opsx:docs` then commit, then execute constitution pre-merge standard tasks) and clarifies that standard tasks are not part of apply.
-- **Incremental Commits with Draft PR**: After creating any artifact, the system commits and pushes it. On the first commit, a feature branch is created and a draft PR is opened via `gh pr create --draft`. Subsequent artifacts are committed to the same branch. PR metadata is available on-demand via `gh pr view`.
+- **WORKFLOW.md Pipeline Configuration**: WORKFLOW.md's YAML frontmatter contains `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and optionally `worktree` (with `enabled`, `path_pattern`, and `auto_cleanup` fields) and `docs_language`.
+- **Incremental Commits with Draft PR**: After creating any artifact, the system commits and pushes it. On the first commit, a feature branch is created and a draft PR is opened via `gh pr create --draft`. Subsequent artifacts are committed to the same branch. The post-artifact hook is worktree-aware -- it skips branch creation when already on the feature branch.
 - **Standard Tasks in Every Task List**: The tasks template includes universal post-implementation steps (archive, changelog, docs, commit and push) as a final section. Projects can add extras via the constitution's `## Standard Tasks` section, which are appended after the universal steps.
 - **Capability Granularity Guidance**: The proposal Smart Template's instruction defines what constitutes a capability (a cohesive behavior domain with 3-8 requirements) versus a feature detail (a single behavior within an existing capability). Heuristics guide merging: shared actor, trigger, or data model suggests one capability, and proposed capabilities producing fewer than ~100 lines should be folded into existing specs.
 - **Mandatory Consolidation Check**: Before finalizing proposal capabilities, you must verify overlap with existing specs, check pair-wise overlap between new capabilities, and confirm each has 3+ distinct requirements. The proposal template includes a Consolidation Check section to make this reasoning visible and reviewable.
@@ -45,7 +46,7 @@ Invoking `/opsx:apply` before `tasks.md` exists is rejected with a message to ge
 
 ### Incremental Commits and Draft PR
 
-After creating any artifact, the system commits and pushes it to the remote. On the first artifact commit (typically research), the system creates a feature branch named after the change, commits the artifact, pushes the branch, and creates a draft PR with a minimal WIP body. Subsequent artifact commits push to the existing branch without creating a new PR. If the `gh` CLI is not installed or not authenticated, the system creates the feature branch and commits locally but skips PR creation. The pipeline is never blocked by push or PR creation failures. If WORKFLOW.md does not contain a `post_artifact` field, the commit and push step is skipped entirely.
+After creating any artifact, the system commits and pushes it to the remote. The post-artifact hook checks the current branch first: if already on the `<change-name>` branch (e.g., in a worktree), it skips branch creation; if on main, it creates the feature branch; if on another branch, it switches to the change branch. On the first artifact commit (typically research), the system creates a feature branch named after the change, commits the artifact, pushes the branch, and creates a draft PR with a minimal WIP body. Subsequent artifact commits push to the existing branch without creating a new PR. If the `gh` CLI is not installed or not authenticated, the system creates the feature branch and commits locally but skips PR creation. The pipeline is never blocked by push or PR creation failures. If WORKFLOW.md does not contain a `post_artifact` field, the commit and push step is skipped entirely.
 
 ### WORKFLOW.md and Smart Templates Own Workflow Rules
 
@@ -84,3 +85,5 @@ Before creating any spec files, the specs phase verifies there is no overlap bet
 - If the feature branch already exists (e.g., from a prior attempt), the system reuses the existing branch rather than failing.
 - If the push succeeds but `gh pr create` fails due to a network issue, the failure is noted. The pipeline is not blocked.
 - During auto-continue transitions (e.g., research to proposal), each artifact gets its own commit.
+- If `worktree.path_pattern` does not contain `{change}`, the system reports an error during `/opsx:new`.
+- If `worktree.path_pattern` is empty, it defaults to `.claude/worktrees/{change}`.

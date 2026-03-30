@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Worktree-Based Change Lifecycle
+
+### Added
+- Git worktree isolation for parallel changes — `/opsx:new` creates a dedicated worktree with its own feature branch when worktree mode is enabled, eliminating merge conflicts between concurrent changes (closes #61, closes #59)
+- Automatic worktree context detection — all change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discover`, `preflight`) derive the active change from the current branch when running inside a worktree
+- Worktree cleanup after archive — `/opsx:archive` automatically removes the worktree and merged branch when `auto_cleanup` is enabled
+- Environment checks during `/opsx:setup` — detects git version (2.5+ for worktree support), `gh` CLI availability and authentication, and `.gitignore` coverage for the `.claude/` directory
+- GitHub merge strategy configuration — `/opsx:setup` offers to configure rebase-merge for cleaner linear history with worktree-based workflows
+- WORKFLOW.md template file — pipeline configuration is now maintained as a template at `src/templates/workflow.md`, consistent with the constitution template pattern
+
+### Changed
+- `/opsx:setup` copies WORKFLOW.md from the plugin template instead of generating it inline — easier to maintain and update across versions
+- Post-artifact commit hook is now worktree-aware — skips branch creation when already on a feature branch in a worktree
+- WORKFLOW.md gains an optional `worktree:` configuration section with `enabled`, `path_pattern`, and `auto_cleanup` fields
+- Skills layer spec no longer uses a hardcoded skill count — lists skill names without a fixed total to prevent drift when skills are added
+
 ## 2026-03-26 — Documentation Drift Verification
 
 ### Added

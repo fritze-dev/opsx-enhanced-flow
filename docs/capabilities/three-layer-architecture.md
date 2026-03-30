@@ -1,8 +1,8 @@
 ---
 title: "Three-Layer Architecture"
 capability: "three-layer-architecture"
-description: "Defines the CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers that structure the plugin, with distinct responsibilities and independent modifiability."
-lastUpdated: "2026-03-26"
+description: "CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers with distinct responsibilities and independent modifiability"
+lastUpdated: "2026-03-30"
 ---
 
 # Three-Layer Architecture
@@ -15,13 +15,13 @@ Projects using AI-driven workflows need a way to separate global rules, pipeline
 
 ## Rationale
 
-Separating concerns into Constitution (project rules), WORKFLOW.md + Smart Templates (pipeline structure and artifact definitions), and Skills (command logic) ensures that each layer has a single authoritative owner. WORKFLOW.md provides slim pipeline orchestration -- stage ordering, apply gate, post-artifact hook -- while Smart Templates carry their own instructions and metadata in YAML frontmatter, making each artifact definition self-contained. This mirrors established software architecture patterns where configuration, orchestration, and execution are kept distinct. The separation enables the plugin to serve different projects -- each project brings its own Constitution while sharing the same WORKFLOW.md structure and Skills.
+Separating concerns into Constitution (project rules), WORKFLOW.md + Smart Templates (pipeline structure and artifact definitions), and Skills (command logic) ensures that each layer has a single authoritative owner. WORKFLOW.md provides slim pipeline orchestration -- stage ordering, apply gate, post-artifact hook, optional worktree configuration -- while Smart Templates carry their own instructions and metadata in YAML frontmatter, making each artifact definition self-contained. This mirrors established software architecture patterns where configuration, orchestration, and execution are kept distinct. The separation enables the plugin to serve different projects -- each project brings its own Constitution while sharing the same WORKFLOW.md structure and Skills.
 
 ## Features
 
 - **Constitution Layer**: A single `CONSTITUTION.md` file at `openspec/CONSTITUTION.md` defines all project-wide rules, including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Every AI action reads this file before performing work, enforced via WORKFLOW.md's `context` field.
-- **WORKFLOW.md + Smart Templates Layer**: `openspec/WORKFLOW.md` declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, and project context. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter. Together they serve as the single source of truth for pipeline structure and artifact generation.
-- **Skills Layer**: All 12 commands are delivered as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills are categorized as workflow (5: new, ff, apply, verify, archive), governance (5: setup, bootstrap, discover, preflight, sync), and documentation (2: changelog, docs). All skills are model-invocable.
+- **WORKFLOW.md + Smart Templates Layer**: `openspec/WORKFLOW.md` declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, optional worktree configuration, and project context. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter. Together they serve as the single source of truth for pipeline structure and artifact generation.
+- **Skills Layer**: All commands are delivered as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills are categorized as workflow (new, ff, apply, verify, archive), governance (setup, bootstrap, discover, preflight, sync, docs-verify), and documentation (changelog, docs). All skills are model-invocable.
 - **Layer Separation**: Each layer is independently modifiable. WORKFLOW.md and Smart Templates do not embed skill logic, and the constitution does not contain pipeline-specific artifact definitions. Skills depend on WORKFLOW.md and Smart Templates by reading them directly at runtime.
 
 ## Behavior
@@ -32,11 +32,11 @@ The constitution file is loaded and its rules are applied before any AI-driven s
 
 ### WORKFLOW.md and Smart Templates Define the Pipeline
 
-WORKFLOW.md declares exactly 6 artifacts in strict dependency order via its `pipeline` array: research, proposal, specs, design, preflight, and tasks. Each Smart Template in `openspec/templates/` contains `id`, `generates`, `requires`, and `instruction` fields in YAML frontmatter, with the output structure as the markdown body. The apply phase is gated by the tasks artifact -- implementation cannot begin until tasks are complete.
+WORKFLOW.md declares exactly 6 artifacts in strict dependency order via its `pipeline` array: research, proposal, specs, design, preflight, and tasks. Each Smart Template in `openspec/templates/` contains `id`, `generates`, `requires`, and `instruction` fields in YAML frontmatter, with the output structure as the markdown body. The apply phase is gated by the tasks artifact -- implementation cannot begin until tasks are complete. WORKFLOW.md also supports optional configuration sections such as `worktree` for change isolation and `docs_language` for documentation.
 
-### All 12 Skills Are Present and Invocable
+### All Skills Are Present and Invocable
 
-A fully installed plugin contains exactly 12 skill subdirectories, each with a `SKILL.md` file. All skills have `disable-model-invocation` set to `false` (or absent, which defaults to false), allowing bootstrap workflows and other skills to invoke them programmatically.
+A fully installed plugin contains skill subdirectories, each with a `SKILL.md` file. All skills have `disable-model-invocation` set to `false` (or absent, which defaults to false), allowing bootstrap workflows and other skills to invoke them programmatically.
 
 ### Layers Are Independently Modifiable
 

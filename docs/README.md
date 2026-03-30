@@ -6,7 +6,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 1. **Constitution** (`openspec/CONSTITUTION.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
 
 3. **Skills** (`skills/*/SKILL.md`) — 13 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (5: new, ff, apply, verify, archive), governance (6: setup, bootstrap, discover, preflight, sync, docs-verify), and documentation (2: changelog, docs). All skills are model-invocable.
 
@@ -57,6 +57,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Verify preflight side-effect cross-check as step 8 with WARNING severity | Additive safety net; consistent with heuristic philosophy; two-pass matching (tasks then codebase) | [ADR-030](decisions/adr-030-verify-preflight-side-effect-cross-check.md) |
 | Plugin source in `src/`, auto GitHub Releases via CI, local marketplace for dev | Clean consumer cache; automated releases; VS Code-compatible dev workflow | [ADR-031](decisions/adr-031-auto-github-releases-and-plugin-source-restr.md) |
 | Documentation drift verification via semantic checks with CLEAN/DRIFTED/OUT OF SYNC verdicts | Structural element comparison is cheaper and more actionable than diff-based regeneration; three-tier severity matches existing quality gate patterns | [ADR-032](decisions/adr-032-documentation-drift-verification.md) |
+| Worktree-based change lifecycle with opt-in isolation, context detection, and template extraction | Full filesystem isolation eliminates merge conflicts for parallel changes; auto-detection reduces manual input; template pattern ensures consistency | [ADR-033](decisions/adr-033-worktree-based-change-lifecycle.md) |
 
 ### Notable Trade-offs
 
@@ -93,6 +94,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
+- **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:new`.
 
 ## Conventions
 
@@ -109,15 +111,15 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization with WORKFLOW.md generation, Smart Template installation, and legacy migration |
+| [Project Setup](capabilities/project-setup.md) | One-time project initialization with template-based WORKFLOW.md, environment checks, and worktree opt-in |
 | [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
 
 ### Change Workflow
 
 | Capability | Description |
 |---|---|
-| [Change Workspace](capabilities/change-workspace.md) | Create, manage, and archive change workspaces with date-prefixed naming |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline driven by WORKFLOW.md and Smart Templates with dependency gating and PR integration |
+| [Change Workspace](capabilities/change-workspace.md) | Create, manage, and archive change workspaces with worktree isolation and date-prefixed naming |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline driven by WORKFLOW.md and Smart Templates with dependency gating and worktree-aware PR integration |
 | [Artifact Generation](capabilities/artifact-generation.md) | Fast-forward generation with smart checkpoints and change selection |
 | [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features |
 
