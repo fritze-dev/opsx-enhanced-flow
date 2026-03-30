@@ -1,12 +1,12 @@
 ## Why
 
-The archive skill invokes spec sync via the Agent/Task tool without explicitly requiring foreground execution. The LLM can launch the sync agent in the background and proceed to the archive commit, causing spec changes in `openspec/specs/` to land after the commit — leaving uncommitted changes.
+The archive skill's sync invocation has two root causes for the race condition observed in #73: (1) the subagent prompt lacks context about why sync is a blocking prerequisite for archive, giving the LLM no reason to prioritize sequential execution, and (2) there is no validation of the sync result before archive proceeds — the skill moves straight to step 5 without confirming sync completed successfully.
 
 ## What Changes
 
-- Update the sync invocation in the archive skill (step 4) to explicitly prohibit background execution in the subagent prompt
-- Add result validation after sync completes to confirm specs were actually written before proceeding to archive
-- Update the `change-workspace` spec to codify the foreground execution requirement for auto-sync
+- Improve the subagent prompt in the archive skill (step 4) to convey that sync is a blocking prerequisite — the archive cannot proceed until sync has completed and reported its results
+- Add result validation after the sync agent returns to confirm sync succeeded before proceeding to archive (step 5)
+- Update the `change-workspace` spec to codify the prompt clarity and validation requirements for auto-sync
 
 ## Capabilities
 
@@ -16,7 +16,7 @@ None.
 
 ### Modified Capabilities
 
-- `change-workspace`: Add requirement that auto-sync during archive MUST run in the foreground (not as a background agent), and that the archive step MUST validate sync completion before proceeding.
+- `change-workspace`: Add requirement that the sync subagent prompt MUST convey blocking intent, and that the archive skill MUST validate sync completion from the agent result before proceeding.
 
 ### Consolidation Check
 
@@ -30,11 +30,11 @@ N/A — no new specs proposed. Reviewed `spec-sync` (covers sync mechanics, not 
 ## Scope & Boundaries
 
 **In scope:**
-- Fix the archive skill's sync invocation to prevent background execution
-- Add validation that sync completed before archive proceeds
-- Update spec to reflect the foreground requirement
+- Improve the subagent prompt to convey blocking intent and context
+- Add validation gate on the sync agent result before archive proceeds
+- Update spec to codify prompt clarity and validation requirements
 
 **Out of scope:**
 - Changing the sync skill itself
 - Switching from Agent/Task tool to Skill tool (context isolation is desirable)
-- General audit of other background agent invocations across skills
+- General audit of other subagent prompts across skills
