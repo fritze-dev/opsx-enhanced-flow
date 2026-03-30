@@ -15,7 +15,7 @@ Without structured change workspaces, spec-driven development becomes disorganiz
 
 ## Rationale
 
-Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe identifiers across operating systems. Archives use a date-prefixed directory naming scheme (YYYY-MM-DD-name) based on ISO 8601, so they sort chronologically in the filesystem by default. The archive step prompts for spec sync before moving files, ensuring baseline specs stay current without forcing the user's hand. Git worktrees provide full filesystem isolation per change -- each worktree has its own working directory and branch, eliminating cross-change interference from structural modifications on main. Worktree context detection uses `git rev-parse --git-dir` (a reliable built-in git mechanism) to auto-detect which change is active, with the change name derived directly from the branch name (1:1 mapping established by `/opsx:new`). The feature is opt-in via WORKFLOW.md configuration, so existing projects continue working without modification.
+Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe identifiers across operating systems. Archives use a date-prefixed directory naming scheme (YYYY-MM-DD-name) based on ISO 8601, so they sort chronologically in the filesystem by default. The archive step automatically syncs delta specs to baseline before moving files, ensuring baseline specs always stay current without manual intervention. Git worktrees provide full filesystem isolation per change -- each worktree has its own working directory and branch, eliminating cross-change interference from structural modifications on main. Worktree context detection uses `git rev-parse --git-dir` (a reliable built-in git mechanism) to auto-detect which change is active, with the change name derived directly from the branch name (1:1 mapping established by `/opsx:new`). The feature is opt-in via WORKFLOW.md configuration, so existing projects continue working without modification.
 
 ## Features
 
@@ -26,7 +26,7 @@ Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe iden
 - **Worktree context detection** -- all 7 change-detecting skills (`ff`, `apply`, `verify`, `archive`, `sync`, `discover`, `preflight`) auto-detect the active change from worktree branch context before falling through to directory-based detection
 - Date-prefixed archiving via `/opsx:archive` -- moves completed changes to a chronologically sorted archive
 - **Worktree cleanup after archive** -- offers automatic or manual worktree removal based on `worktree.auto_cleanup` configuration
-- Sync prompt before archive -- surfaces unsynced delta specs and offers to sync before filing the change away
+- Automatic spec sync before archive -- unsynced delta specs are automatically applied to baseline specs during archiving
 - Warnings for incomplete artifacts or tasks before archiving
 
 ## Behavior
@@ -51,7 +51,7 @@ The created workspace is a directory at `openspec/changes/<name>/`. The artifact
 
 When you run `/opsx:archive`, the system moves the workspace to the archive directory with a date prefix (e.g., `2026-03-02-add-user-auth/`). Before archiving:
 
-- If unsynced delta specs exist, the system shows a summary and offers "Sync now" or "Archive without syncing."
+- If unsynced delta specs exist, the system automatically syncs them to baseline and displays a summary of applied changes.
 - If artifacts or tasks are incomplete, the system displays a warning with details and asks you to confirm.
 - If the archive target directory already exists, the system fails with an error and suggests a resolution.
 
@@ -75,3 +75,5 @@ When tasks are partially complete (e.g., 3 of 7 checkboxes marked), the system d
 - If `git worktree remove` fails on a dirty worktree, the system reports the error and suggests `--force` or committing changes first.
 - Each worktree should contain exactly one change matching the branch name; additional `openspec/changes/` directories are ignored by worktree detection.
 - If WORKFLOW.md has no `worktree` section, worktree mode is disabled.
+- If delta specs exist but are already in sync with baseline, the auto-sync is a no-op and archiving proceeds normally.
+- If the sync operation fails during archive, the system reports the error and stops -- it does not proceed to archive with unsynced specs.

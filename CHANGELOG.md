@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Auto-Sync Before Archive
+
+### Changed
+- `/opsx:archive` now automatically syncs delta specs to baseline before archiving — the previous "Sync now / Archive without syncing" prompt has been removed, eliminating unnecessary friction in the post-apply workflow
+- Sync summary is still displayed so users see what was applied to baseline specs
+- If sync fails, archive is blocked and the error is reported — archiving with unsynced specs is no longer possible
+
 ## 2026-03-30 — Worktree-Based Change Lifecycle
 
 ### Added

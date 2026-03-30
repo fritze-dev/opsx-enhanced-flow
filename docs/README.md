@@ -58,6 +58,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Plugin source in `src/`, auto GitHub Releases via CI, local marketplace for dev | Clean consumer cache; automated releases; VS Code-compatible dev workflow | [ADR-031](decisions/adr-031-auto-github-releases-and-plugin-source-restr.md) |
 | Documentation drift verification via semantic checks with CLEAN/DRIFTED/OUT OF SYNC verdicts | Structural element comparison is cheaper and more actionable than diff-based regeneration; three-tier severity matches existing quality gate patterns | [ADR-032](decisions/adr-032-documentation-drift-verification.md) |
 | Worktree-based change lifecycle with opt-in isolation, context detection, and template extraction | Full filesystem isolation eliminates merge conflicts for parallel changes; auto-detection reduces manual input; template pattern ensures consistency | [ADR-033](decisions/adr-033-worktree-based-change-lifecycle.md) |
+| Auto-sync delta specs before archive instead of prompting | Preserves transparency while removing friction; syncing is always the correct choice | [ADR-034](decisions/adr-034-auto-sync-before-archive.md) |
 
 ### Notable Trade-offs
 
@@ -95,6 +96,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
 - **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:new`.
+- **No opt-out for auto-sync (ADR-034)**: Users can no longer archive without syncing; intentional since archiving without syncing was never a valid workflow step. Sync failure blocks archive (safe failure mode).
 
 ## Conventions
 

@@ -48,20 +48,17 @@ Archive a completed change in the experimental workflow.
 
    **If no tasks file exists:** Proceed without task-related warning.
 
-4. **Assess delta spec sync state**
+4. **Auto-sync delta specs**
 
-   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync prompt.
+   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, skip this step.
 
    **If delta specs exist:**
    - Compare each delta spec with its corresponding main spec at `openspec/specs/<capability>/spec.md`
    - Determine what changes would be applied (adds, modifications, removals, renames)
-   - Show a combined summary before prompting
-
-   **Prompt options:**
-   - If changes needed: "Sync now (recommended)", "Archive without syncing"
-   - If already synced: "Archive now", "Sync anyway", "Cancel"
-
-   If user chooses sync, use Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke opsx:sync for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>"). Proceed to archive regardless of choice.
+   - Show a combined summary of pending changes
+   - Automatically invoke sync using Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke opsx:sync for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>")
+   - If sync fails, report the error and stop — do NOT proceed to archive with unsynced specs
+   - Proceed to archive after sync completes
 
 5. **Perform the archive**
 
@@ -111,5 +108,5 @@ Archive a completed change in the experimental workflow.
 - Check artifact completion by verifying output files exist for each artifact defined in WORKFLOW.md and Smart Templates
 - Don't block archive on warnings - just inform and confirm
 - Show clear summary of what happened
-- If sync is requested, use opsx:sync approach (agent-driven)
-- If delta specs exist, always run the sync assessment and show the combined summary before prompting
+- If delta specs exist, auto-sync before archiving — no user prompt needed
+- If sync fails, block the archive and report the error

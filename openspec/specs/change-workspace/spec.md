@@ -4,7 +4,7 @@ category: change-workflow
 ---
 ## Purpose
 
-Manages the change lifecycle including workspace creation (`/opsx:new`), schema-defined workspace structure, and change archiving (`/opsx:archive`) with date-prefixed directory naming and sync prompts.
+Manages the change lifecycle including workspace creation (`/opsx:new`), schema-defined workspace structure, and change archiving (`/opsx:archive`) with date-prefixed directory naming and automatic spec sync.
 
 ## Requirements
 
@@ -63,9 +63,9 @@ The created workspace SHALL contain the artifacts defined by the active schema. 
 
 ### Requirement: Archive Completed Change
 
-The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. Before archiving, the system SHALL assess delta spec sync state and prompt the user to sync if unsynced delta specs exist. The system SHALL NOT silently archive without informing the user of the sync opportunity. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
+The system SHALL move a completed change workspace to `openspec/changes/archive/` with a date-prefixed directory name in the format `YYYY-MM-DD-<change-name>` when the user invokes `/opsx:archive`. Before archiving, the system SHALL automatically sync delta specs to baseline specs if unsynced delta specs exist, showing a summary of applied changes. The system SHALL NOT prompt the user to choose between syncing and archiving. If the archive target directory already exists, the system SHALL fail with an error and suggest a resolution.
 
-**User Story:** As a developer I want completed changes archived with a date prefix and a sync prompt, so that the project history is preserved chronologically and baseline specs stay up to date.
+**User Story:** As a developer I want completed changes archived with a date prefix and automatic spec sync, so that the project history is preserved chronologically and baseline specs stay up to date without unnecessary prompts.
 
 #### Scenario: Archive a completed change
 
@@ -75,14 +75,14 @@ The system SHALL move a completed change workspace to `openspec/changes/archive/
 - **THEN** the system moves `openspec/changes/add-user-auth/` to `openspec/changes/archive/2026-03-02-add-user-auth/`
 - **AND** displays a summary including change name, schema, and archive location
 
-#### Scenario: Prompt for sync before archiving
+#### Scenario: Auto-sync before archiving
 
 - **GIVEN** a change named "add-user-auth" with delta specs in `openspec/changes/add-user-auth/specs/`
 - **AND** the delta specs have not been synced to baseline
 - **WHEN** the user invokes `/opsx:archive`
-- **THEN** the system SHALL analyze delta specs and show a summary of pending changes
-- **AND** SHALL prompt with options: "Sync now (recommended)" or "Archive without syncing"
-- **AND** SHALL proceed to archive regardless of the user's sync choice
+- **THEN** the system SHALL automatically invoke sync to apply delta specs to baseline
+- **AND** SHALL display a summary of applied changes (additions, modifications, removals)
+- **AND** SHALL proceed to archive after sync completes
 
 #### Scenario: Archive with incomplete artifacts
 
@@ -206,6 +206,8 @@ The `/opsx:archive` skill SHALL offer worktree cleanup after archiving when the 
 - **Dirty worktree during cleanup**: `git worktree remove` fails on dirty worktrees. Report the error and suggest `--force` or committing changes first.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
+- **Delta specs already synced:** When delta specs exist but are already in sync with baseline, the auto-sync is a no-op. The system proceeds to archive without additional output.
+- **Sync failure:** If the sync operation fails, the system SHALL report the error and stop. It SHALL NOT proceed to archive with unsynced specs.
 
 ## Assumptions
 
