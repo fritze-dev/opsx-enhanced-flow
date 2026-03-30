@@ -57,7 +57,7 @@ When you run `/opsx:archive`, the system moves the workspace to the archive dire
 
 ### Worktree Cleanup After Archive
 
-When archiving from a worktree, the system offers cleanup based on the `worktree.auto_cleanup` setting. If `auto_cleanup` is `true`, the system navigates to the main repository, removes the worktree, and deletes the merged branch. If `auto_cleanup` is `false` or absent, the system provides manual cleanup instructions. When not in a worktree, no cleanup is mentioned.
+When archiving from a worktree, the system offers cleanup based on the `worktree.auto_cleanup` setting. If `auto_cleanup` is `true`, the system navigates to the main repository, removes the worktree, and deletes the branch. To handle all merge strategies (including squash merges), the system checks the PR merge status via GitHub before deleting the branch. If the PR is confirmed merged, force delete is used; otherwise, the system falls back to standard branch deletion. If `auto_cleanup` is `false` or absent, the system provides manual cleanup instructions. When not in a worktree, no cleanup is mentioned.
 
 ### Archiving with Incomplete Tasks
 
@@ -74,6 +74,7 @@ When tasks are partially complete (e.g., 3 of 7 checkboxes marked), the system d
 - If the worktree path exists but is not a git worktree, the system fails with an error rather than overwriting.
 - If `git worktree remove` fails on a dirty worktree, the system reports the error and suggests `--force` or committing changes first.
 - Each worktree should contain exactly one change matching the branch name; additional `openspec/changes/` directories are ignored by worktree detection.
+- If `gh` CLI is unavailable during branch deletion and the PR was squash-merged, the standard deletion fails. The system reports the error and suggests manual force deletion.
 - If WORKFLOW.md has no `worktree` section, worktree mode is disabled.
 - If delta specs exist but are already in sync with baseline, the auto-sync is a no-op and archiving proceeds normally.
 - If the sync operation fails during archive, the system reports the error and stops -- it does not proceed to archive with unsynced specs.

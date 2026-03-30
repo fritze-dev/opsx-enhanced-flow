@@ -22,8 +22,8 @@ No foundational tasks — single-file change with no dependencies.
 ## 4. Standard Tasks (Post-Implementation)
 
 - [x] 4.1. Archive change (`/opsx:archive`)
-- [ ] 4.2. Generate changelog (`/opsx:changelog`)
-- [ ] 4.3. Generate/update docs (`/opsx:docs`)
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary (`gh pr ready && gh pr edit --body "..."`)
+- [x] 4.2. Generate changelog (`/opsx:changelog`)
+- [x] 4.3. Generate/update docs (`/opsx:docs`)
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review, update body with change summary (`gh pr ready && gh pr edit --body "..."`)
 - [ ] 4.6. (Post-Merge) Update plugin locally (`claude plugin marketplace update opsx-enhanced-flow && claude plugin update opsx@opsx-enhanced-flow`)

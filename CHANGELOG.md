@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Fix Squash Merge Cleanup
+
+### Fixed
+- Worktree branch deletion after archive no longer fails when the PR was squash-merged — the system now checks PR merge status via GitHub before deleting the branch, using force delete when the merge is confirmed
+- Graceful fallback when `gh` CLI is unavailable or no PR exists — reverts to standard branch deletion to preserve existing behavior
+
 ## 2026-03-30 — Auto-Sync Before Archive
 
 ### Changed
