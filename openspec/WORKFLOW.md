@@ -47,7 +47,7 @@ post_artifact: |
 worktree:
   enabled: true
   path_pattern: .claude/worktrees/{change}
-  auto_cleanup: false
+  auto_cleanup: true
 
 context: |
   Always read and follow openspec/CONSTITUTION.md before proceeding.
