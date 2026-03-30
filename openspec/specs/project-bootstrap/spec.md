@@ -45,7 +45,7 @@ The `/opsx:bootstrap` command SHALL generate a `constitution.md` file based on t
 - **THEN** the Code Style section SHALL reflect the 4-space indentation and camelCase convention, and the Conventions section SHALL reference the conventional commits format
 
 ### Requirement: Initial Change Creation
-After generating the constitution, the `/opsx:bootstrap` command SHALL create an initial change workspace using the OpenSpec CLI and hand off to the standard pipeline. The initial change SHALL be named according to the project context (e.g., `initial-spec`). The bootstrap command SHALL then inform the user to continue with `/opsx:continue` or `/opsx:ff` to generate artifacts, followed by `/opsx:apply` for the QA loop, and finally `/opsx:archive` which prompts to sync delta specs into baselines. The bootstrap command SHALL NOT include sync or archive as apply tasks — these are separate workflow steps that follow after apply completes.
+After generating the constitution, the `/opsx:bootstrap` command SHALL create an initial change workspace using the OpenSpec CLI and hand off to the standard pipeline. The initial change SHALL be named according to the project context (e.g., `initial-spec`). The bootstrap command SHALL then inform the user to continue with `/opsx:ff` to generate artifacts (specs are created directly at `openspec/specs/`), followed by `/opsx:apply` for the QA loop, and then `/opsx:changelog` and `/opsx:docs` for documentation.
 
 **User Story:** As a developer I want bootstrap to create my first change workspace automatically, so that I can immediately start the spec-driven workflow without manual setup.
 
@@ -57,13 +57,13 @@ After generating the constitution, the `/opsx:bootstrap` command SHALL create an
 #### Scenario: Handoff to standard pipeline
 - **GIVEN** the initial change workspace has been created
 - **WHEN** the bootstrap command completes
-- **THEN** the system SHALL report the created change name and the full workflow: generate artifacts (`/opsx:ff`), run QA loop (`/opsx:apply`), then archive with sync (`/opsx:archive`)
+- **THEN** the system SHALL report the created change name and the full workflow: generate artifacts (`/opsx:ff`), run QA loop (`/opsx:apply`), then generate docs (`/opsx:changelog` + `/opsx:docs`)
 
-#### Scenario: Sync is not an apply task
+#### Scenario: Post-apply steps are not apply tasks
 - **GIVEN** the initial change is a documentation-only bootstrap with no code implementation
 - **WHEN** tasks.md is generated for the initial change
-- **THEN** the tasks SHALL contain only QA loop tasks (success metrics, verify, approval)
-- **AND** sync SHALL NOT appear as an apply task because it is handled by the archive step
+- **THEN** the implementation sections SHALL contain only QA loop tasks (success metrics, verify, approval)
+- **AND** changelog, docs, and version bump SHALL appear in the Standard Tasks section only
 
 ### Requirement: Recovery Mode
 The `/opsx:bootstrap` command SHALL detect when baseline specs already exist in `openspec/specs/`. When existing specs are found, the bootstrap command SHALL enter recovery mode: scanning the current codebase, comparing it against existing specs, and reporting drift findings. Recovery mode SHALL NOT overwrite existing specs or the constitution. Instead, it SHALL produce a drift report listing discrepancies between the codebase and the specs, and suggest corrective actions (e.g., `/opsx:new hotfix-xyz` for small drift or a full re-bootstrap for large drift).

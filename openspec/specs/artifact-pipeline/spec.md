@@ -136,7 +136,6 @@ Each Smart Template's `instruction` field SHALL contain workflow rules that appl
 - **GIVEN** `openspec/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
 - **THEN** it SHALL contain the post-apply sequence: `/opsx:verify` → `/opsx:changelog` → `/opsx:docs`
-- **AND** SHALL NOT reference `/opsx:sync` or `/opsx:archive`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 

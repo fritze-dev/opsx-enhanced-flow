@@ -41,10 +41,10 @@ The tasks.md template QA Loop section SHALL include the final verify step:
 
 - **GIVEN** a change that has been implemented
 - **AND** the user has NOT provided an explicit "Approved" response
-- **WHEN** the user attempts to invoke `/opsx:archive`
+- **WHEN** the user attempts to proceed with the post-apply workflow
 - **THEN** the system SHALL check the QA Loop section for the approval checkbox
 - **AND** SHALL warn that human approval has not been given
-- **AND** SHALL prompt the user to complete the QA loop before archiving
+- **AND** SHALL prompt the user to complete the QA loop before proceeding
 
 #### Scenario: Approval blocked by critical issues
 

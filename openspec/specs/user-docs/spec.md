@@ -218,7 +218,7 @@ Translation rules:
 #### Scenario: Product names preserved in any language
 - **GIVEN** `docs_language` is set to a non-English language
 - **WHEN** the agent generates documentation
-- **THEN** product names (OpenSpec, Claude Code), commands (`/opsx:docs`, `/opsx:archive`), and file paths SHALL remain in English
+- **THEN** product names (OpenSpec, Claude Code), commands (`/opsx:docs`, `/opsx:new`), and file paths SHALL remain in English
 
 #### Scenario: Language change triggers full regeneration
 - **GIVEN** existing capability docs were generated in English

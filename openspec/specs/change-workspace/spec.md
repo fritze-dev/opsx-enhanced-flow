@@ -199,7 +199,6 @@ Skills SHALL distinguish active from completed changes based on task completion 
 - **`gh` CLI unavailable during cleanup**: Fall back to `git branch -d`. If that also fails, skip this worktree and continue.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
-- **Legacy archive directories**: After migration, no `openspec/changes/archive/` directory should exist. If found, skills SHALL treat contents as regular completed changes.
 
 ## Assumptions
 

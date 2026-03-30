@@ -242,7 +242,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 #### Scenario: No archived design decisions to check
 
-- **GIVEN** a project with no archives in `openspec/changes/archive/`
+- **GIVEN** a project with no completed changes in `openspec/changes/`
 - **WHEN** the user invokes `/opsx:docs-verify`
 - **THEN** the system skips the ADR dimension
 - **AND** notes "No archived design decisions to verify against"
