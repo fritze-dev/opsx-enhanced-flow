@@ -87,7 +87,10 @@ Archive a completed change in the experimental workflow.
      1. Determine the worktree path from `git rev-parse --show-toplevel`
      2. Navigate to the main repository (parent of the worktree)
      3. Run: `git worktree remove <worktree-path>`
-     4. If the branch has been merged to main: `git branch -d <change-name>`
+     4. Delete the feature branch:
+        - Check PR merge status: `gh pr view <change-name> --json state --jq '.state'`
+        - If result is `MERGED`: `git branch -D <change-name>`
+        - If `gh` fails (unavailable, not authenticated, or no PR exists): fall back to `git branch -d <change-name>`
      5. Report: "Worktree cleaned up at <path>"
    - If `auto_cleanup` is `false` or absent:
      - Report: "Worktree at <path> still exists. Run `git worktree remove <path>` to clean up."
