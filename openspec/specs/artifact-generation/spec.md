@@ -15,20 +15,10 @@ When invoked without a change name and existing changes are present, ff SHALL li
 
 **User Story:** As a developer I want a single command that generates all remaining artifacts, so that I can progress the pipeline efficiently whether starting a new change or continuing an existing one.
 
-#### Scenario: Fast-forward edits specs directly
-
-- **GIVEN** a change workspace where research.md and proposal.md are complete
-- **AND** the proposal lists capabilities `user-auth` (new) and `quality-gates` (modified)
-- **WHEN** the user runs `/opsx:ff`
-- **THEN** the system SHALL create `openspec/specs/user-auth/spec.md` as a new file
-- **AND** SHALL edit `openspec/specs/quality-gates/spec.md` in place
-- **AND** SHALL NOT create any files under `openspec/changes/<change-dir>/specs/`
-
 #### Scenario: Fast-forward from research to tasks
 - **GIVEN** a change workspace where only research.md is complete
 - **WHEN** the user runs `/opsx:ff`
 - **THEN** the system SHALL generate all 5 remaining artifacts in dependency order and report a summary
-- **AND** spec edits SHALL be made directly to `openspec/specs/`
 
 #### Scenario: Fast-forward with some artifacts already complete
 - **GIVEN** a change workspace where research.md, proposal.md, and specs are complete
@@ -62,7 +52,7 @@ When invoked without a change name and existing changes are present, ff SHALL li
 
 #### Scenario: Change selection for existing changes
 - **GIVEN** existing changes under `openspec/changes/` and the user invokes `/opsx:ff` without specifying a name
-- **WHEN** the skill detects active changes (with unchecked tasks or missing artifacts)
+- **WHEN** the skill detects active changes
 - **THEN** it SHALL present a list of active changes using AskUserQuestion
 - **AND** SHALL mark the most recently modified change as recommended
 

@@ -45,7 +45,7 @@ The system SHALL create a change workspace when the user invokes `/opsx:new <cha
 
 ### Requirement: Workspace Structure
 
-The created workspace SHALL contain the artifacts defined by the pipeline in WORKFLOW.md. The artifact pipeline sequence SHALL be determined by the `pipeline` array in `openspec/WORKFLOW.md` frontmatter (e.g., research, proposal, specs, design, preflight, tasks). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next. The workspace SHALL NOT contain a `specs/` subdirectory — spec changes are made directly to baseline specs in `openspec/specs/`.
+The created workspace SHALL contain the artifacts defined by the pipeline in WORKFLOW.md. The artifact pipeline sequence SHALL be determined by the `pipeline` array in `openspec/WORKFLOW.md` frontmatter (e.g., research, proposal, specs, design, preflight, tasks). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next.
 
 **User Story:** As a developer I want the workspace to be pre-structured according to the workflow pipeline, so that I know exactly which artifacts need to be produced and in what order.
 
