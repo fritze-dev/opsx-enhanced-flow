@@ -42,7 +42,7 @@
   - All 37 archives migrated from `archive/` to `changes/`: PASS / FAIL
   - `/opsx:new` creates `YYYY-MM-DD-<name>` directory: PASS / FAIL
   - Lazy worktree cleanup detects merged branches: PASS / FAIL
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
+- [x] 3.2. Auto-Verify: Run `/opsx:verify`
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
 - [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
