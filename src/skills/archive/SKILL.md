@@ -75,6 +75,7 @@ Archive a completed change in the experimental workflow.
 
    ```bash
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
+   git add openspec/changes/<name>/
    ```
 
 6. **Worktree cleanup (if applicable)**
