@@ -60,6 +60,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Worktree-based change lifecycle with opt-in isolation, context detection, and template extraction | Full filesystem isolation eliminates merge conflicts for parallel changes; auto-detection reduces manual input; template pattern ensures consistency | [ADR-033](decisions/adr-033-worktree-based-change-lifecycle.md) |
 | Auto-sync delta specs before archive instead of prompting | Preserves transparency while removing friction; syncing is always the correct choice | [ADR-034](decisions/adr-034-auto-sync-before-archive.md) |
 | PR merge check before branch deletion; force delete on confirmed merge | GitHub API is authoritative for merge status; handles all merge strategies including squash | [ADR-035](decisions/adr-035-pr-merge-check-for-branch-deletion.md) |
+| Fix sync race condition via blocking prompt and state-based validation | Subagent prompt conveys blocking intent; baseline spec existence check follows steps 2/3 pattern | [ADR-036](decisions/adr-036-fix-sync-race-condition-in-archive.md) |
 
 ### Notable Trade-offs
 
@@ -99,6 +100,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:new`.
 - **No opt-out for auto-sync (ADR-034)**: Users can no longer archive without syncing; intentional since archiving without syncing was never a valid workflow step. Sync failure blocks archive (safe failure mode).
 - **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting.
+- **LLM may ignore blocking prompt context (ADR-036)**: Prompt-based enforcement relies on LLM compliance; mitigated by state-based validation gate that blocks archive regardless of scheduling.
 
 ## Conventions
 

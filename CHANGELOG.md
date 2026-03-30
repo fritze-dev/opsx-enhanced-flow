@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Fix Background Sync Race Condition
+
+### Fixed
+- Spec sync during `/opsx:archive` no longer races with the archive commit — the sync subagent prompt now conveys that sync is a blocking prerequisite, preventing background or parallel execution
+- Archive now validates that all delta spec capabilities have corresponding baseline specs before proceeding — if any are missing, archive is blocked and the missing capabilities are reported
+
 ## 2026-03-30 — Fix Issue Reference in PR Body
 
 ### Fixed
