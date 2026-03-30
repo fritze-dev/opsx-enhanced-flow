@@ -1,17 +1,17 @@
 ---
 name: docs
-description: Generate or update user-facing documentation from merged specs. Run after /opsx:archive to create capability docs, ADRs, and a consolidated README with architecture overview.
+description: Generate or update user-facing documentation from baseline specs. Run after implementation is complete to create capability docs, ADRs, and a consolidated README with architecture overview.
 disable-model-invocation: false
 ---
 
 # /opsx:docs — Generate User Documentation
 
-> Run this **after** `/opsx:archive` to generate or update user-facing documentation.
+> Run this **after** implementation and verification to generate or update user-facing documentation.
 
 **Input**: Optional argument:
-- No argument → incremental update (only regenerate docs for capabilities with newer archives, new ADRs, and README if needed)
-- A capability name (e.g., `auth`) → regenerate only that capability's doc (always regenerated regardless of dates, only reads that capability's archives)
-- A comma-separated list of capability names (e.g., `artifact-pipeline,artifact-generation`) → regenerate only the listed capabilities (always regenerated regardless of dates, archives only read for listed capabilities). Designed for the post-archive workflow where the caller already knows which capabilities were affected.
+- No argument → incremental update (only regenerate docs for capabilities with newer completed changes, new ADRs, and README if needed)
+- A capability name (e.g., `auth`) → regenerate only that capability's doc (always regenerated regardless of dates, only reads that capability's changes)
+- A comma-separated list of capability names (e.g., `artifact-pipeline,artifact-generation`) → regenerate only the listed capabilities (always regenerated regardless of dates, changes only read for listed capabilities). Designed for the post-apply workflow where the caller already knows which capabilities were affected.
 
 ## Instructions
 
@@ -36,42 +36,44 @@ Glob `openspec/specs/*/spec.md` to find all available capabilities. The director
 
 If a capability name argument was given (single or comma-separated list), handle as follows:
 
-- **Single capability** (e.g., `auth`): Process only that one (error if not found). Always marked for regeneration regardless of dates. Only read archives matching that capability's glob pattern.
-- **Comma-separated list** (e.g., `artifact-pipeline,artifact-generation`): Parse the list, trim whitespace from each name, and deduplicate. Validate each name against `openspec/specs/<name>/spec.md` — if a name does not exist, warn and skip it. All valid capabilities are always marked for regeneration regardless of dates. Only read archives for the listed capabilities. Do NOT scan or process unlisted capabilities at all.
+- **Single capability** (e.g., `auth`): Process only that one (error if not found). Always marked for regeneration regardless of dates. Only read completed changes relevant to that capability.
+- **Comma-separated list** (e.g., `artifact-pipeline,artifact-generation`): Parse the list, trim whitespace from each name, and deduplicate. Validate each name against `openspec/specs/<name>/spec.md` — if a name does not exist, warn and skip it. All valid capabilities are always marked for regeneration regardless of dates. Only read completed changes for the listed capabilities. Do NOT scan or process unlisted capabilities at all.
 
 **Change detection (no argument mode):** For each discovered capability, determine whether regeneration is needed:
 
 1. Check if `docs/capabilities/<capability>.md` exists. If not → mark for regeneration.
 2. If the file exists, read its YAML frontmatter and extract the `lastUpdated` value (format: `YYYY-MM-DD`). If the field is missing or malformed → mark for regeneration.
-3. Glob `openspec/changes/archive/*/specs/<capability>/` to find all archives that touched this capability. Extract the date prefix (`YYYY-MM-DD`) from each archive directory name.
-4. If ANY archive date is newer than or equal to the doc's `lastUpdated` → mark for regeneration. (Use `>=` comparison to handle same-day re-archiving.)
-5. If no archive date is newer → skip this capability entirely.
+3. Scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Extract the date prefix (`YYYY-MM-DD`) from each matching change directory name.
+4. If ANY change date is newer than or equal to the doc's `lastUpdated` → mark for regeneration. (Use `>=` comparison to handle same-day changes.)
+5. If no change date is newer → skip this capability entirely.
+
+**Fallback for proposals without structured Capabilities section:** If a change's proposal.md does not have a parseable Capabilities section (e.g., early changes with different formats), treat the change as potentially affecting all capabilities — mark all capabilities for regeneration if that change's date is newer than any doc's `lastUpdated`.
 
 Build two lists: **capabilities to regenerate** and **capabilities to skip**. Only capabilities marked for regeneration proceed to Steps 2 and 3.
 
-If all capabilities are skipped (no newer archives for any), report: "All capability docs are up-to-date — no changes detected" and proceed to Step 4.
+If all capabilities are skipped (no newer changes for any), report: "All capability docs are up-to-date — no changes detected" and proceed to Step 4.
 
-### Step 2: Look Up Archive Enrichment
+### Step 2: Look Up Change Enrichment
 
-For each capability **marked for regeneration**, glob `openspec/changes/archive/*/specs/<capability>/` to find archived changes that touched it. Skip capabilities not marked for regeneration — do not read their archives.
+For each capability **marked for regeneration**, scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Skip capabilities not marked for regeneration — do not read their changes.
 
-For each archive found, read the following files from the archive root directory (skip any that don't exist):
+For each relevant change found, read the following files from the change directory (skip any that don't exist):
 - `proposal.md` — extract the `## Why` section (for Rationale context, NOT for Purpose)
 - `research.md` — extract the `## 3. Approaches` section and key findings
 - `design.md` — extract `## Non-Goals` (for Known Limitations AND Future Enhancements), `## Risks & Trade-offs`, and `## Decisions` table
 - `preflight.md` — extract `## F. Assumption Audit` (assumptions rated "Acceptable Risk" that affect users)
 
-**Multiple archives for one capability:** When multiple archives exist, aggregate research findings, limitations, and future enhancements across all archives.
+**Multiple changes for one capability:** When multiple completed changes exist for one capability, aggregate research findings, limitations, and future enhancements across all changes.
 
 **Non-Goals classification:** Non-Goals from `design.md` serve two sections:
 - **Known Limitations**: Non-Goals that describe current technical constraints or deliberate scope limits (rewrite as "Does not support X")
 - **Future Enhancements**: Non-Goals explicitly marked "(deferred)" or "(separate feature)", plus sensible out-of-scope items that are natural extensions of the capability. Do NOT include items that are merely change-level scope boundaries (e.g., "No changes to other skills"). Link to GitHub Issues where they exist.
 
-**CRITICAL — Purpose section source:** The Purpose section ALWAYS describes what the capability does and why it matters — never the motivation for a specific change. Derive Purpose from the spec's `## Purpose` section using problem-framing (what goes wrong without this capability). Archive proposals provide context for the Rationale section, NOT for Purpose. Do not use proposal "Why" sections as the Purpose — they describe why a change was made, not why the capability exists.
+**CRITICAL — Purpose section source:** The Purpose section ALWAYS describes what the capability does and why it matters — never the motivation for a specific change. Derive Purpose from the spec's `## Purpose` section using problem-framing (what goes wrong without this capability). Change proposals provide context for the Rationale section, NOT for Purpose. Do not use proposal "Why" sections as the Purpose — they describe why a change was made, not why the capability exists.
 
-**initial-spec fallback:** If a capability's only relevant archive is `initial-spec`, derive Purpose from the spec's `## Purpose` section. Derive Rationale from spec requirements, scenarios, and assumptions — explain WHY the design works this way (e.g., why kebab-case naming, why date-prefix sorting, why certain constraints exist). The initial-spec research.md may also contain useful design context. Only omit Rationale if truly no design reasoning is derivable from the spec itself.
+**initial-spec fallback:** If a capability's only relevant change is `initial-spec`, derive Purpose from the spec's `## Purpose` section. Derive Rationale from spec requirements, scenarios, and assumptions — explain WHY the design works this way (e.g., why kebab-case naming, why date-prefix sorting, why certain constraints exist). The initial-spec research.md may also contain useful design context. Only omit Rationale if truly no design reasoning is derivable from the spec itself.
 
-**No archives found:** Skip enrichment — generate a spec-only doc (current behavior).
+**No relevant changes found:** Skip enrichment — generate a spec-only doc (current behavior).
 
 ### Step 3: Generate Enriched Capability Documentation
 
@@ -125,32 +127,32 @@ For each capability marked for regeneration, read its baseline spec's YAML front
 
 Read the ADR template at `openspec/schemas/opsx-enhanced/templates/docs/adr.md` for the expected output format.
 
-Generate formal ADRs from `## Decisions` tables across archived `design.md` files.
+Generate formal ADRs from `## Decisions` tables across completed changes' `design.md` files.
 
-**Incremental detection:** Before generating ADRs, determine whether new archives need processing:
+**Incremental detection:** Before generating ADRs, determine whether new changes need processing:
 
 1. Glob `docs/decisions/adr-[0-9]*.md` to find existing generated ADR files (excluding manual `adr-M*.md`). If none exist → full generation mode (first run).
-2. In full generation mode, process all archives. Otherwise:
+2. In full generation mode, process all completed changes. Otherwise:
 3. Determine the highest existing ADR number from filenames.
-4. For each existing ADR file, check its References section for an `[Archive: ...]` backlink to identify which archive produced it. Build a set of already-processed archives.
-5. If any existing ADR lacks an archive backlink (e.g., legacy files from before this feature), fall back to full generation for this run.
-6. Glob `openspec/changes/archive/*/design.md` and sort chronologically. Identify archives NOT in the already-processed set.
-7. For unprocessed archives, check if they contain valid Decisions tables (see skip rule below).
-8. If no new archives with valid Decisions tables exist → skip ADR generation entirely and report "ADRs are up-to-date."
-9. If new archives exist → generate new ADR files starting from `highest_existing_number + 1`.
+4. For each existing ADR file, check its References section for a `[Change: ...]` or `[Archive: ...]` backlink to identify which change produced it. Build a set of already-processed changes.
+5. If any existing ADR lacks a backlink (e.g., legacy files from before this feature), fall back to full generation for this run.
+6. Glob `openspec/changes/*/design.md` and sort chronologically. Filter to completed changes (all tasks checked). Identify changes NOT in the already-processed set.
+7. For unprocessed changes, check if they contain valid Decisions tables (see skip rule below).
+8. If no new changes with valid Decisions tables exist → skip ADR generation entirely and report "ADRs are up-to-date."
+9. If new changes exist → generate new ADR files starting from `highest_existing_number + 1`.
 
-**One-time full regeneration for consolidation:** If the existing ADR file count does not match the expected count after applying consolidation heuristics to all archives, perform a full regeneration. This handles the transition when consolidation is first introduced. Delete all existing generated `adr-[0-9]*.md` files (preserve `adr-M*.md`) and regenerate from scratch.
+**One-time full regeneration for consolidation:** If the existing ADR file count does not match the expected count after applying consolidation heuristics to all changes, perform a full regeneration. This handles the transition when consolidation is first introduced. Delete all existing generated `adr-[0-9]*.md` files (preserve `adr-M*.md`) and regenerate from scratch.
 
-**Discovery:** Glob `openspec/changes/archive/*/design.md`. Sort archives chronologically by their `YYYY-MM-DD` prefix. Skip archives without `design.md`.
+**Discovery:** Glob `openspec/changes/*/design.md`. Filter to completed changes. Sort chronologically by their `YYYY-MM-DD` prefix. Skip changes without `design.md`.
 
-**Enrichment:** For each archive being processed, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same archive if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
+**Enrichment:** For each change being processed, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same change directory if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
 
-**Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that archive for ADR generation.
+**Skip rule:** After reading each `design.md`, verify that a markdown table with pipe delimiters exists under a heading containing "Decisions" (e.g., `## Decisions` or `## Architecture Decisions`). A valid Decisions table MUST have columns that include "Decision" and "Rationale". If the section contains only prose (e.g., "No architectural changes"), a non-Decisions table (e.g., Success Metrics), or no table at all — skip that change for ADR generation.
 
 **Consolidation heuristics:** Before assigning numbers, apply these rules to each archive's Decisions table:
 
-1. If the archive's Decisions table has 3 or more rows AND the archive represents a single-topic change (determined by: archive name suggests one topic, all decisions reference the same capabilities) → consolidate all decisions into one ADR.
-2. If decisions within the same archive clearly address different concerns (e.g., one about naming, another about data migration) → keep them as separate ADRs.
+1. If the change's Decisions table has 3 or more rows AND the change represents a single-topic change (determined by: change name suggests one topic, all decisions reference the same capabilities) → consolidate all decisions into one ADR.
+2. If decisions within the same change clearly address different concerns (e.g., one about naming, another about data migration) → keep them as separate ADRs.
 3. For borderline cases (2 rows, or mixed topics) → keep separate (conservative default).
 
 **Inline rationale (all ADR types):** Every ADR — whether consolidated or single-decision — SHALL include rationale inline in the Decision section using the em-dash pattern. There is no separate `## Rationale` section. The Rationale column from the design.md Decisions table provides the inline rationale text.
@@ -165,7 +167,7 @@ Generate formal ADRs from `## Decisions` tables across archived `design.md` file
 - **Alternatives Considered**: Merged from all consolidated rows
 - **Consequences**: Combined across all consolidated decisions
 
-**Numbering:** Assign sequential numbers (zero-padded, 3 digits) across all archives, accounting for consolidation. Each consolidated group gets ONE number. Within each archive, unconsolidated decisions are numbered in table row order. Example: initial-spec has 3 separate decisions → ADR-001, ADR-002, ADR-003. rename-init-to-setup has 5 rows consolidated into 1 → ADR-004.
+**Numbering:** Assign sequential numbers (zero-padded, 3 digits) across all changes, accounting for consolidation. Each consolidated group gets ONE number. Within each change, unconsolidated decisions are numbered in table row order. Example: initial-spec has 3 separate decisions → ADR-001, ADR-002, ADR-003. rename-init-to-setup has 5 rows consolidated into 1 → ADR-004.
 
 **Slug generation:** From the Decision column text (or consolidated title), apply this deterministic algorithm:
 1. Lowercase the entire string
@@ -185,23 +187,23 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 
 **References (internal links only):** References SHALL contain only internal relative links — no external URLs (GitHub issues, external docs). The archive backlink provides traceability to GitHub issues via the archive's proposal.md.
 
-The first reference in every ADR SHALL be the source archive backlink: `[Archive: <short-name>](../../openspec/changes/archive/<archive-dir>/)` where `<short-name>` is the archive directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the archive link, determine which specs are relevant to each decision. Check the archive's `specs/` subdirectory to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same archive when decisions are related.
+The first reference in every ADR SHALL be the source change backlink: `[Change: <short-name>](../../openspec/changes/<change-dir>/)` where `<short-name>` is the change directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the change link, determine which specs are relevant to each decision. Read the change's `proposal.md` Capabilities section to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same change when decisions are related.
 
 **Reference validation with auto-resolution:** After writing each ADR's References, validate all links and actively resolve broken references:
 - For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If it doesn't exist (e.g., renamed or split), search for successor spec(s). If found, replace the broken link. If the successor cannot be determined, ask the user to identify the correct spec. No `<!-- REVIEW -->` markers should be left in the output.
-- For every `[Archive: <name>]` link, glob `openspec/changes/archive/*-<name>/` to verify the archive exists. If not found, ask the user whether to remove the link or provide the correct archive name. No `<!-- REVIEW -->` markers should be left in the output.
+- For every `[Change: <name>]` or `[Archive: <name>]` link, glob `openspec/changes/*-<name>/` to verify the change exists. If not found, ask the user whether to remove the link or provide the correct change name. No `<!-- REVIEW -->` markers should be left in the output.
 
-**Cross-reference heuristic:** Beyond cross-referencing ADRs from the same archive, check if the current ADR's archive modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping `specs/` subdirectories with earlier archives. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the archive content.
+**Cross-reference heuristic:** Beyond cross-referencing ADRs from the same change, check if the current ADR's change modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping capabilities with earlier changes. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the change content.
 
 **Do NOT generate an ADR index at `docs/decisions/README.md`.** ADR discovery is handled by inline links in the `docs/README.md` Key Design Decisions table.
 
-**No archives with design.md:** Skip ADR generation entirely, do not create `docs/decisions/`.
+**No completed changes with design.md:** Skip ADR generation entirely, do not create `docs/decisions/`.
 
 Create `docs/decisions/` directory if it does not exist.
 
 **Track writes:** Record whether any ADR was created during this step. This flag is needed for Step 5 (conditional README regeneration).
 
-**Manual ADR preservation:** Do NOT delete files matching `adr-M*.md` in `docs/decisions/`. These are manual ADRs not generated from archived design.md files. They use the `adr-MNNN-slug.md` naming convention (M prefix + 3-digit zero-padded number) to distinguish them from generated ADRs.
+**Manual ADR preservation:** Do NOT delete files matching `adr-M*.md` in `docs/decisions/`. These are manual ADRs not generated from change design.md files. They use the `adr-MNNN-slug.md` naming convention (M prefix + 3-digit zero-padded number) to distinguish them from generated ADRs.
 
 ### Step 5: Generate Consolidated README
 
@@ -248,8 +250,8 @@ List generated ADRs first (ordered by number), followed by manual ADRs (ordered 
 ```
 ## Docs Generated
 
-**Capabilities**: N regenerated, K skipped (no newer archives), J skipped (unchanged content)
-**ADRs**: M new ADRs generated / "up-to-date" (no new archives with decisions)
+**Capabilities**: N regenerated, K skipped (no newer changes), J skipped (unchanged content)
+**ADRs**: M new ADRs generated / "up-to-date" (no new changes with decisions)
 **README**: Regenerated / "up-to-date" (no changes detected)
 
 **Output**:
@@ -265,13 +267,13 @@ List generated ADRs first (ordered by number), followed by manual ADRs (ordered 
 - [ ] Capability Title (capability-id) — regenerated but identical, lastUpdated preserved
 (only shown if any)
 
-### Capabilities — Skipped (no newer archives)
+### Capabilities — Skipped (no newer changes)
 - [ ] Capability Title (capability-id)
 - [ ] ...
 
 ### Decision Records
-- [x] M new ADRs generated from N new archived design.md files
-(or: "All ADRs are up-to-date — no new archives with decisions")
+- [x] M new ADRs generated from N new completed changes with design.md
+(or: "All ADRs are up-to-date — no new changes with decisions")
 
 ### README
 - [x] Regenerated (N capability docs + M ADRs changed)
@@ -288,7 +290,7 @@ List generated ADRs first (ordered by number), followed by manual ADRs (ordered 
 ```
 ## Docs
 
-No specs found in openspec/specs/. Run /opsx:archive first to merge specs.
+No specs found in openspec/specs/. Run /opsx:ff to create specs first.
 ```
 
 ## Quality Guidelines

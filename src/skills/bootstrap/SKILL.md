@@ -59,21 +59,19 @@ Continue until zero `<!-- REVIEW -->` markers remain in the constitution. Do not
 ### Step 3: Create Initial Change
 
 ```bash
-mkdir -p openspec/changes/initial-spec
+mkdir -p openspec/changes/$(date +%Y-%m-%d)-initial-spec
 ```
 
 ### Step 4: Hand Off
 
 Tell the user:
 1. Review `openspec/CONSTITUTION.md` — all uncertain items have been resolved, but a final review is recommended
-2. The initial change workspace is ready at `openspec/changes/initial-spec/`
+2. The initial change workspace is ready at `openspec/changes/YYYY-MM-DD-initial-spec/`
 3. Continue with the standard pipeline:
-   - `/opsx:ff` — generate one artifact at a time (recommended for first bootstrap, allows review between steps)
-   - `/opsx:ff` — generate all artifacts in one go
+   - `/opsx:ff` — generate all artifacts (specs are created directly at `openspec/specs/`)
 4. After all artifacts are complete, run `/opsx:apply` to execute the QA loop (this is a docs-only change — no code tasks, just quality checks)
-5. When approved, run `/opsx:sync` to merge delta specs into baseline specs at `openspec/specs/`
-6. Then run `/opsx:archive` to finalize and move the change to archive
-7. The project is then ready for feature development with `/opsx:new`
+5. When approved, run `/opsx:changelog` and `/opsx:docs` to generate documentation
+6. The project is then ready for feature development with `/opsx:new`
 
 **Hint for the research artifact:** This is a full-project bootstrap, not a single feature. Cover the entire project — identify capabilities at multiple levels:
 - **Design Concepts** — Principles, quality practices, architectural patterns, methodology decisions

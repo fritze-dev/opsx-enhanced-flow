@@ -14,9 +14,8 @@
 - **Skill immutability:** Skills in `skills/` are generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)
 - Pipeline source of truth: `openspec/WORKFLOW.md` (orchestration) + `openspec/templates/` (Smart Templates)
-- Baseline specs: `openspec/specs/<capability>/spec.md` (one directory per capability)
-- Delta specs: `openspec/changes/<feature>/specs/<capability>/spec.md`
-- Archives: `openspec/changes/archive/YYYY-MM-DD-<feature>/`
+- Baseline specs: `openspec/specs/<capability>/spec.md` (one directory per capability, edited directly during specs stage)
+- Changes: `openspec/changes/YYYY-MM-DD-<feature>/` (date-prefixed at creation, contains planning artifacts)
 
 ## Code Style
 
@@ -25,18 +24,18 @@
 
 ## Constraints
 
-- Baseline specs use `## Purpose` + `## Requirements` (no ADDED/MODIFIED prefix)
+- Baseline specs use `## Purpose` + `## Requirements` — edited directly during the specs stage, no delta format
 
 ## Conventions
 
 - **Commits:** Imperative present tense with category prefix (e.g., `Refactor: ...`, `Fix: ...`)
-- **Post-archive version bump:** After `/opsx:archive` completes successfully, automatically increment the patch version in `src/.claude-plugin/plugin.json` (e.g., `1.0.3` → `1.0.4`) and sync the `version` field in `.claude-plugin/marketplace.json` to match. If versions are out of sync, use `src/.claude-plugin/plugin.json` as source of truth. Display the new version in the archive summary. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For intentional minor/major releases, manually set the version in both files and push — the Action handles tagging and release creation.
+- **Post-apply version bump:** During the post-apply workflow, automatically increment the patch version in `src/.claude-plugin/plugin.json` (e.g., `1.0.3` → `1.0.4`) and sync the `version` field in `.claude-plugin/marketplace.json` to match. If versions are out of sync, use `src/.claude-plugin/plugin.json` as source of truth. Display the new version. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For intentional minor/major releases, manually set the version in both files and push — the Action handles tagging and release creation.
 - **Plugin source layout:** Plugin source code lives in `src/` (skills, templates, plugin.json). Project files (docs, CI, specs, changelog) stay at the repo root. Consumer plugin caches contain only `src/` contents. The marketplace.json at `.claude-plugin/marketplace.json` uses `source: "./src"`.
 - **Local development:** Developers register the local repo as marketplace via `claude plugin marketplace add <local-path> --scope user`. Skill changes reload via `/reload-plugins`. Version changes require `claude plugin update opsx@opsx-enhanced-flow`.
 - **README accuracy:** When plugin behavior changes (skills, WORKFLOW.md, templates, constitution, architecture), update the README to reflect the new state. The README is the primary user-facing documentation and must stay consistent with the implementation.
 - **Workflow friction:** When workflow execution reveals friction, capture it as a GitHub Issue with the `friction` label. Include: what happened, expected behavior, and suggested fix.
 - **Design review checkpoint:** After creating specs + design artifacts, always pause for user alignment before proceeding to preflight/tasks. The design phase is the mandatory review checkpoint in every OpenSpec workflow.
-- **No ADR references in specs:** Specs MUST NOT reference ADRs (e.g., "see ADR-019"). ADRs are generated after archiving — specs exist before ADRs do. Specs describe requirements; ADRs document the decisions that shaped them.
+- **No ADR references in specs:** Specs MUST NOT reference ADRs (e.g., "see ADR-019"). ADRs are generated after implementation — specs exist before ADRs do. Specs describe requirements; ADRs document the decisions that shaped them.
 
 ## Standard Tasks
 

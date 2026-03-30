@@ -4,9 +4,11 @@ description: Requirements with Gherkin scenarios (BDD) and optional user stories
 generates: "specs/**/*.md"
 requires: [proposal]
 instruction: |
-  Create specification files that define WHAT the system should do.
+  Edit baseline spec files that define WHAT the system should do.
+  Specs are edited directly at openspec/specs/<capability>/spec.md — there
+  are no delta spec files or intermediate formats.
 
-  Overlap Verification (before creating any spec files):
+  Overlap Verification (before editing any spec files):
   1. Read the proposal's Consolidation Check section.
   2. For each new capability, scan existing specs in openspec/specs/ for overlapping
      requirements (same actor, same trigger, same data model).
@@ -14,15 +16,11 @@ instruction: |
      a Modified Capability on the existing spec, not a new spec. Update the proposal's
      Capabilities section to reflect this before proceeding.
 
-  Create one spec file per capability listed in the proposal's Capabilities section.
-  - New capabilities: use the exact kebab-case name from the proposal (specs/<capability>/spec.md).
-  - Modified capabilities: use the existing spec folder name from openspec/specs/<capability>/.
-
-  Delta operations (use ## headers):
-  - **ADDED Requirements**: New capabilities
-  - **MODIFIED Requirements**: Changed behavior — MUST include full updated content
-  - **REMOVED Requirements**: Deprecated features — MUST include **Reason** and **Migration**
-  - **RENAMED Requirements**: Name changes only — use FROM:/TO: format
+  Edit or create one spec file per capability listed in the proposal's Capabilities section.
+  - New capabilities: create openspec/specs/<capability>/spec.md using the exact
+    kebab-case name from the proposal.
+  - Modified capabilities: edit the existing file at openspec/specs/<capability>/spec.md
+    in place. Add, modify, or remove requirements as described in the proposal.
 
   Format requirements (strict ordering):
   1. `### Requirement: <name>` header
@@ -33,15 +31,6 @@ instruction: |
   - **CRITICAL**: Scenarios MUST use exactly 4 hashtags (`####`). Using 3 hashtags or bullets will fail silently.
   - Scenarios use full Gherkin: GIVEN establishes preconditions, WHEN triggers, THEN asserts.
   - Every requirement MUST have at least one scenario.
-
-  MODIFIED requirements workflow:
-  1. Locate the existing requirement in openspec/specs/<capability>/spec.md
-  2. Copy the ENTIRE requirement block (from `### Requirement:` through all scenarios)
-  3. Paste under `## MODIFIED Requirements` and edit to reflect new behavior
-  4. Ensure header text matches exactly (whitespace-insensitive)
-
-  Common pitfall: Using MODIFIED with partial content loses detail at archive time.
-  If adding new concerns without changing existing behavior, use ADDED instead.
 
   Include an "Edge Cases" section for boundary conditions and error states.
   Mark every assumption as: `- Visible assumption text. <!-- ASSUMPTION: short tag -->`.
@@ -59,7 +48,10 @@ category: [category]
 ---
 -->
 
-## ADDED Requirements
+## Purpose
+<!-- Brief description of what this capability does -->
+
+## Requirements
 
 ### Requirement: <!-- requirement name -->
 <!-- requirement description — use SHALL/MUST for normative statements -->
@@ -70,14 +62,6 @@ category: [category]
 - **GIVEN** <!-- initial state -->
 - **WHEN** <!-- action / trigger -->
 - **THEN** <!-- expected outcome -->
-
-## MODIFIED Requirements
-<!-- Only for changes to existing capabilities. Remove section if not applicable.
-     MUST include full updated content — partial content loses detail at archive. -->
-
-## REMOVED Requirements
-<!-- Only for removed capabilities. Remove section if not applicable.
-     MUST include Reason and Migration path. -->
 
 ## Edge Cases
 <!-- Boundary conditions, error states, empty states, concurrency -->

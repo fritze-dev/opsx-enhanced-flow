@@ -1,12 +1,12 @@
 ---
 name: changelog
-description: Generate release notes from archived specs. Run after /opsx:archive to incrementally update CHANGELOG.md.
+description: Generate release notes from completed changes. Run after implementation is complete to incrementally update CHANGELOG.md.
 disable-model-invocation: false
 ---
 
 # /opsx:changelog — Generate Release Notes
 
-> Run this **after** `/opsx:archive` to generate changelog entries from archived specs.
+> Run this **after** implementation and verification to generate changelog entries from completed changes.
 
 **Input**: No arguments. Incrementally updates `CHANGELOG.md` — only new entries are added, existing entries are preserved.
 
@@ -23,42 +23,50 @@ Read `openspec/WORKFLOW.md` and extract the `docs_language` field from its YAML 
 - **Missing or "English":** Proceed with English output (default behavior, no change).
 - **Non-English value (e.g., "German", "French"):** Generate all new changelog entry headings and descriptions in the target language in Step 6. Dates remain in ISO format. Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths remain in English.
 
-### Step 1: Discover Archives
+### Step 1: Discover Completed Changes
 
-Glob `openspec/changes/archive/*/` to find all archived change directories.
+Glob `openspec/changes/*/` to find all change directories.
 The directory name follows the pattern `YYYY-MM-DD-<change-name>`.
 
-If no archives exist, create an empty `CHANGELOG.md` with proper headers and stop.
+**Filter to completed changes:** For each change directory, check if `tasks.md` exists and all checkbox items are marked `- [x]` (no `- [ ]` items). Only include changes where all tasks are complete.
+
+If no completed changes exist, create an empty `CHANGELOG.md` with proper headers and stop.
 
 ### Step 2: Read Existing Changelog
 
-If `CHANGELOG.md` exists in the project root, read it. Extract dates and change names from existing `##` headings to determine which archive entries are already documented.
+If `CHANGELOG.md` exists in the project root, read it. Extract dates and change names from existing `##` headings to determine which change entries are already documented.
 
 ### Step 3: Determine New Entries
 
-Compare archive directories against existing headings. Only process archive entries whose date + name combination is not yet in the changelog.
+Compare completed change directories against existing headings. Only process entries whose date + name combination is not yet in the changelog.
 
 If no new entries exist, report and stop.
 
 ### Step 4: Extract Information per New Entry
 
-From each new archive directory, read:
+From each new completed change directory, read:
 - `proposal.md` — Problem statement, motivation, capabilities
+
+Then read the current baseline specs for the capabilities listed in the proposal's Capabilities section:
+- `openspec/specs/<capability>/spec.md` — User-facing behavior (stories + scenarios)
+
+Also read from the change directory:
 - `design.md` — Architecture decisions, success metrics
-- `specs/*/spec.md` — User-facing behavior changes (stories + scenarios). Read all spec files in the archive.
 
 If `proposal.md` is missing, skip the entry with a warning.
+
+**Fallback for proposals without structured Capabilities section:** If the proposal does not have a parseable Capabilities section (e.g., early changes with different formats), derive the change description from the proposal's "What Changes" and "Why" sections instead of looking up baseline specs.
 
 ### Step 5: Classify Changes
 
 Derive a type from the proposal and spec content:
 
-| Archive Element | Changelog Element |
-|-----------------|-------------------|
-| proposal.md "Problem Statement" | Context for the entry |
+| Source | Changelog Element |
+|--------|-------------------|
+| proposal.md "Why" section | Context for the entry |
 | proposal.md "Capabilities" table | Change type: Added (NEW) / Changed (MODIFIED) |
-| specs/*/spec.md User Stories | User-facing description of changes |
-| specs/*/spec.md Gherkin scenario titles | Behavioral details (if relevant) |
+| Baseline specs User Stories | User-facing description of changes |
+| Baseline specs Gherkin scenario titles | Behavioral details (if relevant) |
 | design.md | Not used directly (too technical) |
 | Implementation details (file paths, APIs) | Omitted entirely |
 
@@ -81,7 +89,7 @@ Generate entries following [Keep a Changelog](https://keepachangelog.com/) forma
 - [Bug fixes, if any]
 ```
 
-> **No `[Unreleased]` tag.** Each changelog entry is generated *after* archiving — the change is already complete. The archive date *is* the release date.
+> **No `[Unreleased]` tag.** Each changelog entry is generated *after* the change is complete. The change directory date *is* the release date.
 
 If no `CHANGELOG.md` exists yet, create it from scratch with proper headers.
 
@@ -107,13 +115,13 @@ Show the user a summary of what was added.
 - ...
 ```
 
-## Output When No Archives
+## Output When No Completed Changes
 
 ```
 ## Changelog
 
-No archived changes found in openspec/changes/archive/.
-Created empty CHANGELOG.md. Entries will be added as changes are archived.
+No completed changes found in openspec/changes/.
+Created empty CHANGELOG.md. Entries will be added as changes are completed.
 ```
 
 ## Output When No New Entries
@@ -121,13 +129,13 @@ Created empty CHANGELOG.md. Entries will be added as changes are archived.
 ```
 ## Changelog
 
-No new entries. All N archived changes are already in the changelog.
+No new entries. All N completed changes are already in the changelog.
 ```
 
 ## Guardrails
 
-- Always read each archive's proposal.md before generating — do not generate from memory
-- If an archive has no proposal.md, skip it and warn
+- Always read each change's proposal.md before generating — do not generate from memory
+- If a change has no proposal.md, skip it and warn
 - Never overwrite or modify existing changelog entries — only add new ones
 - Write from the **user's perspective**, not the developer's
 - No implementation details: no file paths, no CLI commands, no API endpoints

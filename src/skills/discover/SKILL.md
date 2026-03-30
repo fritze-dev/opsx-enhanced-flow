@@ -22,14 +22,14 @@ Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run
 If no explicit change name was provided as an argument:
 1. Run: `git rev-parse --git-dir`
 2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
 4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
 5. If not valid: fall through to normal detection below
 
 If no change name provided:
 - Infer from conversation context
 - Auto-select if only one active change exists
-- If ambiguous, list directories under `openspec/changes/` (exclude `archive/`) and ask the user to select
+- If ambiguous, list active change directories under `openspec/changes/` (those with unchecked tasks or no tasks.md) and ask the user to select
 
 ### Step 2: Read Context
 

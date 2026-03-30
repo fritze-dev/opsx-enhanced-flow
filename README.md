@@ -68,17 +68,13 @@ Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 /opsx:bootstrap                 # AI scans your codebase → generates project rules + initial specs
 # → You review what the AI found
 
-# 3. Archive the baseline
-/opsx:archive                   # Saves initial specs as your project's baseline
-
-# 4. Build a feature (repeat for each feature)
+# 3. Build a feature (repeat for each feature)
 /opsx:new feature-x             # Create a workspace for the new feature
-/opsx:ff                        # AI generates planning artifacts, pauses for review after design, then generates pre-flight + tasks
+/opsx:ff                        # AI generates planning artifacts (specs edited directly), pauses for review after design, then generates pre-flight + tasks
 # → You review specs + design, confirm alignment
 /opsx:apply                     # AI implements according to the plan
 # → You test the result
 /opsx:verify                    # Automated checks → you confirm "Approved"
-/opsx:archive                   # Specs get merged, workspace gets archived
 /opsx:changelog                 # Generate release notes
 /opsx:docs                      # Generate user documentation
 
@@ -182,7 +178,7 @@ These design principles are enforced across the three-layer architecture — eac
 | 1. Setup | `/opsx:setup` | Installs workflow + templates into the project. |
 | 2. Bootstrap | `/opsx:bootstrap` | Scans codebase → generates `CONSTITUTION.md` + initial specs. |
 | 3. Review | *Manual* | Review constitution and generated specs for correctness. |
-| 4. Archive | `/opsx:archive` | Initial specs land in `openspec/specs/` as baseline. |
+| 4. Docs | `/opsx:changelog` + `/opsx:docs` | Generate initial documentation. |
 
 #### Feature Cycle
 
@@ -192,8 +188,7 @@ These design principles are enforced across the three-layer architecture — eac
 | 2. Review | *Manual* | Review specs + design, confirm alignment. ff continues with pre-flight + tasks. |
 | 3. Execute | `/opsx:apply` | AI implements according to `tasks.md`, stops at QA gate. |
 | 4. QA | *Manual + `/opsx:verify`* | User tests → Fix Loop → explicit "Approved". |
-| 5. Archive | `/opsx:archive` | Merge specs into `openspec/specs/`, move workspace to `archive/`. |
-| 6. Docs | `/opsx:changelog` + `/opsx:docs` | Generate release notes & user documentation. |
+| 5. Docs | `/opsx:changelog` + `/opsx:docs` | Generate release notes & user documentation. |
 
 #### Discovery Step (Optional)
 
@@ -211,7 +206,7 @@ For complex features, run discovery separately before fast-forward:
 
 When code changes happen outside the spec process (hotfixes, dependency updates, external contributions):
 
-- **Small drift:** `/opsx:new hotfix-xyz` → `/opsx:ff` → derive specs from existing code → `/opsx:archive`
+- **Small drift:** `/opsx:new hotfix-xyz` → `/opsx:ff` → derive specs from existing code → `/opsx:changelog` → `/opsx:docs`
 - **Large drift:** Re-run `/opsx:bootstrap` — it detects existing specs and runs in recovery mode (drift detection + consistency passes)
 
 > The spec process assumes specs come before code. When reality diverges, use these paths to re-sync.
@@ -235,12 +230,11 @@ opsx-enhanced-flow/
 │   │   ├── ff/SKILL.md                    # Fast-forward all artifacts
 │   │   ├── apply/SKILL.md                 # Implement tasks
 │   │   ├── verify/SKILL.md               # Verify implementation
-│   │   ├── archive/SKILL.md               # Archive completed change
+│   │   ├── docs-verify/SKILL.md            # Verify docs vs specs
 │   │   ├── setup/SKILL.md                 # Install workflow + templates
 │   │   ├── bootstrap/SKILL.md             # Codebase scan → constitution + specs
 │   │   ├── discover/SKILL.md              # Interactive research with Q&A
 │   │   ├── preflight/SKILL.md             # Standalone quality check
-│   │   ├── sync/SKILL.md                  # Sync delta specs to baseline
 │   │   ├── changelog/SKILL.md             # Generate release notes
 │   │   └── docs/SKILL.md                  # Generate user documentation
 │   └── templates/                         # Smart Templates (copied by /opsx:setup)
@@ -250,15 +244,15 @@ opsx-enhanced-flow/
 │       ├── preflight.md                   # Pre-flight check template
 │       ├── tasks.md                       # Implementation tasks template
 │       ├── constitution.md                # Constitution scaffold template
-│       ├── specs/spec.md                  # Spec (delta) template
+│       ├── specs/spec.md                  # Spec template
 │       └── docs/                          # Documentation output templates
 │
 ├── openspec/                              # Project's own OpenSpec (dogfooding)
 │   ├── WORKFLOW.md                        # Pipeline orchestration
 │   ├── CONSTITUTION.md                    # Project constitution
 │   ├── templates/                         # Project's copy of Smart Templates
-│   ├── specs/                             # Merged specs (one per capability)
-│   └── changes/archive/                   # Archived feature workspaces
+│   ├── specs/                             # Baseline specs (one per capability, edited directly)
+│   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
 ├── .github/workflows/                     # CI/CD
 │   ├── release.yml                        # Auto tag + release on version change
@@ -276,10 +270,9 @@ your-project/
 │   ├── WORKFLOW.md                        # Pipeline orchestration (generated by /opsx:setup)
 │   ├── CONSTITUTION.md                    # Project rules (generated by /opsx:bootstrap)
 │   ├── templates/                         # Smart Templates (copied by /opsx:setup)
-│   ├── specs/                             # Single source of truth (merged specs)
-│   └── changes/                           # Active feature development
-│       ├── <feature-name>/                # Current workspace (temporary)
-│       └── archive/                       # History: YYYY-MM-DD-<feature-name>/
+│   ├── specs/                             # Baseline specs (edited directly during specs stage)
+│   └── changes/                           # Feature workspaces
+│       └── YYYY-MM-DD-<feature-name>/     # Date-prefixed at creation
 │
 ├── docs/                                  # End-user documentation (auto-generated)
 │   ├── README.md                          # Architecture overview + capabilities + ADR index
@@ -291,7 +284,7 @@ your-project/
 └── ...
 ```
 
-> **Archive naming:** Archived workspaces use the format `YYYY-MM-DD-<feature-name>/` (OpenSpec convention). The `/opsx:changelog` skill relies on this date prefix to identify the most recent archive.
+> **Change naming:** Change workspaces use the format `YYYY-MM-DD-<feature-name>/` — date-prefixed at creation. The `/opsx:changelog` skill relies on this date prefix for chronological ordering.
 
 ---
 
@@ -307,22 +300,20 @@ your-project/
 
 ### Skills
 
-All 12 skills are available as `/opsx:*` commands when the plugin is installed. See [docs/README.md](docs/README.md) for detailed capability documentation.
+All 10 skills are available as `/opsx:*` commands when the plugin is installed. See [docs/README.md](docs/README.md) for detailed capability documentation.
 
 | Command | Purpose |
 |---------|---------|
 | `/opsx:setup` | Install workflow + templates into project (one-time setup) |
 | `/opsx:bootstrap` | Full codebase scan → constitution + initial specs |
-| `/opsx:new` | Create a new change workspace |
+| `/opsx:new` | Create a new change workspace (date-prefixed, with lazy worktree cleanup) |
 | `/opsx:discover` | Interactive research with Q&A for complex features |
-| `/opsx:ff` | Generate all remaining artifacts (pauses at design review + preflight warnings) |
+| `/opsx:ff` | Generate all remaining artifacts, edit specs directly (pauses at design review + preflight warnings) |
 | `/opsx:apply` | Implement according to `tasks.md` |
 | `/opsx:verify` | Automated verification checks |
-| `/opsx:archive` | Merge specs & archive workspace |
-| `/opsx:sync` | Sync delta specs to baseline |
 | `/opsx:preflight` | Standalone pre-flight quality check |
-| `/opsx:changelog` | Generate release notes from archived specs |
-| `/opsx:docs` | Generate user documentation from merged specs |
+| `/opsx:changelog` | Generate release notes from completed changes |
+| `/opsx:docs` | Generate user documentation from baseline specs |
 
 ---
 
@@ -343,7 +334,7 @@ After installing the plugin, run `/opsx:setup` in your project to install the wo
 
 #### Updating the Plugin
 
-Patch versions are bumped automatically when changes are archived via `/opsx:archive`. To update as a consumer:
+Patch versions are bumped automatically during the post-apply workflow. To update as a consumer:
 
 ```bash
 # 1. Refresh the marketplace listing
@@ -362,7 +353,7 @@ claude plugin uninstall opsx@opsx-enhanced-flow
 claude plugin install opsx@opsx-enhanced-flow
 ```
 
-> **Versioning:** Patch versions auto-increment on `/opsx:archive`. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For minor/major releases, manually set the version and push — the Action handles the rest.
+> **Versioning:** Patch versions auto-increment during the post-apply workflow. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For minor/major releases, manually set the version and push — the Action handles the rest.
 
 > **Version pinning:** To pin to a specific version, add the marketplace with a tag reference:
 > ```bash

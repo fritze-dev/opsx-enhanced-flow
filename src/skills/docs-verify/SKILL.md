@@ -21,7 +21,7 @@ Verify that generated documentation accurately reflects the current state of spe
    - **Specs**: Glob `openspec/specs/*/spec.md` to find all capabilities. The directory name is the capability ID.
    - **Capability docs**: Glob `docs/capabilities/*.md`. If `docs/capabilities/` does not exist, note it and treat all capabilities as missing docs.
    - **ADRs**: Glob `docs/decisions/adr-*.md`. Separate generated ADRs (`adr-[0-9]*.md`) from manual ADRs (`adr-M*.md`). If `docs/decisions/` does not exist, note it.
-   - **Archives**: Glob `openspec/changes/archive/*/design.md` to find archived design decisions. If no archives exist, note it.
+   - **Completed changes**: Glob `openspec/changes/*/design.md` to find design decisions from completed changes (all tasks checked in tasks.md). If no completed changes exist, note it.
    - **README**: Check if `docs/README.md` exists.
    - **Constitution**: Read `openspec/CONSTITUTION.md` for README architecture checks.
 
@@ -49,25 +49,25 @@ Verify that generated documentation accurately reflects the current state of spe
 
 4. **Dimension B: ADRs vs Design Decisions**
 
-   If no archives with `design.md` exist, skip this dimension and note: "No archived design decisions to verify against."
+   If no completed changes with `design.md` exist, skip this dimension and note: "No design decisions to verify against."
 
-   For each archived `design.md`:
+   For each completed change's `design.md`:
 
    **Decisions table discovery:**
    - Look for a markdown table under a heading containing "Decisions" (e.g., `## Decisions`).
    - The table must have columns including "Decision" and "Rationale".
-   - If the section contains only prose (e.g., "No architectural changes"), no table, or a non-Decisions table — skip this archive.
+   - If the section contains only prose (e.g., "No architectural changes"), no table, or a non-Decisions table — skip this change.
 
    **ADR cross-check:**
    - For each decision row in the table, search the existing generated ADR files (`adr-[0-9]*.md`) for content that matches the decision text (check the `## Decision` section of each ADR).
-   - Also check each ADR's References section for an `[Archive: ...]` backlink matching the current archive directory name.
-   - If a decision has no matching ADR, add WARNING: "Missing ADR for design decision: `<decision-text-summary>`" with reference to the archive `design.md`. Recommend: "Run `/opsx:docs` to generate missing ADRs."
+   - Also check each ADR's References section for a `[Change: ...]` or `[Archive: ...]` backlink matching the current change directory name.
+   - If a decision has no matching ADR, add WARNING: "Missing ADR for design decision: `<decision-text-summary>`" with reference to the change's `design.md`. Recommend: "Run `/opsx:docs` to generate missing ADRs."
 
    **Manual ADR handling:**
    - Files matching `adr-M*.md` are manual ADRs. Do NOT check them against archived Decisions tables. Do NOT flag them as unmatched.
 
    **Consolidation awareness:**
-   - If an archive has 3+ decision rows that map to a single consolidated ADR, count that as covered (not as missing ADRs).
+   - If a change has 3+ decision rows that map to a single consolidated ADR, count that as covered (not as missing ADRs).
 
 5. **Dimension C: README vs Current State**
 
@@ -101,7 +101,7 @@ Verify that generated documentation accurately reflects the current state of spe
    | Dimension | Status |
    |-----------|--------|
    | Capability Docs | N specs checked, M issues |
-   | ADRs | N archives checked, M issues |
+   | ADRs | N changes checked, M issues |
    | README | Checked / Missing |
 
    | Severity | Count |
@@ -131,7 +131,7 @@ Verify that generated documentation accurately reflects the current state of spe
 - **Existence checks**: Exact filename match first, then frontmatter/heading fallback for capability docs.
 - **Requirement matching**: Search for the requirement name text within the capability doc. Use case-insensitive matching. A requirement is "covered" if its name (or a recognizable derivative) appears in a heading, bullet, or bold text within the doc.
 - **Purpose alignment**: Compare the core subject matter, not exact wording. Flag only if the doc describes a fundamentally different capability than the spec.
-- **ADR matching**: Match by decision text keywords in the ADR's Decision section, or by archive backlink in References.
+- **ADR matching**: Match by decision text keywords in the ADR's Decision section, or by change/archive backlink in References.
 - **README capability matching**: Match by capability name (kebab-case) appearing in the table. Case-insensitive.
 - **Constitution consistency**: Compare key terms and technology names, not prose structure.
 - **False positive avoidance**: When uncertain whether something is drift or intentional, prefer INFO over WARNING, WARNING over CRITICAL.
@@ -141,7 +141,7 @@ Verify that generated documentation accurately reflects the current state of spe
 - If `docs/capabilities/` does not exist: report all specs as missing docs (CRITICAL), continue to other dimensions.
 - If `docs/decisions/` does not exist: skip Dimension B, note "No ADR directory found."
 - If `docs/README.md` does not exist: report as single CRITICAL, skip README sub-checks.
-- If no archives exist: skip Dimension B, note "No archived design decisions to verify against."
+- If no completed changes exist: skip Dimension B, note "No design decisions to verify against."
 - If no specs exist: report "No specs found in `openspec/specs/`. Nothing to verify." and stop.
 - Always report which dimensions were checked and which were skipped.
 

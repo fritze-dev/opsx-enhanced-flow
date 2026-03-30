@@ -13,11 +13,9 @@ apply:
     They are tracked in tasks.md for auditability but executed separately
     after apply completes.
 
-    Post-apply workflow: /opsx:verify → /opsx:archive →
-    /opsx:changelog → /opsx:docs → commit → execute constitution
+    Post-apply workflow: /opsx:verify →
+    /opsx:changelog → /opsx:docs → version bump → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
-    IMPORTANT: /opsx:verify MUST run before /opsx:sync or /opsx:archive.
-    Never sync baseline specs before implementation is verified.
 
     Constitution standard tasks are split into pre-merge and post-merge.
     Only pre-merge tasks are executed during post-apply workflow.
@@ -35,10 +33,11 @@ post_artifact: |
      - If already on `<change-name>` branch (e.g., in a worktree): skip branch creation
      - If on main: `git checkout -b <change-name>`
      - If on another branch: `git checkout <change-name>`
-  2. Stage change artifacts: `git add openspec/changes/<change-name>/`
-  3. Commit: `git commit -m "WIP: <change-name> — <artifact-id>"`
-  4. Push: `git push -u origin <change-name>`
-  5. On FIRST push only (no existing PR for this branch):
+  2. Stage change artifacts: `git add openspec/changes/<change-dir>/`
+  3. Stage spec edits (if specs stage): `git add openspec/specs/`
+  4. Commit: `git commit -m "WIP: <change-name> — <artifact-id>"`
+  5. Push: `git push -u origin <change-name>`
+  6. On FIRST push only (no existing PR for this branch):
      `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
 
   If `gh` CLI is unavailable or not authenticated, skip PR creation.
@@ -59,4 +58,4 @@ context: |
 
 # Workflow
 
-Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → QA → Sync → Archive
+Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → QA → Changelog → Docs

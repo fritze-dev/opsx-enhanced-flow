@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Verify implementation matches change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent before archiving.
+description: Verify implementation matches change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent.
 disable-model-invocation: false
 ---
 
@@ -16,11 +16,11 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    If no explicit change name was provided as an argument:
    1. Run: `git rev-parse --git-dir`
    2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
    4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
-   If not detected via worktree: List directories under `openspec/changes/` (exclude `archive/`). Use the **AskUserQuestion tool** to let the user select.
+   If not detected via worktree: List active change directories under `openspec/changes/` (those with unchecked tasks or no tasks.md). Use the **AskUserQuestion tool** to let the user select.
 
    Show changes that have implementation tasks (tasks.md exists).
    Mark changes with incomplete tasks as "(In Progress)".
@@ -34,12 +34,14 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 3. **Load artifacts**
 
    Read all available artifact files from the change directory:
-   - `openspec/changes/<name>/research.md`
-   - `openspec/changes/<name>/proposal.md`
-   - `openspec/changes/<name>/specs/*/spec.md`
-   - `openspec/changes/<name>/design.md`
-   - `openspec/changes/<name>/preflight.md`
-   - `openspec/changes/<name>/tasks.md`
+   - `openspec/changes/<change-dir>/research.md`
+   - `openspec/changes/<change-dir>/proposal.md`
+   - `openspec/changes/<change-dir>/design.md`
+   - `openspec/changes/<change-dir>/preflight.md`
+   - `openspec/changes/<change-dir>/tasks.md`
+
+   Also read baseline specs for the capabilities listed in the proposal's Capabilities section:
+   - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
 4. **Initialize verification report structure**
 
@@ -61,19 +63,18 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Spec Coverage**:
-   - If delta specs exist in `openspec/changes/<name>/specs/`:
-     - Extract all requirements (marked with "### Requirement:")
-     - For each requirement:
-       - Search codebase for keywords related to the requirement
-       - Assess if implementation likely exists
-     - If requirements appear unimplemented:
-       - Add CRITICAL issue: "Requirement not found: <requirement name>"
-       - Recommendation: "Implement requirement X: <description>"
+   - Read baseline specs for capabilities listed in the proposal's Capabilities section
+   - For each requirement in the relevant baseline specs:
+     - Search codebase for keywords related to the requirement
+     - Assess if implementation likely exists
+   - If requirements appear unimplemented:
+     - Add CRITICAL issue: "Requirement not found: <requirement name>"
+     - Recommendation: "Implement requirement X: <description>"
 
 6. **Verify Correctness**
 
    **Requirement Implementation Mapping**:
-   - For each requirement from delta specs:
+   - For each requirement from the relevant baseline specs:
      - Search codebase for implementation evidence
      - If found, note file paths and line ranges
      - Assess if implementation matches requirement intent
@@ -82,7 +83,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
        - Recommendation: "Review <file>:<lines> against requirement X"
 
    **Scenario Coverage**:
-   - For each scenario in delta specs (marked with "#### Scenario:"):
+   - For each scenario in the relevant baseline specs (marked with "#### Scenario:"):
      - Check if conditions are handled in code
      - Check if tests exist covering the scenario
      - If scenario appears uncovered:
@@ -157,9 +158,9 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
       - Each with specific recommendation
 
    **Final Assessment**:
-   - If CRITICAL issues: "X critical issue(s) found. Fix before archiving."
-   - If only warnings: "No critical issues. Y warning(s) to consider. Ready for archive (with noted improvements)."
-   - If all clear: "All checks passed. Ready for archive."
+   - If CRITICAL issues: "X critical issue(s) found. Fix before proceeding."
+   - If only warnings: "No critical issues. Y warning(s) to consider. Ready to proceed (with noted improvements)."
+   - If all clear: "All checks passed. Ready to proceed with post-apply workflow."
 
 **Verification Heuristics**
 

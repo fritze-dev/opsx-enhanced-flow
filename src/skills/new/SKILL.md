@@ -23,9 +23,22 @@ Start a new change using the experimental artifact-driven approach.
 
    Check that `openspec/WORKFLOW.md` exists. If missing, tell the user to run `/opsx:setup` first and stop.
 
-3. **Create the change workspace**
+3. **Lazy worktree cleanup**
+
+   Before creating a new change, check for stale worktrees:
+   1. Run `git worktree list` to find all worktrees (excluding the main working tree).
+   2. For each worktree, extract the branch name.
+   3. Check if the branch's PR was merged: `gh pr view <branch-name> --json state --jq '.state'`
+      - If result is `MERGED`: remove the worktree (`git worktree remove <path>`) and delete the branch (`git branch -D <branch-name>`). Report: "Cleaned up stale worktree: <branch-name> (merged)"
+      - If `gh` is unavailable or no PR exists: fall back to `git branch -d <branch-name>`. If that succeeds (branch was merged), remove the worktree. If it fails (branch not merged), skip this worktree.
+      - If result is `OPEN` or `CLOSED`: skip this worktree (still active or intentionally closed).
+   4. If no stale worktrees found, proceed silently.
+
+4. **Create the change workspace**
 
    Read `openspec/WORKFLOW.md` frontmatter for the `worktree` configuration.
+
+   Determine the current date in `YYYY-MM-DD` format for the directory prefix.
 
    **If `worktree.enabled` is `true`:**
    1. Compute the worktree path by replacing `{change}` in `worktree.path_pattern` with the change name (default pattern: `.claude/worktrees/{change}`)
@@ -33,40 +46,41 @@ Start a new change using the experimental artifact-driven approach.
    3. Create the worktree: `git worktree add <path> -b <change-name>`
       - If the branch already exists, try: `git worktree add <path> <change-name>`
       - If the path already exists but is not a git worktree, fail with an error.
-   4. Create the change directory inside the worktree:
+   4. Create the change directory inside the worktree with date prefix:
       ```bash
-      mkdir -p <worktree-path>/openspec/changes/<name>
+      mkdir -p <worktree-path>/openspec/changes/YYYY-MM-DD-<name>
       ```
    5. Report the worktree path and branch name. Instruct the user to switch their working directory to the worktree.
 
    **If `worktree.enabled` is absent, commented out, or `false`:**
    ```bash
-   mkdir -p openspec/changes/<name>
+   mkdir -p openspec/changes/YYYY-MM-DD-<name>
    ```
-   This creates the change workspace at `openspec/changes/<name>/` (existing behavior).
 
-4. **Show the artifact status**
+   **Check for existing change:** Before creating, check if a directory matching `openspec/changes/*-<name>` already exists (in worktree or main tree). If so, suggest continuing that change instead.
+
+5. **Show the artifact status**
 
    Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter (`templates_dir` and `pipeline` array). For each artifact ID in `pipeline`, read the corresponding Smart Template at `<templates_dir>/<id>.md` to get its `generates` and `requires` fields.
 
    For each artifact:
-   - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
+   - Check if `openspec/changes/YYYY-MM-DD-<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/YYYY-MM-DD-<name>/specs/`)
    - **done**: output file exists
    - **ready**: not done, but all artifacts listed in `requires` are done
    - **blocked**: not done, and at least one artifact in `requires` is not done
 
    Display which artifacts need to be created and which are ready.
 
-5. **Get instructions for the first artifact**
+6. **Get instructions for the first artifact**
 
    Find the first artifact with status "ready". Read its Smart Template's `instruction` frontmatter field for content guidance and the template body for the output structure.
 
-6. **STOP and wait for user direction**
+7. **STOP and wait for user direction**
 
 **Output**
 
 After completing the steps, summarize:
-- Change name and location
+- Change name and location (including date prefix)
 - Artifact pipeline and its sequence
 - Current status (0/N artifacts complete)
 - The template for the first artifact
@@ -76,4 +90,4 @@ After completing the steps, summarize:
 - Do NOT create any artifacts yet - just show the instructions
 - Do NOT advance beyond showing the first artifact template
 - If the name is invalid (not kebab-case), ask for a valid name
-- If a change with that name already exists, suggest continuing that change instead
+- If a change with that name already exists (matching `*-<name>`), suggest continuing that change instead

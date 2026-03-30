@@ -16,34 +16,36 @@ Implement tasks from an OpenSpec change.
    If no explicit change name was provided as an argument:
    1. Run: `git rev-parse --git-dir`
    2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
    4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, list directories under `openspec/changes/` (exclude `archive/`) and use the **AskUserQuestion tool** to let the user select
+   - Auto-select if only one active change exists (active = has unchecked tasks or no tasks.md)
+   - If ambiguous, list active change directories under `openspec/changes/` and use the **AskUserQuestion tool** to let the user select
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
 
 2. **Check status**
 
-   Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter. For each artifact ID in the `pipeline` array, read the corresponding Smart Template to get its `generates` field and check if `openspec/changes/<name>/<generates>` exists. Also check the `apply:` section — its `requires` field lists which artifacts must be complete before implementation. Its `tracks` field names the task file (typically `tasks.md`).
+   Read `openspec/WORKFLOW.md` to get the pipeline configuration from its YAML frontmatter. For each artifact ID in the `pipeline` array, read the corresponding Smart Template to get its `generates` field and check if `openspec/changes/<change-dir>/<generates>` exists. Also check the `apply:` section — its `requires` field lists which artifacts must be complete before implementation. Its `tracks` field names the task file (typically `tasks.md`).
 
    **Handle states:**
    - If apply-required artifacts are missing: show message, suggest using `/opsx:ff`
-   - If all tasks are already done: congratulate, suggest archive
+   - If all tasks are already done: congratulate, suggest running post-apply workflow (`/opsx:changelog` → `/opsx:docs`)
    - Otherwise: proceed to implementation
 
 3. **Read context files**
 
    Read `openspec/WORKFLOW.md`'s `apply.instruction` field for apply guidance and the `context` field for project-level context instructions. Then read all completed artifact files in the change directory as context:
-   - `openspec/changes/<name>/research.md`
-   - `openspec/changes/<name>/proposal.md`
-   - `openspec/changes/<name>/specs/*/spec.md`
-   - `openspec/changes/<name>/design.md`
-   - `openspec/changes/<name>/tasks.md`
+   - `openspec/changes/<change-dir>/research.md`
+   - `openspec/changes/<change-dir>/proposal.md`
+   - `openspec/changes/<change-dir>/design.md`
+   - `openspec/changes/<change-dir>/tasks.md`
+
+   Also read baseline specs for the capabilities listed in the proposal's Capabilities section:
+   - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
 4. **Show current progress**
 
@@ -71,7 +73,7 @@ Implement tasks from an OpenSpec change.
    Display:
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
-   - If all done: suggest archive
+   - If all done: suggest post-apply workflow (`/opsx:verify` → `/opsx:changelog` → `/opsx:docs`)
    - If paused: explain why and wait for guidance
 
 **Guardrails**
@@ -82,7 +84,7 @@ Implement tasks from an OpenSpec change.
 - Keep code changes minimal and scoped to each task
 - Update task checkbox immediately after completing each task
 - Pause on errors, blockers, or unclear requirements - don't guess
-- Do not modify files under `openspec/specs/` during apply — spec changes flow through `/opsx:sync`
+- Modifying files under `openspec/specs/` during apply IS permitted — specs are edited directly in this workflow
 
 **Fluid Workflow Integration**
 

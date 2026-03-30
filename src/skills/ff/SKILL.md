@@ -16,11 +16,11 @@ Fast-forward through artifact creation - generate everything needed to start imp
    If no explicit change name was provided as an argument:
    1. Run: `git rev-parse --git-dir`
    2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
    4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
-   List directories under `openspec/changes/` (exclude `archive/`). If active changes exist, use the **AskUserQuestion tool** to let the user choose:
+   List directories under `openspec/changes/`. Filter to **active changes** — those where `tasks.md` does not exist or contains at least one `- [ ]` item. If active changes exist, use the **AskUserQuestion tool** to let the user choose:
    - Present existing changes as options (top 3-4, most recently modified first, mark most recent as "(Recommended)")
    - Include an option to create a new change
 
@@ -32,7 +32,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 2. **Create the change directory** (if new)
    ```bash
-   mkdir -p openspec/changes/<name>
+   mkdir -p openspec/changes/YYYY-MM-DD-<name>
    ```
 
 3. **Get the artifact build order**
@@ -48,10 +48,12 @@ Fast-forward through artifact creation - generate everything needed to start imp
    - `instruction`: AI behavioral constraints
 
    Check artifact status:
-   - Check if `openspec/changes/<name>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<name>/specs/`)
+   - Check if `openspec/changes/<change-dir>/<generates>` exists (for glob patterns like `specs/**/*.md`, check if at least one matching file exists under `openspec/changes/<change-dir>/specs/`)
    - **done**: output file exists
    - **ready**: not done, but all artifacts listed in `requires` are done
    - **blocked**: not done, and at least one artifact in `requires` is not done
+
+   **Special handling for `specs` artifact**: The specs stage does NOT create files in the change directory. Instead, it edits baseline specs directly at `openspec/specs/<capability>/spec.md`. To check if the specs stage is "done", verify that the proposal's Capabilities section lists capabilities and the corresponding baseline spec files exist or have been recently modified.
 
 4. **Create artifacts in sequence until apply-ready**
 
@@ -65,9 +67,14 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - Read the Smart Template at `<templates_dir>/<id>.md`:
         - **instruction**: from YAML frontmatter `instruction:` field (content guidance)
         - **template body**: the markdown after the frontmatter (output structure)
-        - **output path**: `openspec/changes/<name>/<generates>`
+        - **output path**: `openspec/changes/<change-dir>/<generates>`
       - Read any completed dependency files for context
-      - Create the artifact file using the template body as the structure
+      - **For the `specs` artifact**: Instead of creating delta spec files, edit baseline specs directly:
+        - For new capabilities listed in the proposal: create `openspec/specs/<capability>/spec.md`
+        - For modified capabilities: edit the existing `openspec/specs/<capability>/spec.md` in place
+        - Use the spec template's instruction for format guidance (requirements with Gherkin scenarios)
+        - Do NOT create files under `openspec/changes/<change-dir>/specs/`
+      - **For all other artifacts**: Create the artifact file in the change directory using the template body as the structure
       - Apply the instruction as constraints — but do NOT copy it into the file
       - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `post_artifact` field. If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
       - Show brief progress: "Created <artifact-id>"
@@ -100,6 +107,7 @@ After completing all artifacts, summarize:
 - **IMPORTANT**: The `instruction` field and WORKFLOW.md `context` are constraints for YOU, not content for the file
   - Do NOT copy instruction blocks into the artifact
   - These guide what you write, but should never appear in the output
+- **IMPORTANT**: The `specs` stage edits baseline specs directly at `openspec/specs/`. Do NOT create delta spec files with ADDED/MODIFIED/REMOVED sections. Edit the specs in place using the standard baseline format (`## Purpose`, `## Requirements`, `### Requirement:`, `#### Scenario:`).
 
 **Checkpoint Model**
 
