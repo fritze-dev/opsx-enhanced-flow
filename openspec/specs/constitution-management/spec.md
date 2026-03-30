@@ -166,6 +166,7 @@ The constitution's Conventions section SHALL include a rule requiring that workf
 ## Edge Cases
 
 - **Friction in non-plugin projects**: The convention applies to all projects using the opsx workflow, not just the plugin itself. Consumer projects should track friction in their own issue trackers.
+- **Multiple issues referenced**: If a change addresses multiple issues, all should be referenced (e.g., `Closes #42, Closes #43`).
 - **New schema version adds rules**: When the schema is updated with new instructions, the constitution should be audited for newly-redundant entries.
 - **Bootstrap on empty project**: A project with no source files or configuration. The agent SHALL generate a minimal constitution with placeholder sections and mark all entries with `<!-- REVIEW -->`.
 - **Contradictory patterns observed**: The codebase contains two conflicting conventions (e.g., both camelCase and snake_case function names). The agent SHALL document both observed patterns and mark the entry with `<!-- REVIEW -->` for user resolution.
