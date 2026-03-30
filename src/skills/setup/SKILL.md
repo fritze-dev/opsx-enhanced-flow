@@ -35,64 +35,10 @@ cp -r "${CLAUDE_PLUGIN_ROOT}/templates/." openspec/templates/
 
 ### 2. Create WORKFLOW.md (skip if exists)
 
-Only if `openspec/WORKFLOW.md` does **not** already exist, create it with this content:
+Only if `openspec/WORKFLOW.md` does **not** already exist:
 
-```markdown
----
-templates_dir: openspec/templates
-pipeline: [research, proposal, specs, design, preflight, tasks]
-
-apply:
-  requires: [tasks]
-  tracks: tasks.md
-  instruction: |
-    Read context files, work through pending tasks, mark complete as you go.
-    Pause if you hit blockers or need clarification.
-
-    Standard Tasks (post-implementation section) are NOT part of apply.
-    They are tracked in tasks.md for auditability but executed separately
-    after apply completes.
-
-    Post-apply workflow: /opsx:verify → /opsx:archive →
-    /opsx:changelog → /opsx:docs → commit → execute constitution
-    pre-merge standard tasks. Never skip steps.
-    IMPORTANT: /opsx:verify MUST run before /opsx:sync or /opsx:archive.
-    Never sync baseline specs before implementation is verified.
-
-    Constitution standard tasks are split into pre-merge and post-merge.
-    Only pre-merge tasks are executed during post-apply workflow.
-    Post-merge tasks remain as unchecked reminders in tasks.md —
-    they are executed manually after the PR is merged.
-
-    Before committing, mark all standard task checkboxes in tasks.md
-    as complete — including the commit step itself — EXCEPT post-merge
-    tasks, which remain unchecked.
-
-post_artifact: |
-  After creating any artifact, commit and push the change:
-  1. If not on a feature branch (i.e., on main): `git checkout -b <change-name>`
-  2. Stage change artifacts: `git add openspec/changes/<change-name>/`
-  3. Commit: `git commit -m "WIP: <change-name> — <artifact-id>"`
-  4. Push: `git push -u origin <change-name>`
-  5. On FIRST push only (no existing PR for this branch):
-     `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
-
-  If `gh` CLI is unavailable or not authenticated, skip PR creation.
-  If the branch already exists, switch to it (`git checkout <change-name>`).
-  If push fails, continue with local commit — do not block the pipeline.
-
-context: |
-  Always read and follow openspec/CONSTITUTION.md before proceeding.
-  All workflow artifacts (research, proposal, specs, design, preflight, tasks)
-  must be written in English regardless of docs_language.
-
-# docs_language: English
----
-
-# Workflow
-
-Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → QA → Sync → Archive
-```
+1. Copy the workflow template from the plugin: `cp "${CLAUDE_PLUGIN_ROOT}/templates/workflow.md" openspec/WORKFLOW.md`
+2. If the template file does not exist at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, report an error and suggest reinstalling the plugin.
 
 If it already exists, report: "WORKFLOW.md already exists — preserved."
 
@@ -108,7 +54,42 @@ Only if `openspec/CONSTITUTION.md` does **not** already exist, create it:
 
 If it already exists, report: "CONSTITUTION.md already exists — preserved."
 
-### 4. Validate
+### 4. Environment checks
+
+Run these checks and report results:
+
+1. **Git version**: Run `git --version` and parse the version number. Report whether git 2.5+ is available (required for worktree support). If below 2.5, note that worktree mode is unavailable.
+
+2. **gh CLI**: Run `gh --version`. If available, run `gh auth status` to check authentication. Report one of:
+   - "gh CLI: available and authenticated"
+   - "gh CLI: installed but not authenticated"
+   - "gh CLI: not found"
+
+3. **.gitignore**: Check if `.gitignore` contains a `/.claude/` entry. Report whether it is present.
+
+### 5. Worktree opt-in (conditional)
+
+Only if **both** git 2.5+ and gh CLI are available and authenticated:
+
+1. Use **AskUserQuestion tool** to ask: "Enable worktree-based change isolation? Each `/opsx:new` will create an isolated git worktree with its own feature branch."
+   - Options: "Yes (Recommended)" / "No"
+
+2. If the user opts in:
+   - Read `openspec/WORKFLOW.md` and uncomment the `worktree:` section, setting `enabled: true`:
+     ```yaml
+     worktree:
+       enabled: true
+       path_pattern: .claude/worktrees/{change}
+       auto_cleanup: false
+     ```
+   - If `.gitignore` does not contain `/.claude/`, ask the user whether to add it. If they agree, append `/.claude/` to `.gitignore`.
+   - Use **AskUserQuestion tool** to ask: "Configure GitHub repository for rebase-merge strategy? This keeps linear history and reduces merge conflicts with worktrees."
+     - Options: "Yes (Recommended)" / "No"
+   - If the user opts in to rebase-merge: Run `gh api repos/{owner}/{repo} -X PATCH -f allow_rebase_merge=true`. Report success or failure. If the API call fails (e.g., insufficient permissions), report the error and continue.
+
+3. If the user declines or conditions are not met: Skip silently. The `worktree:` section remains commented out in WORKFLOW.md.
+
+### 6. Validate
 
 Verify that:
 - `openspec/WORKFLOW.md` exists and is readable (read its first few lines)
@@ -121,9 +102,12 @@ If any check fails, report which specific validation failed.
 
 Report a summary:
 - Smart Templates installed at `openspec/templates/`
-- WORKFLOW.md status (created or preserved)
+- WORKFLOW.md status (created from template or preserved)
 - CONSTITUTION.md status (created or preserved)
 - Migration status (if legacy layout was detected)
+- Environment: git version, gh CLI status, .gitignore status
+- Worktree mode: enabled or disabled
+- Merge strategy: configured or skipped
 - Suggest: "Run `/opsx:bootstrap` to scan your codebase and generate the project constitution."
 
 Do not run `/opsx:bootstrap` automatically — let the user decide when to proceed.

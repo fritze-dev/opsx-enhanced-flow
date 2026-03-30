@@ -12,6 +12,14 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 1. **If no clear input provided, check for existing changes first**
 
+   **Worktree context detection** (runs first, before directory listing):
+   If no explicit change name was provided as an argument:
+   1. Run: `git rev-parse --git-dir`
+   2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
+   3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+   4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+   5. If not valid: fall through to normal detection below
+
    List directories under `openspec/changes/` (exclude `archive/`). If active changes exist, use the **AskUserQuestion tool** to let the user choose:
    - Present existing changes as options (top 3-4, most recently modified first, mark most recent as "(Recommended)")
    - Include an option to create a new change

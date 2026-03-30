@@ -12,11 +12,19 @@ Archive a completed change in the experimental workflow.
 
 1. **If no change name provided, prompt for selection**
 
-   List directories under `openspec/changes/` (exclude `archive/`). Use the **AskUserQuestion tool** to let the user select.
+   **Worktree context detection** (runs first, before directory listing):
+   If no explicit change name was provided as an argument:
+   1. Run: `git rev-parse --git-dir`
+   2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
+   3. Verify: `openspec/changes/<branch-name>/` exists in the current working tree
+   4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+   5. If not valid: fall through to normal detection below
+
+   If not detected via worktree: List directories under `openspec/changes/` (exclude `archive/`). Use the **AskUserQuestion tool** to let the user select.
 
    Show only active changes (not already archived).
 
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+   **IMPORTANT**: Do NOT auto-select from directory listing. Worktree context detection is acceptable.
 
 2. **Check artifact completion status**
 
@@ -72,13 +80,31 @@ Archive a completed change in the experimental workflow.
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    ```
 
-6. **Display summary**
+6. **Worktree cleanup (if applicable)**
+
+   Check if the current session is in a git worktree (run `git rev-parse --git-dir` — if it contains `/worktrees/`, we're in a worktree).
+
+   If in a worktree:
+   - Read `openspec/WORKFLOW.md` frontmatter for `worktree.auto_cleanup`
+   - If `auto_cleanup` is `true`:
+     1. Determine the worktree path from `git rev-parse --show-toplevel`
+     2. Navigate to the main repository (parent of the worktree)
+     3. Run: `git worktree remove <worktree-path>`
+     4. If the branch has been merged to main: `git branch -d <change-name>`
+     5. Report: "Worktree cleaned up at <path>"
+   - If `auto_cleanup` is `false` or absent:
+     - Report: "Worktree at <path> still exists. Run `git worktree remove <path>` to clean up."
+
+   If not in a worktree: skip this step.
+
+7. **Display summary**
 
    Show archive completion summary including:
    - Change name
    - Archive location
    - Whether specs were synced (if applicable)
    - Note about any warnings (incomplete artifacts/tasks)
+   - Worktree cleanup status (if applicable)
 
 **Guardrails**
 - Always prompt for change selection if not provided

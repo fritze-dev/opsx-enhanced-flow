@@ -23,11 +23,27 @@ Start a new change using the experimental artifact-driven approach.
 
    Check that `openspec/WORKFLOW.md` exists. If missing, tell the user to run `/opsx:setup` first and stop.
 
-3. **Create the change directory**
+3. **Create the change workspace**
+
+   Read `openspec/WORKFLOW.md` frontmatter for the `worktree` configuration.
+
+   **If `worktree.enabled` is `true`:**
+   1. Compute the worktree path by replacing `{change}` in `worktree.path_pattern` with the change name (default pattern: `.claude/worktrees/{change}`)
+   2. Check if a worktree at that path already exists (`git worktree list`). If so, suggest switching to it instead and stop.
+   3. Create the worktree: `git worktree add <path> -b <change-name>`
+      - If the branch already exists, try: `git worktree add <path> <change-name>`
+      - If the path already exists but is not a git worktree, fail with an error.
+   4. Create the change directory inside the worktree:
+      ```bash
+      mkdir -p <worktree-path>/openspec/changes/<name>
+      ```
+   5. Report the worktree path and branch name. Instruct the user to switch their working directory to the worktree.
+
+   **If `worktree.enabled` is absent, commented out, or `false`:**
    ```bash
    mkdir -p openspec/changes/<name>
    ```
-   This creates the change workspace at `openspec/changes/<name>/`.
+   This creates the change workspace at `openspec/changes/<name>/` (existing behavior).
 
 4. **Show the artifact status**
 
