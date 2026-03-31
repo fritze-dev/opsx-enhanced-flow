@@ -10,7 +10,7 @@ Defines the QA loop with mandatory explicit human approval before archiving, inc
 
 ### Requirement: QA Loop with Mandatory Approval
 
-The system SHALL require explicit human approval before a change can be archived. The QA loop consists of: (1) running `/opsx:verify` to produce a verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT archive a change without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before archiving proceeds. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
+The system SHALL require explicit human approval before a change can proceed to the post-apply workflow. The QA loop consists of: (1) running `/opsx:verify` to produce a verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
 
 Approval SHALL be gated by a final verification pass. After the fix loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run before the user is asked for approval. This ensures that all changes made during the fix loop — including spec updates, design changes, and code fixes — are verified as consistent before archiving. If the fix loop was not entered (first verify was clean), the initial verify at step 3.2 satisfies this requirement and the final verify step can be marked complete immediately.
 
@@ -138,8 +138,8 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 
 ## Edge Cases
 
-- **Approval without running verify**: If the user has never run `/opsx:verify` for the current change, the QA Loop approval checkbox in tasks.md will not be checked. The system SHALL warn during archive that verification has not been performed.
-- **Stale verification**: If code changes are made after the last verify run, the verification report may be stale. The system does not enforce re-verification automatically but SHALL note the timestamp of the last verify run relative to the most recent code changes when the user requests archive.
+- **Approval without running verify**: If the user has never run `/opsx:verify` for the current change, the QA Loop approval checkbox in tasks.md will not be checked. The system SHALL warn that verification has not been performed.
+- **Stale verification**: If code changes are made after the last verify run, the verification report may be stale. The system does not enforce re-verification automatically but SHALL note the timestamp of the last verify run relative to the most recent code changes when the user proceeds with the post-apply workflow.
 - **No design.md success metrics**: If design.md does not contain explicit success metrics, the QA Loop section SHALL still include the mandatory human approval checkbox but will have no PASS/FAIL metric checkboxes.
 - **User provides partial approval**: If the user responds with something ambiguous (e.g., "looks ok" or "seems fine"), the system SHALL clarify that it needs an explicit "Approved" and SHALL NOT treat ambiguous responses as approval.
 - **All issues are suggestions only**: If verification produces only SUGGESTION-level findings and no CRITICAL or WARNING issues, the system SHALL proceed directly to requesting approval without requiring fixes.

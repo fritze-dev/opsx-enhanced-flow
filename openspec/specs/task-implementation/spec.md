@@ -144,7 +144,7 @@ The system SHALL allow implementation tasks to modify spec files (`openspec/spec
 - **Mixed checkbox states mid-file**: If completed tasks appear after pending tasks (out of order), the system SHALL still count correctly and work on pending tasks regardless of position.
 - **Single task remaining**: The system SHALL handle the case where only one task remains with the same progress reporting format ("6/7 tasks complete").
 - **No standard tasks in constitution:** If the project constitution does not define a `## Standard Tasks` section, the tasks.md SHALL omit the Post-Implementation section entirely. Apply behavior is unchanged.
-- **Standard tasks manually checked:** If a user manually marks standard tasks as `- [x]` before archive, the system SHALL count them as complete in progress totals.
+- **Standard tasks manually checked:** If a user manually marks standard tasks as `- [x]` before completion, the system SHALL count them as complete in progress totals.
 - **Apply re-invoked after standard tasks complete:** If all tasks including standard tasks are marked complete, the system SHALL report "All tasks complete" and suggest running the post-apply workflow.
 - **Pre-merge extras executed during post-apply:** Constitution-defined pre-merge standard tasks (e.g., "Update PR") SHALL be executed during the post-apply workflow after commit and push. Post-merge tasks (e.g., "Update plugin") SHALL remain unchecked — they are executed manually after the PR is merged.
 - **Constitution extra fails:** If a constitution extra fails (e.g., `gh pr ready` fails due to network), the agent SHALL note the failure, skip marking that task as complete, and continue with remaining extras. The failed task remains as `- [ ]` for manual resolution.

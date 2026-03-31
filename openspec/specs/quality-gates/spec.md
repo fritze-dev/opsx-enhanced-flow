@@ -142,7 +142,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **WHEN** the developer runs `/opsx:verify` as the final verification step (3.5)
 - **THEN** the verification report SHALL show 0 CRITICAL issues
 - **AND** the report SHALL reflect the current state of all artifacts (including any specs updated during the fix loop)
-- **AND** the final assessment SHALL be "All checks passed. Ready for archive." or note remaining warnings
+- **AND** the final assessment SHALL be "All checks passed. Ready to proceed." or note remaining warnings
 
 #### Scenario: Side-effect from preflight not addressed
 
@@ -193,7 +193,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 #### Scenario: All documentation is in sync
 
 - **GIVEN** a project with 5 capabilities, each having a corresponding capability doc in `docs/capabilities/`
-- **AND** all archived design decisions have corresponding ADRs in `docs/decisions/`
+- **AND** all completed changes' design decisions have corresponding ADRs in `docs/decisions/`
 - **AND** `docs/README.md` lists all 5 capabilities and references valid ADRs
 - **WHEN** the user invokes `/opsx:docs-verify`
 - **THEN** the system produces a verification report
@@ -240,18 +240,18 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **AND** does not error or abort
 - **AND** recommends "Run `/opsx:docs` to generate initial documentation"
 
-#### Scenario: No archived design decisions to check
+#### Scenario: No design decisions to check
 
 - **GIVEN** a project with no completed changes in `openspec/changes/`
 - **WHEN** the user invokes `/opsx:docs-verify`
 - **THEN** the system skips the ADR dimension
-- **AND** notes "No archived design decisions to verify against"
+- **AND** notes "No design decisions to verify against"
 - **AND** still checks the other two dimensions
 
 #### Scenario: Manual ADR without design decision is not flagged
 
 - **GIVEN** a manual ADR `docs/decisions/adr-M001-initial-approach.md`
-- **AND** no corresponding entry in any archived design.md Decisions table
+- **AND** no corresponding entry in any completed change's design.md Decisions table
 - **WHEN** the system checks ADRs vs Design Decisions
 - **THEN** the manual ADR is recognized by its `adr-MNNN` prefix
 - **AND** no issue is raised for it
@@ -280,4 +280,4 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - Preflight Section C uses a consistent structure (table or list with risk descriptions and assessments) that can be parsed for side-effect extraction. <!-- ASSUMPTION: Section C format -->
 - Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec directory name in `openspec/specs/`. <!-- ASSUMPTION: Naming convention -->
 - The README capabilities table uses a parseable format (Markdown table or structured list) that allows the system to extract capability names. <!-- ASSUMPTION: README format -->
-- Archived design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->
+- Completed changes' design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->

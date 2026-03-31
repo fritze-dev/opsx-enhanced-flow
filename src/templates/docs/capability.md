@@ -6,7 +6,7 @@ requires: []
 instruction: |
   Generate user-facing capability documentation from merged specs.
   Derive Purpose from spec Purpose using problem-framing.
-  Derive Rationale from research.md and design.md in archives.
+  Derive Rationale from research.md and design.md in completed changes.
   Write in present tense — describe current design, not change history.
   OMIT empty optional sections entirely.
 ---
@@ -26,7 +26,7 @@ lastUpdated: "[YYYY-MM-DD]"
 [1-3 sentences describing what problem this capability solves.
  ALWAYS frame as the capability's purpose, never as motivation for a specific change.
  Derive from spec Purpose section using problem-framing.
- Archive proposals may provide additional context but must not replace
+ Change proposals may provide additional context but must not replace
  the capability-level purpose with change-level motivation.]
 
 <!-- How to write Purpose:

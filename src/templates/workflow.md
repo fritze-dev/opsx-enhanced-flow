@@ -13,10 +13,10 @@ apply:
     They are tracked in tasks.md for auditability but executed separately
     after apply completes.
 
-    Post-apply workflow: /opsx:verify → /opsx:archive →
+    Post-apply workflow: /opsx:verify →
     /opsx:changelog → /opsx:docs → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
-    IMPORTANT: /opsx:verify MUST run before /opsx:sync or /opsx:archive.
+    IMPORTANT: /opsx:verify MUST run before proceeding.
     Never sync specs before implementation is verified.
 
     Constitution standard tasks are split into pre-merge and post-merge.
@@ -59,4 +59,4 @@ context: |
 
 # Workflow
 
-Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → QA → Sync → Archive
+Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → QA → Changelog → Docs

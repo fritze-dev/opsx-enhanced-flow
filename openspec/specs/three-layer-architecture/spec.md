@@ -44,7 +44,7 @@ The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Sma
 - **THEN** it SHALL require the `tasks` artifact to be complete before implementation begins
 
 ### Requirement: Skills Layer
-The system SHALL deliver all commands as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills SHALL be categorized as workflow (new, ff, apply, verify, archive), governance (setup, bootstrap, discover, preflight, sync, docs-verify), or documentation (changelog, docs). All skills SHALL be model-invocable (disable-model-invocation: false or absent).
+The system SHALL deliver all commands as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills SHALL be categorized as workflow (new, ff, apply, verify), governance (setup, bootstrap, discover, preflight, docs-verify), or documentation (changelog, docs). All skills SHALL be model-invocable (disable-model-invocation: false or absent).
 
 **User Story:** As a developer I want every command delivered as a SKILL.md file, so that Claude Code can discover and invoke them through its plugin system.
 

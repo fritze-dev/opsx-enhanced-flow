@@ -4,8 +4,8 @@ description: Documentation entry point with architecture overview
 generates: docs/README.md
 requires: []
 instruction: |
-  Generate the docs README from constitution, specs, and archived changes.
-  Aggregate decisions from all archived design.md tables.
+  Generate the docs README from constitution, specs, and completed changes.
+  Aggregate decisions from all completed changes' design.md tables.
   Group capabilities by category from spec frontmatter.
   Include ALL decisions in the Key Design Decisions table.
 ---
@@ -22,8 +22,8 @@ instruction: |
 
 ## Key Design Decisions
 
-<!-- Aggregate notable decisions from all archived design.md Decisions tables.
-     Deduplicate — if the same decision appears in multiple archives, include once.
+<!-- Aggregate notable decisions from all completed changes' design.md Decisions tables.
+     Deduplicate — if the same decision appears in multiple changes, include once.
      Include ALL decisions.
      The ADR column links directly to the corresponding ADR file.
      Surface notable trade-offs from ADR Consequences sections. -->
