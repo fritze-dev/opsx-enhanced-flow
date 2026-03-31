@@ -81,7 +81,7 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 - **THEN** the spec SHALL include frontmatter with `order` and `category` values that position the new capability appropriately among existing capabilities
 
 ### Requirement: Spec Format
-Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Specs SHALL NOT use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED). Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
+Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
 
 **User Story:** As a developer reading the specs I want a clean format without change-tracking prefixes, so that I see the current state of requirements clearly.
 
@@ -90,7 +90,7 @@ Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` 
 - **WHEN** the spec file is opened
 - **THEN** it SHALL contain a `## Purpose` section describing the capability, followed by a `## Requirements` section with all current requirements
 
-#### Scenario: Baseline requirements follow standard format
+#### Scenario: Requirements follow standard format
 - **GIVEN** a requirement within a spec
 - **WHEN** the requirement block is inspected
 - **THEN** it SHALL have a `### Requirement:` header, normative description, optional User Story, and one or more `#### Scenario:` blocks

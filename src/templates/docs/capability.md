@@ -4,7 +4,7 @@ description: Capability documentation template
 generates: "docs/capabilities/*.md"
 requires: []
 instruction: |
-  Generate user-facing capability documentation from merged specs.
+  Generate user-facing capability documentation from specs.
   Derive Purpose from spec Purpose using problem-framing.
   Derive Rationale from research.md and design.md in completed changes.
   Write in present tense — describe current design, not change history.

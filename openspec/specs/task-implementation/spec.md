@@ -66,7 +66,7 @@ The system SHALL report implementation progress using checkbox counts from the t
 - **WHEN** the final checkbox is marked complete
 - **THEN** the system displays "Progress: 7/7 tasks complete"
 - **AND** lists all tasks completed during the current session
-- **AND** suggests archiving the change
+- **AND** suggests running the post-apply workflow
 
 #### Scenario: Display progress on pause
 

@@ -4,7 +4,7 @@ category: development
 ---
 ## Purpose
 
-Defines the QA loop with mandatory explicit human approval before archiving, including success metric validation, fix-verify cycles, and bidirectional feedback between code and specs.
+Defines the QA loop with mandatory explicit human approval before finalizing, including success metric validation, fix-verify cycles, and bidirectional feedback between code and specs.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ Defines the QA loop with mandatory explicit human approval before archiving, inc
 
 The system SHALL require explicit human approval before a change can proceed to the post-apply workflow. The QA loop consists of: (1) running `/opsx:verify` to produce a verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
 
-Approval SHALL be gated by a final verification pass. After the fix loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run before the user is asked for approval. This ensures that all changes made during the fix loop — including spec updates, design changes, and code fixes — are verified as consistent before archiving. If the fix loop was not entered (first verify was clean), the initial verify at step 3.2 satisfies this requirement and the final verify step can be marked complete immediately.
+Approval SHALL be gated by a final verification pass. After the fix loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run before the user is asked for approval. This ensures that all changes made during the fix loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the fix loop was not entered (first verify was clean), the initial verify at step 3.2 satisfies this requirement and the final verify step can be marked complete immediately.
 
 The tasks.md template QA Loop section SHALL include the final verify step:
 
@@ -25,7 +25,7 @@ The tasks.md template QA Loop section SHALL include the final verify step:
 3.6. Approval: Only finish on explicit "Approved"
 ```
 
-**User Story:** As a developer I want a mandatory human approval step before archiving, so that no change is finalized without my explicit review and sign-off.
+**User Story:** As a developer I want a mandatory human approval step before finalizing, so that no change is finalized without my explicit review and sign-off.
 
 #### Scenario: Approval after clean verification
 
@@ -35,7 +35,7 @@ The tasks.md template QA Loop section SHALL include the final verify step:
 - **WHEN** the system presents the verification report
 - **THEN** the system asks for explicit approval
 - **AND** the user responds "Approved"
-- **AND** the system proceeds to allow archiving
+- **AND** the system proceeds to allow the post-apply workflow
 
 #### Scenario: Approval blocked by critical issues
 
@@ -51,7 +51,7 @@ The tasks.md template QA Loop section SHALL include the final verify step:
 - **WHEN** the system presents the findings
 - **THEN** the system SHALL request approval while highlighting the warnings
 - **AND** the user may respond "Approved" to accept the warnings
-- **AND** the system SHALL proceed to allow archiving
+- **AND** the system SHALL proceed to allow the post-apply workflow
 
 #### Scenario: Success metrics carried into QA loop
 

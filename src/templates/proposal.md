@@ -11,7 +11,7 @@ instruction: |
   - **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.
   - **Capabilities**: Identify which specs will be created or modified:
     - **New Capabilities**: List capabilities being introduced. Each becomes a new `specs/<name>/spec.md`. Use kebab-case names (e.g., `user-auth`, `data-export`).
-    - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each needs a delta spec file. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
+    - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each edits the existing spec file in place. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
   - **Impact**: Affected code, APIs, dependencies, or systems.
   - **Scope & Boundaries**: Explicitly state what is and isn't part of this change.
 

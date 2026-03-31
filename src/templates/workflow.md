@@ -17,7 +17,7 @@ apply:
     /opsx:changelog → /opsx:docs → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
     IMPORTANT: /opsx:verify MUST run before proceeding.
-    Never sync specs before implementation is verified.
+    Never proceed before implementation is verified.
 
     Constitution standard tasks are split into pre-merge and post-merge.
     Only pre-merge tasks are executed during post-apply workflow.
