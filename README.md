@@ -119,11 +119,11 @@ Quality practices baked into the workflow. Each "gem" is a specific artifact or 
 | **Discovery** | `research.md` | Research documentation & targeted clarification questions — prevents the AI from making assumptions or hallucinating solutions. |
 | **Intent Contract** | `proposal.md` | Captures why a change is needed and which capabilities it affects — creates the binding contract between planning and spec phases. Each capability maps to a spec file. |
 | **BDD / Gherkin** | `spec.md` | Normative requirements (SHALL/MUST) with structured Gherkin scenarios (Given/When/Then) and optional user stories — makes expected behavior precise and directly testable. |
-| **Success Metrics** | `design.md` | Hard, measurable success criteria — verified as PASS/FAIL in the QA loop before archiving. |
+| **Success Metrics** | `design.md` | Hard, measurable success criteria — verified as PASS/FAIL in the QA loop before proceeding. |
 | **Pre-Flight Check** | `preflight.md` | Quality review before implementation: traceability, gap analysis, side effects, duplication & consistency checks, assumption audit. |
-| **Changelog** | `CHANGELOG.md` | Auto-generated release notes from archived specs — tracks what changed, when, and why. Follows [Keep a Changelog](https://keepachangelog.com/) format. |
+| **Changelog** | `CHANGELOG.md` | Auto-generated release notes from completed changes — tracks what changed, when, and why. Follows [Keep a Changelog](https://keepachangelog.com/) format. |
 | **User Docs** | `docs/capabilities/*.md` | Auto-generated end-user documentation from merged specs — always reflects the full current state of the project. |
-| **Decision Records** | `docs/decisions/adr-*.md` | Auto-generated Architecture Decision Records from archived design decisions — preserves the "why" behind every architectural choice. |
+| **Decision Records** | `docs/decisions/adr-*.md` | Auto-generated Architecture Decision Records from completed changes' design decisions — preserves the "why" behind every architectural choice. |
 | **Architecture Overview** | `docs/README.md` | Auto-generated consolidated documentation entry point — architecture, tech stack, key design decisions, and capability index. |
 
 ---
@@ -138,8 +138,8 @@ Every artifact in the pipeline carries built-in completion criteria in a structu
 |----------|-----------|-------------------|
 | `spec.md` — Gherkin Scenarios | **Functional completeness** — behavior is done when all scenarios pass | Each scenario is a discrete Given/When/Then check — pass or fail, no ambiguity |
 | `design.md` — Success Metrics | **Quality targets** — the feature meets its measurable goals | Each metric has a concrete threshold — verified as PASS/FAIL during QA |
-| `preflight.md` — Findings | **Risk resolution** — all identified gaps and side effects are addressed | Each finding is a checklist item — "Verify findings are binding" means unresolved items block archiving |
-| `tasks.md` — QA Loop | **Implementation completeness** — all planned work is executed and tested | Explicit "Approved" gate — no silent archiving without human sign-off |
+| `preflight.md` — Findings | **Risk resolution** — all identified gaps and side effects are addressed | Each finding is a checklist item — "Verify findings are binding" means unresolved items block the workflow |
+| `tasks.md` — QA Loop | **Implementation completeness** — all planned work is executed and tested | Explicit "Approved" gate — no silent completion without human sign-off |
 
 Because these criteria live inside the artifacts — not in a separate checklist — they can't drift out of sync with the actual work. When the spec changes, the DoD changes with it.
 
@@ -164,9 +164,9 @@ These design principles are enforced across the three-layer architecture — eac
 - **User Stories encouraged** — Requirements SHOULD include User Stories to capture intent and user value. Stories are the bridge between stakeholders and engineers. Omit for purely technical or non-functional requirements. *(Schema: spec template)*
 - **Gherkin mandatory** — Strict Given/When/Then scenarios make behavior unambiguous and directly testable. No "the system should work well" hand-waving. *(Schema: spec template)*
 - **Preflight mandatory** — The pre-flight check catches gaps, side effects, and inconsistencies before implementation begins. Skipping it means discovering problems during coding. *(Schema: artifact dependency chain)*
-- **No silent archiving** — The AI must wait for explicit "Approved" because only a human can verify that the implementation actually works as intended. This prevents premature spec merges. *(Skill: archive)*
+- **No silent completion** — The AI must wait for explicit "Approved" because only a human can verify that the implementation actually works as intended. This prevents premature completion. *(Skill: verify)*
 - **Constitution always loaded** — The constitution defines project-wide rules that must inform every AI action — not just artifact generation but also implementation and verification. *(Config: context pointer)*
-- **Verify findings are binding** — All critical/warning issues from verification must be resolved (code fix or spec update) before archiving. Findings are not optional suggestions. *(Skill: verify)*
+- **Verify findings are binding** — All critical/warning issues from verification must be resolved (code fix or spec update) before proceeding. Findings are not optional suggestions. *(Skill: verify)*
 - **Bidirectional feedback** — When implementation reveals new edge cases or design flaws, specs and design are updated (not just the code). The QA fix loop is the enforcement point. *(Schema: tasks template)*
 - **Definition of Done is emergent** — Gherkin scenarios define functional completeness, success metrics define quality targets, preflight findings define risk resolution, and explicit approval gates implementation completeness. No separate DoD checklist needed. *(Schema: tasks instruction)*
 - **Design review mandatory** — The design phase is the mandatory review checkpoint in every workflow. `/opsx:ff` pauses after design for user alignment before generating preflight and tasks. This ensures the human reviews approach and architecture before the system proceeds to quality checks and implementation planning. *(Constitution: convention)*
@@ -251,7 +251,7 @@ opsx-enhanced-flow/
 │   ├── WORKFLOW.md                        # Pipeline orchestration
 │   ├── CONSTITUTION.md                    # Project constitution
 │   ├── templates/                         # Project's copy of Smart Templates
-│   ├── specs/                             # Baseline specs (one per capability, edited directly)
+│   ├── specs/                             # Specs (one per capability, edited directly)
 │   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
 ├── .github/workflows/                     # CI/CD
@@ -270,7 +270,7 @@ your-project/
 │   ├── WORKFLOW.md                        # Pipeline orchestration (generated by /opsx:setup)
 │   ├── CONSTITUTION.md                    # Project rules (generated by /opsx:bootstrap)
 │   ├── templates/                         # Smart Templates (copied by /opsx:setup)
-│   ├── specs/                             # Baseline specs (edited directly during specs stage)
+│   ├── specs/                             # Specs (edited directly during specs stage)
 │   └── changes/                           # Feature workspaces
 │       └── YYYY-MM-DD-<feature-name>/     # Date-prefixed at creation
 │
@@ -313,7 +313,7 @@ All 10 skills are available as `/opsx:*` commands when the plugin is installed. 
 | `/opsx:verify` | Automated verification checks |
 | `/opsx:preflight` | Standalone pre-flight quality check |
 | `/opsx:changelog` | Generate release notes from completed changes |
-| `/opsx:docs` | Generate user documentation from baseline specs |
+| `/opsx:docs` | Generate user documentation from specs |
 
 ---
 

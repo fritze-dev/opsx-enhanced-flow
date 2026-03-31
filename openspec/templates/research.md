@@ -15,7 +15,7 @@ instruction: |
     Decisions table in docs/README.md as index; deep-dive into
     specific ADRs only when the proposed change touches an area
     with a prior decision
-  - Do not read: openspec/changes/archive/ (historical),
+  - Do not read:
     docs/capabilities/*.md (derived from specs, redundant)
 
   Document your research findings for this feature request.

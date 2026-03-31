@@ -4,7 +4,7 @@ description: Architecture Decision Record template
 generates: "docs/decisions/adr-*.md"
 requires: []
 instruction: |
-  Generate ADRs from archived design.md Decisions tables.
+  Generate ADRs from completed changes' design.md Decisions tables.
   Use inline rationale via em-dash in the Decision section.
   Use semantic link text for references.
   Context should be minimum 4-6 sentences.
@@ -21,7 +21,7 @@ Accepted (YYYY-MM-DD)
      - What motivated the decision (the problem being solved)
      - What was investigated or researched
      - Key constraints or trade-offs that shaped the decision
-     Enrich with research.md "## 3. Approaches" from the same archive if available.
+     Enrich with research.md "## 3. Approaches" from the same change if available.
      Do NOT write thin contexts like "we chose X over Y because Z". -->
 
 [Context text]

@@ -20,20 +20,14 @@ instruction: |
   findings define risk resolution, and explicit user approval
   gates implementation completeness.
 
-  IMPORTANT: Do NOT include sync or archive as implementation tasks
-  (sections 1-2). They may appear in the Standard Tasks section but
-  never as implementation work. The apply phase covers only
-  implementation and QA (sections 1-3).
-  Do NOT include tasks that edit baseline specs under `openspec/specs/`.
-  Baseline spec changes flow exclusively through delta specs and
-  `/opsx:sync` — never via direct edits during apply.
+  The apply phase covers implementation and QA (sections 1-3).
   For documentation-only changes (no code), implementation sections may
   be empty — the QA loop alone is sufficient.
 
   Standard Tasks: The template includes a section 4 with universal
-  post-implementation steps (archive, changelog, docs, push). Always
-  include this section as-is. If the project constitution defines a
-  "## Standard Tasks" section, append its items after the universal
+  post-implementation steps (changelog, docs, version bump, push).
+  Always include this section as-is. If the project constitution defines
+  a "## Standard Tasks" section, append its items after the universal
   steps. Copy constitution items verbatim.
 ---
 # Implementation Tasks: [Feature Name]
@@ -51,14 +45,14 @@ instruction: |
 - [ ] 3.1. Metric Check: Verify each Success Metric from design.md — PASS / FAIL.
 - [ ] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before archiving.
+- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
 - [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
 - [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 <!-- Universal post-implementation steps. Always include this section.
      If the constitution defines ## Standard Tasks, append those items after these. -->
-- [ ] 4.1. Archive change (`/opsx:archive`)
-- [ ] 4.2. Generate changelog (`/opsx:changelog`)
-- [ ] 4.3. Generate/update docs (`/opsx:docs`)
+- [ ] 4.1. Generate changelog (`/opsx:changelog`)
+- [ ] 4.2. Generate/update docs (`/opsx:docs`)
+- [ ] 4.3. Bump version
 - [ ] 4.4. Commit and push to remote

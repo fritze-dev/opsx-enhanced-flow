@@ -11,7 +11,7 @@ instruction: |
   - **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.
   - **Capabilities**: Identify which specs will be created or modified:
     - **New Capabilities**: List capabilities being introduced. Each becomes a new `specs/<name>/spec.md`. Use kebab-case names (e.g., `user-auth`, `data-export`).
-    - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each needs a delta spec file. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
+    - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each edits the existing spec file in place. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
   - **Impact**: Affected code, APIs, dependencies, or systems.
   - **Scope & Boundaries**: Explicitly state what is and isn't part of this change.
 
@@ -60,9 +60,14 @@ instruction: |
 
 ### Modified Capabilities
 <!-- Existing capabilities whose REQUIREMENTS are changing (not just implementation).
-     Only list here if spec-level behavior changes. Each needs a delta spec file.
+     Only list here if spec-level behavior changes.
      Use existing spec names from openspec/specs/. Leave empty if no requirement changes. -->
 - `<existing-name>`: <what requirement is changing>
+
+### Removed Capabilities
+<!-- Capabilities being entirely removed. Include reason and migration path.
+     Leave empty if no capabilities are removed. -->
+- `<existing-name>`: <reason for removal, migration path>
 
 ### Consolidation Check
 <!-- MANDATORY: Show your work before finalizing the Capabilities lists above.
