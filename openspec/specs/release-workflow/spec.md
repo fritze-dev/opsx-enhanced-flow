@@ -4,17 +4,17 @@ category: finalization
 ---
 ## Purpose
 
-Define the release workflow conventions for the plugin, including automatic patch version bumps on archive, version synchronization between plugin files, manual minor/major release processes, consumer update guidance, skill immutability rules, end-to-end install/update checklists, and changelog generation from archived changes.
+Define the release workflow conventions for the plugin, including automatic patch version bumps, version synchronization between plugin files, manual minor/major release processes, consumer update guidance, skill immutability rules, end-to-end install/update checklists, and changelog generation from completed changes.
 
 ## Requirements
 
-### Requirement: Post-Archive Auto Patch Bump Convention
+### Requirement: Auto Patch Version Bump
 
 The project constitution SHALL define a convention that instructs the post-apply workflow to automatically increment the patch version in `.claude-plugin/plugin.json` after a successful change completion. The convention SHALL also require syncing the `version` field in `.claude-plugin/marketplace.json` to match. The output SHALL display the new version.
 
-**User Story:** As a plugin maintainer I want the patch version to auto-increment on archive, so that consumers can detect updates without manual version bumps.
+**User Story:** As a plugin maintainer I want the patch version to auto-increment when a change is completed, so that consumers can detect updates without manual version bumps.
 
-#### Scenario: Successful auto-bump after archive
+#### Scenario: Successful auto-bump after change completion
 
 - **GIVEN** a plugin project with `.claude-plugin/plugin.json` containing version `1.0.3`
 - **AND** `.claude-plugin/marketplace.json` containing version `1.0.3`
@@ -86,7 +86,7 @@ The constitution SHALL define a rule that skills in `skills/` are generic plugin
 
 #### Scenario: Project-specific behavior defined in constitution
 
-- **GIVEN** a need for project-specific post-archive behavior (e.g., version bumps)
+- **GIVEN** a need for project-specific post-completion behavior (e.g., version bumps)
 - **WHEN** a developer plans the implementation
 - **THEN** the behavior SHALL be defined as a convention in `openspec/constitution.md`
 - **AND** SHALL NOT be added as a step in the skill file
@@ -123,7 +123,7 @@ After pushing a version bump to the remote, the developer's local plugin install
 
 #### Scenario: Developer with local marketplace updates after version bump
 
-- **GIVEN** a version bump has been applied locally (via archive auto-bump or manual)
+- **GIVEN** a version bump has been applied locally (via auto-bump or manual)
 - **WHEN** the developer runs `claude plugin update opsx@opsx-enhanced-flow`
 - **THEN** the local plugin installation SHALL reflect the new version
 
@@ -134,7 +134,7 @@ After pushing a version bump to the remote, the developer's local plugin install
 - **AND** runs `claude plugin update opsx@opsx-enhanced-flow`
 - **THEN** the local plugin installation SHALL reflect the new version
 
-### Requirement: Archive Output Includes Next Steps
+### Requirement: Completion Workflow Next Steps
 
 The post-apply workflow output SHALL include a "Next steps" section guiding the user through the complete post-completion workflow: generate changelog, generate docs, version bump, push, and update the local plugin. This is defined via the constitution convention.
 
@@ -144,37 +144,37 @@ The post-apply workflow output SHALL include a "Next steps" section guiding the 
 - **WHEN** the verification summary is displayed
 - **THEN** the output SHALL include next steps: `/opsx:changelog` → `/opsx:docs` → version bump → push → update plugin
 
-### Requirement: Generate Changelog from Archives
-The `/opsx:changelog` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories (named `YYYY-MM-DD-<feature>`) and identify completed changes (all tasks checked). For each completed change not yet in the changelog, the agent SHALL read `proposal.md` from the change directory for motivation and capabilities, and read the current baseline specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles of the affected capabilities. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for archives not yet represented, preserving existing manually written entries.
+### Requirement: Generate Changelog from Completed Changes
+The `/opsx:changelog` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories (named `YYYY-MM-DD-<feature>`) and identify completed changes (all tasks checked). For each completed change not yet in the changelog, the agent SHALL read `proposal.md` from the change directory for motivation and capabilities, and read the current specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles of the affected capabilities. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for changes not yet represented, preserving existing manually written entries.
 
 **User Story:** As a user of the project I want a changelog that tells me what changed and when, so that I can understand the impact of updates without reading spec files or commit logs.
 
-#### Scenario: Changelog generated from single archived change
+#### Scenario: Changelog generated from single completed change
 - **GIVEN** a completed change at `openspec/changes/2025-01-15-user-auth/` containing a proposal describing a new authentication feature
 - **AND** the proposal lists capability `user-auth` as new
 - **AND** `openspec/specs/user-auth/spec.md` contains user stories and scenarios
 - **WHEN** the developer runs `/opsx:changelog`
-- **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 describing the new authentication feature using user stories from the baseline spec
+- **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 describing the new authentication feature using user stories from the spec
 
-#### Scenario: Multiple archives ordered newest first
-- **GIVEN** three archived changes dated 2025-01-10, 2025-02-05, and 2025-03-20
+#### Scenario: Multiple completed changes ordered newest first
+- **GIVEN** three completed changes dated 2025-01-10, 2025-02-05, and 2025-03-20
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** the changelog lists the 2025-03-20 entry first, followed by 2025-02-05, then 2025-01-10
 
 #### Scenario: Existing changelog preserved
 - **GIVEN** a `CHANGELOG.md` that already contains manually written entries for versions 1.0 and 1.1
-- **AND** a new archived change that has not been represented in the changelog
+- **AND** a new completed change that has not been represented in the changelog
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** the agent adds the new entry at the top of the changelog without modifying or removing the existing 1.0 and 1.1 entries
 
-#### Scenario: No archives to process
+#### Scenario: No completed changes to process
 - **GIVEN** no completed changes exist under `openspec/changes/`
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** the agent informs the user that no completed changes were found and no changelog entries were generated
 
 #### Scenario: Change with only internal refactoring
-- **GIVEN** an archived change whose proposal and specs describe purely internal refactoring with no user-visible changes
-- **WHEN** the agent processes the archive
+- **GIVEN** a completed change whose proposal and specs describe purely internal refactoring with no user-visible changes
+- **WHEN** the agent processes the change
 - **THEN** the agent either omits the entry entirely or includes it under a minimal note (e.g., "Internal improvements") rather than fabricating user-facing changes
 
 ### Requirement: Language-Aware Changelog Generation
@@ -184,7 +184,7 @@ The `/opsx:changelog` command SHALL determine the documentation language before 
 
 #### Scenario: Changelog generated in configured language
 - **GIVEN** `openspec/config.yaml` contains `docs_language: German`
-- **AND** a new archived change exists that is not yet in the changelog
+- **AND** a new completed change exists that is not yet in the changelog
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** the new entry SHALL have German section headers (e.g., `### Hinzugefügt`, `### Geändert`, `### Behoben`)
 - **AND** entry descriptions SHALL be in German

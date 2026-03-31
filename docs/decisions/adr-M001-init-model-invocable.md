@@ -39,7 +39,7 @@ All skills are model-invocable, including init. The init skill has `disable-mode
 
 ## References
 
-- [Archive: fix-init-skill](../../openspec/changes/archive/2026-03-02-fix-init-skill/)
+- [Change: fix-init-skill](../../openspec/changes/2026-03-02-fix-init-skill/)
 - [ADR-001: Initial Spec Organization](adr-001-initial-spec-organization.md)
 - [ADR-011: Rename Init to Setup](adr-011-rename-init-to-setup.md)
 - [Spec: three-layer-architecture](../../openspec/specs/three-layer-architecture/spec.md)

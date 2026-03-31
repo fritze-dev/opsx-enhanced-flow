@@ -43,7 +43,7 @@ The opsx-enhanced-flow plugin was fully functional with 13 skills, a 6-stage art
 
 ## References
 
-- [Archive: initial-spec](../../openspec/changes/archive/2026-03-02-initial-spec/)
+- [Change: initial-spec](../../openspec/changes/2026-03-02-initial-spec/)
 - [Spec: three-layer-architecture](../../openspec/specs/three-layer-architecture/spec.md)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [Spec: spec-format](../../openspec/specs/spec-format/spec.md)

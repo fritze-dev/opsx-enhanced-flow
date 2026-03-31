@@ -42,7 +42,7 @@ Assumption markers in specs used two patterns inconsistently: Pattern A places a
 
 ## References
 
-- [Archive: visible-assumptions](../../openspec/changes/archive/2026-03-24-visible-assumptions/)
+- [Change: visible-assumptions](../../openspec/changes/2026-03-24-visible-assumptions/)
 - [Spec: spec-format](../../openspec/specs/spec-format/spec.md)
 - [Spec: quality-gates](../../openspec/specs/quality-gates/spec.md)
 - [Spec: constitution-management](../../openspec/specs/constitution-management/spec.md)

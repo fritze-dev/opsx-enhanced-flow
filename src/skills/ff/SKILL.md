@@ -53,7 +53,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
    - **ready**: not done, but all artifacts listed in `requires` are done
    - **blocked**: not done, and at least one artifact in `requires` is not done
 
-   **Special handling for `specs` artifact**: The specs stage does NOT create files in the change directory. Instead, it edits baseline specs directly at `openspec/specs/<capability>/spec.md`. To check if the specs stage is "done", verify that the proposal's Capabilities section lists capabilities and the corresponding baseline spec files exist or have been recently modified.
+   **Special handling for `specs` artifact**: The specs stage does NOT create files in the change directory. Instead, it edits specs directly at `openspec/specs/<capability>/spec.md`. To check if the specs stage is "done", verify that the proposal's Capabilities section lists capabilities and the corresponding spec files exist or have been recently modified.
 
 4. **Create artifacts in sequence until apply-ready**
 
@@ -69,12 +69,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - **template body**: the markdown after the frontmatter (output structure)
         - **output path**: `openspec/changes/<change-dir>/<generates>`
       - Read any completed dependency files for context
-      - **For the `specs` artifact**: Instead of creating delta spec files, edit baseline specs directly:
-        - For new capabilities listed in the proposal: create `openspec/specs/<capability>/spec.md`
-        - For modified capabilities: edit the existing `openspec/specs/<capability>/spec.md` in place
-        - Use the spec template's instruction for format guidance (requirements with Gherkin scenarios)
-        - Do NOT create files under `openspec/changes/<change-dir>/specs/`
-      - **For all other artifacts**: Create the artifact file in the change directory using the template body as the structure
+      - Create the artifact file using the template body as the structure
       - Apply the instruction as constraints — but do NOT copy it into the file
       - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `post_artifact` field. If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
       - Show brief progress: "Created <artifact-id>"
@@ -107,7 +102,6 @@ After completing all artifacts, summarize:
 - **IMPORTANT**: The `instruction` field and WORKFLOW.md `context` are constraints for YOU, not content for the file
   - Do NOT copy instruction blocks into the artifact
   - These guide what you write, but should never appear in the output
-- **IMPORTANT**: The `specs` stage edits baseline specs directly at `openspec/specs/`. Do NOT create delta spec files with ADDED/MODIFIED/REMOVED sections. Edit the specs in place using the standard baseline format (`## Purpose`, `## Requirements`, `### Requirement:`, `#### Scenario:`).
 
 **Checkpoint Model**
 

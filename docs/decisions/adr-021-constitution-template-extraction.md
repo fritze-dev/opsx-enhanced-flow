@@ -35,6 +35,6 @@ The constitution section structure (Tech Stack, Architecture Rules, Code Style, 
 
 ## References
 
-- [Archive: constitution-template](../../openspec/changes/archive/2026-03-25-constitution-template/)
+- [Change: constitution-template](../../openspec/changes/2026-03-25-constitution-template/)
 - [Spec: constitution-management](../../openspec/specs/constitution-management/spec.md)
 - [ADR-020: Bootstrap Standard Tasks Section Placement](adr-020-bootstrap-standard-tasks-section-placement.md)

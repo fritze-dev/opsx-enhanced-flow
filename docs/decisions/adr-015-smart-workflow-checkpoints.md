@@ -43,7 +43,7 @@ Reducing friction at routine transitions while increasing rigor at critical chec
 
 ## References
 
-- [Archive: smart-workflow-checkpoints](../../openspec/changes/archive/2026-03-23-smart-workflow-checkpoints/)
+- [Change: smart-workflow-checkpoints](../../openspec/changes/2026-03-23-smart-workflow-checkpoints/)
 - [Spec: quality-gates](../../openspec/specs/quality-gates/spec.md)
 - [Spec: artifact-generation](../../openspec/specs/artifact-generation/spec.md)
 - [ADR-006: Design Review Checkpoint](adr-006-design-review-checkpoint.md)

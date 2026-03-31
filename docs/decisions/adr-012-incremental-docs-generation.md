@@ -48,7 +48,7 @@ The `/opsx:docs` command regenerates all documentation artifacts on every run â€
 
 ## References
 
-- [Archive: improve-docs-efficiency](../../openspec/changes/archive/2026-03-23-improve-docs-efficiency/)
+- [Change: improve-docs-efficiency](../../openspec/changes/2026-03-23-improve-docs-efficiency/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)

@@ -32,6 +32,6 @@ The `/opsx:archive` skill previously prompted users to choose between "Sync now 
 
 ## References
 
-- [Archive: auto-sync-before-archive](../../openspec/changes/archive/2026-03-30-auto-sync-before-archive/)
+- [Change: auto-sync-before-archive](../../openspec/changes/2026-03-30-auto-sync-before-archive/)
 - [Spec: change-workspace](../../openspec/specs/change-workspace/spec.md)
 - [ADR-033: Worktree-Based Change Lifecycle](adr-033-worktree-based-change-lifecycle.md)

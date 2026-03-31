@@ -42,7 +42,7 @@ Post-implementation workflow steps (archive, changelog, docs, push, plugin updat
 
 ## References
 
-- [Archive: standard-tasks](../../openspec/changes/archive/2026-03-24-standard-tasks/)
+- [Change: standard-tasks](../../openspec/changes/2026-03-24-standard-tasks/)
 - [Spec: task-implementation](../../openspec/specs/task-implementation/spec.md)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [ADR-010: Config as bootstrap-only](adr-010-config-as-bootstrap-only.md)

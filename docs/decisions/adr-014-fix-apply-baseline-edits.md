@@ -39,7 +39,7 @@ Defense in depth with formal traceability. The instruction prevents bad tasks fr
 
 ## References
 
-- [Archive: fix-apply-baseline-edits](../../openspec/changes/archive/2026-03-23-fix-apply-baseline-edits/)
+- [Change: fix-apply-baseline-edits](../../openspec/changes/2026-03-23-fix-apply-baseline-edits/)
 - [Spec: task-implementation](../../openspec/specs/task-implementation/spec.md)
 - [Spec: spec-sync](../../openspec/specs/spec-sync/spec.md)
 - [GitHub Issue #43](https://github.com/fritze-dev/opsx-enhanced-flow/issues/43)

@@ -44,7 +44,7 @@ The plugin repository mixed plugin source code (skills, templates, manifest) wit
 
 ## References
 
-- [Archive: auto-github-releases](../../openspec/changes/archive/2026-03-26-auto-github-releases/)
+- [Change: auto-github-releases](../../openspec/changes/2026-03-26-auto-github-releases/)
 - [Spec: release-workflow](../../openspec/specs/release-workflow/spec.md)
 - [Spec: project-setup](../../openspec/specs/project-setup/spec.md)
 - [ADR-004: Release Workflow](adr-004-release-workflow.md)

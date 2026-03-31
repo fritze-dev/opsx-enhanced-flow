@@ -14,7 +14,7 @@
 - **Skill immutability:** Skills in `skills/` are generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)
 - Pipeline source of truth: `openspec/WORKFLOW.md` (orchestration) + `openspec/templates/` (Smart Templates)
-- Baseline specs: `openspec/specs/<capability>/spec.md` (one directory per capability, edited directly during specs stage)
+- Specs: `openspec/specs/<capability>/spec.md` (one directory per capability, edited directly during specs stage)
 - Changes: `openspec/changes/YYYY-MM-DD-<feature>/` (date-prefixed at creation, contains planning artifacts)
 
 ## Code Style
@@ -24,7 +24,7 @@
 
 ## Constraints
 
-- Baseline specs use `## Purpose` + `## Requirements` — edited directly during the specs stage, no delta format
+- Specs use `## Purpose` + `## Requirements` — edited directly during the specs stage, no delta format
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 ---
 name: docs
-description: Generate or update user-facing documentation from baseline specs. Run after implementation is complete to create capability docs, ADRs, and a consolidated README with architecture overview.
+description: Generate or update user-facing documentation from specs. Run after implementation is complete to create capability docs, ADRs, and a consolidated README with architecture overview.
 disable-model-invocation: false
 ---
 
@@ -83,7 +83,7 @@ For each relevant change found, read the following files from the change directo
 
 Read the capability doc template at `openspec/schemas/opsx-enhanced/templates/docs/capability.md` for the expected output format.
 
-For each capability marked for regeneration, read its baseline spec's YAML frontmatter (if present) to get the `order` and `category` values. Generate the doc content following the template structure.
+For each capability marked for regeneration, read its spec's YAML frontmatter (if present) to get the `order` and `category` values. Generate the doc content following the template structure.
 
 **Content-aware writes:** After generating each capability doc, compare the generated content against the existing file content, **excluding the `lastUpdated` frontmatter field**. If the content is identical (only `lastUpdated` would differ), do NOT write the file and do NOT bump the `lastUpdated` timestamp. Only write the file and set `lastUpdated` to today's date if the content has actually changed. This prevents false timestamp updates when regeneration produces unchanged output.
 
@@ -134,7 +134,7 @@ Generate formal ADRs from `## Decisions` tables across completed changes' `desig
 1. Glob `docs/decisions/adr-[0-9]*.md` to find existing generated ADR files (excluding manual `adr-M*.md`). If none exist → full generation mode (first run).
 2. In full generation mode, process all completed changes. Otherwise:
 3. Determine the highest existing ADR number from filenames.
-4. For each existing ADR file, check its References section for a `[Change: ...]` or `[Archive: ...]` backlink to identify which change produced it. Build a set of already-processed changes.
+4. For each existing ADR file, check its References section for a `[Change: ...]` backlink to identify which change produced it. Build a set of already-processed changes.
 5. If any existing ADR lacks a backlink (e.g., legacy files from before this feature), fall back to full generation for this run.
 6. Glob `openspec/changes/*/design.md` and sort chronologically. Filter to completed changes (all tasks checked). Identify changes NOT in the already-processed set.
 7. For unprocessed changes, check if they contain valid Decisions tables (see skip rule below).
@@ -187,11 +187,11 @@ Examples: "Sync marketplace.json in same convention" → `sync-marketplace-json-
 
 **References (internal links only):** References SHALL contain only internal relative links — no external URLs (GitHub issues, external docs). The change backlink provides traceability to GitHub issues via the change's proposal.md.
 
-The first reference in every ADR SHALL be the source change backlink: `[Change: <short-name>](../../openspec/changes/<change-dir>/)` where `<short-name>` is the change directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the change link, determine which specs are relevant to each decision. Read the change's `proposal.md` Capabilities section to find which capabilities were affected. Link to those baseline specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same change when decisions are related.
+The first reference in every ADR SHALL be the source change backlink: `[Change: <short-name>](../../openspec/changes/<change-dir>/)` where `<short-name>` is the change directory name without the date prefix (e.g., `improve-docs-quality` from `2026-03-05-improve-docs-quality`). After the change link, determine which specs are relevant to each decision. Read the change's `proposal.md` Capabilities section to find which capabilities were affected. Link to those specs using semantic link text: `[Spec: capability-name](../../openspec/specs/capability/spec.md)`. Also cross-reference other ADRs from the same change when decisions are related.
 
 **Reference validation with auto-resolution:** After writing each ADR's References, validate all links and actively resolve broken references:
 - For every `[Spec: <name>]` link, glob `openspec/specs/<name>/spec.md` to verify the spec exists. If it doesn't exist (e.g., renamed or split), search for successor spec(s). If found, replace the broken link. If the successor cannot be determined, ask the user to identify the correct spec. No `<!-- REVIEW -->` markers should be left in the output.
-- For every `[Change: <name>]` or `[Archive: <name>]` link, glob `openspec/changes/*-<name>/` to verify the change exists. If not found, ask the user whether to remove the link or provide the correct change name. No `<!-- REVIEW -->` markers should be left in the output.
+- For every `[Change: <name>]` link, glob `openspec/changes/*-<name>/` to verify the change exists. If not found, ask the user whether to remove the link or provide the correct change name. No `<!-- REVIEW -->` markers should be left in the output.
 
 **Cross-reference heuristic:** Beyond cross-referencing ADRs from the same change, check if the current ADR's change modifies a system established by an earlier ADR. Look for explicit references to other changes in proposal.md/design.md, or overlapping capabilities with earlier changes. If a clear thematic relationship exists, add a cross-reference to the earlier ADR. Do NOT add cross-references speculatively — only when the relationship is evident from the change content.
 
@@ -232,7 +232,7 @@ Create or update `docs/README.md` as the **single entry point** for all generate
 
 List generated ADRs first (ordered by number), followed by manual ADRs (ordered by M-number). Do NOT read `design.md` from change directories for this table — ADR files are the single canonical source. Surface notable trade-offs from ADR Negative Consequences — add a "Notable Trade-offs" subsection if any decisions have significant negative consequences. Include trade-offs that affect documentation consumers or represent meaningful constraints — every ADR with a substantive negative consequence should be represented.
 
-**Capabilities section:** Group capabilities by the `category` field from baseline spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
+**Capabilities section:** Group capabilities by the `category` field from spec YAML frontmatter. Render each category as a group header (title-case of the kebab-case value, e.g., `change-workflow` → "Change Workflow"). Within each group, order by `order` field (lower first). If a capability has no `category`, place in an "Other" group.
 
 **No constitution found:** Warn the user and skip architecture overview generation.
 **No ADR files found:** If no ADR files exist in `docs/decisions/`, omit the Key Design Decisions section.

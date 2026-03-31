@@ -44,7 +44,7 @@ Implement tasks from an OpenSpec change.
    - `openspec/changes/<change-dir>/design.md`
    - `openspec/changes/<change-dir>/tasks.md`
 
-   Also read baseline specs for the capabilities listed in the proposal's Capabilities section:
+   Also read specs for the capabilities listed in the proposal's Capabilities section:
    - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
 4. **Show current progress**

@@ -41,7 +41,7 @@ ADR-026 placed branch creation and draft PR in the proposal artifact instruction
 
 ## References
 
-- [Archive: move-pr-to-new-skill](../../openspec/changes/archive/) (pending archive)
+- [Change: move-pr-to-new-skill](../../openspec/changes/) (pending archive)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [ADR-026: Inline PR Integration in Proposal Step](adr-026-inline-pr-integration-in-proposal-step.md) (superseded)
 - [ADR-002: Workflow Rule Ownership](adr-002-workflow-rule-ownership.md)

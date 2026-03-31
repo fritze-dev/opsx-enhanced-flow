@@ -60,9 +60,14 @@ instruction: |
 
 ### Modified Capabilities
 <!-- Existing capabilities whose REQUIREMENTS are changing (not just implementation).
-     Only list here if spec-level behavior changes. Each needs a delta spec file.
+     Only list here if spec-level behavior changes.
      Use existing spec names from openspec/specs/. Leave empty if no requirement changes. -->
 - `<existing-name>`: <what requirement is changing>
+
+### Removed Capabilities
+<!-- Capabilities being entirely removed. Include reason and migration path.
+     Leave empty if no capabilities are removed. -->
+- `<existing-name>`: <reason for removal, migration path>
 
 ### Consolidation Check
 <!-- MANDATORY: Show your work before finalizing the Capabilities lists above.

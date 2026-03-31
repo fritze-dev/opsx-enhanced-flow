@@ -45,6 +45,6 @@ After the v1.0.7 docs regeneration (which implemented ADR-009's quality improvem
 
 ## References
 
-- [Archive: improve-docs-sections](../../openspec/changes/archive/2026-03-05-improve-docs-sections/)
+- [Change: improve-docs-sections](../../openspec/changes/2026-03-05-improve-docs-sections/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [ADR-009: Improve Docs Output Quality](adr-009-improve-docs-output-quality.md)

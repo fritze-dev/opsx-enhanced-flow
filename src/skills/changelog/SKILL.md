@@ -47,7 +47,7 @@ If no new entries exist, report and stop.
 From each new completed change directory, read:
 - `proposal.md` — Problem statement, motivation, capabilities
 
-Then read the current baseline specs for the capabilities listed in the proposal's Capabilities section:
+Then read the current specs for the capabilities listed in the proposal's Capabilities section:
 - `openspec/specs/<capability>/spec.md` — User-facing behavior (stories + scenarios)
 
 Also read from the change directory:
@@ -55,7 +55,7 @@ Also read from the change directory:
 
 If `proposal.md` is missing, skip the entry with a warning.
 
-**Fallback for proposals without structured Capabilities section:** If the proposal does not have a parseable Capabilities section (e.g., early changes with different formats), derive the change description from the proposal's "What Changes" and "Why" sections instead of looking up baseline specs.
+**Fallback for proposals without structured Capabilities section:** If the proposal does not have a parseable Capabilities section (e.g., early changes with different formats), derive the change description from the proposal's "What Changes" and "Why" sections instead of looking up specs.
 
 ### Step 5: Classify Changes
 
@@ -65,8 +65,8 @@ Derive a type from the proposal and spec content:
 |--------|-------------------|
 | proposal.md "Why" section | Context for the entry |
 | proposal.md "Capabilities" table | Change type: Added (NEW) / Changed (MODIFIED) |
-| Baseline specs User Stories | User-facing description of changes |
-| Baseline specs Gherkin scenario titles | Behavioral details (if relevant) |
+| Specs User Stories | User-facing description of changes |
+| Specs Gherkin scenario titles | Behavioral details (if relevant) |
 | design.md | Not used directly (too technical) |
 | Implementation details (file paths, APIs) | Omitted entirely |
 

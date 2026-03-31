@@ -31,6 +31,6 @@ The `/opsx:docs` skill's Step 1 (change detection) scans all capabilities agains
 
 ## References
 
-- [Archive: optimize-docs-regeneration](../../openspec/changes/archive/2026-03-24-optimize-docs-regeneration/)
+- [Change: optimize-docs-regeneration](../../openspec/changes/2026-03-24-optimize-docs-regeneration/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [ADR-012: Incremental Docs Generation](adr-012-incremental-docs-generation.md)

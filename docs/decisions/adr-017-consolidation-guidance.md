@@ -46,7 +46,7 @@ Three approaches were considered: (A) text-only instruction and template changes
 
 ## References
 
-- [Archive: consolidation-guidance](../../openspec/changes/archive/2026-03-24-consolidation-guidance/)
+- [Change: consolidation-guidance](../../openspec/changes/2026-03-24-consolidation-guidance/)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [Spec: artifact-generation](../../openspec/specs/artifact-generation/spec.md)
 - [ADR-001: Initial Spec Organization](adr-001-initial-spec-organization.md)

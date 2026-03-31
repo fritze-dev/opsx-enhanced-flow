@@ -42,5 +42,5 @@ The research phase evaluated three approaches: adding the cross-check to verify 
 
 ## References
 
-- [Archive: verify-preflight-side-effects](../../openspec/changes/archive/2026-03-26-verify-preflight-side-effects/)
+- [Change: verify-preflight-side-effects](../../openspec/changes/2026-03-26-verify-preflight-side-effects/)
 - [Spec: quality-gates](../../openspec/specs/quality-gates/spec.md)

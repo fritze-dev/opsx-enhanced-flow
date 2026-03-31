@@ -34,7 +34,7 @@ The `/opsx:archive` skill's worktree cleanup step used `git branch -d` to delete
 
 ## References
 
-- [Archive: fix-squash-merge-cleanup](../../openspec/changes/archive/2026-03-30-fix-squash-merge-cleanup/)
+- [Change: fix-squash-merge-cleanup](../../openspec/changes/2026-03-30-fix-squash-merge-cleanup/)
 - [Spec: change-workspace](../../openspec/specs/change-workspace/spec.md)
 - [ADR-033: Worktree-Based Change Lifecycle](adr-033-worktree-based-change-lifecycle.md)
 - [ADR-034: Auto-Sync Before Archive](adr-034-auto-sync-before-archive.md)

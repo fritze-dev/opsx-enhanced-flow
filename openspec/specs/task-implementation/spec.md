@@ -10,7 +10,7 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 ### Requirement: Implement Tasks from Task List
 
-The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, design, tasks) from the change directory and baseline specs from `openspec/specs/` for the capabilities listed in the proposal before beginning implementation. The system SHALL read the `apply.instruction` field from WORKFLOW.md for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
+The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, design, tasks) from the change directory and specs from `openspec/specs/` for the capabilities listed in the proposal before beginning implementation. The system SHALL read the `apply.instruction` field from WORKFLOW.md for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
@@ -114,13 +114,13 @@ The system SHALL distinguish between implementation tasks (Foundation, Implement
 - **AND** the committed tasks.md SHALL reflect the pre-merge/post-merge distinction
 - **AND** no extra follow-up commit SHALL be needed for pre-merge standard task checkboxes
 
-### Requirement: Baseline Spec Edits During Implementation
+### Requirement: Spec Edits During Implementation
 
-The system SHALL allow implementation tasks to modify baseline spec files (`openspec/specs/`) when required by the task description. Specs are edited directly during the specs stage and may need refinements during implementation. Implementation tasks (sections 1-2) SHALL NOT include post-apply workflow steps (changelog, docs, version bump). These steps SHALL appear in the Standard Tasks section.
+The system SHALL allow implementation tasks to modify spec files (`openspec/specs/`) when required by the task description. Specs are edited directly during the specs stage and may need refinements during implementation. Implementation tasks (sections 1-2) SHALL NOT include post-apply workflow steps (changelog, docs, version bump). These steps SHALL appear in the Standard Tasks section.
 
 **User Story:** As a developer I want to be able to refine specs during implementation if needed, so that specs stay accurate as implementation reveals edge cases.
 
-#### Scenario: Task refines a baseline spec during implementation
+#### Scenario: Task refines a spec during implementation
 
 - **GIVEN** a task that says "Add edge case for empty input to user-auth spec"
 - **WHEN** the system implements this task

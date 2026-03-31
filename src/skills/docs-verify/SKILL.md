@@ -60,7 +60,7 @@ Verify that generated documentation accurately reflects the current state of spe
 
    **ADR cross-check:**
    - For each decision row in the table, search the existing generated ADR files (`adr-[0-9]*.md`) for content that matches the decision text (check the `## Decision` section of each ADR).
-   - Also check each ADR's References section for a `[Change: ...]` or `[Archive: ...]` backlink matching the current change directory name.
+   - Also check each ADR's References section for a `[Change: ...]` backlink matching the current change directory name.
    - If a decision has no matching ADR, add WARNING: "Missing ADR for design decision: `<decision-text-summary>`" with reference to the change's `design.md`. Recommend: "Run `/opsx:docs` to generate missing ADRs."
 
    **Manual ADR handling:**
@@ -131,7 +131,7 @@ Verify that generated documentation accurately reflects the current state of spe
 - **Existence checks**: Exact filename match first, then frontmatter/heading fallback for capability docs.
 - **Requirement matching**: Search for the requirement name text within the capability doc. Use case-insensitive matching. A requirement is "covered" if its name (or a recognizable derivative) appears in a heading, bullet, or bold text within the doc.
 - **Purpose alignment**: Compare the core subject matter, not exact wording. Flag only if the doc describes a fundamentally different capability than the spec.
-- **ADR matching**: Match by decision text keywords in the ADR's Decision section, or by change/archive backlink in References.
+- **ADR matching**: Match by decision text keywords in the ADR's Decision section, or by change backlink in References.
 - **README capability matching**: Match by capability name (kebab-case) appearing in the table. Case-insensitive.
 - **Constitution consistency**: Compare key terms and technology names, not prose structure.
 - **False positive avoidance**: When uncertain whether something is drift or intentional, prefer INFO over WARNING, WARNING over CRITICAL.

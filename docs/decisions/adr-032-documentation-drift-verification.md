@@ -46,6 +46,6 @@ The new `/opsx:docs-verify` skill fills this gap as a third quality gate, checki
 
 ## References
 
-- [Archive: docs-verify](../../openspec/changes/archive/2026-03-26-docs-verify/)
+- [Change: docs-verify](../../openspec/changes/2026-03-26-docs-verify/)
 - [Spec: quality-gates](../../openspec/specs/quality-gates/spec.md)
 - [ADR-030: Verify Preflight Side-Effect Cross-Check](adr-030-verify-preflight-side-effect-cross-check.md)

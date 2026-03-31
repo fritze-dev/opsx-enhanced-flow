@@ -35,7 +35,7 @@ If no change name provided:
 
 1. Read `openspec/CONSTITUTION.md` for project rules and conventions.
 2. Read all artifacts in the current change directory (`openspec/changes/<change-dir>/`).
-3. Read baseline specs at `openspec/specs/` for cross-spec consistency. For the Traceability Matrix, read the proposal's Capabilities section to identify which baseline specs should have been updated by this change.
+3. Read specs at `openspec/specs/` for cross-spec consistency. For the Traceability Matrix, read the proposal's Capabilities section to identify which specs should have been updated by this change.
 
 ### Step 3: Get Preflight Instructions
 

@@ -39,6 +39,6 @@ The `init` skill name conflicts with Claude Code's built-in `/init` command, whi
 
 ## References
 
-- [Archive: rename-init-to-setup](../../openspec/changes/archive/2026-03-23-rename-init-to-setup/)
+- [Change: rename-init-to-setup](../../openspec/changes/2026-03-23-rename-init-to-setup/)
 - [Spec: project-setup](../../openspec/specs/project-setup/spec.md)
 - [ADR-M001: Setup is model-invocable](adr-M001-init-model-invocable.md)

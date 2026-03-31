@@ -33,6 +33,6 @@ The archive skill delegates spec sync to a subagent via the Agent/Task tool duri
 
 ## References
 
-- [Archive: fix-background-sync-race-condition](../../openspec/changes/archive/2026-03-30-fix-background-sync-race-condition/)
+- [Change: fix-background-sync-race-condition](../../openspec/changes/2026-03-30-fix-background-sync-race-condition/)
 - [Spec: change-workspace](../../openspec/specs/change-workspace/spec.md)
 - [ADR-034: Auto-Sync Before Archive](adr-034-auto-sync-before-archive.md)

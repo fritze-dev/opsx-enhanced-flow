@@ -4,9 +4,7 @@ description: Requirements with Gherkin scenarios (BDD) and optional user stories
 generates: "specs/**/*.md"
 requires: [proposal]
 instruction: |
-  Edit baseline spec files that define WHAT the system should do.
-  Specs are edited directly at openspec/specs/<capability>/spec.md — there
-  are no delta spec files or intermediate formats.
+  Edit spec files that define WHAT the system should do.
 
   Overlap Verification (before editing any spec files):
   1. Read the proposal's Consolidation Check section.

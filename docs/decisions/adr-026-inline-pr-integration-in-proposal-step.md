@@ -43,7 +43,7 @@ The opsx-enhanced workflow lacked git branching and PR integration. Teams using 
 
 ## References
 
-- [Archive: add-pr-step](../../openspec/changes/archive/2026-03-25-add-pr-step/)
+- [Change: add-pr-step](../../openspec/changes/2026-03-25-add-pr-step/)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [Spec: task-implementation](../../openspec/specs/task-implementation/spec.md)
 - [ADR-018: Standard Tasks Two-Layer Design](adr-018-standard-tasks-two-layer-design.md)

@@ -46,7 +46,7 @@ Separately, the Key Design Decisions table in `docs/README.md` was sourcing its 
 
 ## References
 
-- [Archive: streamline-adr-format](../../openspec/changes/archive/2026-03-23-streamline-adr-format/)
+- [Change: streamline-adr-format](../../openspec/changes/2026-03-23-streamline-adr-format/)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)
 - [ADR-012: Incremental Docs Generation](adr-012-incremental-docs-generation.md)

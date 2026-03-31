@@ -20,9 +20,7 @@ instruction: |
   findings define risk resolution, and explicit user approval
   gates implementation completeness.
 
-  Implementation tasks MAY include edits to baseline specs under
-  `openspec/specs/` when needed — specs are edited directly in this
-  workflow. The apply phase covers implementation and QA (sections 1-3).
+  The apply phase covers implementation and QA (sections 1-3).
   For documentation-only changes (no code), implementation sections may
   be empty — the QA loop alone is sufficient.
 

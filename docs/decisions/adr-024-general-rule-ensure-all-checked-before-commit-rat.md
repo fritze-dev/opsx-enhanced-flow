@@ -30,6 +30,6 @@ The post-apply workflow runs: `/opsx:archive` then `/opsx:changelog` then `/opsx
 
 ## References
 
-- [Archive: fix-standard-tasks-commit-order](../../openspec/changes/archive/2026-03-25-fix-standard-tasks-commit-order/)
+- [Change: fix-standard-tasks-commit-order](../../openspec/changes/2026-03-25-fix-standard-tasks-commit-order/)
 - [Spec: task-implementation](../../openspec/specs/task-implementation/spec.md)
 - [ADR-018: Standard Tasks Two-Layer Design](adr-018-standard-tasks-two-layer-design.md)

@@ -91,7 +91,7 @@ The agent SHALL NOT generate `docs/architecture-overview.md` as a separate file.
 - **THEN** the agent regenerates `docs/README.md` to reflect the updated constitution content
 
 ### Requirement: Generate Documentation Table of Contents
-The `/opsx:docs` command SHALL create or update `docs/README.md` as the single entry point for all generated documentation. The README SHALL include the architecture overview content (System Architecture, Tech Stack, Key Design Decisions with ADR links, Conventions) followed by a capabilities section. The capabilities section SHALL be grouped by the `category` frontmatter field from baseline specs, rendered as category group headers (title-case). Within each category group, capabilities SHALL be ordered by the `order` frontmatter field (lower first). The Key Design Decisions table SHALL include an "ADR" column linking directly to the corresponding ADR file instead of a "Source" column. The README SHALL surface notable trade-offs from ADR Consequences for the most significant decisions. The `docs/README.md` SHALL be regenerated when capability docs or ADRs change, as specified by the conditional regeneration logic in the "Generate Architecture Overview" requirement. The agent SHALL read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format. Capability descriptions in the capabilities table SHALL be concise: max 80 characters or 15 words. Each description SHALL be one short phrase, not a multi-clause sentence.
+The `/opsx:docs` command SHALL create or update `docs/README.md` as the single entry point for all generated documentation. The README SHALL include the architecture overview content (System Architecture, Tech Stack, Key Design Decisions with ADR links, Conventions) followed by a capabilities section. The capabilities section SHALL be grouped by the `category` frontmatter field from specs, rendered as category group headers (title-case). Within each category group, capabilities SHALL be ordered by the `order` frontmatter field (lower first). The Key Design Decisions table SHALL include an "ADR" column linking directly to the corresponding ADR file instead of a "Source" column. The README SHALL surface notable trade-offs from ADR Consequences for the most significant decisions. The `docs/README.md` SHALL be regenerated when capability docs or ADRs change, as specified by the conditional regeneration logic in the "Generate Architecture Overview" requirement. The agent SHALL read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format. Capability descriptions in the capabilities table SHALL be concise: max 80 characters or 15 words. Each description SHALL be one short phrase, not a multi-clause sentence.
 
 The agent SHALL NOT generate a separate `docs/architecture-overview.md` file. The agent SHALL NOT generate a separate `docs/decisions/README.md` file. If either file exists from a previous run, the agent SHALL delete it.
 
@@ -108,17 +108,17 @@ The agent SHALL NOT generate a separate `docs/architecture-overview.md` file. Th
 - **THEN** the agent deletes `docs/architecture-overview.md` and `docs/decisions/README.md`
 
 #### Scenario: Capabilities grouped by category
-- **GIVEN** baseline specs with `category` frontmatter values like `setup`, `change-workflow`, `development`
+- **GIVEN** specs with `category` frontmatter values like `setup`, `change-workflow`, `development`
 - **WHEN** the agent generates the capabilities section
 - **THEN** capabilities appear under category group headers (e.g., "### Setup", "### Change Workflow"), ordered by `order` within each group
 
 #### Scenario: Capabilities without category appear in Other group
-- **GIVEN** a baseline spec with no `category` frontmatter
+- **GIVEN** a spec with no `category` frontmatter
 - **WHEN** the agent generates the capabilities section
 - **THEN** the capability appears under an "Other" group header
 
 #### Scenario: Capability descriptions are concise
-- **GIVEN** baseline specs with varying description lengths
+- **GIVEN** specs with varying description lengths
 - **WHEN** the agent generates the capabilities table
 - **THEN** each description is at most 80 characters or 15 words — one short phrase, not a multi-clause sentence
 

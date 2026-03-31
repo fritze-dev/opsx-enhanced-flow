@@ -29,6 +29,6 @@ The multi-capability argument optimization for `/opsx:docs` needed to be placed 
 
 ## References
 
-- [Archive: optimize-docs-regeneration](../../openspec/changes/archive/2026-03-24-optimize-docs-regeneration/)
+- [Change: optimize-docs-regeneration](../../openspec/changes/2026-03-24-optimize-docs-regeneration/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [ADR-022: Extend Argument to Accept Multiple Capability Names](adr-022-extend-argument-to-accept-multiple-capability-nam.md)

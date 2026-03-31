@@ -47,7 +47,7 @@ The first production run of `/opsx:docs` (v1.0.5) exposed 11 quality gaps across
 
 ## References
 
-- [Archive: improve-docs-quality](../../openspec/changes/archive/2026-03-05-improve-docs-quality/)
+- [Change: improve-docs-quality](../../openspec/changes/2026-03-05-improve-docs-quality/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)

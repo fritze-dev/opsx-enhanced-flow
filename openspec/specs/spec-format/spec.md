@@ -4,7 +4,7 @@ category: reference
 ---
 ## Purpose
 
-Defines the format rules for specifications including normative descriptions with RFC 2119 keywords, User Stories, Gherkin scenarios, and baseline spec structure.
+Defines the format rules for specifications including normative descriptions with RFC 2119 keywords, User Stories, Gherkin scenarios, and spec structure.
 
 ## Requirements
 
@@ -54,8 +54,8 @@ Every requirement SHALL have at least one scenario using Gherkin format. Scenari
 - **THEN** they SHALL use `- **AND** ...` after the relevant GIVEN, WHEN, or THEN clause to add supplementary conditions
 
 ### Requirement: Spec Frontmatter Metadata
-Baseline specs MAY include an optional YAML frontmatter block at the top of the file, delimited by `---` lines. The frontmatter SHALL support the following fields:
-- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the baseline spec. The `/opsx:docs` command SHALL read this value to determine capability ordering.
+Specs MAY include an optional YAML frontmatter block at the top of the file, delimited by `---` lines. The frontmatter SHALL support the following fields:
+- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `/opsx:docs` command SHALL read this value to determine capability ordering.
 - `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `/opsx:docs` command SHALL use this value to render category group headers in the capabilities table.
 
 Both fields are optional. If `order` is absent, `/opsx:docs` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group.
@@ -64,14 +64,14 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 
 **User Story:** As a project maintainer I want deterministic, project-specific ordering and grouping of capabilities in generated documentation, so that the TOC follows my project's workflow sequence and stays consistent across doc regeneration runs.
 
-#### Scenario: Baseline spec with frontmatter
-- **GIVEN** a baseline spec at `openspec/specs/quality-gates/spec.md`
+#### Scenario: Spec with frontmatter
+- **GIVEN** a spec at `openspec/specs/quality-gates/spec.md`
 - **AND** the spec has frontmatter with `order: 8` and `category: development`
 - **WHEN** `/opsx:docs` generates the capabilities table
 - **THEN** quality-gates appears at position 8, under a "Development" group header
 
-#### Scenario: Baseline spec without frontmatter falls back gracefully
-- **GIVEN** a baseline spec with no YAML frontmatter
+#### Scenario: Spec without frontmatter falls back gracefully
+- **GIVEN** a spec with no YAML frontmatter
 - **WHEN** `/opsx:docs` generates the capabilities table
 - **THEN** the capability appears in an "Other" group with agent-determined ordering
 
@@ -80,18 +80,18 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 - **WHEN** the agent creates the spec at `openspec/specs/<capability>/spec.md`
 - **THEN** the spec SHALL include frontmatter with `order` and `category` values that position the new capability appropriately among existing capabilities
 
-### Requirement: Baseline Spec Format
-Baseline specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Baseline specs SHALL NOT use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED). Each requirement within the baseline SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
+### Requirement: Spec Format
+Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Specs SHALL NOT use operation prefixes (ADDED, MODIFIED, REMOVED, RENAMED). Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
 
-**User Story:** As a developer reading the baseline specs I want a clean format without change-tracking prefixes, so that I see the current state of requirements clearly.
+**User Story:** As a developer reading the specs I want a clean format without change-tracking prefixes, so that I see the current state of requirements clearly.
 
-#### Scenario: Baseline spec structure
-- **GIVEN** a baseline spec for the `project-setup` capability
+#### Scenario: Spec structure
+- **GIVEN** a spec for the `project-setup` capability
 - **WHEN** the spec file is opened
 - **THEN** it SHALL contain a `## Purpose` section describing the capability, followed by a `## Requirements` section with all current requirements
 
 #### Scenario: Baseline requirements follow standard format
-- **GIVEN** a requirement within a baseline spec
+- **GIVEN** a requirement within a spec
 - **WHEN** the requirement block is inspected
 - **THEN** it SHALL have a `### Requirement:` header, normative description, optional User Story, and one or more `#### Scenario:` blocks
 

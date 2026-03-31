@@ -29,6 +29,6 @@ The mark-before-commit behavior needed a home in the schema. The `apply.instruct
 
 ## References
 
-- [Archive: fix-standard-tasks-commit-order](../../openspec/changes/archive/2026-03-25-fix-standard-tasks-commit-order/)
+- [Change: fix-standard-tasks-commit-order](../../openspec/changes/2026-03-25-fix-standard-tasks-commit-order/)
 - [Spec: task-implementation](../../openspec/specs/task-implementation/spec.md)
 - [ADR-024: General Rule for Marking Standard Tasks Before Commit](adr-024-general-rule-ensure-all-checked-before-commit-rat.md)

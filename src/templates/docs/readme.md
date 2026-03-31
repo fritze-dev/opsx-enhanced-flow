@@ -48,7 +48,7 @@ instruction: |
 
 ## Capabilities
 
-<!-- Group capabilities by `category` from baseline spec frontmatter.
+<!-- Group capabilities by `category` from spec frontmatter.
      Render each category as a group header (title-case of kebab-case value).
      Within each group, order by `order` field (lower first).
      If a capability has no category, place in "Other" group. -->

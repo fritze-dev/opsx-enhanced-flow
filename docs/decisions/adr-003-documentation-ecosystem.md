@@ -58,7 +58,7 @@ The `/opsx:docs` skill read only baseline specs at `openspec/specs/*/spec.md` to
 
 ## References
 
-- [Archive: doc-ecosystem](../../openspec/changes/archive/2026-03-04-doc-ecosystem/)
+- [Change: doc-ecosystem](../../openspec/changes/2026-03-04-doc-ecosystem/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)

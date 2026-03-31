@@ -31,7 +31,7 @@ The standard-tasks feature (ADR-018) introduced a two-layer system for post-impl
 
 ## References
 
-- [Archive: bootstrap-standard-tasks-section](../../openspec/changes/archive/2026-03-25-bootstrap-standard-tasks-section/)
+- [Change: bootstrap-standard-tasks-section](../../openspec/changes/2026-03-25-bootstrap-standard-tasks-section/)
 - [Spec: project-bootstrap](../../openspec/specs/project-bootstrap/spec.md)
 - [Spec: constitution-management](../../openspec/specs/constitution-management/spec.md)
 - [ADR-018: Standard Tasks Two-Layer Design](adr-018-standard-tasks-two-layer-design.md)

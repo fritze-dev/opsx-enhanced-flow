@@ -47,7 +47,7 @@ A full docs regeneration test (delete all docs, run `/opsx:docs`, diff against p
 
 ## References
 
-- [Archive: fix-docs-skill-regressions](../../openspec/changes/archive/2026-03-05-fix-docs-skill-regressions/)
+- [Change: fix-docs-skill-regressions](../../openspec/changes/2026-03-05-fix-docs-skill-regressions/)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: architecture-docs](../../openspec/specs/architecture-docs/spec.md)

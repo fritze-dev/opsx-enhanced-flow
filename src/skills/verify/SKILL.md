@@ -40,7 +40,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - `openspec/changes/<change-dir>/preflight.md`
    - `openspec/changes/<change-dir>/tasks.md`
 
-   Also read baseline specs for the capabilities listed in the proposal's Capabilities section:
+   Also read specs for the capabilities listed in the proposal's Capabilities section:
    - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
 4. **Initialize verification report structure**
@@ -63,8 +63,8 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Spec Coverage**:
-   - Read baseline specs for capabilities listed in the proposal's Capabilities section
-   - For each requirement in the relevant baseline specs:
+   - Read specs for capabilities listed in the proposal's Capabilities section
+   - For each requirement in the relevant specs:
      - Search codebase for keywords related to the requirement
      - Assess if implementation likely exists
    - If requirements appear unimplemented:
@@ -74,7 +74,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 6. **Verify Correctness**
 
    **Requirement Implementation Mapping**:
-   - For each requirement from the relevant baseline specs:
+   - For each requirement from the relevant specs:
      - Search codebase for implementation evidence
      - If found, note file paths and line ranges
      - Assess if implementation matches requirement intent
@@ -83,7 +83,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
        - Recommendation: "Review <file>:<lines> against requirement X"
 
    **Scenario Coverage**:
-   - For each scenario in the relevant baseline specs (marked with "#### Scenario:"):
+   - For each scenario in the relevant specs (marked with "#### Scenario:"):
      - Check if conditions are handled in code
      - Check if tests exist covering the scenario
      - If scenario appears uncovered:

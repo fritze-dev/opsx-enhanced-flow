@@ -44,7 +44,7 @@ A full QA cycle (delete all docs, regenerate via `/opsx:docs`, diff) revealed tw
 
 ## References
 
-- [Archive: fix-docs-regeneration-quality](../../openspec/changes/archive/2026-03-05-fix-docs-regeneration-quality/)
+- [Change: fix-docs-regeneration-quality](../../openspec/changes/2026-03-05-fix-docs-regeneration-quality/)
 - [Spec: user-docs](../../openspec/specs/user-docs/spec.md)
 - [Spec: decision-docs](../../openspec/specs/decision-docs/spec.md)
 - [ADR-003: Documentation Ecosystem](adr-003-documentation-ecosystem.md)

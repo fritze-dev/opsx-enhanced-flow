@@ -44,7 +44,7 @@ The first dogfooding run of the opsx-enhanced-flow plugin revealed significant f
 
 ## References
 
-- [Archive: fix-workflow-friction](../../openspec/changes/archive/2026-03-02-fix-workflow-friction/)
+- [Change: fix-workflow-friction](../../openspec/changes/2026-03-02-fix-workflow-friction/)
 - [Spec: constitution-management](../../openspec/specs/constitution-management/spec.md)
 - [Spec: artifact-pipeline](../../openspec/specs/artifact-pipeline/spec.md)
 - [Spec: project-setup](../../openspec/specs/project-setup/spec.md)
