@@ -13,11 +13,19 @@ apply:
     They are tracked in tasks.md for auditability but executed separately
     after apply completes.
 
-    Post-apply workflow: /opsx:verify →
+    Post-apply workflow: /opsx:verify → commit and push implementation
+    changes for review → pause for user approval →
     /opsx:changelog → /opsx:docs → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
     IMPORTANT: /opsx:verify MUST run before proceeding.
     Never proceed before implementation is verified.
+
+    After /opsx:verify passes, commit and push all implementation changes
+    before pausing for user approval:
+    1. Stage all changed files: `git add -A`
+    2. Commit: `git commit -m "WIP: <change-name> — implementation"`
+    3. Push: `git push`
+    If push fails, continue with local commit — do not block the workflow.
 
     Constitution standard tasks are split into pre-merge and post-merge.
     Only pre-merge tasks are executed during post-apply workflow.
