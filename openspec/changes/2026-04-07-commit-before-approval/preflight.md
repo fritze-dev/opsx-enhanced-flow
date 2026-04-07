@@ -26,9 +26,8 @@ No constitution changes needed. The commit message format (`WIP: <change-name> �
 
 ## E. Duplication & Consistency
 
-- No overlap between the new requirement in `task-implementation` ("WIP Commit in QA Loop") and the existing "Standard Tasks Exclusion" requirement — they address different commits (WIP vs final).
-- The new requirement in `human-approval-gate` is additive to the existing "QA Loop with Mandatory Approval" requirement — it adds a precondition (changes committed) before the approval gate.
-- Step numbers are consistent between specs and template after renumbering.
+- No overlap between the new requirement in `artifact-pipeline` ("Post-Implementation Commit Before Approval") and the existing "Post-Artifact Commit and PR Integration" requirement — they address different phases (implementation vs artifact creation).
+- The `human-approval-gate` spec now references QA Loop steps by semantic name — immune to future template renumbering.
 
 ## F. Assumption Audit
 

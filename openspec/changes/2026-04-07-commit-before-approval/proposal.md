@@ -38,7 +38,7 @@ N/A — no new specs proposed. `artifact-pipeline` already owns the post_artifac
 
 **In scope:**
 - Tasks template QA Loop modification
-- Spec updates for human-approval-gate and task-implementation
+- Spec updates for artifact-pipeline and human-approval-gate
 - The commit step uses existing git/gh patterns (same as post_artifact hook)
 
 **Out of scope:**
