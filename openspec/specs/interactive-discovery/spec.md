@@ -10,7 +10,7 @@ Provides `/opsx:discover` for standalone interactive research with targeted Q&A 
 
 ### Requirement: Standalone Research with Q&A
 
-The system SHALL run an interactive discovery session when the user invokes `/opsx:discover`. Discovery SHALL operate independently from the artifact pipeline -- it generates only the `research.md` artifact and then pauses for user answers. It SHALL NOT generate proposal, specs, design, or any downstream artifacts. The discovery process SHALL: (1) verify that `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml` exist, (2) read the constitution for project rules, (3) read the current change directory and existing specs, (4) check whether existing specs reflect the current codebase and note stale-spec risks, (5) read the research artifact's `instruction` field from schema.yaml and its template, (6) generate `research.md` with a coverage assessment rating each category as Clear, Partial, or Missing, and (7) generate targeted clarification questions only for Partial or Missing categories, limited to a maximum of 5 questions prioritized by Impact multiplied by Uncertainty. If all categories are Clear, the system SHALL state that and skip questions. After the user provides answers, the system SHALL record decisions with rationale in the Decisions section of research.md and then stop.
+The system SHALL run an interactive discovery session when the user invokes `/opsx:discover`. Discovery SHALL operate independently from the artifact pipeline -- it generates only the `research.md` artifact and then pauses for user answers. It SHALL NOT generate proposal, specs, design, or any downstream artifacts. The discovery process SHALL: (1) verify that `openspec/WORKFLOW.md` and `openspec/templates/` exist, (2) read the constitution for project rules, (3) read the current change directory and existing specs, (4) check whether existing specs reflect the current codebase and note stale-spec risks, (5) read the research artifact's `instruction` field from the Smart Template and WORKFLOW.md, (6) generate `research.md` with a coverage assessment rating each category as Clear, Partial, or Missing, and (7) generate targeted clarification questions only for Partial or Missing categories, limited to a maximum of 5 questions prioritized by Impact multiplied by Uncertainty. If all categories are Clear, the system SHALL state that and skip questions. After the user provides answers, the system SHALL record decisions with rationale in the Decisions section of research.md and then stop.
 
 **User Story:** As a developer I want a dedicated interactive research phase with targeted questions, so that I can explore complex features thoroughly and ensure all ambiguities are resolved before the artifact pipeline generates specs and design.
 
@@ -81,8 +81,8 @@ The system SHALL run an interactive discovery session when the user invokes `/op
 
 - **GIVEN** the project has not been set up with `/opsx:setup`
 - **WHEN** the user invokes `/opsx:discover`
-- **THEN** the system checks for `openspec/config.yaml` and `openspec/schemas/opsx-enhanced/schema.yaml`
-- **AND** one or both files are missing
+- **THEN** the system checks for `openspec/WORKFLOW.md` and `openspec/templates/`
+- **AND** one or both are missing
 - **AND** the system tells the user to run `/opsx:setup` first and stops
 
 ## Edge Cases

@@ -14,7 +14,7 @@ The `/opsx:bootstrap` command SHALL analyze the entire project codebase on first
 **User Story:** As a developer adopting spec-driven development on an existing project I want bootstrap to understand my codebase automatically, so that the generated constitution reflects my actual project rather than generic defaults.
 
 #### Scenario: First-run scan of an existing project
-- **GIVEN** a project with source code, configuration files, and dependencies but no `openspec/constitution.md`
+- **GIVEN** a project with source code, configuration files, and dependencies but no `openspec/CONSTITUTION.md`
 - **WHEN** the user runs `/opsx:bootstrap`
 - **THEN** the system SHALL scan the entire codebase and identify the tech stack, languages, frameworks, file structure, and coding conventions
 
@@ -31,7 +31,7 @@ The `/opsx:bootstrap` command SHALL generate a `constitution.md` file based on t
 #### Scenario: Constitution generated from scan results
 - **GIVEN** the codebase scan has completed and identified TypeScript, React, and Jest as the primary technologies
 - **WHEN** the constitution generation phase runs
-- **THEN** the system SHALL create `openspec/constitution.md` with Tech Stack listing TypeScript, React, and Jest, along with Architecture Rules, Code Style, Constraints, Conventions, and an empty Standard Tasks section reflecting the observed patterns
+- **THEN** the system SHALL create `openspec/CONSTITUTION.md` with Tech Stack listing TypeScript, React, and Jest, along with Architecture Rules, Code Style, Constraints, Conventions, and an empty Standard Tasks section reflecting the observed patterns
 
 #### Scenario: Standard Tasks section present but empty on first run
 - **GIVEN** a new project being bootstrapped for the first time
@@ -83,7 +83,7 @@ The `/opsx:bootstrap` command SHALL detect when specs already exist in `openspec
 
 - If the project has no source code files (empty repository), bootstrap SHALL generate a minimal constitution with placeholder sections and inform the user to update it manually.
 - If the codebase uses multiple languages or conflicting conventions, the constitution SHALL document the primary patterns and note the variations as exceptions.
-- If `openspec/constitution.md` exists but `openspec/specs/` is empty, bootstrap SHALL treat this as a partial first-run and skip constitution generation while proceeding to initial change creation.
+- If `openspec/CONSTITUTION.md` exists but `openspec/specs/` is empty, bootstrap SHALL treat this as a partial first-run and skip constitution generation while proceeding to initial change creation.
 - If the OpenSpec CLI is not installed when bootstrap is invoked, bootstrap SHALL instruct the user to run `/opsx:setup` first.
 - If the project has an extremely deep directory structure, the scan SHALL use reasonable depth limits to avoid performance issues.
 
