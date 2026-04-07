@@ -27,10 +27,16 @@ instruction: |
   Standard Tasks: The template includes a section 4 with universal
   post-implementation steps (changelog, docs, version bump, push).
   Always include this section as-is. If the project constitution defines
-  a "## Standard Tasks" section, append its items after the universal
-  steps. Copy constitution items verbatim — pre-merge items use
-  `- [ ]` checkbox format, post-merge items use plain `- ` bullet
-  format (no checkbox). Plain bullets are reminders, not tracked tasks.
+  a "## Standard Tasks" section with a "### Pre-Merge" subsection,
+  append those pre-merge items (as `- [ ]` checkboxes) after the
+  universal steps in section 4.
+
+  Post-Merge Reminders: If the constitution's Standard Tasks has a
+  "### Post-Merge" subsection, add a separate section 5 titled
+  "Post-Merge Reminders". Copy post-merge items as plain `- ` bullets
+  (no checkbox, no numbering). These are not tracked tasks — just
+  reminders for manual execution after the PR is merged. If no
+  Post-Merge subsection exists, omit section 5 entirely.
 ---
 # Implementation Tasks: [Feature Name]
 
@@ -53,8 +59,13 @@ instruction: |
 
 ## 4. Standard Tasks (Post-Implementation)
 <!-- Universal post-implementation steps. Always include this section.
-     If the constitution defines ## Standard Tasks, append those items after these. -->
+     If the constitution defines ## Standard Tasks > ### Pre-Merge, append those items after these. -->
 - [ ] 4.1. Generate changelog (`/opsx:changelog`)
 - [ ] 4.2. Generate/update docs (`/opsx:docs`)
 - [ ] 4.3. Bump version
 - [ ] 4.4. Commit and push to remote
+
+## 5. Post-Merge Reminders
+<!-- Not tracked as tasks. Executed manually after the PR is merged.
+     If the constitution defines ## Standard Tasks > ### Post-Merge, copy those items here as plain bullets.
+     Omit this section entirely if no post-merge items exist. -->

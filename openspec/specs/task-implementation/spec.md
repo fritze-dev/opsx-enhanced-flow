@@ -85,18 +85,18 @@ The system SHALL report implementation progress using checkbox counts from the t
 
 ### Requirement: Standard Tasks Exclusion from Apply Scope
 
-The system SHALL distinguish between implementation tasks (Foundation, Implementation, QA Loop sections) and standard tasks (Post-Implementation section) in the generated `tasks.md`. During `/opsx:apply`, the system SHALL only process tasks in the implementation and QA sections. Standard tasks in the Post-Implementation section SHALL NOT be executed by the apply phase. Standard tasks SHALL remain as unchecked `- [ ]` items after apply completes. The standard tasks section SHALL be included in the total checkbox count for progress reporting, reflecting the full workflow completion state. During the post-apply workflow, the system SHALL mark all standard task checkboxes as complete in `tasks.md` — including universal steps and constitution-defined pre-merge extras — before creating the final commit, so that the committed file reflects the fully-checked state. Constitution-defined post-merge items SHALL use plain bullet format (`- ` without checkbox) as reminders for manual execution after the PR is merged. Plain bullets are not counted in progress totals and are not parsed by the apply skill.
+The system SHALL distinguish between implementation tasks (Foundation, Implementation, QA Loop sections) and standard tasks (Post-Implementation section) in the generated `tasks.md`. During `/opsx:apply`, the system SHALL only process tasks in the implementation and QA sections. Standard tasks in the Post-Implementation section SHALL NOT be executed by the apply phase. Standard tasks SHALL remain as unchecked `- [ ]` items after apply completes. The standard tasks section SHALL be included in the total checkbox count for progress reporting, reflecting the full workflow completion state. During the post-apply workflow, the system SHALL mark all standard task checkboxes as complete in `tasks.md` — including universal steps and constitution-defined pre-merge extras — before creating the final commit, so that the committed file reflects the fully-checked state. Constitution-defined post-merge items SHALL appear in a separate section (section 5: "Post-Merge Reminders") using plain bullet format (`- ` without checkbox). Plain bullets are not counted in progress totals and are not parsed by the apply skill. If no post-merge items exist in the constitution, section 5 SHALL be omitted.
 
 **User Story:** As a developer I want post-implementation workflow steps tracked as checkboxes in my task list but not executed by apply, so that I have a visible, auditable checklist for post-apply steps without conflating them with implementation work.
 
 #### Scenario: Apply skips standard tasks section
 
-- **GIVEN** a tasks.md with sections 1-3 (Foundation, Implementation, QA Loop) and section 4 (Standard Tasks Post-Implementation) containing 3 unchecked items
+- **GIVEN** a tasks.md with sections 1-3 (Foundation, Implementation, QA Loop), section 4 (Standard Tasks Post-Implementation) containing 3 unchecked items, and section 5 (Post-Merge Reminders) containing plain bullet reminders
 - **WHEN** the user invokes `/opsx:apply`
 - **THEN** the system SHALL work through pending tasks in sections 1-3 only
-- **AND** SHALL NOT attempt to execute tasks in section 4
-- **AND** section 4 checkbox items SHALL remain as `- [ ]` after apply completes
-- **AND** section 4 plain bullet items (post-merge reminders) SHALL remain unchanged
+- **AND** SHALL NOT attempt to execute tasks in sections 4 or 5
+- **AND** section 4 items SHALL remain as `- [ ]` after apply completes
+- **AND** section 5 plain bullet reminders SHALL remain unchanged
 
 #### Scenario: Progress count includes standard tasks
 
@@ -107,12 +107,12 @@ The system SHALL distinguish between implementation tasks (Foundation, Implement
 
 #### Scenario: All standard tasks marked before commit
 
-- **GIVEN** a tasks.md with all implementation tasks complete and standard tasks including universal steps (changelog, docs, version bump, commit and push), pre-merge extras (e.g., update PR) as unchecked checkboxes, and post-merge reminders (e.g., update plugin) as plain bullets
+- **GIVEN** a tasks.md with all implementation tasks complete, section 4 standard tasks including universal steps (changelog, docs, version bump, commit and push) and pre-merge extras (e.g., update PR) as unchecked checkboxes, and section 5 post-merge reminders (e.g., update plugin) as plain bullets
 - **AND** the post-apply workflow has completed all steps including pre-merge constitution extras
 - **WHEN** the system is about to create the final commit
 - **THEN** the system SHALL mark universal and pre-merge standard task checkboxes as `- [x]` in tasks.md
-- **AND** post-merge reminders SHALL remain as plain bullets (they have no checkbox to mark)
-- **AND** the committed tasks.md SHALL reflect the pre-merge/post-merge distinction
+- **AND** section 5 post-merge reminders SHALL remain as plain bullets (they have no checkbox to mark)
+- **AND** the committed tasks.md SHALL reflect the section 4/5 distinction
 - **AND** no extra follow-up commit SHALL be needed for pre-merge standard task checkboxes
 
 ### Requirement: Spec Edits During Implementation
