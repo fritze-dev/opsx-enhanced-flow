@@ -30,7 +30,7 @@ Each ADR SHALL include:
 
 **Cross-reference heuristic for related ADRs:** Beyond cross-referencing ADRs from the same change, the agent SHALL check whether the current ADR modifies, extends, or supersedes a system established by an earlier ADR. Specifically:
 1. If the current change's `proposal.md` or `design.md` references another change by name (e.g., "supersedes the full regeneration from doc-ecosystem"), the agent SHALL link to the ADR from that referenced change.
-2. If the current change modifies the same capabilities as an earlier change's ADR (determined by overlapping capabilities), the agent SHOULD add a cross-reference to the most relevant earlier ADR.
+2. If the current change modifies the same capabilities as an earlier change's ADR (determined by overlapping capabilities in proposal.md Capabilities sections), the agent SHOULD add a cross-reference to the most relevant earlier ADR.
 3. The agent SHALL NOT add cross-references speculatively — only when a clear thematic relationship is evident from the change content.
 
 The slug SHALL be derived from the Decision column text using this deterministic algorithm:

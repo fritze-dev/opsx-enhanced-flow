@@ -57,7 +57,7 @@ After generating the constitution, the `/opsx:bootstrap` command SHALL create an
 #### Scenario: Handoff to standard pipeline
 - **GIVEN** the initial change workspace has been created
 - **WHEN** the bootstrap command completes
-- **THEN** the system SHALL report the created change name and the full workflow: generate artifacts (`/opsx:ff`), run QA loop (`/opsx:apply`), then generate docs (`/opsx:changelog` + `/opsx:docs`)
+- **THEN** the system SHALL report the created change name and inform the user to run `/opsx:ff` or `/opsx:continue` to generate artifacts, followed by `/opsx:apply`, then `/opsx:changelog` and `/opsx:docs`
 
 ### Requirement: Recovery Mode
 The `/opsx:bootstrap` command SHALL detect when specs already exist in `openspec/specs/`. When existing specs are found, the bootstrap command SHALL enter recovery mode: scanning the current codebase, comparing it against existing specs, and reporting drift findings. Recovery mode SHALL NOT overwrite existing specs or the constitution. Instead, it SHALL produce a drift report listing discrepancies between the codebase and the specs, and suggest corrective actions (e.g., `/opsx:new hotfix-xyz` for small drift or a full re-bootstrap for large drift).

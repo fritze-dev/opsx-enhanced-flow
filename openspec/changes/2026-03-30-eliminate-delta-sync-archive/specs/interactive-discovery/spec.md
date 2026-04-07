@@ -8,15 +8,15 @@ Context loading guardrails SHALL direct the agent to read `openspec/specs/*/spec
 
 #### Scenario: Ambiguous change selection
 
-- **GIVEN** multiple active changes exist under `openspec/changes/`
+- **GIVEN** the user is not in a worktree context
+- **AND** multiple active changes exist under `openspec/changes/`
 - **AND** no change name is provided
 - **WHEN** the user invokes `/opsx:discover`
-- **THEN** the system SHALL list active change directories (those with unchecked tasks or no tasks.md)
-- **AND** ask the user to select one
+- **THEN** the system SHALL list active changes and ask the user to select one
 
 ## Edge Cases
 
-- **Ambiguous change selection**: If multiple active changes exist and no name is provided, the system SHALL list directories under `openspec/changes/` that are active (unchecked tasks or missing tasks.md) and ask the user to select one.
+- **Ambiguous change selection**: If not in a worktree context and multiple active changes exist, the system SHALL list active changes and ask the user to select one.
 
 ## Assumptions
 

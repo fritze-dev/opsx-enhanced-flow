@@ -37,7 +37,7 @@ The system SHALL create a change workspace when the user invokes `/opsx:new <cha
 
 ### Requirement: Workspace Structure
 
-The created workspace SHALL contain the artifacts defined by the pipeline in WORKFLOW.md. The artifact pipeline sequence SHALL be determined by the `pipeline` array in `openspec/WORKFLOW.md` frontmatter (e.g., research, proposal, specs, design, preflight, tasks). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next. The workspace SHALL NOT contain a `specs/` subdirectory — spec changes are made directly to baseline specs in `openspec/specs/`.
+The created workspace SHALL contain the artifacts defined by the pipeline in WORKFLOW.md. The artifact pipeline sequence SHALL be determined by the `pipeline` array in `openspec/WORKFLOW.md` frontmatter (e.g., research, proposal, specs, design, preflight, tasks). Each artifact SHALL have a defined dependency chain that gates progression from one stage to the next.
 
 **User Story:** As a developer I want the workspace to be pre-structured according to the workflow pipeline, so that I know exactly which artifacts need to be produced and in what order.
 
@@ -88,7 +88,7 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 
 ### Requirement: Worktree Context Detection
 
-All change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) SHALL detect the active change from worktree context before falling through to directory-based detection. The detection SHALL: (1) check if the current working directory is inside a git worktree by inspecting `git rev-parse --git-dir` for a path containing `/worktrees/`, (2) derive the change name from the current branch via `git rev-parse --abbrev-ref HEAD`, (3) search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree. If a match is found, the skill SHALL auto-select this change and announce: "Detected worktree context: using change '<name>'". If no matching directory exists, the skill SHALL fall through to normal detection logic.
+All change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) SHALL detect the active change from worktree context before falling through to directory-based detection. The detection SHALL: (1) check if the current working directory is inside a git worktree by inspecting `git rev-parse --git-dir` for a path containing `/worktrees/`, (2) derive the change name from the current branch via `git rev-parse --abbrev-ref HEAD` (the branch name matches the change name without the date prefix), (3) search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree. If a match is found, the skill SHALL auto-select this change and announce: "Detected worktree context: using change '<name>'". If no matching directory exists, the skill SHALL fall through to normal detection logic.
 
 **User Story:** As a developer working in a worktree I want skills to automatically know which change I'm working on, so that I don't have to specify the change name every time.
 
