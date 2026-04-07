@@ -4,24 +4,19 @@ category: reference
 ---
 ## Purpose
 
-Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, and the skill reading pattern that together replace the former schema.yaml and config.yaml configuration.
+Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, and the skill reading pattern for pipeline configuration.
 
 ## Requirements
 
 ### Requirement: WORKFLOW.md Pipeline Orchestration
-The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), and optionally `docs_language`. The markdown body MAY contain supplementary workflow documentation. When `openspec/WORKFLOW.md` is present, skills SHALL read it instead of `openspec/schemas/opsx-enhanced/schema.yaml` and `openspec/config.yaml`.
+The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), and optionally `docs_language`. The markdown body MAY contain supplementary workflow documentation.
 
-**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that pipeline configuration is not scattered across schema.yaml and config.yaml.
+**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place.
 
 #### Scenario: Skill reads WORKFLOW.md for pipeline configuration
 - **GIVEN** a project with `openspec/WORKFLOW.md` containing pipeline frontmatter
 - **WHEN** any artifact-generating skill is invoked
 - **THEN** the skill SHALL read WORKFLOW.md frontmatter for `templates_dir`, `pipeline`, `apply`, and `post_artifact` configuration
-
-#### Scenario: WORKFLOW.md replaces schema.yaml and config.yaml
-- **GIVEN** a project with `openspec/WORKFLOW.md`
-- **WHEN** a skill needs pipeline definitions or project context
-- **THEN** it SHALL read from WORKFLOW.md and SHALL NOT require `openspec/schemas/opsx-enhanced/schema.yaml` or `openspec/config.yaml`
 
 #### Scenario: WORKFLOW.md frontmatter contains required fields
 - **GIVEN** a valid `openspec/WORKFLOW.md`

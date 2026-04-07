@@ -76,7 +76,7 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 ### Requirement: WORKFLOW.md Owns Pipeline Configuration
 `openspec/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `post_artifact` instructions for commit/push/PR, `context` pointing to the constitution, optionally `docs_language`, and optionally `worktree` object with `enabled` (boolean), `path_pattern` (string with `{change}` placeholder), and `auto_cleanup` (boolean). Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
 
-**User Story:** As a workflow maintainer I want pipeline orchestration in a single WORKFLOW.md file, so that configuration is not scattered across schema.yaml and config.yaml.
+**User Story:** As a workflow maintainer I want pipeline orchestration in a single WORKFLOW.md file, so that all pipeline configuration lives in one place.
 
 #### Scenario: WORKFLOW.md contains pipeline orchestration
 - **GIVEN** the `openspec/WORKFLOW.md` file
