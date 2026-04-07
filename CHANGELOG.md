@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-07 — Post-Merge Reminder Format
+
+### Changed
+- Post-merge items in generated task lists now use plain bullet format instead of unchecked checkboxes — they are visual reminders, not tracked tasks, and no longer count toward progress totals
+- Post-merge reminders appear in a dedicated "Post-Merge Reminders" section, separate from the Standard Tasks section
+- Constitution and bootstrap templates updated with Pre-Merge / Post-Merge subsection structure
+
 ## 2026-04-07 — Fix Stale Spec References
 
 ### Fixed

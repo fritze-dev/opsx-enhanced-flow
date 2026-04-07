@@ -24,7 +24,7 @@ Tasks are implemented sequentially in the order listed because the task list rep
 - **Resume from where you left off** -- skips already-completed tasks and starts from the first pending one.
 - **Pause on blockers** -- stops and asks for clarification when a task is ambiguous, a design issue is discovered, or a technical constraint prevents progress.
 - **Direct spec editing** -- specs at `openspec/specs/` can be modified during implementation when task requirements include spec changes.
-- **Standard tasks separation** -- post-implementation steps (changelog, docs, version bump, push) are tracked as checkboxes in the task list but not executed by apply. Constitution-defined pre-merge extras are executed during the post-apply workflow; post-merge tasks remain unchecked as reminders.
+- **Standard tasks separation** -- post-implementation steps (changelog, docs, version bump, push) are tracked as checkboxes in the task list but not executed by apply. Constitution-defined pre-merge extras are executed during the post-apply workflow. Post-merge reminders appear in a dedicated section as plain bullets — they are not tracked tasks and do not count toward progress.
 - **Parallelizable task markers** -- tasks marked with `[P]` indicate they can be done in parallel. The marker is informational only and does not change progress counting logic.
 
 ## Behavior
@@ -57,9 +57,11 @@ Specs at `openspec/specs/` can be modified during implementation. When a task re
 
 ### Standard Tasks (Post-Implementation)
 
-Every task list includes a final section with post-implementation workflow steps (changelog, docs, version bump, commit and push). These standard tasks are checkboxes like any other task, but `/opsx:apply` does not execute them. They remain unchecked after apply completes, serving as an auditable checklist for the post-apply workflow. Standard tasks are included in progress counts -- after apply, you might see "5/9 tasks complete" reflecting that 4 standard tasks still need to be done manually. If you run `/opsx:archive` while standard tasks are unchecked, the system warns you that tasks remain incomplete. Projects can add project-specific extras to the standard tasks via the constitution's `## Standard Tasks` section.
+Every task list includes a Standard Tasks section with post-implementation workflow steps (changelog, docs, version bump, commit and push). These standard tasks are checkboxes like any other task, but `/opsx:apply` does not execute them. They remain unchecked after apply completes, serving as an auditable checklist for the post-apply workflow. Standard tasks are included in progress counts -- after apply, you might see "5/9 tasks complete" reflecting that standard tasks still need to be done manually. Projects can add project-specific pre-merge extras to the standard tasks via the constitution's `## Standard Tasks > ### Pre-Merge` section.
 
-During the post-apply workflow, universal standard task checkboxes and constitution-defined pre-merge extras (e.g., updating a PR to ready-for-review) are marked complete before creating the final commit. This ensures the committed tasks.md reflects the fully-checked state, eliminating the need for an extra follow-up commit just for checkboxes. Post-merge standard tasks (e.g., updating a plugin locally) remain unchecked as reminders for manual execution after the PR is merged.
+Post-merge reminders (e.g., updating a plugin locally) appear in a separate "Post-Merge Reminders" section using plain bullet format — no checkboxes. They are not counted in progress totals and serve purely as visual reminders for manual execution after the PR is merged. Projects define post-merge items in the constitution's `## Standard Tasks > ### Post-Merge` section.
+
+During the post-apply workflow, universal standard task checkboxes and constitution-defined pre-merge extras (e.g., updating a PR to ready-for-review) are marked complete before creating the final commit. This ensures the committed tasks.md reflects the fully-checked state, eliminating the need for an extra follow-up commit just for checkboxes.
 
 ### All Tasks Already Complete
 
