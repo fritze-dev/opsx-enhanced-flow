@@ -6,14 +6,14 @@ No foundation tasks.
 
 ## 2. Implementation
 
-- [ ] 2.1. Update `openspec/CONSTITUTION.md`: change Post-Merge items from `- [ ]` to `- ` (plain bullet)
-- [ ] 2.2. Update `openspec/specs/task-implementation/spec.md`: rewrite post-merge references from "remain unchecked / remain as `- [ ]`" to "use plain bullet format (no checkbox)"
-- [ ] 2.3. Update `openspec/templates/tasks.md`: add clarification in instruction that post-merge constitution items use plain bullet format
+- [x] 2.1. Update `openspec/CONSTITUTION.md`: change Post-Merge items from `- [ ]` to `- ` (plain bullet)
+- [x] 2.2. Update `openspec/specs/task-implementation/spec.md`: rewrite post-merge references from "remain unchecked / remain as `- [ ]`" to "use plain bullet format (no checkbox)"
+- [x] 2.3. Update `openspec/templates/tasks.md`: add clarification in instruction that post-merge constitution items use plain bullet format
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Check: grep constitution for post-merge checkboxes; grep spec for "remain unchecked" — PASS / FAIL
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
+- [x] 3.1. Metric Check: grep constitution for post-merge checkboxes; grep spec for "remain unchecked" — PASS / FAIL
+- [x] 3.2. Auto-Verify: Run `/opsx:verify`
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix → re-verify.
 - [ ] 3.5. Final Verify: Skip if 3.4 was not entered.
