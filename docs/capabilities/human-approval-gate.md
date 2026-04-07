@@ -2,7 +2,7 @@
 title: "Human Approval Gate"
 capability: "human-approval-gate"
 description: "Defines the QA loop with mandatory explicit human approval before archiving, including verification, fix-verify cycles, and bidirectional feedback."
-lastUpdated: "2026-03-05"
+lastUpdated: "2026-04-07"
 ---
 
 # Human Approval Gate
@@ -20,7 +20,7 @@ The QA loop places verification before approval so that the user reviews concret
 ## Features
 
 - **Mandatory Human Approval**: The system requires an explicit "Approved" response before a change can be archived. Ambiguous responses (like "looks ok" or "seems fine") are not accepted.
-- **Structured QA Loop**: The tasks.md template includes a 6-step QA section: Metric Check, Auto-Verify, User Testing, Fix Loop, Final Verify, and Approval.
+- **Structured QA Loop**: The tasks.md template includes a QA section with these steps in order: Metric Check, Auto-Verify, User Testing, Fix Loop, Final Verify, and Approval. Implementation changes are committed and pushed before User Testing via the `apply.instruction` in WORKFLOW.md.
 - **Success Metric Checkboxes**: Every success metric from `design.md` is carried over as a PASS/FAIL checkbox in the QA Loop section. All must be marked PASS before approval.
 - **Fix-Verify Cycles**: Issues found during verification are resolved either by fixing the code to match the spec or by updating the spec to match the implementation. Multiple iterations are supported until all critical issues are resolved.
 - **Final Verification Pass**: After the fix loop completes, a final `/opsx:verify` run confirms that all fixes are consistent. This step is skipped if the fix loop was not entered.
@@ -50,11 +50,11 @@ When `design.md` contains success metrics (for example, "Auth response time < 20
 
 ### Final Verify Runs After the Fix Loop
 
-When the initial verify (step 3.2) finds CRITICAL issues and the developer completes the fix loop (step 3.4), the system runs `/opsx:verify` one final time (step 3.5). The final verify report must confirm 0 CRITICAL issues before the system proceeds to request approval. If the final verify discovers new issues introduced by fix loop changes, the developer returns to the fix loop to resolve them and then re-runs the final verify.
+When Auto-Verify finds CRITICAL issues and the developer completes the Fix Loop, the system runs `/opsx:verify` one final time (Final Verify). The final verify report must confirm 0 CRITICAL issues before the system proceeds to request Approval. If Final Verify discovers new issues introduced by Fix Loop changes, the developer returns to the Fix Loop to resolve them and then re-runs Final Verify.
 
 ### Final Verify Is Skipped When First Verify Is Clean
 
-When the initial verify finds no CRITICAL or WARNING issues, user testing finds no bugs, and the fix loop is not entered, the final verify step is marked complete immediately and the system proceeds to approval.
+When Auto-Verify finds no CRITICAL or WARNING issues, User Testing finds no bugs, and the Fix Loop is not entered, the Final Verify step is marked complete immediately and the system proceeds to Approval.
 
 ### Fix Loop Resolves Issues Through Code or Spec Changes
 
@@ -74,3 +74,4 @@ When verification finds CRITICAL or WARNING issues, the user addresses each by e
 - If the user provides an ambiguous response (like "looks ok"), the system clarifies that it needs an explicit "Approved" and does not treat ambiguous responses as approval.
 - If verification produces only SUGGESTION-level findings and no CRITICAL or WARNING issues, the system proceeds directly to requesting approval without requiring fixes.
 - If a CRITICAL issue is a false positive (for example, a keyword search matched unrelated code), the user may acknowledge the false positive. Re-running verify with the same code is a valid fix loop iteration.
+- If the Fix Loop produces additional changes, those changes are committed during the Fix Loop's re-verify cycle. The initial commit before User Testing captures the implementation state at first verify pass; subsequent Fix Loop commits are incremental.
