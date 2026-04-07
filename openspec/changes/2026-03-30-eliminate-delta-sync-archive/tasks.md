@@ -43,10 +43,10 @@
   - `/opsx:new` creates `YYYY-MM-DD-<name>` directory: PASS / FAIL
   - Lazy worktree cleanup detects merged branches: PASS / FAIL
 - [x] 3.2. Auto-Verify: Run `/opsx:verify`
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
+- [x] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
+- [x] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
