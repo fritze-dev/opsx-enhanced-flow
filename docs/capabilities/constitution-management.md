@@ -15,14 +15,14 @@ AI assistants working on a project need to know the project's real conventions -
 
 ## Rationale
 
-The constitution is generated from observed patterns rather than invented from scratch, ensuring it reflects what the codebase actually does. Uncertain observations are actively resolved through direct user questions during bootstrap -- the agent iterates through each uncertain item, asks the user for a decision, and removes the marker, ensuring no invisible `<!-- REVIEW -->` comments persist in the final output. The constitution is referenced by all AI actions through `config.yaml`, making enforcement automatic rather than relying on the user to remind the AI of project rules. Updates during design phases are additive by default -- existing entries are not removed without explicit user approval -- which prevents accidental loss of established conventions. When a design replaces one technology with another, the agent asks the user directly whether to make the change rather than leaving a review marker. The constitution contains only project-specific rules; rules that belong to the schema (such as pipeline ordering or spec format) are not duplicated.
+The constitution is generated from observed patterns rather than invented from scratch, ensuring it reflects what the codebase actually does. Uncertain observations are actively resolved through direct user questions during bootstrap -- the agent iterates through each uncertain item, asks the user for a decision, and removes the marker, ensuring no invisible `<!-- REVIEW -->` comments persist in the final output. The constitution is referenced by all AI actions through WORKFLOW.md, making enforcement automatic rather than relying on the user to remind the AI of project rules. Updates during design phases are additive by default -- existing entries are not removed without explicit user approval -- which prevents accidental loss of established conventions. When a design replaces one technology with another, the agent asks the user directly whether to make the change rather than leaving a review marker. The constitution contains only project-specific rules; rules that belong to the schema (such as pipeline ordering or spec format) are not duplicated.
 
 ## Features
 
 - **Schema-Defined Template**: The constitution section structure is defined by a template in the active schema's template directory. The bootstrap skill reads this template as a starting structure and adapts sections to fit the project -- adding, omitting, or restructuring as needed.
 - **Bootstrap-Generated Constitution**: The `/opsx:bootstrap` command scans source files, configuration files, directory structures, and dependency manifests to infer the constitution. Every entry is traceable to an observed pattern -- no invented or aspirational rules.
 - **Active Resolution of Uncertain Items**: During bootstrap, the agent iterates through all uncertain items, presents each to the user, documents the decision, and removes the marker. No `<!-- REVIEW -->` markers remain after bootstrap completes.
-- **Global Context Enforcement**: Every skill invocation and artifact generation step reads the constitution before proceeding, configured through `config.yaml`.
+- **Global Context Enforcement**: Every skill invocation and artifact generation step reads the constitution before proceeding, configured through WORKFLOW.md.
 - **Automatic Updates During Design**: When a design introduces new technologies or patterns, the constitution is updated to reflect them. Changes are noted in the design document for visibility during review.
 - **Project-Specific Content Only**: The constitution does not duplicate rules already defined by the schema. It retains Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks.
 - **Friction Tracking Convention**: The constitution includes a convention requiring that workflow friction discovered during any workflow run be captured as a GitHub Issue with the `friction` label.
@@ -35,7 +35,7 @@ The constitution's section structure comes from a template file in the active sc
 
 ### Constitution Generated from Codebase Scan
 
-When `/opsx:bootstrap` runs on an existing project, it reads the constitution template for the section structure and then scans source files, configuration files (like `tsconfig.json` and ESLint configs), directory structures, and dependency manifests. The resulting `openspec/constitution.md` includes the detected tech stack, code style rules, architecture patterns, and conventions. Technologies or frameworks that are not detected in the codebase are not included -- the agent does not invent conventions.
+When `/opsx:bootstrap` runs on an existing project, it reads the constitution template for the section structure and then scans source files, configuration files (like `tsconfig.json` and ESLint configs), directory structures, and dependency manifests. The resulting `openspec/CONSTITUTION.md` includes the detected tech stack, code style rules, architecture patterns, and conventions. Technologies or frameworks that are not detected in the codebase are not included -- the agent does not invent conventions.
 
 ### Uncertain Items Resolved Through User Interaction
 
@@ -43,7 +43,7 @@ When the agent encounters inconsistent patterns during bootstrap (for example, b
 
 ### Constitution Is Read Before Every AI Action
 
-The `config.yaml` references `openspec/constitution.md` as a required context file. When any skill is invoked -- whether `/opsx:new`, `/opsx:continue`, or any other command -- the agent loads and considers the constitution content before generating output. If the constitution is missing, the agent warns the user and recommends running `/opsx:bootstrap`.
+The WORKFLOW.md references `openspec/CONSTITUTION.md` as a required context file. When any skill is invoked -- whether `/opsx:new`, `/opsx:continue`, or any other command -- the agent loads and considers the constitution content before generating output. If the constitution is missing, the agent warns the user and recommends running `/opsx:bootstrap`.
 
 ### Constitution Is Updated During Design Phases
 
@@ -60,7 +60,7 @@ The constitution's Conventions section includes a "Workflow friction" entry requ
 ## Known Limitations
 
 - Constitution updates during design are immediately visible to subsequent skill invocations only if the agent re-reads context files. This is assumed to be standard file system behavior.
-- The `config.yaml` workflow rules must be configured correctly during `/opsx:setup` to reference the constitution.
+- The WORKFLOW.md workflow rules must be configured correctly during `/opsx:setup` to reference the constitution.
 
 ## Future Enhancements
 

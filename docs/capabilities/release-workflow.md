@@ -74,7 +74,7 @@ Skills in `skills/` are generic plugin code shared across all consumers and are 
 
 ### Project-Specific Behavior in Constitution
 
-When project-specific post-apply behavior is needed (such as version bumps), it is defined as a convention in `openspec/constitution.md`, not added as a step in the skill file.
+When project-specific post-apply behavior is needed (such as version bumps), it is defined as a convention in `openspec/CONSTITUTION.md`, not added as a step in the skill file.
 
 ### End-to-End Install Flow
 
@@ -114,7 +114,7 @@ If an archived change describes purely internal refactoring with no user-visible
 
 ### Changelog in Configured Language
 
-When `openspec/config.yaml` contains a `docs_language` setting (for example, `German`), `/opsx:changelog` generates section headers and entry descriptions in that language. Dates remain in ISO format and product names stay in English.
+When `openspec/WORKFLOW.md` contains a `docs_language` setting (for example, `German`), `/opsx:changelog` generates section headers and entry descriptions in that language. Dates remain in ISO format and product names stay in English.
 
 ### Default Language
 

@@ -98,7 +98,7 @@ Each distinct Gherkin scenario group in the spec produces at least one Behavior 
 
 ### Template-Driven Format
 
-The agent reads the capability doc template at `openspec/schemas/opsx-enhanced/templates/docs/capability.md` and uses it as the structural format for the output.
+The agent reads the capability doc template at `openspec/templates/docs/capability.md` and uses it as the structural format for the output.
 
 ### Skipping Unchanged Capabilities
 

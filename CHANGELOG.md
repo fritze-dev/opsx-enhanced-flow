@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-07 — Fix Stale Spec References
+
+### Fixed
+- ~60 stale references across 10 spec files updated to reflect the current project structure after the schema directory elimination — `config.yaml` → `WORKFLOW.md`, `openspec/schemas/` → `openspec/templates/`, `constitution.md` → `CONSTITUTION.md`
+- Auto-bump requirement now correctly references `src/.claude-plugin/plugin.json` instead of the nonexistent `.claude-plugin/plugin.json`
+- Historical references to eliminated files removed from workflow-contract and artifact-pipeline specs — only project-setup retains old paths for its active legacy migration feature
+
 ## 2026-03-30 — Eliminate Delta-Specs, Sync & Archive
 
 ### Changed
