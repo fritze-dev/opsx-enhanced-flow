@@ -124,6 +124,36 @@ WORKFLOW.md SHALL define a `post_artifact` field containing instructions that th
 - **WHEN** the agent finishes creating an artifact
 - **THEN** the agent SHALL skip post-artifact operations and proceed normally
 
+### Requirement: Post-Implementation Commit Before Approval
+
+The tasks.md template QA Loop SHALL include a Commit and Push step between Auto-Verify and User Testing. This step SHALL commit all implementation changes with the message `WIP: <change-name> — implementation` and push to the remote branch, so that the PR diff is available for user review before the approval gate. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+
+**User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
+
+#### Scenario: Implementation committed before user testing
+
+- **GIVEN** a change with all implementation tasks complete and Auto-Verify passed
+- **WHEN** the QA Loop reaches the Commit and Push step
+- **THEN** the system SHALL commit all changed files with message `WIP: <change-name> — implementation`
+- **AND** SHALL push to the remote branch
+- **AND** the PR diff SHALL be available for the user to review before User Testing
+
+#### Scenario: Graceful degradation on push failure
+
+- **GIVEN** a change where Auto-Verify passed but `git push` fails
+- **WHEN** the QA Loop reaches the Commit and Push step
+- **THEN** the system SHALL create a local commit
+- **AND** SHALL note that the user should review changes locally
+- **AND** SHALL proceed to User Testing
+
+#### Scenario: WIP commit does not replace final commit
+
+- **GIVEN** a change where the WIP implementation commit was created during the QA Loop
+- **AND** the post-apply workflow completes changelog, docs, and version bump
+- **WHEN** the Standard Tasks commit step is reached
+- **THEN** the system SHALL create a separate commit with all post-apply changes
+- **AND** the WIP commit and the final commit SHALL be distinct commits in the git history
+
 ### Requirement: Smart Templates Own Workflow Rules
 Each Smart Template's `instruction` field SHALL contain workflow rules that apply to its artifact type. The tasks template instruction SHALL include the Definition of Done rule (emergent from artifacts). The tasks template instruction SHALL include a standard tasks directive for including universal post-implementation steps and appending constitution-defined project-specific extras. The apply instruction in WORKFLOW.md SHALL include the post-apply workflow sequence and clarify that standard tasks are executed separately after apply completes.
 
