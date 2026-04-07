@@ -28,7 +28,9 @@ instruction: |
   post-implementation steps (changelog, docs, version bump, push).
   Always include this section as-is. If the project constitution defines
   a "## Standard Tasks" section, append its items after the universal
-  steps. Copy constitution items verbatim.
+  steps. Copy constitution items verbatim — pre-merge items use
+  `- [ ]` checkbox format, post-merge items use plain `- ` bullet
+  format (no checkbox). Plain bullets are reminders, not tracked tasks.
 ---
 # Implementation Tasks: [Feature Name]
 
