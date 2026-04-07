@@ -10,13 +10,13 @@ Define the release workflow conventions for the plugin, including automatic patc
 
 ### Requirement: Auto Patch Version Bump
 
-The project constitution SHALL define a convention that instructs the post-apply workflow to automatically increment the patch version in `.claude-plugin/plugin.json` after a successful change completion. The convention SHALL also require syncing the `version` field in `.claude-plugin/marketplace.json` to match. The output SHALL display the new version.
+The project constitution SHALL define a convention that instructs the post-apply workflow to automatically increment the patch version in `src/.claude-plugin/plugin.json` after a successful change completion. The convention SHALL also require syncing the `version` field in `.claude-plugin/marketplace.json` to match. The output SHALL display the new version.
 
 **User Story:** As a plugin maintainer I want the patch version to auto-increment when a change is completed, so that consumers can detect updates without manual version bumps.
 
 #### Scenario: Successful auto-bump after change completion
 
-- **GIVEN** a plugin project with `.claude-plugin/plugin.json` containing version `1.0.3`
+- **GIVEN** a plugin project with `src/.claude-plugin/plugin.json` containing version `1.0.3`
 - **AND** `.claude-plugin/marketplace.json` containing version `1.0.3`
 - **AND** the constitution defines the post-completion auto-bump convention
 - **WHEN** the post-apply workflow runs for a completed change
@@ -26,7 +26,7 @@ The project constitution SHALL define a convention that instructs the post-apply
 
 ### Requirement: Version Sync Between Plugin Files
 
-The `version` field in `.claude-plugin/marketplace.json` MUST always match the `version` field in `.claude-plugin/plugin.json`. The auto-bump convention SHALL update both files together. If they are found out of sync before bumping, the system SHALL sync them to the plugin.json version first, then apply the patch bump.
+The `version` field in `.claude-plugin/marketplace.json` MUST always match the `version` field in `src/.claude-plugin/plugin.json`. The auto-bump convention SHALL update both files together. If they are found out of sync before bumping, the system SHALL sync them to the plugin.json version first, then apply the patch bump.
 
 #### Scenario: Files already in sync
 
@@ -88,7 +88,7 @@ The constitution SHALL define a rule that skills in `skills/` are generic plugin
 
 - **GIVEN** a need for project-specific post-completion behavior (e.g., version bumps)
 - **WHEN** a developer plans the implementation
-- **THEN** the behavior SHALL be defined as a convention in `openspec/constitution.md`
+- **THEN** the behavior SHALL be defined as a convention in `openspec/CONSTITUTION.md`
 - **AND** SHALL NOT be added as a step in the skill file
 
 ### Requirement: End-to-End Install and Update Checklist
@@ -178,12 +178,12 @@ The `/opsx:changelog` command SHALL generate release notes from completed change
 - **THEN** the agent either omits the entry entirely or includes it under a minimal note (e.g., "Internal improvements") rather than fabricating user-facing changes
 
 ### Requirement: Language-Aware Changelog Generation
-The `/opsx:changelog` command SHALL determine the documentation language before generating entries. The agent SHALL read `openspec/config.yaml` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths SHALL remain in English.
+The `/opsx:changelog` command SHALL determine the documentation language before generating entries. The agent SHALL read `openspec/WORKFLOW.md` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths SHALL remain in English.
 
 **User Story:** As a non-English-speaking team I want changelog entries in my language, so that release notes are immediately understandable.
 
 #### Scenario: Changelog generated in configured language
-- **GIVEN** `openspec/config.yaml` contains `docs_language: German`
+- **GIVEN** `openspec/WORKFLOW.md` contains `docs_language: German`
 - **AND** a new completed change exists that is not yet in the changelog
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** the new entry SHALL have German section headers (e.g., `### Hinzugefügt`, `### Geändert`, `### Behoben`)
@@ -191,7 +191,7 @@ The `/opsx:changelog` command SHALL determine the documentation language before 
 - **AND** dates SHALL remain in ISO format
 
 #### Scenario: Default to English when field is missing
-- **GIVEN** `openspec/config.yaml` does not contain a `docs_language` field
+- **GIVEN** `openspec/WORKFLOW.md` does not contain a `docs_language` field
 - **WHEN** the developer runs `/opsx:changelog`
 - **THEN** all entries SHALL be generated in English (unchanged behavior)
 

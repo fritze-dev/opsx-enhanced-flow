@@ -19,7 +19,7 @@ The system SHALL work through pending task checkboxes in the change's `tasks.md`
 - **GIVEN** a change named "add-user-auth" with a tasks.md containing 5 pending tasks
 - **AND** all pipeline artifacts (proposal, specs, design) are available as context in the change directory
 - **WHEN** the user invokes `/opsx:apply add-user-auth`
-- **THEN** the system reads all context files from the change directory and the apply instruction from schema.yaml
+- **THEN** the system reads all context files from the change directory and the apply instruction from WORKFLOW.md
 - **AND** works through each pending task in order
 - **AND** makes the code changes described by each task
 - **AND** marks each task `- [x]` immediately after completing it

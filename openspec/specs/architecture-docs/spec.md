@@ -9,7 +9,7 @@ Provides a cross-cutting architecture overview as part of the consolidated `docs
 ## Requirements
 
 ### Requirement: Generate Architecture Overview
-The `/opsx:docs` command SHALL generate a cross-cutting architecture overview as part of the consolidated `docs/README.md` file. The overview content SHALL be synthesized from the project constitution (`openspec/constitution.md`), the three-layer-architecture spec (`openspec/specs/three-layer-architecture/spec.md`), and all generated ADR files at `docs/decisions/adr-*.md`. The architecture overview SHALL include: a "System Architecture" section describing the three-layer model, a "Tech Stack" section from the constitution, a "Key Design Decisions" section sourced from ADR files, and a "Conventions" section from the constitution.
+The `/opsx:docs` command SHALL generate a cross-cutting architecture overview as part of the consolidated `docs/README.md` file. The overview content SHALL be synthesized from the project constitution (`openspec/CONSTITUTION.md`), the three-layer-architecture spec (`openspec/specs/three-layer-architecture/spec.md`), and all generated ADR files at `docs/decisions/adr-*.md`. The architecture overview SHALL include: a "System Architecture" section describing the three-layer model, a "Tech Stack" section from the constitution, a "Key Design Decisions" section sourced from ADR files, and a "Conventions" section from the constitution.
 
 **Key Design Decisions table — ADR-sourced:** The table SHALL be built by reading all ADR files in `docs/decisions/` (both generated `adr-NNN-*.md` and manual `adr-M*.md`). For each ADR, the agent SHALL extract:
 - **Decision**: A summary derived from the `## Decision` section content. For consolidated ADRs with numbered sub-decisions, summarize the overarching decision. For single-decision ADRs, use the inline decision text.
@@ -18,13 +18,13 @@ The `/opsx:docs` command SHALL generate a cross-cutting architecture overview as
 
 The table SHALL list generated ADRs first (ordered by number), followed by manual ADRs (ordered by M-number). The agent SHALL NOT read `design.md` from change directories for the Key Design Decisions table — ADR files are the single canonical source.
 
-The overview SHALL surface notable trade-offs from ADR Consequences sections — if a decision has a significant negative consequence, it SHALL be mentioned as a brief note in the table or in a "Notable Trade-offs" subsection below the table. The Notable Trade-offs subsection SHALL include trade-offs that affect documentation consumers or represent meaningful constraints. Every ADR with a substantive negative consequence SHOULD be represented. The document SHALL be written in user-facing language. The agent SHALL read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format.
+The overview SHALL surface notable trade-offs from ADR Consequences sections — if a decision has a significant negative consequence, it SHALL be mentioned as a brief note in the table or in a "Notable Trade-offs" subsection below the table. The Notable Trade-offs subsection SHALL include trade-offs that affect documentation consumers or represent meaningful constraints. Every ADR with a substantive negative consequence SHOULD be represented. The document SHALL be written in user-facing language. The agent SHALL read the README template at `openspec/templates/docs/readme.md` for the expected output format.
 
 **Conditional regeneration:** The `docs/README.md` SHALL be regenerated only when at least one of the following conditions is met during the current `/opsx:docs` run:
 1. Any capability doc was created or updated (written to disk) in this run.
 2. Any ADR was created in this run.
 3. No `docs/README.md` exists yet (first run).
-4. The content of `openspec/constitution.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. The agent SHALL read the constitution and compare its key content against the README to detect drift.
+4. The content of `openspec/CONSTITUTION.md` (Tech Stack, Architecture Rules, Conventions sections) has diverged from the corresponding sections in the existing `docs/README.md`. The agent SHALL read the constitution and compare its key content against the README to detect drift.
 
 If none of these conditions are met, the agent SHALL skip README regeneration and report "README is up-to-date — no capability or ADR changes detected."
 
@@ -33,7 +33,7 @@ The agent SHALL NOT generate `docs/architecture-overview.md` as a separate file.
 **User Story:** As a developer or contributor I want a single document that explains the system architecture and key decisions with direct links to ADRs and visible trade-offs, so that I can understand the project structure and the reasoning behind it without navigating multiple files.
 
 #### Scenario: Architecture overview generated as part of consolidated README
-- **GIVEN** a constitution at `openspec/constitution.md` with Tech Stack and Architecture Rules sections
+- **GIVEN** a constitution at `openspec/CONSTITUTION.md` with Tech Stack and Architecture Rules sections
 - **AND** ADR files exist at `docs/decisions/adr-*.md`
 - **WHEN** the developer runs `/opsx:docs`
 - **THEN** the agent writes architecture overview content (System Architecture, Tech Stack, Key Design Decisions, Conventions) into `docs/README.md`
@@ -86,12 +86,12 @@ The agent SHALL NOT generate `docs/architecture-overview.md` as a separate file.
 #### Scenario: README regenerated when constitution content drifted
 - **GIVEN** no capability docs or ADRs were changed in this run
 - **AND** `docs/README.md` already exists
-- **AND** `openspec/constitution.md` (Tech Stack, Architecture Rules, or Conventions) has been updated since the last README generation
+- **AND** `openspec/CONSTITUTION.md` (Tech Stack, Architecture Rules, or Conventions) has been updated since the last README generation
 - **WHEN** the agent reaches the README generation step
 - **THEN** the agent regenerates `docs/README.md` to reflect the updated constitution content
 
 ### Requirement: Generate Documentation Table of Contents
-The `/opsx:docs` command SHALL create or update `docs/README.md` as the single entry point for all generated documentation. The README SHALL include the architecture overview content (System Architecture, Tech Stack, Key Design Decisions with ADR links, Conventions) followed by a capabilities section. The capabilities section SHALL be grouped by the `category` frontmatter field from specs, rendered as category group headers (title-case). Within each category group, capabilities SHALL be ordered by the `order` frontmatter field (lower first). The Key Design Decisions table SHALL include an "ADR" column linking directly to the corresponding ADR file instead of a "Source" column. The README SHALL surface notable trade-offs from ADR Consequences for the most significant decisions. The `docs/README.md` SHALL be regenerated when capability docs or ADRs change, as specified by the conditional regeneration logic in the "Generate Architecture Overview" requirement. The agent SHALL read the README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` for the expected output format. Capability descriptions in the capabilities table SHALL be concise: max 80 characters or 15 words. Each description SHALL be one short phrase, not a multi-clause sentence.
+The `/opsx:docs` command SHALL create or update `docs/README.md` as the single entry point for all generated documentation. The README SHALL include the architecture overview content (System Architecture, Tech Stack, Key Design Decisions with ADR links, Conventions) followed by a capabilities section. The capabilities section SHALL be grouped by the `category` frontmatter field from specs, rendered as category group headers (title-case). Within each category group, capabilities SHALL be ordered by the `order` frontmatter field (lower first). The Key Design Decisions table SHALL include an "ADR" column linking directly to the corresponding ADR file instead of a "Source" column. The README SHALL surface notable trade-offs from ADR Consequences for the most significant decisions. The `docs/README.md` SHALL be regenerated when capability docs or ADRs change, as specified by the conditional regeneration logic in the "Generate Architecture Overview" requirement. The agent SHALL read the README template at `openspec/templates/docs/readme.md` for the expected output format. Capability descriptions in the capabilities table SHALL be concise: max 80 characters or 15 words. Each description SHALL be one short phrase, not a multi-clause sentence.
 
 The agent SHALL NOT generate a separate `docs/architecture-overview.md` file. The agent SHALL NOT generate a separate `docs/decisions/README.md` file. If either file exists from a previous run, the agent SHALL delete it.
 
@@ -133,12 +133,12 @@ The agent SHALL NOT generate a separate `docs/architecture-overview.md` file. Th
 - **THEN** notable trade-offs are surfaced as brief notes in the table or a subsection
 
 ### Requirement: Language-Aware Architecture Overview
-The architecture overview content generated as part of `docs/README.md` by `/opsx:docs` SHALL respect the `docs_language` setting from `openspec/config.yaml`. When a non-English language is configured, all section headings (e.g., "System Architecture", "Tech Stack", "Key Design Decisions", "Conventions") and descriptive content SHALL be translated to the target language. Table column headers in the Key Design Decisions table SHALL also be translated. Product names, commands, and file paths SHALL remain in English.
+The architecture overview content generated as part of `docs/README.md` by `/opsx:docs` SHALL respect the `docs_language` setting from `openspec/WORKFLOW.md`. When a non-English language is configured, all section headings (e.g., "System Architecture", "Tech Stack", "Key Design Decisions", "Conventions") and descriptive content SHALL be translated to the target language. Table column headers in the Key Design Decisions table SHALL also be translated. Product names, commands, and file paths SHALL remain in English.
 
 **User Story:** As a non-English-speaking team I want the architecture overview in my language, so that the full documentation entry point is accessible to my team.
 
 #### Scenario: Architecture overview in configured language
-- **GIVEN** `openspec/config.yaml` contains `docs_language: German`
+- **GIVEN** `openspec/WORKFLOW.md` contains `docs_language: German`
 - **AND** a constitution and completed changes' design.md files exist
 - **WHEN** the developer runs `/opsx:docs`
 - **THEN** the architecture overview in `docs/README.md` SHALL have German headings (e.g., "Systemarchitektur", "Technologie-Stack") and German content
@@ -162,6 +162,6 @@ The architecture overview content generated as part of `docs/README.md` by `/ops
 
 ## Assumptions
 
-- The constitution at `openspec/constitution.md` is the source of truth for tech stack and conventions. <!-- ASSUMPTION: Constitution maintained by workflow -->
-- The consolidated README template at `openspec/schemas/opsx-enhanced/templates/docs/readme.md` defines the expected output structure. <!-- ASSUMPTION: Template created as part of this change -->
+- The constitution at `openspec/CONSTITUTION.md` is the source of truth for tech stack and conventions. <!-- ASSUMPTION: Constitution maintained by workflow -->
+- The consolidated README template at `openspec/templates/docs/readme.md` defines the expected output structure. <!-- ASSUMPTION: Template created as part of this change -->
 - ADR files are always generated before README generation within a single `/opsx:docs` run (Step 4 before Step 5). <!-- ASSUMPTION: SKILL.md step ordering guarantees this -->
