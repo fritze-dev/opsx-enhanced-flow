@@ -115,6 +115,28 @@ The system SHALL distinguish between implementation tasks (Foundation, Implement
 - **AND** the committed tasks.md SHALL reflect the Standard Tasks / Post-Merge Reminders distinction
 - **AND** no extra follow-up commit SHALL be needed for pre-merge standard task checkboxes
 
+### Requirement: WIP Commit in QA Loop
+
+The tasks.md template SHALL include a commit-and-push step in the QA Loop section between Auto-Verify (3.2) and User Testing (3.4). This step SHALL commit all implementation changes with the message `WIP: <change-name> — implementation` and push to the remote branch. This ensures the PR diff is available for the user to review before they are asked for approval. This WIP commit is distinct from the final commit in the Standard Tasks section (4.4), which includes changelog, docs, and version bump changes. The WIP commit captures the implementation state; the final commit captures the complete post-apply workflow state.
+
+**User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
+
+#### Scenario: WIP commit before user testing
+
+- **GIVEN** a change with all implementation tasks complete and Auto-Verify (3.2) passed
+- **WHEN** the system reaches step 3.3 (Commit and push)
+- **THEN** the system SHALL commit all changed files with message `WIP: <change-name> — implementation`
+- **AND** SHALL push to the remote branch
+- **AND** SHALL proceed to User Testing (3.4) where it pauses for user review
+
+#### Scenario: WIP commit does not replace final commit
+
+- **GIVEN** a change where the WIP commit (3.3) was created during the QA loop
+- **AND** the post-apply workflow completes changelog, docs, and version bump
+- **WHEN** the system reaches Standard Tasks step 4.4 (Commit and push)
+- **THEN** the system SHALL create a separate commit with all post-apply changes
+- **AND** the WIP commit and the final commit SHALL be distinct commits in the git history
+
 ### Requirement: Spec Edits During Implementation
 
 The system SHALL allow implementation tasks to modify spec files (`openspec/specs/`) when required by the task description. Specs are edited directly during the specs stage and may need refinements during implementation. Implementation tasks (Foundation, Implementation sections) SHALL NOT include post-apply workflow steps (changelog, docs, version bump). These steps SHALL appear in the Standard Tasks section.

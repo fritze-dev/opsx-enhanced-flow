@@ -14,15 +14,18 @@ The system SHALL require explicit human approval before a change can proceed to 
 
 Approval SHALL be gated by a final verification pass. After the fix loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run before the user is asked for approval. This ensures that all changes made during the fix loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the fix loop was not entered (first verify was clean), the initial verify at step 3.2 satisfies this requirement and the final verify step can be marked complete immediately.
 
-The tasks.md template QA Loop section SHALL include the final verify step:
+Implementation changes SHALL be committed and pushed before the user is asked for approval. After verification passes (step 3.2), the system SHALL commit all implementation changes and push to the remote branch so that the PR diff is available for review. The commit message SHALL use the format `WIP: <change-name> — implementation`. If `gh` CLI is unavailable or push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This commit is a WIP checkpoint — the final commit with changelog, docs, and version bump occurs in the Standard Tasks section.
+
+The tasks.md template QA Loop section SHALL include the commit step and final verify step:
 
 ```
 3.1. Metric Check
 3.2. Auto-Verify: Run /opsx:verify
-3.3. User Testing: Stop here!
-3.4. Fix Loop: fix → re-verify
-3.5. Final Verify: Run /opsx:verify to confirm all fixes are consistent
-3.6. Approval: Only finish on explicit "Approved"
+3.3. Commit and push implementation changes for review
+3.4. User Testing: Stop here!
+3.5. Fix Loop: fix → re-verify
+3.6. Final Verify: Run /opsx:verify to confirm all fixes are consistent
+3.7. Approval: Only finish on explicit "Approved"
 ```
 
 **User Story:** As a developer I want a mandatory human approval step before finalizing, so that no change is finalized without my explicit review and sign-off.
@@ -61,32 +64,48 @@ The tasks.md template QA Loop section SHALL include the final verify step:
 - **AND** each checkbox SHALL be marked by the user or verifier during the QA phase
 - **AND** all checkboxes MUST be marked PASS before approval can be granted
 
+#### Scenario: Commit and push before user testing
+
+- **GIVEN** a change where the initial verify (3.2) passed with no CRITICAL issues
+- **WHEN** the system reaches step 3.3
+- **THEN** the system SHALL commit all implementation changes with message `WIP: <change-name> — implementation`
+- **AND** SHALL push to the remote branch
+- **AND** the PR diff SHALL be available for the user to review before step 3.4
+
+#### Scenario: Commit step with no remote access
+
+- **GIVEN** a change where verify passed but `git push` fails or `gh` CLI is unavailable
+- **WHEN** the system reaches step 3.3
+- **THEN** the system SHALL create a local commit
+- **AND** SHALL note that the user should review changes locally
+- **AND** SHALL proceed to user testing (3.4)
+
 #### Scenario: Final verify after fix loop
 
 - **GIVEN** a change where the initial verify (3.2) found CRITICAL issues
-- **AND** the developer completed the fix loop (3.4), fixing all issues
+- **AND** the developer completed the fix loop (3.5), fixing all issues
 - **WHEN** the fix loop is complete
-- **THEN** the system SHALL run `/opsx:verify` one final time (step 3.5)
+- **THEN** the system SHALL run `/opsx:verify` one final time (step 3.6)
 - **AND** the final verify report SHALL confirm 0 CRITICAL issues
-- **AND** only then SHALL the system proceed to request approval (step 3.6)
+- **AND** only then SHALL the system proceed to request approval (step 3.7)
 
 #### Scenario: Final verify skipped when first verify is clean
 
 - **GIVEN** a change where the initial verify (3.2) found no CRITICAL or WARNING issues
-- **AND** the user testing (3.3) found no bugs
-- **AND** the fix loop (3.4) was not entered
-- **WHEN** the QA loop reaches step 3.5
+- **AND** the user testing (3.4) found no bugs
+- **AND** the fix loop (3.5) was not entered
+- **WHEN** the QA loop reaches step 3.6
 - **THEN** the final verify step SHALL be marked complete immediately
-- **AND** the system SHALL proceed to approval (3.6)
+- **AND** the system SHALL proceed to approval (3.7)
 
 #### Scenario: Final verify finds new issues from fix loop changes
 
 - **GIVEN** a fix loop where the developer updated specs and code
-- **WHEN** the final verify (3.5) is run
+- **WHEN** the final verify (3.6) is run
 - **AND** it discovers that a spec update introduced an inconsistency
 - **THEN** the system SHALL report the new issue
-- **AND** the developer SHALL return to the fix loop (3.4) to resolve it
-- **AND** SHALL re-run the final verify (3.5) after the fix
+- **AND** the developer SHALL return to the fix loop (3.5) to resolve it
+- **AND** SHALL re-run the final verify (3.6) after the fix
 
 ### Requirement: Fix Loop
 
@@ -144,6 +163,7 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 - **User provides partial approval**: If the user responds with something ambiguous (e.g., "looks ok" or "seems fine"), the system SHALL clarify that it needs an explicit "Approved" and SHALL NOT treat ambiguous responses as approval.
 - **All issues are suggestions only**: If verification produces only SUGGESTION-level findings and no CRITICAL or WARNING issues, the system SHALL proceed directly to requesting approval without requiring fixes.
 - **Fix loop with no code changes needed**: If a CRITICAL issue is a false positive (e.g., keyword search matched unrelated code), the user may update the verify heuristics or acknowledge the false positive. Re-running verify with the same code is a valid fix loop iteration.
+- **Commit step after fix loop**: If the fix loop (3.5) produces additional changes, those changes are committed during the fix loop's re-verify cycle. The initial commit at 3.3 captures the implementation state at first verify pass; subsequent fix loop commits are incremental.
 
 ## Assumptions
 
