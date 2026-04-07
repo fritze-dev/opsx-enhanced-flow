@@ -14,7 +14,7 @@ The system SHALL require explicit human approval before a change can proceed to 
 
 Approval SHALL be gated by a final verification pass. After the Fix Loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run (Final Verify step) before the user is asked for approval. This ensures that all changes made during the Fix Loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the Fix Loop was not entered (first verify was clean), the Final Verify step can be marked complete immediately.
 
-The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verify, Commit and Push, User Testing, Fix Loop, Final Verify, and Approval. The exact step numbering is a template concern defined in the tasks Smart Template.
+The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verify, User Testing, Fix Loop, Final Verify, and Approval. The exact step numbering is a template concern defined in the tasks Smart Template. Implementation changes are committed and pushed before User Testing via the `apply.instruction` in WORKFLOW.md (not as a template step).
 
 **User Story:** As a developer I want a mandatory human approval step before finalizing, so that no change is finalized without my explicit review and sign-off.
 

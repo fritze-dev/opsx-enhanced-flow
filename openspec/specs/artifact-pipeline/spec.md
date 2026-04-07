@@ -126,14 +126,14 @@ WORKFLOW.md SHALL define a `post_artifact` field containing instructions that th
 
 ### Requirement: Post-Implementation Commit Before Approval
 
-The tasks.md template QA Loop SHALL include a Commit and Push step between Auto-Verify and User Testing. This step SHALL commit all implementation changes with the message `WIP: <change-name> — implementation` and push to the remote branch, so that the PR diff is available for user review before the approval gate. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:verify` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
 
 **User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
 
 #### Scenario: Implementation committed before user testing
 
 - **GIVEN** a change with all implementation tasks complete and Auto-Verify passed
-- **WHEN** the QA Loop reaches the Commit and Push step
+- **WHEN** the post-apply workflow reaches the commit-before-approval step
 - **THEN** the system SHALL commit all changed files with message `WIP: <change-name> — implementation`
 - **AND** SHALL push to the remote branch
 - **AND** the PR diff SHALL be available for the user to review before User Testing
@@ -141,14 +141,14 @@ The tasks.md template QA Loop SHALL include a Commit and Push step between Auto-
 #### Scenario: Graceful degradation on push failure
 
 - **GIVEN** a change where Auto-Verify passed but `git push` fails
-- **WHEN** the QA Loop reaches the Commit and Push step
+- **WHEN** the post-apply workflow reaches the commit-before-approval step
 - **THEN** the system SHALL create a local commit
 - **AND** SHALL note that the user should review changes locally
 - **AND** SHALL proceed to User Testing
 
 #### Scenario: WIP commit does not replace final commit
 
-- **GIVEN** a change where the WIP implementation commit was created during the QA Loop
+- **GIVEN** a change where the WIP implementation commit was created during the post-apply workflow
 - **AND** the post-apply workflow completes changelog, docs, and version bump
 - **WHEN** the Standard Tasks commit step is reached
 - **THEN** the system SHALL create a separate commit with all post-apply changes

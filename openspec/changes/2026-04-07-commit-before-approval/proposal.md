@@ -29,15 +29,14 @@ N/A — no new specs proposed. `artifact-pipeline` already owns the post_artifac
 
 ## Impact
 
-- `openspec/templates/tasks.md` — QA Loop section gains a new step (renumbers 3.3–3.6 to 3.4–3.7)
-- `openspec/specs/artifact-pipeline/spec.md` — new "Post-Implementation Commit Before Approval" requirement
+- `openspec/WORKFLOW.md` — `apply.instruction` gains commit+push step after verify, before user approval
+- `openspec/specs/artifact-pipeline/spec.md` — new "Post-Implementation Commit Before Approval" requirement referencing apply.instruction
 - `openspec/specs/human-approval-gate/spec.md` — remove hardcoded step numbers, reference by name
-- All future `tasks.md` files generated from the template will include the new commit step
 
 ## Scope & Boundaries
 
 **In scope:**
-- Tasks template QA Loop modification
+- WORKFLOW.md apply.instruction modification
 - Spec updates for artifact-pipeline and human-approval-gate
 - The commit step uses existing git/gh patterns (same as post_artifact hook)
 

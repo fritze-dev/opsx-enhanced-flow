@@ -52,11 +52,10 @@ instruction: |
 ## 3. QA Loop & Human Approval
 - [ ] 3.1. Metric Check: Verify each Success Metric from design.md — PASS / FAIL.
 - [ ] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
-- [ ] 3.3. Commit and push implementation changes for review.
-- [ ] 3.4. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.5. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
-- [ ] 3.6. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.5 was not entered.
-- [ ] 3.7. Approval: Only finish on explicit **"Approved"** by the user.
+- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
+- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
+- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 <!-- Universal post-implementation steps. Always include this section.

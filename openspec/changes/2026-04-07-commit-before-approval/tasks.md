@@ -2,7 +2,7 @@
 
 ## 1. Foundation
 
-- [x] 1.1. Update the QA Loop section in `openspec/templates/tasks.md`: add step 3.3 "Commit and push implementation changes for review" and renumber subsequent steps (3.3→3.4, 3.4→3.5, 3.5→3.6, 3.6→3.7)
+- [x] 1.1. Add commit+push instruction to `openspec/WORKFLOW.md` `apply.instruction`: after `/opsx:verify` passes, commit and push implementation changes before pausing for user approval
 
 ## 2. Implementation
 
@@ -11,15 +11,14 @@
 ## 3. QA Loop & Human Approval
 
 - [x] 3.1. Metric Check:
-  - [x] Generated tasks.md files include "Commit and push implementation changes for review" step in QA Loop — PASS
-  - [x] Step numbering in QA Loop is consistent (3.1 through 3.7) — PASS
+  - [x] WORKFLOW.md apply.instruction includes commit+push after verify, before user approval — PASS
+  - [x] artifact-pipeline spec references apply.instruction for commit behavior — PASS
   - [x] human-approval-gate spec uses semantic step names instead of numbers — PASS
 - [x] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
-- [x] 3.3. Commit and push implementation changes for review.
-- [ ] 3.4. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.5. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
-- [ ] 3.6. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.5 was not entered.
-- [ ] 3.7. Approval: Only finish on explicit **"Approved"** by the user.
+- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
+- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
+- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 

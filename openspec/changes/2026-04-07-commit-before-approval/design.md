@@ -10,21 +10,21 @@ The post_artifact hook in WORKFLOW.md already commits after each planning artifa
 
 **Files to modify:**
 
-1. **`openspec/templates/tasks.md`** (lines 53-58) — Add step 3.3 "Commit and push implementation changes for review" between Auto-Verify and User Testing. Renumber subsequent steps (3.3→3.4, 3.4→3.5, 3.5→3.6, 3.6→3.7).
+1. **`openspec/WORKFLOW.md`** (`apply.instruction`) — Add commit+push instruction after `/opsx:verify` passes and before user approval pause. Analogous to `post_artifact` but for the implementation phase.
 
-2. **`openspec/specs/artifact-pipeline/spec.md`** — New "Post-Implementation Commit Before Approval" requirement extending the post_artifact pattern to the implementation phase.
+2. **`openspec/specs/artifact-pipeline/spec.md`** — New "Post-Implementation Commit Before Approval" requirement, specifying the behavior lives in `apply.instruction`.
 
-3. **`openspec/specs/human-approval-gate/spec.md`** — Remove hardcoded step numbers (3.1–3.7), reference QA Loop steps by semantic name instead. Step numbering is a template concern.
+3. **`openspec/specs/human-approval-gate/spec.md`** — Remove hardcoded step numbers, reference QA Loop steps by semantic name. Note that commit happens via `apply.instruction`, not as a template step.
 
 No changes needed to:
+- `openspec/templates/tasks.md` — Template stays unchanged; commit is a WORKFLOW.md concern, not a template step.
 - `openspec/specs/task-implementation/spec.md` — No changes; the commit behavior lives in artifact-pipeline.
-- `src/skills/apply/SKILL.md` — The apply skill already processes QA Loop tasks sequentially. The new step will be executed like any other task.
-- `openspec/WORKFLOW.md` — The apply.instruction and post_artifact hook remain unchanged.
+- `src/skills/apply/SKILL.md` — The apply skill reads `apply.instruction` from WORKFLOW.md at runtime.
 
 ## Goals & Success Metrics
 
-* Generated tasks.md files include step 3.3 "Commit and push implementation changes for review" in the QA Loop — PASS/FAIL
-* Step numbering in QA Loop is consistent (3.1 through 3.7) — PASS/FAIL
+* WORKFLOW.md apply.instruction includes commit+push after verify, before user approval — PASS/FAIL
+* artifact-pipeline spec references apply.instruction for commit behavior — PASS/FAIL
 * human-approval-gate spec uses semantic step names instead of numbers — PASS/FAIL
 
 ## Non-Goals
@@ -37,7 +37,7 @@ No changes needed to:
 
 | Decision | Rationale | Alternatives |
 |----------|-----------|--------------|
-| Add explicit task step in template rather than apply skill guidance | Visible in every tasks.md; agent processes it like any other task; auditable | Add guidance in WORKFLOW.md apply.instruction (soft enforcement, not visible in tasks.md) |
+| Add commit instruction to WORKFLOW.md apply.instruction rather than tasks template | Consistent with post_artifact pattern (WORKFLOW.md owns commit behavior); template stays clean; no renumbering needed | Add as template task step (visible but couples template to git concerns) |
 | Use `WIP: <change-name> — implementation` commit message format | Consistent with post_artifact hook pattern (`WIP: <change-name> — <artifact-id>`); clearly marks as non-final | Use generic "checkpoint" message (less informative); use final commit format (confusing) |
 | Place commit step after verify, before user testing | User needs the diff to review; verify should pass before committing | Place after user testing (defeats purpose); place before verify (commits potentially broken code) |
 
