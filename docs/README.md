@@ -62,6 +62,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | PR merge check before branch deletion; force delete on confirmed merge | GitHub API is authoritative for merge status; handles all merge strategies including squash | [ADR-035](decisions/adr-035-pr-merge-check-for-branch-deletion.md) |
 | ~~Fix sync race condition via blocking prompt and state-based validation~~ | ~~Superseded by ADR-037 — sync eliminated~~ | [ADR-036](decisions/adr-036-fix-sync-race-condition-in-archive.md) |
 | Eliminate delta specs, sync, and archive — edit specs directly, flat changes directory | Single spec format, no merge step, completion by tasks.md status not directory location | [ADR-037](decisions/adr-037-eliminate-delta-specs-sync-and-archive.md) |
+| Commit before approval in apply.instruction; WIP commit after verify, before user testing | Consistent with post_artifact pattern; WORKFLOW.md owns commit behavior; template stays clean | [ADR-038](decisions/adr-038-commit-before-approval-in-apply-instruction.md) |
 
 ### Notable Trade-offs
 
@@ -103,6 +104,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **~~LLM may ignore blocking prompt context (ADR-036)~~**: Superseded by ADR-037 — sync eliminated.
 - **Spec conflicts on shared branches (ADR-037)**: Two parallel changes editing the same baseline spec produce git merge conflicts; mitigated by worktree isolation for local changes.
 - **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:docs <capability>` override and preflight traceability.
+- **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
 
 ## Conventions
 

@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-07 — Commit Before Approval
+
+### Changed
+- Implementation changes are now committed and pushed after `/opsx:verify` passes and before the user is asked for approval — the PR diff is available for review instead of asking the user to approve uncommitted local changes (closes #82)
+- QA Loop steps in the human-approval-gate spec are now referenced by semantic name (Metric Check, Auto-Verify, User Testing, etc.) instead of hardcoded step numbers — template renumbering no longer requires spec updates
+
 ## 2026-04-07 — Post-Merge Reminder Format
 
 ### Changed
