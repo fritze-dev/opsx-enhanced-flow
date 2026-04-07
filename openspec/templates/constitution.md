@@ -27,5 +27,12 @@ instruction: |
 
 ## Standard Tasks
 
-<!-- Project-specific extras appended to the universal standard tasks in the schema template.
-     Add checkbox items here for steps that should appear in every tasks.md after the universal steps. -->
+<!-- Project-specific extras appended to the universal standard tasks in the tasks template.
+     Pre-merge items use checkbox format and are executed during post-apply workflow.
+     Post-merge items use plain bullet format and are manual reminders after PR merge. -->
+
+### Pre-Merge
+<!-- - [ ] Example: Update PR body with summary -->
+
+### Post-Merge
+<!-- - Example: Run deployment script -->
