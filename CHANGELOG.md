@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-03-30 — Eliminate Delta-Specs, Sync & Archive
+
+### Changed
+- **BREAKING**: Specs are now edited directly at `openspec/specs/` during the specs stage — the delta spec format (ADDED/MODIFIED/REMOVED sections) has been eliminated entirely
+- **BREAKING**: Post-apply workflow simplified to verify → changelog → docs — sync and archive steps are no longer needed
+- Change directories now use a creation-date prefix (`YYYY-MM-DD-<name>`) and remain flat under `openspec/changes/` — no more archive subdirectory
+- Active vs. completed changes are distinguished by tasks.md status (open checkboxes vs. all checked) instead of directory location
+- Changelog and docs now read proposal.md and current baseline specs instead of archived delta specs
+- Docs incremental detection uses proposal Capabilities section to identify affected capabilities
+- Worktree cleanup moved to lazy detection at `/opsx:new` — stale worktrees from merged PRs are cleaned up automatically when creating new changes
+
+### Removed
+- `/opsx:sync` skill — agent-driven delta spec merging is no longer needed
+- `/opsx:archive` skill — completed changes stay in place, no directory move required
+- `spec-sync` capability spec — the entire domain (delta spec merging) has been eliminated
+
 ## 2026-03-30 — Fix Archive Unstaged Deletions
 
 ### Fixed

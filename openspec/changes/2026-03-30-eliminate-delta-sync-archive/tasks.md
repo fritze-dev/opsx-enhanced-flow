@@ -50,10 +50,10 @@
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs change-workspace,artifact-pipeline,artifact-generation,quality-gates,task-implementation,release-workflow,user-docs,interactive-discovery`)
-- [ ] 4.3. Bump version in `src/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`
-- [ ] 4.4. Commit and push to remote
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs (`/opsx:docs change-workspace,artifact-pipeline,artifact-generation,quality-gates,task-implementation,release-workflow,user-docs,interactive-discovery`)
+- [x] 4.3. Bump version in `src/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`
+- [x] 4.4. Commit and push to remote
 
 ### Pre-Merge
 - [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #X"`)

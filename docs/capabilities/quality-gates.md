@@ -2,7 +2,7 @@
 title: "Quality Gates"
 capability: "quality-gates"
 description: "Provides pre-implementation quality checks via /opsx:preflight, post-implementation verification via /opsx:verify, and documentation drift detection via /opsx:docs-verify."
-lastUpdated: "2026-03-26"
+lastUpdated: "2026-04-07"
 ---
 
 # Quality Gates
@@ -66,7 +66,7 @@ When required artifacts (such as the design) have not been created, the prefligh
 
 #### Verification With All Checks Passing
 
-When all tasks are complete, all spec requirements are implemented, and all design decisions are followed, the verification report shows full coverage across Completeness, Correctness, and Coherence. The final assessment is "All checks passed. Ready for archive."
+When all tasks are complete, all spec requirements are implemented, and all design decisions are followed, the verification report shows full coverage across Completeness, Correctness, and Coherence. The final assessment is "All checks passed. Ready for completion."
 
 #### Verification Finds Critical Issues
 
@@ -82,7 +82,7 @@ When a new file does not follow the project's established naming convention (for
 
 #### Verification Degrades Gracefully With Missing Artifacts
 
-When a change has only tasks but no specs or design, verification checks task completion only, skips spec coverage and design adherence checks, and notes in the report which checks were skipped and why. When a change has tasks but no delta specs (for example, a documentation-only change), the system skips requirement-level verification and focuses on task completion and code pattern coherence.
+When a change has only tasks but no specs or design, verification checks task completion only, skips spec coverage and design adherence checks, and notes in the report which checks were skipped and why. When a change has tasks but no specs (for example, a documentation-only change), the system skips requirement-level verification and focuses on task completion and code pattern coherence.
 
 #### Verification Catches Unaddressed Preflight Side-Effects
 
@@ -96,7 +96,7 @@ When invoked as the final verification step after you have fixed all issues from
 
 #### All Documentation Is In Sync
 
-When every spec has a corresponding capability doc, all archived design decisions have corresponding ADRs, and the README lists all capabilities with valid ADR references, the drift report shows no issues across all three dimensions. The verdict is "CLEAN."
+When every spec has a corresponding capability doc, all completed changes with design decisions have corresponding ADRs, and the README lists all capabilities with valid ADR references, the drift report shows no issues across all three dimensions. The verdict is "CLEAN."
 
 #### Capability Doc Missing For a Spec
 
@@ -118,13 +118,13 @@ When the README Key Design Decisions table references an ADR file that does not 
 
 When the docs directory has not been created yet, the system reports each spec as a missing capability doc (CRITICAL) without erroring, and recommends running `/opsx:docs` to generate initial documentation.
 
-#### No Archived Design Decisions to Check
+#### No Completed Changes With Design Decisions to Check
 
-When no archives exist, the system skips the ADR dimension, notes it in the report, and still checks the other two dimensions.
+When no completed changes exist, the system skips the ADR dimension, notes it in the report, and still checks the other two dimensions.
 
 #### Manual ADR Without Design Decision Is Not Flagged
 
-Manual ADRs (files with the `adr-MNNN` prefix) are recognized and excluded from the cross-check against archived design decisions. No issue is raised for manual ADRs.
+Manual ADRs (files with the `adr-MNNN` prefix) are recognized and excluded from the cross-check against completed changes with design decisions. No issue is raised for manual ADRs.
 
 ## Known Limitations
 

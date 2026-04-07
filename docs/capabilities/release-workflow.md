@@ -2,11 +2,11 @@
 title: "Release Workflow"
 capability: "release-workflow"
 description: "Version management, automated releases, plugin distribution, changelog generation, and consumer update process."
-lastUpdated: "2026-03-26"
+lastUpdated: "2026-04-07"
 ---
 # Release Workflow
 
-The release workflow handles version management for the plugin, including automatic patch bumps on archive, automated GitHub Releases via CI, plugin source distribution from the `src/` subdirectory, consumer version pinning, developer local marketplace workflow, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
+The release workflow handles version management for the plugin, including automatic patch bumps during the post-apply workflow, automated GitHub Releases via CI, plugin source distribution from the `src/` subdirectory, consumer version pinning, developer local marketplace workflow, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
 
 ## Purpose
 
@@ -14,11 +14,11 @@ Without an automated release workflow, version bumps are a manual step that is r
 
 ## Rationale
 
-The auto-bump is implemented as a constitution convention rather than a skill modification, respecting the principle that skills are shared plugin code and must not contain project-specific behavior. Patch bumps cover the vast majority of changes; minor and major releases are rare enough that a documented manual process suffices. The changelog command reads `openspec/config.yaml` for a `docs_language` setting, allowing teams to generate release notes in their preferred language while keeping dates in ISO format and product names in English.
+The auto-bump is implemented as a constitution convention rather than a skill modification, respecting the principle that skills are shared plugin code and must not contain project-specific behavior. Patch bumps cover the vast majority of changes; minor and major releases are rare enough that a documented manual process suffices. The changelog command reads `openspec/WORKFLOW.md` for a `docs_language` setting, allowing teams to generate release notes in their preferred language while keeping dates in ISO format and product names in English.
 
 ## Features
 
-- **Automatic patch version bump** — the patch version increments automatically after each successful archive
+- **Automatic patch version bump** — the patch version increments automatically after each completed change during the post-apply workflow
 - **Version synchronization** — `plugin.json` and `marketplace.json` stay in sync automatically
 - **Automated GitHub Releases** — a GitHub Action creates git tags and releases automatically when a version bump is pushed to `main`
 - **Plugin source separation** — plugin files live in `src/`, consumer caches contain only plugin files (no docs, CI, or project files)
@@ -26,15 +26,15 @@ The auto-bump is implemented as a constitution convention rather than a skill mo
 - **Developer local marketplace** — developers register the local repo as marketplace source for live plugin development in VS Code and CLI
 - **Manual minor/major releases** — documented process for intentional version changes; the Action handles tagging automatically
 - **Consumer update guidance** — clear steps for consumers to get the latest plugin version
-- **Changelog generation** — `/opsx:changelog` produces release notes from archived changes in Keep a Changelog format
+- **Changelog generation** — `/opsx:changelog` produces release notes from completed changes in Keep a Changelog format
 - **Language-aware changelog** — changelog entries can be generated in the language configured in `docs_language`
-- **Post-archive next steps** — archive output includes guidance for the complete post-archive workflow
+- **Post-apply next steps** — apply output includes guidance for the complete post-apply workflow
 
 ## Behavior
 
-### Automatic Patch Bump After Archive
+### Automatic Patch Bump
 
-After a successful `/opsx:archive`, the patch version in `src/.claude-plugin/plugin.json` is incremented automatically (for example, `1.0.3` becomes `1.0.4`). The `version` field in `.claude-plugin/marketplace.json` is synced to match. The new version is displayed in the archive summary.
+During the post-apply workflow, the patch version in `src/.claude-plugin/plugin.json` is incremented automatically (for example, `1.0.3` becomes `1.0.4`). The `version` field in `.claude-plugin/marketplace.json` is synced to match. The new version is displayed in the summary.
 
 ### Automated GitHub Releases
 
@@ -74,7 +74,7 @@ Skills in `skills/` are generic plugin code shared across all consumers and are 
 
 ### Project-Specific Behavior in Constitution
 
-When project-specific post-archive behavior is needed (such as version bumps), it is defined as a convention in `openspec/constitution.md`, not added as a step in the skill file.
+When project-specific post-apply behavior is needed (such as version bumps), it is defined as a convention in `openspec/constitution.md`, not added as a step in the skill file.
 
 ### End-to-End Install Flow
 
@@ -88,13 +88,13 @@ The complete update path is: `claude plugin marketplace update` followed by `cla
 
 For developers using the local marketplace, running `claude plugin update opsx@opsx-enhanced-flow` detects the local version change and updates the cached plugin. For developers using the GitHub marketplace, the existing `marketplace update` + `plugin update` flow applies.
 
-### Archive Output Next Steps
+### Post-Apply Workflow Next Steps
 
-After a successful archive with auto-bump, the output includes next steps: run `/opsx:changelog`, push, and update the local plugin.
+After a completed change, the post-apply workflow includes next steps: verify, changelog, docs, version bump, and commit.
 
-### Changelog from Single Archive
+### Changelog from Single Change
 
-Running `/opsx:changelog` reads each archived change directory, examines the proposal, delta specs, and design artifacts, and produces changelog entries summarizing what changed from a user perspective. Entries use the Keep a Changelog format with sections like Added, Changed, and Fixed as applicable.
+Running `/opsx:changelog` reads each completed change directory, examines the proposal, current specs, and design artifacts, and produces changelog entries summarizing what changed from a user perspective. Entries use the Keep a Changelog format with sections like Added, Changed, and Fixed as applicable.
 
 ### Multiple Archives Ordered Newest First
 
@@ -104,9 +104,9 @@ When multiple archives exist, changelog entries are ordered with the newest firs
 
 If `CHANGELOG.md` already contains manually written entries, new entries are added at the top without modifying or removing existing content.
 
-### No Archives to Process
+### No Completed Changes to Process
 
-If the archive directory is empty or does not exist, `/opsx:changelog` informs you that no archived changes were found.
+If no completed changes exist, `/opsx:changelog` informs you that no completed changes were found.
 
 ### Internal-Only Changes
 

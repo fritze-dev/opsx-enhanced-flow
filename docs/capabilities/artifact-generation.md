@@ -2,7 +2,7 @@
 title: "Artifact Generation"
 capability: "artifact-generation"
 description: "Fast-forward command for generating pipeline artifacts, with smart checkpoints at critical transitions and change selection for existing workspaces."
-lastUpdated: "2026-03-26"
+lastUpdated: "2026-04-07"
 ---
 
 # Artifact Generation
@@ -26,6 +26,7 @@ A single `/opsx:ff` command serves all generation needs: it generates all remain
 - **Design review checkpoint** -- pauses after the design artifact for user alignment before continuing
 - **Preflight warnings checkpoint** -- pauses when preflight returns warnings, requiring your explicit acknowledgment before generating tasks
 - **Consolidation verification** -- when creating specs, verifies the proposal's Consolidation Check confirms no overlap with existing specs before creating files
+- **Direct spec editing** -- during the specs stage, `/opsx:ff` edits baseline specs directly at `openspec/specs/<capability>/spec.md` rather than creating delta spec files in the change directory
 - **Direct WORKFLOW.md and template reads** -- reads WORKFLOW.md for pipeline configuration and Smart Templates for artifact definitions, rather than duplicating pipeline logic
 
 ## Behavior
