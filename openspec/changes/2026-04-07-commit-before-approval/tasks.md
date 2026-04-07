@@ -11,9 +11,9 @@
 ## 3. QA Loop & Human Approval
 
 - [ ] 3.1. Metric Check:
-  - [ ] Generated tasks.md files include step 3.3 "Commit and push implementation changes for review" — PASS / FAIL
+  - [ ] Generated tasks.md files include "Commit and push implementation changes for review" step in QA Loop — PASS / FAIL
   - [ ] Step numbering in QA Loop is consistent (3.1 through 3.7) — PASS / FAIL
-  - [ ] Specs reference correct step numbers after renumbering — PASS / FAIL
+  - [ ] human-approval-gate spec uses semantic step names instead of numbers — PASS / FAIL
 - [ ] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
 - [ ] 3.3. Commit and push implementation changes for review.
 - [ ] 3.4. User Testing: **Stop here!** Ask the user for manual approval.

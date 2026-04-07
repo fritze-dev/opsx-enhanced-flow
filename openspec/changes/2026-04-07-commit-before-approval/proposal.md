@@ -16,8 +16,8 @@ After completing implementation and running `/opsx:verify`, the agent pauses at 
 
 ### Modified Capabilities
 
-- `human-approval-gate`: Add requirement that implementation changes must be committed and pushed before the approval gate, so the user can review the PR diff
-- `task-implementation`: Document the WIP commit step in the QA Loop and its relationship to the final commit in Standard Tasks
+- `artifact-pipeline`: Add "Post-Implementation Commit Before Approval" requirement — extends the post_artifact commit pattern to the implementation phase (WIP commit + push in QA Loop before user testing)
+- `human-approval-gate`: Remove hardcoded step numbers, reference QA Loop steps by name (Metric Check, Auto-Verify, Commit and Push, User Testing, Fix Loop, Final Verify, Approval) — step numbering is a template concern
 
 ### Removed Capabilities
 
@@ -25,13 +25,13 @@ After completing implementation and running `/opsx:verify`, the agent pauses at 
 
 ### Consolidation Check
 
-N/A — no new specs proposed. Both modifications target existing specs that own the relevant behavior: `human-approval-gate` owns the QA loop approval flow, `task-implementation` owns the tasks template structure and standard tasks.
+N/A — no new specs proposed. `artifact-pipeline` already owns the post_artifact commit pattern — the implementation commit is a natural extension. `human-approval-gate` owns QA loop semantics but should not hardcode template step numbers.
 
 ## Impact
 
 - `openspec/templates/tasks.md` — QA Loop section gains a new step (renumbers 3.3–3.6 to 3.4–3.7)
-- `openspec/specs/human-approval-gate/spec.md` — new requirement + scenario for commit-before-approval
-- `openspec/specs/task-implementation/spec.md` — updated requirement to document WIP commit in QA loop
+- `openspec/specs/artifact-pipeline/spec.md` — new "Post-Implementation Commit Before Approval" requirement
+- `openspec/specs/human-approval-gate/spec.md` — remove hardcoded step numbers, reference by name
 - All future `tasks.md` files generated from the template will include the new commit step
 
 ## Scope & Boundaries

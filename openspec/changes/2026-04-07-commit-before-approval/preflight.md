@@ -2,17 +2,16 @@
 
 ## A. Traceability Matrix
 
-- [x] Story: "As a developer I want implementation changes committed and pushed before I'm asked for approval" → Scenario: WIP commit before user testing, Commit step with no remote access → Component: `openspec/templates/tasks.md` (QA Loop section)
-- [x] Story: "As a developer I want a mandatory human approval step before finalizing" → Scenario: Commit and push before user testing, Approval after clean verification → Component: `openspec/specs/human-approval-gate/spec.md`
-- [x] Story: "As a developer I want implementation changes committed and pushed before approval" → Scenario: WIP commit does not replace final commit → Component: `openspec/specs/task-implementation/spec.md`
+- [x] Story: "As a developer I want implementation changes committed and pushed before I'm asked for approval" → Scenario: Implementation committed before user testing, Graceful degradation on push failure, WIP commit does not replace final commit → Component: `openspec/specs/artifact-pipeline/spec.md`, `openspec/templates/tasks.md` (QA Loop section)
+- [x] Story: "As a developer I want a mandatory human approval step before finalizing" → Scenario: Approval after clean verification, Final verify after fix loop → Component: `openspec/specs/human-approval-gate/spec.md` (step numbers removed, semantic names used)
 
 ## B. Gap Analysis
 
 No gaps identified:
 - Commit failure is handled (graceful degradation to local commit)
 - Push failure is handled (continue with local commit, note for user)
-- Relationship between WIP commit (3.3) and final commit (4.4) is documented
-- Step renumbering is consistent across template and both specs
+- Relationship between WIP commit and final commit is documented in artifact-pipeline spec
+- human-approval-gate spec no longer hardcodes step numbers — immune to future template renumbering
 
 ## C. Side-Effect Analysis
 

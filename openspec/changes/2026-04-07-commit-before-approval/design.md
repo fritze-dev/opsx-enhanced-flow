@@ -12,19 +12,20 @@ The post_artifact hook in WORKFLOW.md already commits after each planning artifa
 
 1. **`openspec/templates/tasks.md`** (lines 53-58) — Add step 3.3 "Commit and push implementation changes for review" between Auto-Verify and User Testing. Renumber subsequent steps (3.3→3.4, 3.4→3.5, 3.5→3.6, 3.6→3.7).
 
-2. **`openspec/specs/human-approval-gate/spec.md`** — Already updated in specs stage. Contains new requirement for commit-before-approval and updated step references.
+2. **`openspec/specs/artifact-pipeline/spec.md`** — New "Post-Implementation Commit Before Approval" requirement extending the post_artifact pattern to the implementation phase.
 
-3. **`openspec/specs/task-implementation/spec.md`** — Already updated in specs stage. Contains new "WIP Commit in QA Loop" requirement.
+3. **`openspec/specs/human-approval-gate/spec.md`** — Remove hardcoded step numbers (3.1–3.7), reference QA Loop steps by semantic name instead. Step numbering is a template concern.
 
 No changes needed to:
-- `src/skills/apply/SKILL.md` — The apply skill already processes QA Loop tasks sequentially. The new step 3.3 will be executed like any other task.
+- `openspec/specs/task-implementation/spec.md` — No changes; the commit behavior lives in artifact-pipeline.
+- `src/skills/apply/SKILL.md` — The apply skill already processes QA Loop tasks sequentially. The new step will be executed like any other task.
 - `openspec/WORKFLOW.md` — The apply.instruction and post_artifact hook remain unchanged.
 
 ## Goals & Success Metrics
 
 * Generated tasks.md files include step 3.3 "Commit and push implementation changes for review" in the QA Loop — PASS/FAIL
 * Step numbering in QA Loop is consistent (3.1 through 3.7) — PASS/FAIL
-* Specs reference correct step numbers after renumbering — PASS/FAIL
+* human-approval-gate spec uses semantic step names instead of numbers — PASS/FAIL
 
 ## Non-Goals
 
