@@ -49,7 +49,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    3. If `git merge-base` fails (no common ancestor — e.g., orphan branch, first commit, detached HEAD), set a flag to skip all diff-based checks. Note "No merge base available — diff checks skipped" for inclusion in the report.
    4. From the file list, exclude files under `openspec/changes/` and `openspec/specs/` — these are expected in the diff for any OpenSpec change and should not be flagged as unintended.
 
-4. **Verify Implementation**
+4. **Verify Implementation** (Completeness + Correctness)
 
    Check that all planned work was completed and that the actual changes match what was specified.
 
@@ -87,7 +87,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
        - Add WARNING: "Scenario not covered: <scenario name>"
        - Recommendation: "Add test or implementation for scenario: <description>"
 
-5. **Verify Scope**
+5. **Verify Scope** (Coherence + Side-Effects)
 
    Check that the change stays within planned boundaries and doesn't introduce unintended side-effects.
 
