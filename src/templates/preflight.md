@@ -1,5 +1,6 @@
 ---
 id: preflight
+template-version: 1
 description: "Quality gate: traceability, gaps, side effects, assumption audit"
 generates: preflight.md
 requires: [design]

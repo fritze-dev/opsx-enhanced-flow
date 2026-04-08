@@ -1,6 +1,9 @@
 ---
 order: 16
 category: meta
+status: stable
+version: 1
+lastModified: 2026-04-08
 ---
 ## Purpose
 

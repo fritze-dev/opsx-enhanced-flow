@@ -28,11 +28,12 @@ Start a new change using the experimental artifact-driven approach.
    Before creating a new change, check for stale worktrees:
    1. Run `git worktree list` to find all worktrees (excluding the main working tree).
    2. For each worktree, extract the branch name.
-   3. Check if the branch's PR was merged: `gh pr view <branch-name> --json state --jq '.state'`
-      - If result is `MERGED`: remove the worktree (`git worktree remove <path>`) and delete the branch (`git branch -D <branch-name>`). Report: "Cleaned up stale worktree: <branch-name> (merged)"
+   3. **Proposal status check**: Find the change directory in the worktree or main tree matching the branch name (`openspec/changes/*-<branch>/proposal.md`). If the proposal has YAML frontmatter with `status: completed`, the change is done — clean up.
+   4. **Fallback — PR status**: If no proposal status is available, check if the branch's PR was merged: `gh pr view <branch-name> --json state --jq '.state'`
+      - If result is `MERGED`: clean up (remove worktree, delete local and remote branch). Report: "Cleaned up stale worktree: <branch-name> (completed)"
       - If `gh` is unavailable or no PR exists: fall back to `git branch -d <branch-name>`. If that succeeds (branch was merged), remove the worktree. If it fails (branch not merged), skip this worktree.
       - If result is `OPEN` or `CLOSED`: skip this worktree (still active or intentionally closed).
-   4. If no stale worktrees found, proceed silently.
+   5. If no stale worktrees found, proceed silently.
 
 4. **Create the change workspace**
 

@@ -12,15 +12,15 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 1. **Select change**
 
-   **Worktree context detection** (runs first, before directory listing):
+   **Change context detection** (runs first, before directory listing):
    If no explicit change name was provided as an argument:
-   1. Run: `git rev-parse --git-dir`
-   2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
-   4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+   1. Get current branch: `git rev-parse --abbrev-ref HEAD`
+   2. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose YAML frontmatter `branch` field matches the current branch. If found, auto-select that change.
+   3. **Fallback — worktree convention**: If no matching proposal frontmatter, check if inside a worktree (`git rev-parse --git-dir` contains `/worktrees/`), derive change name from branch, search for `openspec/changes/*-<branch-name>/`.
+   4. If valid: auto-select and announce "Detected change context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
-   If not detected via worktree: List active change directories under `openspec/changes/` (those with unchecked tasks or no tasks.md). Use the **AskUserQuestion tool** to let the user select.
+   If not detected via context: List active change directories under `openspec/changes/` (those whose `proposal.md` has frontmatter `status: active`, or fallback: unchecked tasks or no tasks.md). Use the **AskUserQuestion tool** to let the user select.
 
    Show changes that have implementation tasks (tasks.md exists).
    Mark changes with incomplete tasks as "(In Progress)".
@@ -40,8 +40,10 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - `openspec/changes/<change-dir>/preflight.md`
    - `openspec/changes/<change-dir>/tasks.md`
 
-   Read specs for the capabilities listed in the proposal's Capabilities section:
-   - `openspec/specs/<capability>/spec.md` for each capability mentioned
+   Read the proposal's YAML frontmatter `capabilities` field to identify affected specs. If frontmatter is absent, fall back to parsing the `## Capabilities` section.
+   - `openspec/specs/<capability>/spec.md` for each capability listed
+
+   **Draft spec gate**: For each spec listed in the proposal's capabilities, check the spec's frontmatter. If `status: draft` and `change` matches the current change directory, flag as CRITICAL: "Spec <name> is still in draft status — must be finalized before merge."
 
    Load the branch diff:
    1. Run `git merge-base HEAD main` to find the common ancestor commit
@@ -195,6 +197,14 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 - If full artifacts: verify implementation and scope
 - If no merge base available: skip all diff-based checks, fall back to codebase keyword search only
 - Always note which checks were skipped and why
+
+**Verify Completion (draft→stable flip)**
+
+When verify passes (no CRITICAL issues) and the change is approved for merge (during the post-apply workflow, after user approval), finalize tracking fields:
+1. **Specs**: For each spec listed in the proposal's capabilities that has `status: draft` and `change` matching the current change: set `status: stable`, remove the `change` field, increment `version` by 1, and set `lastModified` to the current date.
+2. **Proposal**: Set the proposal's YAML frontmatter `status` to `completed`.
+
+This step runs automatically as part of the post-apply workflow — do not prompt the user for it.
 
 **Output Format**
 

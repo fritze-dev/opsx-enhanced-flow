@@ -43,11 +43,9 @@ If a capability name argument was given (single or comma-separated list), handle
 
 1. Check if `docs/capabilities/<capability>.md` exists. If not → mark for regeneration.
 2. If the file exists, read its YAML frontmatter and extract the `lastUpdated` value (format: `YYYY-MM-DD`). If the field is missing or malformed → mark for regeneration.
-3. Scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Extract the date prefix (`YYYY-MM-DD`) from each matching change directory name.
-4. If ANY change date is newer than or equal to the doc's `lastUpdated` → mark for regeneration. (Use `>=` comparison to handle same-day changes.)
-5. If no change date is newer → skip this capability entirely.
-
-**Fallback for proposals without structured Capabilities section:** If a change's proposal.md does not have a parseable Capabilities section (e.g., early changes with different formats), treat the change as potentially affecting all capabilities — mark all capabilities for regeneration if that change's date is newer than any doc's `lastUpdated`.
+3. Read the spec's `lastModified` frontmatter field from `openspec/specs/<capability>/spec.md`. If `lastModified` is absent → mark for regeneration (unknown modification date).
+4. If `lastModified` is newer than or equal to the doc's `lastUpdated` → mark for regeneration. (Use `>=` comparison to handle same-day changes.)
+5. If `lastModified` is older → skip this capability entirely.
 
 Build two lists: **capabilities to regenerate** and **capabilities to skip**. Only capabilities marked for regeneration proceed to Steps 2 and 3.
 
@@ -55,7 +53,7 @@ If all capabilities are skipped (no newer changes for any), report: "All capabil
 
 ### Step 2: Look Up Change Enrichment
 
-For each capability **marked for regeneration**, scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Skip capabilities not marked for regeneration — do not read their changes.
+For each capability **marked for regeneration**, scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose proposal frontmatter `capabilities` field lists this capability (fall back to parsing the `## Capabilities` section if frontmatter is absent). Skip capabilities not marked for regeneration — do not read their changes.
 
 For each relevant change found, read the following files from the change directory (skip any that don't exist):
 - `proposal.md` — extract the `## Why` section (for Rationale context, NOT for Purpose)
@@ -136,14 +134,14 @@ Generate formal ADRs from `## Decisions` tables across completed changes' `desig
 3. Determine the highest existing ADR number from filenames.
 4. For each existing ADR file, check its References section for a `[Change: ...]` backlink to identify which change produced it. Build a set of already-processed changes.
 5. If any existing ADR lacks a backlink (e.g., legacy files from before this feature), fall back to full generation for this run.
-6. Glob `openspec/changes/*/design.md` and sort chronologically. Filter to completed changes (all tasks checked). Identify changes NOT in the already-processed set.
-7. For unprocessed changes, check if they contain valid Decisions tables (see skip rule below).
+6. Glob `openspec/changes/*/design.md` and sort chronologically. Filter to completed changes (proposal frontmatter `status: completed`, or fallback: all tasks checked). Identify changes NOT in the already-processed set.
+7. For unprocessed changes, check design frontmatter `has_decisions` field first. If `has_decisions: false` or absent, skip this change. If `has_decisions: true`, verify by checking for valid Decisions tables (see skip rule below).
 8. If no new changes with valid Decisions tables exist → skip ADR generation entirely and report "ADRs are up-to-date."
 9. If new changes exist → generate new ADR files starting from `highest_existing_number + 1`.
 
 **One-time full regeneration for consolidation:** If the existing ADR file count does not match the expected count after applying consolidation heuristics to all changes, perform a full regeneration. This handles the transition when consolidation is first introduced. Delete all existing generated `adr-[0-9]*.md` files (preserve `adr-M*.md`) and regenerate from scratch.
 
-**Discovery:** Glob `openspec/changes/*/design.md`. Filter to completed changes. Sort chronologically by their `YYYY-MM-DD` prefix. Skip changes without `design.md`.
+**Discovery:** Glob `openspec/changes/*/design.md`. Filter to completed changes (proposal frontmatter `status: completed`, or fallback: all tasks checked). Sort chronologically by their `YYYY-MM-DD` prefix. Skip changes without `design.md`.
 
 **Enrichment:** For each change being processed, read the FULL `design.md` — not just the Decisions table. Read the `## Context`, `## Architecture & Components`, and `## Risks & Trade-offs` sections to provide rich source material for ADR Context and Consequences sections. Also read `research.md` (Sections 2 and 3: External Research and Approaches) and `proposal.md` (`## Why`) from the same change directory if they exist. This data is essential for writing rich ADR Context sections and accurate Consequences. Do NOT rely on data loaded during earlier steps — Step 4 must independently read all source materials.
 

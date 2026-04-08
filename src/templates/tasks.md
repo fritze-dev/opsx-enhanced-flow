@@ -1,5 +1,6 @@
 ---
 id: tasks
+template-version: 1
 description: Implementation checklist with QA loop
 generates: tasks.md
 requires: [preflight]

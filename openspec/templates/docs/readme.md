@@ -1,5 +1,6 @@
 ---
 id: docs-readme
+template-version: 1
 description: Documentation entry point with architecture overview
 generates: docs/README.md
 requires: []

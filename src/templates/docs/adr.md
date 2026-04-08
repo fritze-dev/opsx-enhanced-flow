@@ -1,5 +1,6 @@
 ---
 id: docs-adr
+template-version: 1
 description: Architecture Decision Record template
 generates: "docs/decisions/adr-*.md"
 requires: []

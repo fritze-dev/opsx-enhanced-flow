@@ -1,4 +1,5 @@
 ---
+template-version: 1
 templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks]
 

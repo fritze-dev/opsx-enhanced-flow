@@ -1,5 +1,6 @@
 ---
 id: proposal
+template-version: 1
 description: Problem statement, proposed solution, and expected impact
 generates: proposal.md
 requires: [research]
@@ -44,6 +45,20 @@ instruction: |
   Keep it concise (1-2 pages). Focus on the "why" not the "how" —
   implementation details belong in design.md.
 ---
+<!-- Proposal tracking frontmatter — set by skills at generation time.
+     status: active | completed (flipped during verify completion)
+     branch: git branch name for this change
+     worktree: worktree path (only when worktree mode enabled)
+     capabilities: machine-readable mirror of the Capabilities section below
+---
+status: active
+branch: [branch-name]
+capabilities:
+  new: []
+  modified: []
+  removed: []
+---
+-->
 ## Why
 
 <!-- Explain the motivation for this change. What problem does this solve? Why now? -->

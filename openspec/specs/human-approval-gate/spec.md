@@ -1,6 +1,9 @@
 ---
 order: 10
 category: development
+status: stable
+version: 1
+lastModified: 2026-04-08
 ---
 ## Purpose
 

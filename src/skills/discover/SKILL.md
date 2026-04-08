@@ -18,18 +18,18 @@ Check that `openspec/WORKFLOW.md` exists. If it is missing, tell the user to run
 
 ### Step 1: Select Change
 
-**Worktree context detection** (runs first, before directory listing):
+**Change context detection** (runs first, before directory listing):
 If no explicit change name was provided as an argument:
-1. Run: `git rev-parse --git-dir`
-2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
-4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+1. Get current branch: `git rev-parse --abbrev-ref HEAD`
+2. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose YAML frontmatter `branch` field matches the current branch. If found, auto-select that change.
+3. **Fallback — worktree convention**: If no matching proposal frontmatter, check if inside a worktree (`git rev-parse --git-dir` contains `/worktrees/`), derive change name from branch, search for `openspec/changes/*-<branch-name>/`.
+4. If valid: auto-select and announce "Detected change context: using change '<name>'"
 5. If not valid: fall through to normal detection below
 
 If no change name provided:
 - Infer from conversation context
-- Auto-select if only one active change exists
-- If ambiguous, list active change directories under `openspec/changes/` (those with unchecked tasks or no tasks.md) and ask the user to select
+- Auto-select if only one active change exists (proposal `status: active`, or fallback: unchecked tasks/no tasks.md)
+- If ambiguous, list active changes and ask the user to select
 
 ### Step 2: Read Context
 
