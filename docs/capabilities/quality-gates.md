@@ -2,7 +2,7 @@
 title: "Quality Gates"
 capability: "quality-gates"
 description: "Provides pre-implementation quality checks via /opsx:preflight, post-implementation verification via /opsx:verify, and documentation drift detection via /opsx:docs-verify."
-lastUpdated: "2026-04-07"
+lastUpdated: "2026-04-08"
 ---
 
 # Quality Gates
@@ -29,6 +29,7 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 - **Preflight Side-Effect Cross-Check**: After checking the three dimensions, verify reads `preflight.md` Section C and cross-checks each identified side-effect against task entries and codebase evidence. Unaddressed side-effects are flagged as WARNINGs.
 - **Documentation Drift Detection (`/opsx:docs-verify`)**: A check of generated documentation against current specs across three dimensions, producing a drift report with issues classified as CRITICAL, WARNING, or INFO and a verdict of CLEAN, DRIFTED, or OUT OF SYNC.
 - **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL). Docs-verify similarly prefers INFO over WARNING when uncertain.
+- **Auto-Fix for Mechanical WARNINGs**: When verify finds WARNINGs that are mechanically fixable (stale cross-references between artifacts, inconsistent naming, outdated text correctable by simple text replacement), it fixes them inline and notes the fix in the report as "WARNING (auto-fixed)." WARNINGs that require your judgment (such as spec/design divergence) remain as open issues.
 
 ## Behavior
 
@@ -87,6 +88,14 @@ When a change has only tasks but no specs or design, verification checks task co
 #### Verification Catches Unaddressed Preflight Side-Effects
 
 After checking the three core dimensions, verify reads the preflight report's Side-Effect Analysis (Section C) and cross-checks each identified side-effect against your task list and the codebase. If a side-effect has a matching task or detectable implementation evidence, no issue is raised. If a side-effect has neither, the report includes a WARNING recommending you add a task or verify that the side-effect is handled. When all side-effects in Section C are assessed as having no risk, the cross-check is skipped and noted in the report.
+
+#### Verify Auto-Fixes Stale Cross-References
+
+When verify detects a WARNING that is mechanically fixable -- such as an artifact referencing a filename that was renamed, or inconsistent naming between artifacts -- it auto-fixes the issue inline (editing the affected file) before presenting the report. The fix appears in the report as "WARNING (auto-fixed)" so you can see what was changed, but it is not presented as an open issue requiring your action.
+
+#### Verify Does Not Auto-Fix Judgment-Required Divergences
+
+When verify detects a WARNING that requires your judgment -- such as the implementation using a different approach than the spec requires -- it does not auto-fix. The divergence is presented as an open WARNING for you to decide whether to update the spec or the code.
 
 #### Final Verify Confirms Fix Loop Resolution
 

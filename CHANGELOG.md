@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-08 — Fix Friction Batch
+
+### Changed
+- QA Loop's Metric Check and Auto-Verify steps are now explicitly marked as automated — the agent runs them without pausing for confirmation, only stopping at User Testing for human approval (closes #81)
+- `/opsx:verify` now auto-fixes mechanically fixable WARNINGs (stale artifact cross-references, inconsistent naming) inline before presenting the report — judgment-required WARNINGs still require user resolution (closes #86)
+- Post-merge worktree cleanup now happens immediately after a successful merge from within a worktree — the agent switches to the main worktree, removes the completed worktree, and deletes the branch instead of leaving cleanup for the next `/opsx:new` (closes #88)
+- Consumer template `apply.instruction` synced with project WORKFLOW.md — pre-existing drift (missing "version bump" step, extra redundant verify reminder) resolved
+
+### Added
+- "Template synchronization" convention in the constitution — changes to WORKFLOW.md behavior fields must be mirrored to the consumer template at `src/templates/workflow.md` (closes #87)
+
 ## 2026-04-07 — Commit Before Approval
 
 ### Changed

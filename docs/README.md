@@ -63,6 +63,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | ~~Fix sync race condition via blocking prompt and state-based validation~~ | ~~Superseded by ADR-037 — sync eliminated~~ | [ADR-036](decisions/adr-036-fix-sync-race-condition-in-archive.md) |
 | Eliminate delta specs, sync, and archive — edit specs directly, flat changes directory | Single spec format, no merge step, completion by tasks.md status not directory location | [ADR-037](decisions/adr-037-eliminate-delta-specs-sync-and-archive.md) |
 | Commit before approval in apply.instruction; WIP commit after verify, before user testing | Consistent with post_artifact pattern; WORKFLOW.md owns commit behavior; template stays clean | [ADR-038](decisions/adr-038-commit-before-approval-in-apply-instruction.md) |
+| Automated QA steps in apply.instruction; verify auto-fix for mechanical WARNINGs; template sync convention; post-merge worktree cleanup | Instruction text is the enforcement layer; mechanical auto-fix scoped narrowly; constitution owns conventions; cleanup complements lazy detection | [ADR-039](decisions/adr-039-fix-friction-batch-agent-guidance.md) |
 
 ### Notable Trade-offs
 
@@ -105,6 +106,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Spec conflicts on shared branches (ADR-037)**: Two parallel changes editing the same baseline spec produce git merge conflicts; mitigated by worktree isolation for local changes.
 - **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:docs <capability>` override and preflight traceability.
 - **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
+- **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
 
 ## Conventions
 

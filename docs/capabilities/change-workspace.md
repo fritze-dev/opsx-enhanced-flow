@@ -2,7 +2,7 @@
 title: "Change Workspace"
 capability: "change-workspace"
 description: "Create and manage change workspaces with worktree isolation and date-prefixed naming"
-lastUpdated: "2026-04-07"
+lastUpdated: "2026-04-08"
 ---
 
 # Change Workspace
@@ -26,6 +26,7 @@ Change names use kebab-case to ensure consistent, URL-safe, filesystem-safe iden
 - **Worktree context detection** -- all change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) auto-detect the active change from worktree branch context before falling through to directory-based detection
 - Date-prefixed naming -- change directories use `YYYY-MM-DD-<name>` format, set at creation time for stable, chronologically sortable names
 - **Lazy worktree cleanup** -- when creating a new change, `/opsx:new` detects stale worktrees from merged PRs and cleans them up automatically
+- **Post-merge worktree cleanup** -- after a successful merge from within a worktree, the system immediately cleans up the worktree and deletes the branch instead of leaving it for the next `/opsx:new`
 - **Active vs completed detection** -- changes are distinguished by tasks.md checkbox status rather than directory location
 
 ## Behavior
@@ -49,6 +50,10 @@ The created workspace is a directory at `openspec/changes/<name>/`. The artifact
 ### Lazy Worktree Cleanup at Change Creation
 
 Before creating a new change, `/opsx:new` checks for stale worktrees. For each existing worktree, it checks the associated PR's merge status via `gh pr view`. If the PR is merged, the worktree is removed and the branch deleted. If the PR is not merged or no PR exists, the worktree is left untouched. If no stale worktrees are found, creation proceeds silently.
+
+### Post-Merge Worktree Cleanup
+
+After a successful `gh pr merge` from within a worktree, the system immediately cleans up rather than leaving stale worktrees for the next `/opsx:new`. The cleanup sequence switches to the main worktree, removes the completed worktree, and deletes the merged branch. If the worktree has uncommitted changes and removal fails, the system reports the error and suggests manual cleanup without blocking the workflow. This complements lazy cleanup -- lazy cleanup catches worktrees from merges that happened outside the agent session, while post-merge cleanup handles in-session merges immediately.
 
 ### Active vs Completed Change Detection
 
