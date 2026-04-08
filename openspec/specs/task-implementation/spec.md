@@ -12,7 +12,7 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, design, tasks) from the change directory and specs from `openspec/specs/` for the capabilities listed in the proposal before beginning implementation. The system SHALL read the `apply.instruction` field from WORKFLOW.md for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
-QA Loop steps 3.1 (Metric Check) and 3.2 (Auto-Verify) are **automated steps** — the system SHALL execute them without pausing for user confirmation. The first human gate in the QA Loop is step 3.3 (User Testing). The system SHALL NOT pause or ask for permission before running `/opsx:verify` at step 3.2; it SHALL invoke the command automatically after the metric check passes.
+The QA Loop's Metric Check and Auto-Verify steps are **automated steps** — the system SHALL execute them without pausing for user confirmation. The first human gate in the QA Loop is User Testing. The system SHALL NOT pause or ask for permission before running `/opsx:verify`; it SHALL invoke the command automatically after the metric check passes.
 
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
@@ -38,11 +38,11 @@ QA Loop steps 3.1 (Metric Check) and 3.2 (Auto-Verify) are **automated steps** �
 #### Scenario: QA automated steps run without pausing
 
 - **GIVEN** a change with all implementation tasks complete
-- **AND** the system reaches QA Loop step 3.1 (Metric Check)
+- **AND** the system reaches the QA Loop Metric Check
 - **WHEN** the metric check passes
-- **THEN** the system SHALL immediately proceed to step 3.2 (Auto-Verify) without pausing
+- **THEN** the system SHALL immediately proceed to Auto-Verify without pausing
 - **AND** SHALL invoke `/opsx:verify` automatically
-- **AND** SHALL only pause at step 3.3 (User Testing) to wait for human approval
+- **AND** SHALL only pause at User Testing to wait for human approval
 
 #### Scenario: Pause on ambiguous task
 

@@ -19,7 +19,7 @@ Four friction issues from real workflow sessions need instruction-level fixes. N
 
 ## Goals & Success Metrics
 
-* **SM-1**: `apply.instruction` in both WORKFLOW.md files contains explicit text distinguishing automated QA steps (3.1, 3.2) from human gate (3.3) — verified by grep for "automated" or "without pausing" in `apply.instruction`
+* **SM-1**: `apply.instruction` in both WORKFLOW.md files contains explicit text distinguishing automated QA steps (Metric Check, Auto-Verify) from human gate (User Testing) — verified by grep for "automated" or "without pausing" in `apply.instruction`
 * **SM-2**: Verify SKILL.md contains auto-fix guidance with clear scope boundary (mechanically fixable vs. judgment-required) — verified by grep for "auto-fix" in verify SKILL.md
 * **SM-3**: CONSTITUTION.md contains a "Template synchronization" convention mentioning both `openspec/WORKFLOW.md` and `src/templates/workflow.md` — verified by grep
 * **SM-4**: `apply.instruction` in both WORKFLOW.md files contains post-merge worktree cleanup sequence (switch directory → remove worktree → delete branch) — verified by grep for "worktree remove" in `apply.instruction`
