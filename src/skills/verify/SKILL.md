@@ -10,7 +10,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 **Steps**
 
-1. **If no change name provided, prompt for selection**
+1. **Select change**
 
    **Worktree context detection** (runs first, before directory listing):
    If no explicit change name was provided as an argument:
@@ -31,7 +31,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
    Read `openspec/WORKFLOW.md` to get the artifact pipeline from its YAML frontmatter. For each artifact, check if its output file exists in `openspec/changes/<name>/`. Note which artifacts are available for verification.
 
-3. **Load artifacts**
+3. **Load context**
 
    Read all available artifact files from the change directory:
    - `openspec/changes/<change-dir>/research.md`
@@ -40,118 +40,107 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - `openspec/changes/<change-dir>/preflight.md`
    - `openspec/changes/<change-dir>/tasks.md`
 
-   Also read specs for the capabilities listed in the proposal's Capabilities section:
+   Read specs for the capabilities listed in the proposal's Capabilities section:
    - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
-4. **Load Diff**
-
-   Obtain the list of files changed on this branch compared to the base branch:
+   Load the branch diff:
    1. Run `git merge-base HEAD main` to find the common ancestor commit
-   2. If the command succeeds, run `git diff <base>...HEAD --name-only` to get the list of changed files. Store this file list for use in subsequent steps.
+   2. If successful, run `git diff <base>...HEAD` to get the full diff content, and `git diff <base>...HEAD --name-only` to get the changed file list. Store both for use in subsequent steps.
    3. If `git merge-base` fails (no common ancestor — e.g., orphan branch, first commit, detached HEAD), set a flag to skip all diff-based checks. Note "No merge base available — diff checks skipped" for inclusion in the report.
    4. From the file list, exclude files under `openspec/changes/` and `openspec/specs/` — these are expected in the diff for any OpenSpec change and should not be flagged as unintended.
 
-5. **Initialize verification report structure**
+4. **Verify Implementation**
 
-   Create a report structure with three dimensions:
-   - **Completeness**: Track tasks and spec coverage
-   - **Correctness**: Track requirement implementation and scenario coverage
-   - **Coherence**: Track design adherence and pattern consistency
-
-   Each dimension can have CRITICAL, WARNING, or SUGGESTION issues.
-
-6. **Verify Completeness**
+   Check that all planned work was completed and that the actual changes match what was specified.
 
    **Task Completion**:
-   - If tasks.md exists, read it
-   - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
+   - Parse checkboxes in tasks.md: `- [ ]` (incomplete) vs `- [x]` (complete)
    - Count complete vs total tasks
    - If incomplete tasks exist:
      - Add CRITICAL issue for each incomplete task
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
-   **Task-Diff Mapping** (skip if diff-based checks are disabled):
+   **Task-Diff Mapping** (skip if diff unavailable):
    - For each task marked complete (`- [x]`) in tasks.md:
      - Extract keywords from the task description (component names, file names, module references)
-     - Check whether at least one file in the diff file list (from step 4) matches those keywords
+     - Check whether at least one file in the diff file list matches those keywords
+     - If a match is found, additionally check the diff content for evidence that the task was actually addressed (e.g., a task about "Add error handling" should show error-handling code in the diff, not just a comment change)
      - If a task description is too generic to produce meaningful matches (e.g., "Clean up code"), skip it and note as inconclusive
-     - If a completed task has no corresponding file in the diff:
+     - If a completed task has no corresponding file or content evidence in the diff:
        - Add WARNING: "Task marked complete but no corresponding changes in diff: <task description>"
        - Recommendation: "Verify this task was implemented or update the task description"
 
-   **Spec Coverage**:
-   - Read specs for capabilities listed in the proposal's Capabilities section
+   **Requirement Verification** (using diff as primary evidence, codebase as fallback):
    - For each requirement in the relevant specs:
-     - Search codebase for keywords related to the requirement
-     - Assess if implementation likely exists
-   - If requirements appear unimplemented:
-     - Add CRITICAL issue: "Requirement not found: <requirement name>"
-     - Recommendation: "Implement requirement X: <description>"
-
-7. **Verify Correctness**
-
-   **Requirement Implementation Mapping**:
-   - For each requirement from the relevant specs:
-     - Search codebase for implementation evidence
-     - If found, note file paths and line ranges
-     - Assess if implementation matches requirement intent
-     - If divergence detected:
-       - Add WARNING: "Implementation may diverge from spec: <details>"
-       - Recommendation: "Review <file>:<lines> against requirement X"
+     1. **Diff evidence** (primary): Search the diff content for keywords and patterns related to the requirement. The diff shows exactly what this change introduced — it is the most relevant evidence source.
+     2. **Codebase evidence** (fallback): If the requirement may have been implemented in a prior change or pre-existing code, search the codebase for keywords related to the requirement.
+     3. Assess whether the evidence matches the requirement intent. Check both existence and correctness in one pass:
+        - If no evidence found anywhere: Add CRITICAL issue: "Requirement not implemented: <requirement name>"
+        - If evidence exists but diverges from spec intent: Add WARNING: "Implementation may diverge from spec: <details>". Recommendation: "Review <file>:<lines> against requirement: <name>"
+        - If evidence matches: requirement is satisfied
 
    **Scenario Coverage**:
    - For each scenario in the relevant specs (marked with "#### Scenario:"):
-     - Check if conditions are handled in code
+     - Check if the scenario's conditions (GIVEN/WHEN/THEN) are addressed in the diff content or codebase
      - Check if tests exist covering the scenario
      - If scenario appears uncovered:
        - Add WARNING: "Scenario not covered: <scenario name>"
        - Recommendation: "Add test or implementation for scenario: <description>"
 
-8. **Verify Coherence**
+5. **Verify Scope**
+
+   Check that the change stays within planned boundaries and doesn't introduce unintended side-effects.
 
    **Design Adherence**:
    - If design.md exists:
      - Extract key decisions (look for sections like "Decision:", "Approach:", "Architecture:")
-     - Verify implementation follows those decisions
+     - Verify implementation follows those decisions (check diff content for evidence)
      - If contradiction detected:
        - Add WARNING: "Design decision not followed: <decision>"
        - Recommendation: "Update implementation or revise design.md to match reality"
    - If no design.md: Skip design adherence check, note "No design.md to verify against"
 
-   **Code Pattern Consistency**:
-   - Review new code for consistency with project patterns
-   - Check file naming, directory structure, coding style
-   - If significant deviations found:
-     - Add SUGGESTION: "Code pattern deviation: <details>"
-     - Recommendation: "Consider following project pattern: <example>"
-
-   **Diff Scope Check** (skip if diff-based checks are disabled):
-   - For each file in the diff file list (from step 4, after exclusions):
+   **Diff Scope Check** (skip if diff unavailable):
+   - For each file in the diff file list (after exclusions):
      - Check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section
      - A file is "traceable" if its path or filename matches keywords from any task description or design component entry
    - Collect all untraced files (files with no connection to any task or design component)
    - If untraced files exist:
      - Add a single grouped SUGGESTION: "Untraced files in diff not covered by any task or design component:" followed by the list of file paths
      - Recommendation: "Review these files — they may be legitimate dependencies or accidental changes"
-   - If all files are traceable: no issues raised
 
-9. **Verify Preflight Side-Effects**
-
-   Cross-check side-effects from preflight against tasks and implementation:
+   **Preflight Side-Effects**:
    - Read `preflight.md` Section C (Side-Effect Analysis)
    - Extract side-effect entries from tables or lists (look for risk descriptions with assessments)
    - Filter out entries assessed as "NONE", "Zero", or similar (no actual risk identified)
    - For each remaining side-effect:
      1. Search `tasks.md` for a keyword match against the side-effect description
-     2. If no task match: search codebase for keyword evidence of the side-effect being addressed
-     3. If neither task nor code evidence found:
+     2. If no task match: search diff content and codebase for evidence of the side-effect being addressed
+     3. If neither task nor evidence found:
         - Add WARNING: "Preflight side-effect not addressed: <side-effect description>"
         - Recommendation: "Add a task or verify that this side-effect is handled in the implementation"
-     4. If task or code evidence found: mark as addressed, no issue raised
+     4. If evidence found: mark as addressed, no issue raised
    - If Section C contains no actionable side-effects (all NONE or empty): skip and note "No preflight side-effects to verify"
    - If a side-effect description is too generic for meaningful keyword matching: skip that entry and note as inconclusive
 
-10. **Generate Verification Report**
+   **Code Pattern Consistency**:
+   - Review new code (from diff content) for consistency with project patterns
+   - Check file naming, directory structure, coding style
+   - If significant deviations found:
+     - Add SUGGESTION: "Code pattern deviation: <details>"
+     - Recommendation: "Consider following project pattern: <example>"
+
+6. **Generate Verification Report**
+
+   **Auto-Fix Pass** (before presenting the report):
+
+   Scan all WARNING-level findings for mechanically fixable issues — stale
+   cross-references between artifacts, inconsistent naming, or outdated text
+   correctable by simple text replacement without judgment. Auto-fix these
+   inline (edit the affected file) and record them as "WARNING (auto-fixed)"
+   in the report. Do NOT auto-fix WARNINGs that require user judgment
+   (e.g., spec/design divergence where the user must choose which is
+   correct) — present those as open issues.
 
    **Summary Scorecard**:
    ```
@@ -160,23 +149,9 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    ### Summary
    | Dimension      | Status           |
    |----------------|------------------|
-   | Completeness   | X/Y tasks, N reqs|
-   | Correctness    | M/N reqs covered |
-   | Coherence      | Followed/Issues  |
-   | Diff Scope     | N files checked, M untraced |
-   | Side-Effects   | N checked, M unaddressed |
+   | Implementation | X/Y tasks, N/M reqs verified |
+   | Scope          | N files checked, M untraced, K side-effects |
    ```
-
-   **Auto-Fix Pass** (before presenting the report):
-
-   Before generating the final report, scan all WARNING-level findings
-   for mechanically fixable issues — stale cross-references between
-   artifacts, inconsistent naming, or outdated text correctable by
-   simple text replacement without judgment. Auto-fix these inline
-   (edit the affected file) and record them as "WARNING (auto-fixed)"
-   in the report. Do NOT auto-fix WARNINGs that require user judgment
-   (e.g., spec/design divergence where the user must choose which is
-   correct) — present those as open issues.
 
    **Issues by Priority**:
 
@@ -186,15 +161,17 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
       - Each with specific, actionable recommendation
 
    2. **WARNING** (Should fix):
-      - Spec/design divergences
+      - Spec/implementation divergences
+      - Tasks complete but no diff evidence
       - Missing scenario coverage
       - Unaddressed preflight side-effects
+      - Design decisions not followed
       - Each with specific recommendation
       - Auto-fixed warnings listed separately as "WARNING (auto-fixed)"
 
    3. **SUGGESTION** (Nice to fix):
+      - Untraced files in diff
       - Pattern inconsistencies
-      - Minor improvements
       - Each with specific recommendation
 
    **Final Assessment**:
@@ -204,21 +181,19 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 **Verification Heuristics**
 
-- **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
-- **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
-- **Coherence**: Look for glaring inconsistencies, don't nitpick style
-- **Diff Scope**: Use file path keyword matching — a file is "traceable" if any task or design component keyword appears in its path. When uncertain, do not flag (err toward fewer false positives)
-- **Task-Diff Mapping**: Match task description keywords against diff file paths. Generic tasks (no specific component/file references) are inconclusive, not failures
-- **Side-Effects**: Use keyword matching from preflight Section C against tasks and codebase — skip entries that are too generic for meaningful matching
-- **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
-- **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
+- **Implementation**: Use diff content as primary evidence for what this change introduced. Fall back to codebase search for pre-existing implementations. Check both existence and correctness in one pass — don't require perfect certainty.
+- **Task-Diff Mapping**: Match task description keywords against file paths AND diff content. A file-level match alone is insufficient — verify the content relates to the task. Generic tasks (no specific component/file references) are inconclusive, not failures.
+- **Scope**: Use file path keyword matching for traceability. Check design decisions against diff evidence. When uncertain, do not flag (err toward fewer false positives).
+- **Side-Effects**: Use keyword matching from preflight Section C against tasks, diff content, and codebase — skip entries that are too generic for meaningful matching.
+- **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL.
+- **Actionability**: Every issue must have a specific recommendation with file/line references where applicable.
 
 **Graceful Degradation**
 
-- If only tasks.md exists: verify task completion only, skip spec/design checks
-- If tasks + specs exist: verify completeness and correctness, skip design
-- If full artifacts: verify all three dimensions
-- If no merge base available: skip all diff-based checks (step 4 flag), proceed with keyword-based verification
+- If only tasks.md exists: verify task completion only, skip spec/design/diff checks
+- If tasks + specs exist: verify implementation, skip design adherence
+- If full artifacts: verify implementation and scope
+- If no merge base available: skip all diff-based checks, fall back to codebase keyword search only
 - Always note which checks were skipped and why
 
 **Output Format**

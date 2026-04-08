@@ -6,20 +6,21 @@
 
 ## 2. Implementation
 
-- [x] 2.1. Update `src/skills/verify/SKILL.md`: Add new **Step 4 "Load Diff"** after step 3 (Load artifacts). Run `git merge-base HEAD main` to find base commit, then `git diff <base>...HEAD --name-only` to get changed file list. If merge-base fails, set a flag to skip all diff checks and note "No merge base available — diff checks skipped". Exclude files under `openspec/changes/` and `openspec/specs/` from unintended change detection.
-- [x] 2.2. Update `src/skills/verify/SKILL.md`: Add **task-diff mapping** sub-check to step 5 (Verify Completeness). For each completed task, keyword-match task description against file paths in the diff. Flag tasks with no matching diff as WARNING. Skip inconclusive matches (generic task descriptions) and note as inconclusive.
-- [x] 2.3. Update `src/skills/verify/SKILL.md`: Add **diff scope check** sub-check to step 7 (Verify Coherence). For each file in the diff, check traceability to tasks or design components. Collect untraced files and report as a single grouped SUGGESTION.
-- [x] 2.4. Update `src/skills/verify/SKILL.md`: Add **Diff Scope** row to the summary scorecard in step 9 (Generate Verification Report). Show count of files checked and untraced files found.
-- [x] 2.5. Renumber existing steps 4-9 to 5-10 in `src/skills/verify/SKILL.md` to accommodate the new step 4.
+- [x] 2.1. Restructure `src/skills/verify/SKILL.md`: Simplify from 10 steps to 6 steps. Merge Load artifacts + Load Diff → step 3 "Load context". Merge Completeness + Correctness → step 4 "Verify Implementation". Merge Coherence + Side-Effects → step 5 "Verify Scope". Two-dimension scorecard (Implementation + Scope).
+- [x] 2.2. Update `src/skills/verify/SKILL.md` step 3: Load full diff content (`git diff <base>...HEAD`) alongside file list (`--name-only`). Both stored for subsequent steps. Graceful skip when no merge base. Exclude `openspec/changes/` and `openspec/specs/` from scope checks.
+- [x] 2.3. Update `src/skills/verify/SKILL.md` step 4 "Verify Implementation": Task-diff mapping matches against file paths AND diff content (content must relate to task, not just file-level match). Requirement verification uses diff content as primary evidence, codebase search as fallback. Checks existence and correctness in one pass. Scenario coverage checks diff content and codebase.
+- [x] 2.4. Update `src/skills/verify/SKILL.md` step 5 "Verify Scope": Design adherence verified against diff evidence. Diff scope check for file traceability (grouped SUGGESTION for untraced files). Side-effect cross-check uses diff content + codebase. Code pattern consistency reviews diff content.
+- [x] 2.5. Update `openspec/specs/quality-gates/spec.md`: Updated Post-Implementation Verification requirement to two dimensions (Implementation + Scope), diff content as primary evidence, updated scenario terminology.
 
 ## 3. QA Loop & Human Approval
 
 - [x] 3.1. Metric Check:
-  - [x] Verify detects a completed task with no corresponding diff (task-diff mapping) — PASS (step 6 Task-Diff Mapping adds WARNING for completed tasks with no diff match)
-  - [x] Verify flags files in the diff not covered by any task or design component — PASS (step 8 Diff Scope Check collects untraced files and reports as SUGGESTION)
-  - [x] Verify skips diff checks gracefully when no merge base exists — PASS (step 4 sets skip flag, graceful degradation section documents fallback)
-  - [x] Verify reports untraced files as a single SUGGESTION, not one per file — PASS (step 8 explicitly says "single grouped SUGGESTION" with list of file paths)
-- [x] 3.2. Auto-Verify: Run `/opsx:verify`
+  - [x] Verify uses diff content to assess whether changes match requirement intent — PASS (step 4 Requirement Verification uses diff as primary evidence)
+  - [x] Verify detects a completed task with no corresponding diff evidence — PASS (step 4 Task-Diff Mapping checks file paths AND content)
+  - [x] Verify flags files in the diff not covered by any task or design component — PASS (step 5 Diff Scope Check, single grouped SUGGESTION)
+  - [x] Verify skips diff checks gracefully when no merge base exists — PASS (step 3 sets skip flag, graceful degradation section)
+  - [x] Verify reports untraced files as a single SUGGESTION, not one per file — PASS (step 5 explicitly groups)
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` (initial pass before restructure; re-verify after)
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
 - [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
