@@ -82,7 +82,7 @@ When a WARNING is **mechanically fixable** — i.e., it involves stale cross-ref
 
 The system SHALL additionally read `preflight.md` and cross-check each side-effect identified in Section C (Side-Effect Analysis) against `tasks.md` entries and codebase implementation evidence. For each side-effect, the system SHALL search for a corresponding task in `tasks.md` (keyword match) or implementation evidence in the codebase (keyword heuristic). If a side-effect has neither a matching task nor detectable implementation evidence, the system SHALL report a WARNING issue with an actionable recommendation. If Section C contains no side-effects (e.g., all risks assessed as NONE), the system SHALL skip the cross-check and note it in the report.
 
-The system SHALL additionally perform **diff-based verification** by reading `git diff <base-branch>...HEAD --name-only` to obtain the list of changed files. The system SHALL determine the base branch by running `git merge-base HEAD main` (or the configured main branch). If no merge base is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report.
+The system SHALL additionally perform **diff-based verification** by comparing the set of files changed on the current branch against the base branch. If no common ancestor with the base branch is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report.
 
 **Diff Scope Check**: For each file in the diff, the system SHALL check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section. Files that appear in the diff but have no connection to any task or design component SHALL be flagged as SUGGESTION ("Unintended change: <file> not covered by any task or design component").
 
@@ -199,7 +199,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Diff scope check finds all files traceable
 
 - **GIVEN** a change with design.md listing `src/skills/verify/SKILL.md` and `openspec/specs/quality-gates/spec.md` as components
-- **AND** `git diff main...HEAD --name-only` returns exactly those two files
+- **AND** the branch diff contains changes to exactly those two files
 - **WHEN** the system performs diff scope verification
 - **THEN** all changed files are traceable to design components
 - **AND** no diff scope issues are raised
@@ -207,28 +207,28 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Diff scope check finds untraced file
 
 - **GIVEN** a change with design.md listing components in `src/skills/verify/`
-- **AND** `git diff main...HEAD --name-only` includes `src/skills/apply/SKILL.md` which is not referenced in any task or design component
+- **AND** the branch diff includes `src/skills/apply/SKILL.md` which is not referenced in any task or design component
 - **WHEN** the system performs diff scope verification
 - **THEN** the report includes a SUGGESTION: "Unintended change: src/skills/apply/SKILL.md not covered by any task or design component"
 
 #### Scenario: Task marked complete with no corresponding diff
 
 - **GIVEN** a change with tasks.md containing a completed task "Update error messages in auth module"
-- **AND** `git diff main...HEAD` contains no changes to any auth-related files
+- **AND** the branch diff contains no changes to any auth-related files
 - **WHEN** the system performs task-diff mapping
 - **THEN** the report includes a WARNING: "Task marked complete but no corresponding changes in diff: Update error messages in auth module"
 
 #### Scenario: Task-diff mapping with matching changes
 
 - **GIVEN** a change with tasks.md containing a completed task "Add diff scope check to verify SKILL.md"
-- **AND** `git diff main...HEAD --name-only` includes `src/skills/verify/SKILL.md`
+- **AND** the branch diff includes `src/skills/verify/SKILL.md`
 - **WHEN** the system performs task-diff mapping
 - **THEN** the task is confirmed as having corresponding changes
 - **AND** no task-diff mapping issue is raised
 
 #### Scenario: Multiple untraced files reported as single suggestion
 
-- **GIVEN** a change where `git diff main...HEAD --name-only` includes 3 files not referenced in design.md or any task
+- **GIVEN** a change where the branch diff includes 3 files not referenced in design.md or any task
 - **WHEN** the system performs unintended change detection
 - **THEN** the report includes a single SUGGESTION listing all 3 untraced files
 - **AND** does not create separate issues per file
@@ -236,8 +236,8 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Diff checks skipped when no merge base available
 
 - **GIVEN** a change on an orphan branch with no common ancestor to main
-- **WHEN** the system attempts to determine the merge base via `git merge-base HEAD main`
-- **AND** the command fails (no common ancestor)
+- **WHEN** the system attempts to determine the common ancestor with main
+- **AND** no common ancestor exists
 - **THEN** the system skips all diff-based checks
 - **AND** notes "No merge base available — diff checks skipped" in the report
 - **AND** proceeds with keyword-based verification as normal
