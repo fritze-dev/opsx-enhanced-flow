@@ -50,10 +50,10 @@
 
 ## 8. QA Loop & Human Approval
 
-- [ ] 8.1. Metric Check: All 18 specs have `status: stable`, `version: 1`, `lastModified: 2026-04-08` — PASS/FAIL
-- [ ] 8.2. Metric Check: All 11 templates + workflow.md have `template-version: 1` — PASS/FAIL
-- [ ] 8.3. Metric Check: No skill parses `## Capabilities` section as primary detection (grep verification) — PASS/FAIL
-- [ ] 8.4. Auto-Verify: Run `/opsx:verify`
+- [x] 8.1. Metric Check: All 18 specs have `status: stable`, `version: 1`, `lastModified: 2026-04-08` — PASS
+- [x] 8.2. Metric Check: All 11 templates + workflow.md have `template-version: 1` — PASS
+- [x] 8.3. Metric Check: No skill parses `## Capabilities` section as primary detection (grep verification) — PASS
+- [x] 8.4. Auto-Verify: Run `/opsx:verify`
 - [ ] 8.5. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 8.6. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
 - [ ] 8.7. Final Verify: Run `/opsx:verify` after all fixes. Skip if 8.6 was not entered.
