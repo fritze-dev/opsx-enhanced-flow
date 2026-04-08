@@ -43,7 +43,15 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    Also read specs for the capabilities listed in the proposal's Capabilities section:
    - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
-4. **Initialize verification report structure**
+4. **Load Diff**
+
+   Obtain the list of files changed on this branch compared to the base branch:
+   1. Run `git merge-base HEAD main` to find the common ancestor commit
+   2. If the command succeeds, run `git diff <base>...HEAD --name-only` to get the list of changed files. Store this file list for use in subsequent steps.
+   3. If `git merge-base` fails (no common ancestor — e.g., orphan branch, first commit, detached HEAD), set a flag to skip all diff-based checks. Note "No merge base available — diff checks skipped" for inclusion in the report.
+   4. From the file list, exclude files under `openspec/changes/` and `openspec/specs/` — these are expected in the diff for any OpenSpec change and should not be flagged as unintended.
+
+5. **Initialize verification report structure**
 
    Create a report structure with three dimensions:
    - **Completeness**: Track tasks and spec coverage
@@ -52,7 +60,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
    Each dimension can have CRITICAL, WARNING, or SUGGESTION issues.
 
-5. **Verify Completeness**
+6. **Verify Completeness**
 
    **Task Completion**:
    - If tasks.md exists, read it
@@ -61,6 +69,15 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - If incomplete tasks exist:
      - Add CRITICAL issue for each incomplete task
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+
+   **Task-Diff Mapping** (skip if diff-based checks are disabled):
+   - For each task marked complete (`- [x]`) in tasks.md:
+     - Extract keywords from the task description (component names, file names, module references)
+     - Check whether at least one file in the diff file list (from step 4) matches those keywords
+     - If a task description is too generic to produce meaningful matches (e.g., "Clean up code"), skip it and note as inconclusive
+     - If a completed task has no corresponding file in the diff:
+       - Add WARNING: "Task marked complete but no corresponding changes in diff: <task description>"
+       - Recommendation: "Verify this task was implemented or update the task description"
 
    **Spec Coverage**:
    - Read specs for capabilities listed in the proposal's Capabilities section
@@ -71,7 +88,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Add CRITICAL issue: "Requirement not found: <requirement name>"
      - Recommendation: "Implement requirement X: <description>"
 
-6. **Verify Correctness**
+7. **Verify Correctness**
 
    **Requirement Implementation Mapping**:
    - For each requirement from the relevant specs:
@@ -90,7 +107,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
        - Add WARNING: "Scenario not covered: <scenario name>"
        - Recommendation: "Add test or implementation for scenario: <description>"
 
-7. **Verify Coherence**
+8. **Verify Coherence**
 
    **Design Adherence**:
    - If design.md exists:
@@ -108,7 +125,17 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Add SUGGESTION: "Code pattern deviation: <details>"
      - Recommendation: "Consider following project pattern: <example>"
 
-8. **Verify Preflight Side-Effects**
+   **Diff Scope Check** (skip if diff-based checks are disabled):
+   - For each file in the diff file list (from step 4, after exclusions):
+     - Check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section
+     - A file is "traceable" if its path or filename matches keywords from any task description or design component entry
+   - Collect all untraced files (files with no connection to any task or design component)
+   - If untraced files exist:
+     - Add a single grouped SUGGESTION: "Untraced files in diff not covered by any task or design component:" followed by the list of file paths
+     - Recommendation: "Review these files — they may be legitimate dependencies or accidental changes"
+   - If all files are traceable: no issues raised
+
+9. **Verify Preflight Side-Effects**
 
    Cross-check side-effects from preflight against tasks and implementation:
    - Read `preflight.md` Section C (Side-Effect Analysis)
@@ -124,7 +151,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - If Section C contains no actionable side-effects (all NONE or empty): skip and note "No preflight side-effects to verify"
    - If a side-effect description is too generic for meaningful keyword matching: skip that entry and note as inconclusive
 
-9. **Generate Verification Report**
+10. **Generate Verification Report**
 
    **Summary Scorecard**:
    ```
@@ -136,6 +163,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    | Completeness   | X/Y tasks, N reqs|
    | Correctness    | M/N reqs covered |
    | Coherence      | Followed/Issues  |
+   | Diff Scope     | N files checked, M untraced |
    | Side-Effects   | N checked, M unaddressed |
    ```
 
@@ -179,6 +207,8 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 - **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
 - **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
 - **Coherence**: Look for glaring inconsistencies, don't nitpick style
+- **Diff Scope**: Use file path keyword matching — a file is "traceable" if any task or design component keyword appears in its path. When uncertain, do not flag (err toward fewer false positives)
+- **Task-Diff Mapping**: Match task description keywords against diff file paths. Generic tasks (no specific component/file references) are inconclusive, not failures
 - **Side-Effects**: Use keyword matching from preflight Section C against tasks and codebase — skip entries that are too generic for meaningful matching
 - **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
 - **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
@@ -188,6 +218,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 - If only tasks.md exists: verify task completion only, skip spec/design checks
 - If tasks + specs exist: verify completeness and correctness, skip design
 - If full artifacts: verify all three dimensions
+- If no merge base available: skip all diff-based checks (step 4 flag), proceed with keyword-based verification
 - Always note which checks were skipped and why
 
 **Output Format**
