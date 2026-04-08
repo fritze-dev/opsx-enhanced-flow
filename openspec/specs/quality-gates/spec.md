@@ -78,6 +78,8 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess three dimensions: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy and scenario coverage), and Coherence (design adherence and code pattern consistency). The system SHALL read specs at `openspec/specs/<capability>/spec.md` for the capabilities listed in the change's proposal to verify implementation against. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
+When a WARNING is **mechanically fixable** — i.e., it involves stale cross-references between artifacts, inconsistent naming, or outdated text that can be corrected by simple text replacement without judgment — the system SHALL auto-fix the issue inline before presenting the report. Auto-fixed issues SHALL still appear in the report as resolved WARNINGs with a note indicating the fix applied. WARNINGs that require user judgment (e.g., spec/design divergence where the user must choose which is correct) SHALL NOT be auto-fixed and SHALL be presented as open issues for user resolution.
+
 The system SHALL additionally read `preflight.md` and cross-check each side-effect identified in Section C (Side-Effect Analysis) against `tasks.md` entries and codebase implementation evidence. For each side-effect, the system SHALL search for a corresponding task in `tasks.md` (keyword match) or implementation evidence in the codebase (keyword heuristic). If a side-effect has neither a matching task nor detectable implementation evidence, the system SHALL report a WARNING issue with an actionable recommendation. If Section C contains no side-effects (e.g., all risks assessed as NONE), the system SHALL skip the cross-check and note it in the report.
 
 The `/opsx:verify` command SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When invoked as a final verify after the fix loop, the command SHALL operate identically — checking completeness, correctness, and coherence against the current state of code and artifacts. No special flags or modes are needed; the verify skill is stateless and always checks the current state.
@@ -111,6 +113,23 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **WHEN** the system checks correctness
 - **THEN** the report includes a WARNING: "Implementation may diverge from spec: auth uses session cookies, spec requires JWT"
 - **AND** recommends "Review src/auth/handler.ts:45 against requirement: JWT Authentication"
+
+#### Scenario: Verify auto-fixes stale artifact cross-reference
+
+- **GIVEN** a change where `proposal.md` references an artifact filename that was renamed during the specs stage
+- **AND** the stale reference is a simple text replacement (old filename → new filename)
+- **WHEN** the system runs `/opsx:verify`
+- **THEN** the system SHALL auto-fix the stale reference in `proposal.md`
+- **AND** the verification report SHALL list the fix as "WARNING (auto-fixed): Updated stale reference in proposal.md"
+- **AND** the report SHALL NOT present it as an open issue requiring user action
+
+#### Scenario: Verify does not auto-fix judgment-requiring divergence
+
+- **GIVEN** a spec requiring JWT authentication
+- **AND** the implementation uses session cookies instead
+- **WHEN** the system runs `/opsx:verify`
+- **THEN** the system SHALL NOT auto-fix the divergence
+- **AND** SHALL present it as an open WARNING for the user to decide whether to update the spec or the code
 
 #### Scenario: Verification finds code pattern inconsistency
 

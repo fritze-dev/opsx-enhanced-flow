@@ -166,6 +166,36 @@ The `/opsx:new` skill SHALL check for stale worktrees before creating a new chan
 - **AND** if the branch was fully merged to main, it is deleted and the worktree removed
 - **AND** if the branch was NOT merged, `git branch -d` fails and the worktree is preserved
 
+### Requirement: Post-Merge Worktree Cleanup
+
+When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) run `git worktree remove <path>` to remove the completed worktree, (3) run `git branch -D <branch-name>` to delete the merged branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:new` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
+
+**User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:new`.
+
+#### Scenario: Cleanup after successful local merge
+
+- **GIVEN** the agent is working inside a worktree at `.claude/worktrees/fix-auth` on branch `fix-auth`
+- **AND** the agent runs `gh pr merge` which succeeds
+- **WHEN** the merge completes
+- **THEN** the system SHALL switch the working directory to the main worktree
+- **AND** run `git worktree remove .claude/worktrees/fix-auth`
+- **AND** run `git branch -D fix-auth`
+- **AND** report "Cleaned up worktree: fix-auth (merged)"
+
+#### Scenario: Cleanup skipped when not in worktree
+
+- **GIVEN** the agent is working in the main working tree (not a worktree)
+- **WHEN** a merge completes
+- **THEN** the system SHALL NOT attempt worktree cleanup
+
+#### Scenario: Worktree removal fails due to dirty state
+
+- **GIVEN** the agent is inside a worktree and a merge completes
+- **AND** the worktree has uncommitted changes
+- **WHEN** `git worktree remove` fails
+- **THEN** the system SHALL report the failure and suggest manual cleanup
+- **AND** SHALL NOT block the workflow
+
 ### Requirement: Active vs Completed Change Detection
 
 Skills SHALL distinguish active from completed changes based on task completion status. A change is considered **active** if its `tasks.md` contains at least one unchecked item (`- [ ]`) or if `tasks.md` does not exist (artifacts still in progress). A change is considered **completed** if its `tasks.md` exists and all items are checked (`- [x]`). Skills that operate on active changes (apply, ff, verify, discover, preflight) SHALL filter to active changes when listing available changes. Skills that operate on completed changes (changelog, docs) SHALL filter to completed changes.
