@@ -24,9 +24,6 @@ instruction: |
 
 ## Conventions
 (Naming, commits, branching, file organization)
-<!-- Template synchronization: changes to openspec/WORKFLOW.md behavior fields
-     (apply.instruction, post_artifact, context) must also be reflected in
-     src/templates/workflow.md. Worktree config may intentionally differ. -->
 
 ## Standard Tasks
 
