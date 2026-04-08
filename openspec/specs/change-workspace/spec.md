@@ -168,7 +168,7 @@ The `/opsx:new` skill SHALL check for stale worktrees before creating a new chan
 
 ### Requirement: Post-Merge Worktree Cleanup
 
-When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) run `git worktree remove <path>` to remove the completed worktree, (3) run `git branch -D <branch-name>` to delete the merged branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:new` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
+When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:new` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
 
 **User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:new`.
 
@@ -178,8 +178,9 @@ When a PR is merged from within a worktree (via `gh pr merge` or equivalent), th
 - **AND** the agent runs `gh pr merge` which succeeds
 - **WHEN** the merge completes
 - **THEN** the system SHALL switch the working directory to the main worktree
-- **AND** run `git worktree remove .claude/worktrees/fix-auth`
-- **AND** run `git branch -D fix-auth`
+- **AND** remove the worktree
+- **AND** delete the local branch
+- **AND** delete the remote branch
 - **AND** report "Cleaned up worktree: fix-auth (merged)"
 
 #### Scenario: Cleanup skipped when not in worktree
