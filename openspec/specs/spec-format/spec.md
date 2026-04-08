@@ -55,16 +55,24 @@ Every requirement SHALL have at least one scenario using Gherkin format. Scenari
 
 ### Requirement: Spec Frontmatter Metadata
 Specs MAY include an optional YAML frontmatter block at the top of the file, delimited by `---` lines. The frontmatter SHALL support the following fields:
+
+**Documentation fields** (optional):
 - `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `/opsx:docs` command SHALL read this value to determine capability ordering.
 - `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `/opsx:docs` command SHALL use this value to render category group headers in the capabilities table.
 
-Both fields are optional. If `order` is absent, `/opsx:docs` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group.
+**Tracking fields** (managed by skills):
+- `status` (string, `stable` or `draft`): Indicates whether the spec is actively being edited by a change. Default: `stable`. Skills SHALL set `status: draft` when modifying a spec during the specs stage and flip back to `stable` during verify completion.
+- `change` (string): The change directory name (e.g., `2026-04-08-spec-frontmatter-tracking`) that is currently editing this spec. SHALL only be present when `status: draft`. Skills SHALL remove this field when flipping to `stable`.
+- `version` (integer): Monotonically increasing version number. Starts at `1` on creation. Skills SHALL increment by 1 each time a change modifies the spec and completes successfully (during verify completion).
+- `lastModified` (string, `YYYY-MM-DD`): The date the spec was last modified. Skills SHALL set this to the current date when editing the spec during the specs stage and again during verify completion.
+
+The `order` and `category` fields are optional. If `order` is absent, `/opsx:docs` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group. The tracking fields (`status`, `version`, `lastModified`) are optional for backward compatibility — skills SHALL handle their absence gracefully by treating missing `status` as `stable`, missing `version` as `1`, and missing `lastModified` as requiring regeneration.
 
 The frontmatter block SHALL appear before the `## Purpose` section. Existing spec content (Purpose, Requirements, Edge Cases, Assumptions) SHALL remain unchanged.
 
-**User Story:** As a project maintainer I want deterministic, project-specific ordering and grouping of capabilities in generated documentation, so that the TOC follows my project's workflow sequence and stays consistent across doc regeneration runs.
+**User Story:** As a project maintainer I want deterministic ordering in docs, change-level tracking for collision detection, and version-based incremental detection, so that skills can reliably identify which specs are affected by a change without fragile text parsing.
 
-#### Scenario: Spec with frontmatter
+#### Scenario: Spec with documentation frontmatter
 - **GIVEN** a spec at `openspec/specs/quality-gates/spec.md`
 - **AND** the spec has frontmatter with `order: 8` and `category: development`
 - **WHEN** `/opsx:docs` generates the capabilities table
@@ -78,7 +86,29 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 #### Scenario: Frontmatter assigned during spec creation
 - **GIVEN** a new capability being specified during the specs artifact phase
 - **WHEN** the agent creates the spec at `openspec/specs/<capability>/spec.md`
-- **THEN** the spec SHALL include frontmatter with `order` and `category` values that position the new capability appropriately among existing capabilities
+- **THEN** the spec SHALL include frontmatter with `order`, `category`, `status: draft`, `change`, `version: 1`, and `lastModified` values
+
+#### Scenario: Tracking fields set during spec editing
+- **GIVEN** a stable spec at `openspec/specs/quality-gates/spec.md` with `status: stable` and `version: 3`
+- **WHEN** a change edits this spec during the specs stage
+- **THEN** the frontmatter SHALL be updated to `status: draft`, `change: <change-dir>`, and `lastModified: <today>`
+- **AND** `version` SHALL remain `3` (not bumped until completion)
+
+#### Scenario: Tracking fields reset during verify completion
+- **GIVEN** a spec with `status: draft`, `change: 2026-04-08-my-change`, and `version: 3`
+- **WHEN** verify completion runs for that change
+- **THEN** the frontmatter SHALL be updated to `status: stable`, `change` field removed, `version: 4`, and `lastModified: <today>`
+
+#### Scenario: Collision detection via draft status
+- **GIVEN** a spec with `status: draft` and `change: 2026-04-08-feature-a`
+- **WHEN** a different change (`2026-04-08-feature-b`) attempts to edit the same spec
+- **THEN** the agent SHALL detect the conflict via mismatched `change` values
+- **AND** SHALL warn the user about the collision before proceeding
+
+#### Scenario: Missing tracking fields treated as defaults
+- **GIVEN** a spec with only `order` and `category` in frontmatter (no tracking fields)
+- **WHEN** a skill reads the spec
+- **THEN** the skill SHALL treat the spec as `status: stable`, `version: 1`, and `lastModified` as unset (requiring regeneration)
 
 ### Requirement: Spec Format
 Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
@@ -127,6 +157,8 @@ The `## Assumptions` section at the end of specs and design documents SHALL coll
 - If a requirement has zero scenarios, the spec SHALL be considered invalid and flagged during preflight.
 - If two specs share the same `order` value, `/opsx:docs` SHALL use alphabetical capability name as tiebreaker.
 - If a `category` value is not one of the standard categories, `/opsx:docs` SHALL still render it as a group header using title-case formatting.
+- If a spec has `status: draft` but no `change` field, the spec SHALL be treated as having an unknown change owner — preflight SHALL flag this as a warning.
+- If a spec has `status: stable` with a `change` field present, the `change` field SHALL be ignored (stale data).
 
 ## Assumptions
 

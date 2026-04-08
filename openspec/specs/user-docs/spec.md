@@ -126,10 +126,9 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 
 **Change detection logic:** For each capability, the agent SHALL:
 1. Read the existing `docs/capabilities/<capability>.md` and extract the `lastUpdated` value from YAML frontmatter. If the file does not exist, the capability needs generation.
-2. Scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability.
-3. Extract the date prefix (`YYYY-MM-DD`) from each matching change directory name.
-4. If ANY change date is newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
-5. If no change date is newer, skip this capability entirely.
+2. Read the spec's `lastModified` frontmatter field from `openspec/specs/<capability>/spec.md`. If `lastModified` is present and newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
+3. **Fallback** (for specs without `lastModified` field): Scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Extract the date prefix (`YYYY-MM-DD`) from each matching change directory name. If ANY change date is newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
+4. If neither the spec's `lastModified` nor any change date is newer, skip this capability entirely.
 
 **First run:** When no capability docs exist yet, all capabilities SHALL be generated (equivalent to full generation).
 
@@ -143,17 +142,24 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 
 **User Story:** As a user I want `/opsx:docs` to only regenerate documentation for capabilities that have new change data, so that unchanged docs are not touched and timestamps remain accurate.
 
-#### Scenario: Capability skipped when no newer changes exist
+#### Scenario: Capability skipped when spec lastModified is older
 - **GIVEN** `docs/capabilities/release-workflow.md` exists with `lastUpdated: "2026-03-20"`
-- **AND** all completed changes listing `release-workflow` in their proposals have date prefixes of `2026-03-04` or earlier
+- **AND** `openspec/specs/release-workflow/spec.md` has `lastModified: "2026-03-04"`
 - **WHEN** the developer runs `/opsx:docs`
 - **THEN** the agent skips `release-workflow` and does not read its changes or regenerate its doc
 
-#### Scenario: Capability regenerated when newer change exists
+#### Scenario: Capability regenerated when spec lastModified is newer
 - **GIVEN** `docs/capabilities/user-docs.md` exists with `lastUpdated: "2026-03-05"`
-- **AND** a completed change `2026-03-23-improve-docs-efficiency/` has a proposal listing `user-docs`
+- **AND** `openspec/specs/user-docs/spec.md` has `lastModified: "2026-03-23"`
 - **WHEN** the developer runs `/opsx:docs`
 - **THEN** the agent regenerates `docs/capabilities/user-docs.md`
+
+#### Scenario: Fallback to proposal scanning when spec has no lastModified
+- **GIVEN** `docs/capabilities/legacy-cap.md` exists with `lastUpdated: "2026-03-05"`
+- **AND** `openspec/specs/legacy-cap/spec.md` has no `lastModified` field
+- **AND** a completed change `2026-03-23-update/` has a proposal listing `legacy-cap`
+- **WHEN** the developer runs `/opsx:docs`
+- **THEN** the agent falls back to proposal scanning and regenerates the doc
 
 #### Scenario: First run generates all capabilities
 - **GIVEN** no capability doc files exist under `docs/capabilities/`
@@ -266,4 +272,5 @@ Translation rules:
 - Per-section maximum limits (Purpose max 3 sentences, Known Limitations max 5 bullets, etc.) are sufficient to prevent doc bloat without needing a priority-based section-dropping rule. <!-- ASSUMPTION: Based on observed doc lengths — no capability doc exceeds 1.3 pages even with all sections -->
 - Change directory date prefixes accurately reflect when the change was created. <!-- ASSUMPTION: Naming enforced by new skill -->
 - The `lastUpdated` frontmatter field in capability docs is only written by `/opsx:docs`, not manually edited. <!-- ASSUMPTION: Users follow workflow conventions -->
-- The proposal's Capabilities section reliably indicates which specs were affected by a change. <!-- ASSUMPTION: Proposal-spec traceability -->
+- The proposal's Capabilities section reliably indicates which specs were affected by a change (fallback detection). <!-- ASSUMPTION: Proposal-spec traceability -->
+- Spec frontmatter `lastModified` is authoritative when present — it is set by skills during spec editing and verify completion. <!-- ASSUMPTION: Tracking field accuracy -->

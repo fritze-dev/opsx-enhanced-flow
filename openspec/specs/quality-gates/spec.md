@@ -10,7 +10,7 @@ Provides `/opsx:preflight` for pre-implementation quality checks across six dime
 
 ### Requirement: Preflight Quality Check
 
-The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:preflight`. The preflight check SHALL cover six dimensions: (A) Traceability Matrix -- mapping each capability listed in the proposal to its corresponding spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, and (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md. The Marker Audit SHALL:
+The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:preflight`. The preflight check SHALL cover seven dimensions: (A) Traceability Matrix -- mapping each capability listed in the proposal to its corresponding spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md, and (G) Draft Spec Validation -- verifying that all specs with `status: draft` have a `change` value matching the current change directory name. Specs with `status: draft` belonging to a different change SHALL be flagged as BLOCKED. Specs with `status: draft` and no `change` field SHALL be flagged as WARNING. The Marker Audit SHALL:
 1. Collect all `<!-- ASSUMPTION: ... -->` tags and verify each has an accompanying visible list item. Assumptions written entirely inside HTML comments (no visible text) SHALL be flagged as format violations.
 2. Rate each valid assumption as Acceptable Risk, Needs Clarification, or Blocking.
 3. Scan for any remaining `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers. Any REVIEW marker found SHALL be rated as Blocking, because REVIEW markers must be resolved before implementation.
@@ -66,6 +66,19 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 - **AND** the system SHALL pause and ask the user to acknowledge each warning
 - **AND** the system SHALL NOT proceed to task creation until the user explicitly confirms
 
+#### Scenario: Preflight validates draft spec ownership
+- **GIVEN** a change named `2026-04-08-my-change`
+- **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
+- **AND** `openspec/specs/user-auth/spec.md` has `status: draft` and `change: 2026-04-01-other-change`
+- **WHEN** the user invokes `/opsx:preflight 2026-04-08-my-change`
+- **THEN** the Draft Spec Validation dimension SHALL flag `user-auth` as BLOCKED (draft owned by different change)
+- **AND** SHALL confirm `quality-gates` as valid (draft owned by current change)
+
+#### Scenario: Preflight detects orphaned draft spec
+- **GIVEN** a spec with `status: draft` but no `change` field
+- **WHEN** the user invokes `/opsx:preflight`
+- **THEN** the Draft Spec Validation SHALL flag it as WARNING: "Draft spec with no change owner"
+
 #### Scenario: Required artifacts missing
 
 - **GIVEN** a change where specs exist but design.md has not been created
@@ -76,7 +89,11 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 ### Requirement: Post-Implementation Verification
 
-The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read specs at `openspec/specs/<capability>/spec.md` for the capabilities listed in the change's proposal to verify implementation against. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
+The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read specs at `openspec/specs/<capability>/spec.md` for the capabilities listed in the change's proposal to verify implementation against.
+
+**Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
+
+**Verify completion (draft→stable flip):** When verify passes (no CRITICAL issues) and the change is approved for merge, the system SHALL finalize spec tracking fields for all specs that were modified by this change: set `status: stable`, remove the `change` field, increment `version` by 1, and set `lastModified` to the current date. This completion step runs as part of the post-apply workflow, after user approval and before the merge commit. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
 When a WARNING is **mechanically fixable** — i.e., it involves stale cross-references between artifacts, inconsistent naming, or outdated text that can be corrected by simple text replacement without judgment — the system SHALL auto-fix the issue inline before presenting the report. Auto-fixed issues SHALL still appear in the report as resolved WARNINGs with a note indicating the fix applied. WARNINGs that require user judgment (e.g., spec/design divergence where the user must choose which is correct) SHALL NOT be auto-fixed and SHALL be presented as open issues for user resolution.
 
@@ -93,6 +110,20 @@ The system SHALL load the branch diff (full content and file list) as part of co
 The `/opsx:verify` command SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When invoked as a final verify after the fix loop, the command SHALL operate identically — checking implementation and scope against the current state of code and artifacts. No special flags or modes are needed; the verify skill is stateless and always checks the current state.
 
 **User Story:** As a developer I want post-implementation verification that checks my code against the specs, so that I can catch gaps, divergences, and inconsistencies before proceeding.
+
+#### Scenario: Verify gates on draft spec status
+- **GIVEN** a change `2026-04-08-my-change` that modified spec `quality-gates`
+- **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
+- **WHEN** the user invokes `/opsx:verify 2026-04-08-my-change`
+- **THEN** the report SHALL include a CRITICAL issue: "Spec quality-gates is still in draft status — must be finalized before merge"
+
+#### Scenario: Verify completion flips draft to stable
+- **GIVEN** a change `2026-04-08-my-change` that modified specs `quality-gates` (version 3) and `spec-format` (version 5)
+- **AND** verify passes with no CRITICAL issues
+- **AND** the user approves the change for merge
+- **WHEN** the verify completion step runs
+- **THEN** `quality-gates` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 4`, `lastModified: 2026-04-08`
+- **AND** `spec-format` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 6`, `lastModified: 2026-04-08`
 
 #### Scenario: Verification with all checks passing
 
