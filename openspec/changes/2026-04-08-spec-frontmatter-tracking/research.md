@@ -71,7 +71,7 @@ No external dependencies. This is an internal metadata enhancement to YAML front
 | Data Model | Clear | YAML frontmatter fields in spec files |
 | UX | Clear | Transparent to users — managed by skills automatically |
 | Integration | Clear | Six skills affected, all identified |
-| Edge Cases | Partial | Abandoned changes with lingering draft status; concurrent edits to same spec |
+| Edge Cases | Clear | Resolved: verify gate blocks draft-to-main; lastModified uses actual edit date |
 | Constraints | Clear | Skill immutability, backward compatibility |
 | Terminology | Clear | Reuses existing YAML frontmatter conventions |
 | Non-Functional | Clear | No performance concerns — file-level metadata reads |
@@ -80,11 +80,13 @@ No external dependencies. This is an internal metadata enhancement to YAML front
 
 | # | Question | Category | Impact |
 |---|----------|----------|--------|
-| 1 | Should `lastModified` use the change directory date prefix or the actual date of the spec edit? | Edge Cases | Medium — affects incremental detection accuracy |
-| 2 | How should abandoned drafts be detected and cleaned up? Preflight warning? Bootstrap recovery? | Edge Cases | Medium — stale drafts could confuse collision detection |
+| 1 | ~~Should `lastModified` use the change directory date prefix or the actual date of the spec edit?~~ | Edge Cases | Resolved — see Decision 1 |
+| 2 | ~~How should abandoned drafts be detected and cleaned up?~~ | Edge Cases | Resolved — see Decision 2 |
 
 ## 7. Decisions
 <!-- Filled after user feedback. -->
 
 | # | Decision | Rationale | Alternatives Considered |
 |---|----------|-----------|------------------------|
+| 1 | `lastModified` is always the actual edit date, not the change directory date prefix | Accuracy — multi-day changes would have stale dates otherwise. Directory date is creation context, not modification context. | Use directory date prefix (simpler but less accurate); add separate `createdDate` field (deferred — can add later if needed) |
+| 2 | No cleanup automatism for abandoned drafts. Enforce via verify gate: `status: draft` must not reach main. Verify flips `draft → stable` during completion. | Simpler and more robust than recovery mechanisms. Draft status only exists in PR branches. Merge gate is a hard enforcement, not soft guidance. | Preflight warning for stale drafts (soft, could be ignored); bootstrap recovery mode (complex, rarely needed) |
