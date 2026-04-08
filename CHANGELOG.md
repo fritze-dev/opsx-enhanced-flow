@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-08 — Diff-Based Verification
+
+### Changed
+- `/opsx:verify` now uses the branch diff as its **primary evidence source** — instead of only searching the codebase with keywords, verification reads the actual diff content to assess whether changes match requirement intent (closes #83)
+- Verify flow restructured from 10 steps to 6 — three dimensions (Completeness, Correctness, Coherence) consolidated into two: **Implementation** (Completeness + Correctness) and **Scope** (Coherence + Side-Effects)
+- Task-Diff Mapping now checks file paths AND diff content — a file-level match alone is no longer sufficient; the diff content must relate to the task description
+- Requirement verification checks both existence and correctness in a single pass using diff evidence, with codebase keyword search as fallback for pre-existing code
+
+### Added
+- Diff Scope Check — flags files in the diff not covered by any task or design component as a grouped suggestion
+- Task-Diff Mapping — detects tasks marked complete that produced no corresponding changes in the diff
+- Graceful skip when no merge base is available (orphan branch, first commit) — diff checks are skipped with a note, keyword-based verification proceeds as normal
+
 ## 2026-04-08 — Fix Friction Batch
 
 ### Changed

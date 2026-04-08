@@ -21,18 +21,18 @@
   - [x] Verify skips diff checks gracefully when no merge base exists — PASS (step 3 sets skip flag, graceful degradation section)
   - [x] Verify reports untraced files as a single SUGGESTION, not one per file — PASS (step 5 explicitly groups)
 - [x] 3.2. Auto-Verify: Run `/opsx:verify` (passed — 0 critical, 0 warnings, 0 suggestions)
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: Fixed sub-dimension labels (Completeness+Correctness, Coherence+Side-Effects), updated stale preflight verdict.
+- [x] 3.5. Final Verify: Run `/opsx:verify` after all fixes — passed (0 critical, 0 warnings, 0 suggestions).
+- [x] 3.6. Approval: User approved.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #83"`)
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs (`/opsx:docs`)
+- [x] 4.3. Bump version (1.0.42 → 1.0.43)
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #83"`)
 
 ## 5. Post-Merge Reminders
 

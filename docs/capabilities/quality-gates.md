@@ -15,7 +15,7 @@ Starting implementation on incomplete or contradictory specs wastes effort and p
 
 ## Rationale
 
-Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and marker audit) because each catches a different category of problem that would be expensive to fix during implementation. The marker audit dimension checks both assumption format compliance and the presence of unresolved `<!-- REVIEW -->` markers, since either issue indicates unfinished work that should not proceed to implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses three dimensions (completeness, correctness, and coherence) and classifies every finding by severity, giving you clear prioritization. Docs-verify uses semantic checks rather than diff-based regeneration because comparing structural elements (Purpose, requirement names, capability listings) is cheaper and produces more actionable output than regenerating docs in memory. All three commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions.
+Preflight covers six distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, and marker audit) because each catches a different category of problem that would be expensive to fix during implementation. The marker audit dimension checks both assumption format compliance and the presence of unresolved `<!-- REVIEW -->` markers, since either issue indicates unfinished work that should not proceed to implementation. When preflight finds warnings but no blockers, it pauses and requires your explicit acknowledgment before proceeding -- this prevents warnings from being silently accepted and surfacing as issues later. Verify assesses two dimensions -- Implementation (Completeness + Correctness) and Scope (Coherence + Side-Effects) -- using the branch diff as the primary evidence source, and classifies every finding by severity, giving you clear prioritization. Docs-verify uses semantic checks rather than diff-based regeneration because comparing structural elements (Purpose, requirement names, capability listings) is cheaper and produces more actionable output than regenerating docs in memory. All three commands are stateless and report findings without auto-fixing, keeping you in control of all resolution decisions.
 
 > **Workflow sequence**: `/opsx:preflight` runs after the design phase and before task creation. `/opsx:verify` runs after implementation as part of the QA loop (steps 3.2 and 3.5 in tasks.md). `/opsx:docs-verify` runs anytime to check documentation freshness.
 
@@ -23,10 +23,13 @@ Preflight covers six distinct dimensions (traceability, gaps, side effects, cons
 
 - **Preflight Quality Check (`/opsx:preflight`)**: A mandatory review across six dimensions before tasks are created, producing a preflight report with a verdict of PASS, PASS WITH WARNINGS, or BLOCKED.
 - **Mandatory Pause on Warnings**: When preflight returns PASS WITH WARNINGS, the system pauses and requires you to review and explicitly acknowledge each warning before proceeding to task creation.
-- **Post-Implementation Verification (`/opsx:verify`)**: A check of the implementation against change artifacts across three dimensions, producing a report with issues classified as CRITICAL, WARNING, or SUGGESTION.
+- **Post-Implementation Verification (`/opsx:verify`)**: A check of the implementation against change artifacts across two dimensions -- Implementation and Scope -- using the branch diff as primary evidence, producing a report with issues classified as CRITICAL, WARNING, or SUGGESTION.
 - **Six Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, and Marker Audit.
-- **Three Verify Dimensions**: Completeness (task completion and spec coverage), Correctness (requirement implementation accuracy), and Coherence (design adherence and code pattern consistency).
-- **Preflight Side-Effect Cross-Check**: After checking the three dimensions, verify reads `preflight.md` Section C and cross-checks each identified side-effect against task entries and codebase evidence. Unaddressed side-effects are flagged as WARNINGs.
+- **Diff-Based Verification**: Verify loads the full branch diff and uses it as the primary evidence source for assessing whether changes match requirement intent. Codebase keyword search serves as a fallback for pre-existing code.
+- **Two Verify Dimensions**: Implementation (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and Scope (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency).
+- **Task-Diff Mapping**: For each completed task, verify checks that the branch diff contains corresponding changes -- matching both file paths and diff content. Tasks marked complete with no evidence in the diff are flagged as WARNINGs.
+- **Diff Scope Check**: Verify checks that every file in the branch diff is traceable to a task or design component. Untraced files are reported as a single grouped SUGGESTION.
+- **Preflight Side-Effect Cross-Check**: As part of scope verification, verify reads `preflight.md` Section C and cross-checks each identified side-effect against task entries, diff content, and codebase evidence. Unaddressed side-effects are flagged as WARNINGs.
 - **Documentation Drift Detection (`/opsx:docs-verify`)**: A check of generated documentation against current specs across three dimensions, producing a drift report with issues classified as CRITICAL, WARNING, or INFO and a verdict of CLEAN, DRIFTED, or OUT OF SYNC.
 - **Severity Classification**: Verify errs on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL). Docs-verify similarly prefers INFO over WARNING when uncertain.
 - **Auto-Fix for Mechanical WARNINGs**: When verify finds WARNINGs that are mechanically fixable (stale cross-references between artifacts, inconsistent naming, outdated text correctable by simple text replacement), it fixes them inline and notes the fix in the report as "WARNING (auto-fixed)." WARNINGs that require your judgment (such as spec/design divergence) remain as open issues.
@@ -67,7 +70,7 @@ When required artifacts (such as the design) have not been created, the prefligh
 
 #### Verification With All Checks Passing
 
-When all tasks are complete, all spec requirements are implemented, and all design decisions are followed, the verification report shows full coverage across Completeness, Correctness, and Coherence. The final assessment is "All checks passed. Ready for completion."
+When all tasks are complete, all spec requirements are implemented, and all design decisions are followed, the verification report shows full coverage across Implementation and Scope. The final assessment is "All checks passed. Ready to proceed."
 
 #### Verification Finds Critical Issues
 
@@ -83,11 +86,11 @@ When a new file does not follow the project's established naming convention (for
 
 #### Verification Degrades Gracefully With Missing Artifacts
 
-When a change has only tasks but no specs or design, verification checks task completion only, skips spec coverage and design adherence checks, and notes in the report which checks were skipped and why. When a change has tasks but no specs (for example, a documentation-only change), the system skips requirement-level verification and focuses on task completion and code pattern coherence.
+When a change has only tasks but no specs or design, verification checks task completion only, skips requirement verification and scope checks, and notes in the report which checks were skipped and why. When no merge base is available (for example, an orphan branch or first commit), diff-based checks are skipped and verification falls back to codebase keyword search only.
 
 #### Verification Catches Unaddressed Preflight Side-Effects
 
-After checking the three core dimensions, verify reads the preflight report's Side-Effect Analysis (Section C) and cross-checks each identified side-effect against your task list and the codebase. If a side-effect has a matching task or detectable implementation evidence, no issue is raised. If a side-effect has neither, the report includes a WARNING recommending you add a task or verify that the side-effect is handled. When all side-effects in Section C are assessed as having no risk, the cross-check is skipped and noted in the report.
+As part of scope verification, verify reads the preflight report's Side-Effect Analysis (Section C) and cross-checks each identified side-effect against your task list, the diff content, and the codebase. If a side-effect has a matching task or detectable implementation evidence, no issue is raised. If a side-effect has neither, the report includes a WARNING recommending you add a task or verify that the side-effect is handled. When all side-effects in Section C are assessed as having no risk, the cross-check is skipped and noted in the report.
 
 #### Verify Auto-Fixes Stale Cross-References
 
@@ -137,8 +140,8 @@ Manual ADRs (files with the `adr-MNNN` prefix) are recognized and excluded from 
 
 ## Known Limitations
 
-- Verify uses heuristic keyword-based code search to find implementation evidence. If a requirement keyword matches unrelated code, the system prefers SUGGESTION severity to avoid false critical issues.
-- On very large codebases, verification scans focus on files referenced in the design and recently modified files rather than performing an exhaustive codebase search.
+- Verify uses the branch diff as its primary evidence source and falls back to heuristic keyword-based codebase search for pre-existing code. If a requirement keyword matches unrelated code, the system prefers SUGGESTION severity to avoid false critical issues.
+- Task-Diff Mapping relies on keyword matching between task descriptions and file paths/diff content. Tasks with very generic descriptions may be marked as inconclusive rather than flagged.
 - When a preflight side-effect description is too generic to produce meaningful keyword matches, the system skips that entry and notes it as inconclusive rather than raising a false warning.
 - All change artifacts (specs, design) are assumed to be available and up to date when preflight is invoked.
 - Docs-verify does not perform deep content comparison -- it checks structural alignment (presence of requirements, capabilities, ADRs), not prose-level semantic equivalence.
