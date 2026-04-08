@@ -31,13 +31,18 @@ Four skills parse the proposal's `## Capabilities` markdown section to identify 
 
 The docs skill already uses `lastUpdated` in generated capability doc frontmatter for incremental detection, but compares against directory name date prefix — not against spec-level metadata.
 
+### Template Installation (Setup Skill)
+Setup (`/opsx:setup`) copies Smart Templates via `cp -r "${CLAUDE_PLUGIN_ROOT}/templates/." openspec/templates/` — aggressive overwrite, no version detection. No mechanism to detect user customizations. Smart Templates have 5 core frontmatter fields (`id`, `description`, `generates`, `requires`, `instruction`) but no `version` field. If a user customizes a local template and then runs setup after a plugin update, their changes are silently lost.
+
 ### Affected Files
 - **Spec template**: `src/templates/specs/spec.md` (consumer) + `openspec/templates/specs/spec.md` (project)
+- **All Smart Templates**: 10 templates in `src/templates/` — need `version` field for merge detection
 - **FF skill**: `src/skills/ff/SKILL.md` — creates/edits specs during artifact pipeline
 - **Verify skill**: `src/skills/verify/SKILL.md` — validates implementation against specs
 - **Changelog skill**: `src/skills/changelog/SKILL.md` — generates release notes
 - **Docs skill**: `src/skills/docs/SKILL.md` — generates capability docs, ADRs, README
 - **Preflight skill**: `src/skills/preflight/SKILL.md` — quality gate before tasks
+- **Setup skill**: `src/skills/setup/SKILL.md` — template installation with merge detection
 
 ## 2. External Research
 
@@ -66,11 +71,11 @@ No external dependencies. This is an internal metadata enhancement to YAML front
 
 | Category | Status | Notes |
 |----------|--------|-------|
-| Scope | Clear | Four fields: status, change, version, lastModified |
+| Scope | Clear | Spec frontmatter (status, change, version, lastModified) + Smart Template version field + setup merge detection |
 | Behavior | Clear | Draft/stable lifecycle, version bump on modification, collision detection |
 | Data Model | Clear | YAML frontmatter fields in spec files |
 | UX | Clear | Transparent to users — managed by skills automatically |
-| Integration | Clear | Six skills affected, all identified |
+| Integration | Clear | Seven skills affected (+ setup), all identified |
 | Edge Cases | Clear | Resolved: verify gate blocks draft-to-main; lastModified uses actual edit date |
 | Constraints | Clear | Skill immutability, backward compatibility |
 | Terminology | Clear | Reuses existing YAML frontmatter conventions |
