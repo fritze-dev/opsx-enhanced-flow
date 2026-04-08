@@ -2,7 +2,7 @@
 title: "Task Implementation"
 capability: "task-implementation"
 description: "Handles working through task checklists in tasks.md, with sequential implementation, progress tracking, pause-on-blocker behavior, direct spec editing, standard tasks separation, and session-level progress reporting."
-lastUpdated: "2026-04-07"
+lastUpdated: "2026-04-08"
 ---
 
 # Task Implementation
@@ -26,6 +26,7 @@ Tasks are implemented sequentially in the order listed because the task list rep
 - **Direct spec editing** -- specs at `openspec/specs/` can be modified during implementation when task requirements include spec changes.
 - **Standard tasks separation** -- post-implementation steps (changelog, docs, version bump, push) are tracked as checkboxes in the task list but not executed by apply. Constitution-defined pre-merge extras are executed during the post-apply workflow. Post-merge reminders appear in a dedicated section as plain bullets — they are not tracked tasks and do not count toward progress.
 - **Parallelizable task markers** -- tasks marked with `[P]` indicate they can be done in parallel. The marker is informational only and does not change progress counting logic.
+- **Automated QA steps** -- the QA Loop's Metric Check and Auto-Verify steps run without pausing for confirmation. The first human gate is User Testing -- that is where the system stops and waits for your approval.
 
 ## Behavior
 
@@ -62,6 +63,10 @@ Every task list includes a Standard Tasks section with post-implementation workf
 Post-merge reminders (e.g., updating a plugin locally) appear in a separate "Post-Merge Reminders" section using plain bullet format — no checkboxes. They are not counted in progress totals and serve purely as visual reminders for manual execution after the PR is merged. Projects define post-merge items in the constitution's `## Standard Tasks > ### Post-Merge` section.
 
 During the post-apply workflow, universal standard task checkboxes and constitution-defined pre-merge extras (e.g., updating a PR to ready-for-review) are marked complete before creating the final commit. This ensures the committed tasks.md reflects the fully-checked state, eliminating the need for an extra follow-up commit just for checkboxes.
+
+### QA Loop Automated Steps
+
+When apply reaches the QA Loop, the Metric Check and Auto-Verify steps are executed automatically without pausing for your confirmation. The system runs each success metric check, then immediately invokes `/opsx:verify` to produce the verification report. The first point where the system stops and waits for your input is User Testing -- this is the explicit human approval gate.
 
 ### All Tasks Already Complete
 

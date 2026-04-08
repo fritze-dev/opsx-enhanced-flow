@@ -19,18 +19,18 @@
 - [x] 3.3. Metric Check: grep CONSTITUTION.md for "Template synchronization" (SM-3) — PASS
 - [x] 3.4. Metric Check: grep `apply.instruction` in both WORKFLOW.md files for "worktree remove" (SM-4) — PASS
 - [x] 3.5. Auto-Verify: Run `/opsx:verify`
-- [ ] 3.6. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.7. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.8. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.7 was not entered.
-- [ ] 3.9. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.6. User Testing: Approved by user.
+- [x] 3.7. Fix Loop: Removed unnecessary constitution template comment (consumer projects don't have src/templates/).
+- [x] 3.8. Final Verify: Run `/opsx:verify` after fix — all checks passed.
+- [x] 3.9. Approval: Approved.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references (`gh pr ready && gh pr edit --body "... Closes #81, #86, #87, #88"`)
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs (`/opsx:docs`)
+- [x] 4.3. Bump version
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review, update body with change summary and issue references (`gh pr ready && gh pr edit --body "... Closes #81, #86, #87, #88"`)
 
 ## 5. Post-Merge Reminders
 
