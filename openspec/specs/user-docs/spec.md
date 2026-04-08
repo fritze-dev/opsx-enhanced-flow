@@ -126,9 +126,9 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 
 **Change detection logic:** For each capability, the agent SHALL:
 1. Read the existing `docs/capabilities/<capability>.md` and extract the `lastUpdated` value from YAML frontmatter. If the file does not exist, the capability needs generation.
-2. Read the spec's `lastModified` frontmatter field from `openspec/specs/<capability>/spec.md`. If `lastModified` is present and newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
-3. **Fallback** (for specs without `lastModified` field): Scan completed change directories at `openspec/changes/*/proposal.md` to find changes whose Capabilities section lists this capability. Extract the date prefix (`YYYY-MM-DD`) from each matching change directory name. If ANY change date is newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
-4. If neither the spec's `lastModified` nor any change date is newer, skip this capability entirely.
+2. Read the spec's `lastModified` frontmatter field from `openspec/specs/<capability>/spec.md`. If `lastModified` is absent, the capability needs regeneration (treated as unknown modification date).
+3. If `lastModified` is newer than (or equal to) the doc's `lastUpdated`, the capability needs regeneration.
+4. If `lastModified` is older than the doc's `lastUpdated`, skip this capability entirely.
 
 **First run:** When no capability docs exist yet, all capabilities SHALL be generated (equivalent to full generation).
 
@@ -154,12 +154,11 @@ The `/opsx:docs` command SHALL support incremental generation by default. Before
 - **WHEN** the developer runs `/opsx:docs`
 - **THEN** the agent regenerates `docs/capabilities/user-docs.md`
 
-#### Scenario: Fallback to proposal scanning when spec has no lastModified
+#### Scenario: Spec without lastModified always regenerated
 - **GIVEN** `docs/capabilities/legacy-cap.md` exists with `lastUpdated: "2026-03-05"`
 - **AND** `openspec/specs/legacy-cap/spec.md` has no `lastModified` field
-- **AND** a completed change `2026-03-23-update/` has a proposal listing `legacy-cap`
 - **WHEN** the developer runs `/opsx:docs`
-- **THEN** the agent falls back to proposal scanning and regenerates the doc
+- **THEN** the agent treats the spec as needing regeneration (unknown modification date)
 
 #### Scenario: First run generates all capabilities
 - **GIVEN** no capability doc files exist under `docs/capabilities/`
@@ -258,6 +257,7 @@ Translation rules:
 - **Change date equals lastUpdated**: The agent SHALL regenerate the capability doc (use >= comparison, not strictly >). This handles same-day changes.
 - **Capability doc exists but has no lastUpdated field**: The agent SHALL treat it as needing regeneration.
 - **Capability doc exists but has malformed lastUpdated**: The agent SHALL treat it as needing regeneration.
+- **Spec has no lastModified field**: The agent SHALL treat the capability as needing regeneration (unknown modification date — safe default).
 - **Empty multi-capability argument**: If an empty string is provided, the agent SHALL treat it as no argument and perform the full incremental scan.
 - **Duplicate capabilities in comma-separated list**: The agent SHALL deduplicate and process each capability only once.
 - **Whitespace in comma-separated list**: The agent SHALL trim whitespace from each capability name (e.g., `auth , export` → `auth`, `export`).
@@ -272,5 +272,4 @@ Translation rules:
 - Per-section maximum limits (Purpose max 3 sentences, Known Limitations max 5 bullets, etc.) are sufficient to prevent doc bloat without needing a priority-based section-dropping rule. <!-- ASSUMPTION: Based on observed doc lengths — no capability doc exceeds 1.3 pages even with all sections -->
 - Change directory date prefixes accurately reflect when the change was created. <!-- ASSUMPTION: Naming enforced by new skill -->
 - The `lastUpdated` frontmatter field in capability docs is only written by `/opsx:docs`, not manually edited. <!-- ASSUMPTION: Users follow workflow conventions -->
-- The proposal's Capabilities section reliably indicates which specs were affected by a change (fallback detection). <!-- ASSUMPTION: Proposal-spec traceability -->
-- Spec frontmatter `lastModified` is authoritative when present — it is set by skills during spec editing and verify completion. <!-- ASSUMPTION: Tracking field accuracy -->
+- Spec frontmatter `lastModified` is authoritative — it is set by skills during spec editing and verify completion. <!-- ASSUMPTION: Tracking field accuracy -->
