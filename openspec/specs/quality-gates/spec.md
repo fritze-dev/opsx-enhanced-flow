@@ -82,6 +82,14 @@ When a WARNING is **mechanically fixable** — i.e., it involves stale cross-ref
 
 The system SHALL additionally read `preflight.md` and cross-check each side-effect identified in Section C (Side-Effect Analysis) against `tasks.md` entries and codebase implementation evidence. For each side-effect, the system SHALL search for a corresponding task in `tasks.md` (keyword match) or implementation evidence in the codebase (keyword heuristic). If a side-effect has neither a matching task nor detectable implementation evidence, the system SHALL report a WARNING issue with an actionable recommendation. If Section C contains no side-effects (e.g., all risks assessed as NONE), the system SHALL skip the cross-check and note it in the report.
 
+The system SHALL additionally perform **diff-based verification** by reading `git diff <base-branch>...HEAD --name-only` to obtain the list of changed files. The system SHALL determine the base branch by running `git merge-base HEAD main` (or the configured main branch). If no merge base is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report.
+
+**Diff Scope Check**: For each file in the diff, the system SHALL check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section. Files that appear in the diff but have no connection to any task or design component SHALL be flagged as SUGGESTION ("Unintended change: <file> not covered by any task or design component").
+
+**Task-Diff Mapping**: For each task marked complete in `tasks.md`, the system SHALL check whether at least one file in the diff corresponds to the task description (keyword match against file paths and diff content). Tasks marked complete that produced no corresponding changes in the diff SHALL be flagged as WARNING ("Task marked complete but no corresponding changes in diff: <task description>").
+
+**Unintended Change Detection**: The system SHALL compare the set of changed files against the set of files referenced in `design.md`'s Architecture & Components section and task descriptions. Files present in the diff but not referenced in any artifact SHALL be collected and reported as a single SUGGESTION with the list of untraced files, rather than one issue per file.
+
 The `/opsx:verify` command SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When invoked as a final verify after the fix loop, the command SHALL operate identically — checking completeness, correctness, and coherence against the current state of code and artifacts. No special flags or modes are needed; the verify skill is stateless and always checks the current state.
 
 **User Story:** As a developer I want post-implementation verification that checks my code against the specs, so that I can catch gaps, divergences, and inconsistencies before proceeding.
@@ -188,6 +196,52 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **THEN** the system skips the side-effect cross-check
 - **AND** notes "No preflight side-effects to verify" in the report
 
+#### Scenario: Diff scope check finds all files traceable
+
+- **GIVEN** a change with design.md listing `src/skills/verify/SKILL.md` and `openspec/specs/quality-gates/spec.md` as components
+- **AND** `git diff main...HEAD --name-only` returns exactly those two files
+- **WHEN** the system performs diff scope verification
+- **THEN** all changed files are traceable to design components
+- **AND** no diff scope issues are raised
+
+#### Scenario: Diff scope check finds untraced file
+
+- **GIVEN** a change with design.md listing components in `src/skills/verify/`
+- **AND** `git diff main...HEAD --name-only` includes `src/skills/apply/SKILL.md` which is not referenced in any task or design component
+- **WHEN** the system performs diff scope verification
+- **THEN** the report includes a SUGGESTION: "Unintended change: src/skills/apply/SKILL.md not covered by any task or design component"
+
+#### Scenario: Task marked complete with no corresponding diff
+
+- **GIVEN** a change with tasks.md containing a completed task "Update error messages in auth module"
+- **AND** `git diff main...HEAD` contains no changes to any auth-related files
+- **WHEN** the system performs task-diff mapping
+- **THEN** the report includes a WARNING: "Task marked complete but no corresponding changes in diff: Update error messages in auth module"
+
+#### Scenario: Task-diff mapping with matching changes
+
+- **GIVEN** a change with tasks.md containing a completed task "Add diff scope check to verify SKILL.md"
+- **AND** `git diff main...HEAD --name-only` includes `src/skills/verify/SKILL.md`
+- **WHEN** the system performs task-diff mapping
+- **THEN** the task is confirmed as having corresponding changes
+- **AND** no task-diff mapping issue is raised
+
+#### Scenario: Multiple untraced files reported as single suggestion
+
+- **GIVEN** a change where `git diff main...HEAD --name-only` includes 3 files not referenced in design.md or any task
+- **WHEN** the system performs unintended change detection
+- **THEN** the report includes a single SUGGESTION listing all 3 untraced files
+- **AND** does not create separate issues per file
+
+#### Scenario: Diff checks skipped when no merge base available
+
+- **GIVEN** a change on an orphan branch with no common ancestor to main
+- **WHEN** the system attempts to determine the merge base via `git merge-base HEAD main`
+- **AND** the command fails (no common ancestor)
+- **THEN** the system skips all diff-based checks
+- **AND** notes "No merge base available — diff checks skipped" in the report
+- **AND** proceeds with keyword-based verification as normal
+
 ### Requirement: Documentation Drift Verification
 
 The system SHALL verify that generated documentation accurately reflects the current state of specs when the user invokes `/opsx:docs-verify`. The verification SHALL assess three dimensions:
@@ -289,6 +343,10 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
 - **Concurrent docs regeneration**: If `/opsx:docs` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **No merge base for diff checks**: If `git merge-base` fails (orphan branch, detached HEAD, first commit), all diff-based checks are skipped gracefully with a note in the report. Keyword-based verification proceeds as normal.
+- **Task description too generic for diff matching**: If a task description is too vague to produce meaningful file path matches (e.g., "Clean up code"), the system SHALL skip that task's diff mapping and note it as inconclusive rather than raising a false warning.
+- **Change artifacts in diff**: Files under `openspec/changes/` and `openspec/specs/` are expected in the diff for any change and SHALL be excluded from unintended change detection (they are always traceable to the change itself).
+- **Diff includes only artifact files**: When a change only modifies specs or planning artifacts (no code files), diff-based checks still apply — task-diff mapping verifies spec edits correspond to tasks, and scope checks verify no unrelated specs were modified.
 
 ## Assumptions
 
@@ -300,3 +358,5 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec directory name in `openspec/specs/`. <!-- ASSUMPTION: Naming convention -->
 - The README capabilities table uses a parseable format (Markdown table or structured list) that allows the system to extract capability names. <!-- ASSUMPTION: README format -->
 - Completed changes' design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->
+- Git is available in the execution environment and the working directory is a git repository with a valid merge base to the main branch. <!-- ASSUMPTION: Git availability -->
+- Task descriptions in tasks.md contain enough keywords to match against file paths in the diff (e.g., component names, file names, or module references). <!-- ASSUMPTION: Task description quality -->
