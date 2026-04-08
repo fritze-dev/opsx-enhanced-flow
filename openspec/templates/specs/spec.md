@@ -6,6 +6,10 @@ requires: [proposal]
 instruction: |
   Edit spec files that define WHAT the system should do.
 
+  Specs describe behavior, not implementation. Do NOT include concrete
+  commands (e.g., git commands), file paths, or API calls in requirement
+  text or scenarios. Implementation details belong in SKILL.md or design.md.
+
   Overlap Verification (before editing any spec files):
   1. Read the proposal's Consolidation Check section.
   2. For each new capability, scan existing specs in openspec/specs/ for overlapping
