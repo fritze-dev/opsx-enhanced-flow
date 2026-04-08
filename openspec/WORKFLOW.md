@@ -18,6 +18,11 @@ apply:
     /opsx:changelog → /opsx:docs → version bump → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
 
+    QA Loop automated steps: Metric Check and Auto-Verify are automated
+    steps — execute them without pausing for user confirmation. Do NOT
+    ask for permission before running /opsx:verify. The first human gate
+    is User Testing — only pause there.
+
     After /opsx:verify passes, commit and push all implementation changes
     before pausing for user approval:
     1. Stage all changed files: `git add -A`
@@ -34,6 +39,14 @@ apply:
     as complete — including the commit step itself — EXCEPT post-merge
     tasks, which remain unchecked. No extra follow-up commit should be
     needed for pre-merge standard task checkboxes.
+
+    Post-merge worktree cleanup: After a successful `gh pr merge` from
+    within a worktree, clean up immediately:
+    1. Switch working directory to the main worktree
+    2. Run `git worktree remove <worktree-path>`
+    3. Run `git branch -D <branch-name>`
+    If worktree remove fails (e.g., dirty state), report the error and
+    suggest manual cleanup — do not block the workflow.
 
 post_artifact: |
   After creating any artifact, commit and push the change:

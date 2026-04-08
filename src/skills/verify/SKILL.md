@@ -139,6 +139,17 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    | Side-Effects   | N checked, M unaddressed |
    ```
 
+   **Auto-Fix Pass** (before presenting the report):
+
+   Before generating the final report, scan all WARNING-level findings
+   for mechanically fixable issues — stale cross-references between
+   artifacts, inconsistent naming, or outdated text correctable by
+   simple text replacement without judgment. Auto-fix these inline
+   (edit the affected file) and record them as "WARNING (auto-fixed)"
+   in the report. Do NOT auto-fix WARNINGs that require user judgment
+   (e.g., spec/design divergence where the user must choose which is
+   correct) — present those as open issues.
+
    **Issues by Priority**:
 
    1. **CRITICAL** (Must fix before proceeding):
@@ -151,6 +162,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
       - Missing scenario coverage
       - Unaddressed preflight side-effects
       - Each with specific recommendation
+      - Auto-fixed warnings listed separately as "WARNING (auto-fixed)"
 
    3. **SUGGESTION** (Nice to fix):
       - Pattern inconsistencies
