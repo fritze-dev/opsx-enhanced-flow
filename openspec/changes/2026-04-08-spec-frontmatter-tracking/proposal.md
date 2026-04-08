@@ -11,8 +11,8 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - Preflight validates that `draft` specs have a `change` value matching the current change
 - Changelog and docs skills use `version`/`lastModified` for detection instead of proposal parsing
 - Migrate all 18 existing specs with `status: stable`, `version: 1`, `lastModified: 2026-04-08`
-- Add `version` field to all Smart Template frontmatter (integer, bumped on plugin changes)
-- Setup skill uses template `version` for merge detection: unchanged local templates are updated silently, customized templates trigger merge with conflict surfacing
+- Add `template-version` field to all Smart Template and workflow.md frontmatter (integer, bumped on plugin changes)
+- Setup skill uses `template-version` for merge detection: unchanged local templates are updated silently, customized templates trigger merge with conflict surfacing
 - Add YAML frontmatter to proposal.md: `status` (active/completed), `branch`, `worktree` (optional), `capabilities` (structured new/modified/removed arrays) — set at creation, flipped during verify completion
 - Add YAML frontmatter to design.md: `has_decisions` (boolean) — set during generation
 - `/opsx:new` and `/opsx:ff` set proposal frontmatter at change creation
@@ -35,8 +35,8 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - `quality-gates`: Verify must gate on draft status (FAIL if draft specs remain); verify completion flips `draft → stable`, bumps `version`, sets `lastModified`. Preflight validates `draft` specs match current change.
 - `release-workflow`: Changelog detection uses spec `version`/`lastModified` instead of proposal Capabilities parsing
 - `user-docs`: Docs incremental detection uses spec `lastModified` instead of directory-date comparison with proposal parsing fallback
-- `workflow-contract`: Smart Template frontmatter format adds `version` field definition
-- `project-setup`: Setup uses template `version` for merge detection — skip overwrite when user has customized, merge new plugin template changes with local customizations, surface conflicts for manual resolution
+- `workflow-contract`: Smart Template frontmatter format adds `template-version` field; WORKFLOW.md adds `template-version` field
+- `project-setup`: Setup uses `template-version` for merge detection — skip overwrite when user has customized, merge new plugin template changes with local customizations, surface conflicts for manual resolution. WORKFLOW.md included in merge detection (replaces skip-if-exists).
 - `change-workspace`: Active/completed detection via proposal `status` field; worktree context detection via proposal `branch` field; lazy cleanup uses `status: completed` signal; proposal `capabilities` field for machine-readable capability lookup
 - `artifact-pipeline`: Artifact Output Frontmatter requirement — proposal adds `status`, `branch`, `worktree`, `capabilities`; design adds `has_decisions`
 
@@ -73,11 +73,11 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 **In scope:**
 - Spec frontmatter field definitions and lifecycle rules
 - Proposal frontmatter fields (status, branch, worktree) and lifecycle
-- Smart Template `version` field definition and merge semantics
+- Smart Template `template-version` field definition and merge semantics
 - FF, verify, preflight, changelog, docs, setup, new skill updates
 - Spec template updates (both consumer and project)
 - Proposal template updates (both consumer and project)
-- All Smart Template updates (add `version: 1`)
+- All Smart Template + workflow.md updates (add `template-version: 1`)
 - Migration of 18 existing specs
 - Simplification of active/completed change detection, worktree context detection, and lazy cleanup
 - Setup merge detection: version comparison, customization detection, conflict surfacing

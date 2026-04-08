@@ -9,7 +9,7 @@ Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, 
 ## Requirements
 
 ### Requirement: WORKFLOW.md Pipeline Orchestration
-The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, and `version` (integer, for template merge detection during `/opsx:setup`). The markdown body MAY contain supplementary workflow documentation.
+The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, and `template-version` (integer, for template merge detection during `/opsx:setup`). The markdown body MAY contain supplementary workflow documentation.
 
 **User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place.
 
@@ -21,17 +21,17 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 #### Scenario: WORKFLOW.md frontmatter contains required fields
 - **GIVEN** a valid `openspec/WORKFLOW.md`
 - **WHEN** its frontmatter is inspected
-- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and `version` fields
+- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and `template-version` fields
 
 ### Requirement: Smart Template Format
-All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `version` (integer, monotonically increasing — bumped when the template content changes). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them.
+All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `template-version` (integer, monotonically increasing — bumped when the plugin changes the template content). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `template-version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them. The field is named `template-version` (not `version`) to distinguish it from spec `version` (content version tracking).
 
 **User Story:** As a developer I want each template to be self-describing with its own instruction and metadata, so that I can understand what a template does without consulting a separate schema file.
 
 #### Scenario: Smart Template contains required frontmatter fields
 - **GIVEN** a Smart Template file (e.g., `openspec/templates/research.md`)
 - **WHEN** its YAML frontmatter is inspected
-- **THEN** it SHALL contain `id`, `description`, `generates`, `requires`, `instruction`, and `version` fields
+- **THEN** it SHALL contain `id`, `description`, `generates`, `requires`, `instruction`, and `template-version` fields
 
 #### Scenario: Skill reads instruction from template frontmatter
 - **GIVEN** a Smart Template with an `instruction` field in its frontmatter
@@ -69,7 +69,7 @@ Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontm
 
 - **WORKFLOW.md missing**: Skills SHALL report an error and suggest running `/opsx:setup`.
 - **Smart Template missing frontmatter**: Skills SHALL treat the file as a plain template (no instruction, no metadata) and report a warning.
-- **Smart Template missing version field**: Setup SHALL treat the template as version 0 (always eligible for update). Skills reading templates SHALL ignore the version field — it is only used by setup for merge detection.
+- **Smart Template missing template-version field**: Setup SHALL treat the template as version 0 (always eligible for update). Skills reading templates SHALL ignore the `template-version` field — it is only used by setup for merge detection.
 - **WORKFLOW.md with malformed YAML**: Skills SHALL report a parse error and stop.
 - **Empty `pipeline` array**: Skills SHALL report that no artifacts are defined and stop.
 - **`templates_dir` points to nonexistent directory**: Skills SHALL report the missing directory and suggest running `/opsx:setup`.
