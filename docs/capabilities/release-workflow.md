@@ -2,7 +2,7 @@
 title: "Release Workflow"
 capability: "release-workflow"
 description: "Version management, automated releases, plugin distribution, changelog generation, and consumer update process."
-lastUpdated: "2026-04-07"
+lastUpdated: "2026-04-08"
 ---
 # Release Workflow
 
@@ -14,21 +14,21 @@ Without an automated release workflow, version bumps are a manual step that is r
 
 ## Rationale
 
-The auto-bump is implemented as a constitution convention rather than a skill modification, respecting the principle that skills are shared plugin code and must not contain project-specific behavior. Patch bumps cover the vast majority of changes; minor and major releases are rare enough that a documented manual process suffices. The changelog command reads `openspec/WORKFLOW.md` for a `docs_language` setting, allowing teams to generate release notes in their preferred language while keeping dates in ISO format and product names in English.
+The auto-bump is implemented as a constitution convention rather than a skill modification, respecting the principle that skills are shared plugin code and must not contain project-specific behavior. Patch bumps cover the vast majority of changes; minor and major releases are rare enough that a documented manual process suffices. The changelog command identifies completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing for legacy changes without frontmatter) and reads the proposal's frontmatter `capabilities` field to identify affected capabilities (falling back to parsing the Capabilities section). It also reads `openspec/WORKFLOW.md` for a `docs_language` setting, allowing teams to generate release notes in their preferred language while keeping dates in ISO format and product names in English.
 
 ## Features
 
-- **Automatic patch version bump** — the patch version increments automatically after each completed change during the post-apply workflow
-- **Version synchronization** — `plugin.json` and `marketplace.json` stay in sync automatically
-- **Automated GitHub Releases** — a GitHub Action creates git tags and releases automatically when a version bump is pushed to `main`
-- **Plugin source separation** — plugin files live in `src/`, consumer caches contain only plugin files (no docs, CI, or project files)
-- **Consumer version pinning** — consumers can pin to a specific version using a tag reference when adding the marketplace
-- **Developer local marketplace** — developers register the local repo as marketplace source for live plugin development in VS Code and CLI
-- **Manual minor/major releases** — documented process for intentional version changes; the Action handles tagging automatically
-- **Consumer update guidance** — clear steps for consumers to get the latest plugin version
-- **Changelog generation** — `/opsx:changelog` produces release notes from completed changes in Keep a Changelog format
-- **Language-aware changelog** — changelog entries can be generated in the language configured in `docs_language`
-- **Post-apply next steps** — apply output includes guidance for the complete post-apply workflow
+- **Automatic patch version bump** -- the patch version increments automatically after each completed change during the post-apply workflow
+- **Version synchronization** -- `plugin.json` and `marketplace.json` stay in sync automatically
+- **Automated GitHub Releases** -- a GitHub Action creates git tags and releases automatically when a version bump is pushed to `main`
+- **Plugin source separation** -- plugin files live in `src/`, consumer caches contain only plugin files (no docs, CI, or project files)
+- **Consumer version pinning** -- consumers can pin to a specific version using a tag reference when adding the marketplace
+- **Developer local marketplace** -- developers register the local repo as marketplace source for live plugin development in VS Code and CLI
+- **Manual minor/major releases** -- documented process for intentional version changes; the Action handles tagging automatically
+- **Consumer update guidance** -- clear steps for consumers to get the latest plugin version
+- **Changelog generation** -- `/opsx:changelog` produces release notes from completed changes in Keep a Changelog format, using proposal frontmatter for change detection
+- **Language-aware changelog** -- changelog entries can be generated in the language configured in `docs_language`
+- **Post-apply next steps** -- apply output includes guidance for the complete post-apply workflow
 
 ## Behavior
 
@@ -42,7 +42,7 @@ When a version bump is pushed to `main`, a GitHub Action automatically creates a
 
 ### Plugin Source Directory
 
-Plugin source code (skills, templates, manifest) lives in the `src/` subdirectory. Consumer plugin caches contain only `src/` contents — documentation, CI workflows, OpenSpec project files, and changelogs are not downloaded. The marketplace uses `source: "./src"` to reference the plugin subdirectory.
+Plugin source code (skills, templates, manifest) lives in the `src/` subdirectory. Consumer plugin caches contain only `src/` contents -- documentation, CI workflows, OpenSpec project files, and changelogs are not downloaded. The marketplace uses `source: "./src"` to reference the plugin subdirectory.
 
 ### Consumer Version Pinning
 
@@ -94,11 +94,11 @@ After a completed change, the post-apply workflow includes next steps: verify, c
 
 ### Changelog from Single Change
 
-Running `/opsx:changelog` reads each completed change directory, examines the proposal, current specs, and design artifacts, and produces changelog entries summarizing what changed from a user perspective. Entries use the Keep a Changelog format with sections like Added, Changed, and Fixed as applicable.
+Running `/opsx:changelog` scans change directories, identifies completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing for legacy proposals), reads the proposal's `capabilities` frontmatter to find affected specs, and produces changelog entries summarizing what changed from a user perspective. Entries use the Keep a Changelog format with sections like Added, Changed, and Fixed.
 
-### Multiple Archives Ordered Newest First
+### Multiple Changes Ordered Newest First
 
-When multiple archives exist, changelog entries are ordered with the newest first.
+When multiple completed changes exist, changelog entries are ordered with the newest first.
 
 ### Existing Changelog Preserved
 
@@ -110,7 +110,7 @@ If no completed changes exist, `/opsx:changelog` informs you that no completed c
 
 ### Internal-Only Changes
 
-If an archived change describes purely internal refactoring with no user-visible impact, it is either omitted or included under a minimal note rather than fabricating user-facing changes.
+If a completed change describes purely internal refactoring with no user-visible impact, it is either omitted or included under a minimal note rather than fabricating user-facing changes.
 
 ### Changelog in Configured Language
 
@@ -126,8 +126,8 @@ If the documentation language is changed after entries have already been generat
 
 ## Known Limitations
 
-- Does not support automatic minor or major version bumps — these require a manual process (but the Action handles tagging automatically after push).
-- Consumer migration from the old flat layout to the new `src/` layout requires a `plugin update` — there is no automatic migration.
+- Does not support automatic minor or major version bumps -- these require a manual process (but the Action handles tagging automatically after push).
+- Consumer migration from the old flat layout to the new `src/` layout requires a `plugin update` -- there is no automatic migration.
 
 ## Future Enhancements
 
@@ -140,4 +140,4 @@ If the documentation language is changed after entries have already been generat
 - If `CHANGELOG.md` is missing when the release Action runs, the release is created with a minimal body instead of failing.
 - If a consumer adds the marketplace before the `src/` restructuring, the old cache is replaced on the next `plugin update`.
 - If the version field contains a non-semver value, the system warns and skips the bump rather than producing an invalid version.
-- If the archive directory contains changes with only internal refactoring, the changelog agent either omits the entry or uses a minimal note to avoid fabricating user-facing changes.
+- If the change directory contains changes with only internal refactoring, the changelog agent either omits the entry or uses a minimal note to avoid fabricating user-facing changes.

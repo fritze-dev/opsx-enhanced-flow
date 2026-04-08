@@ -3,6 +3,27 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-08 — Spec Frontmatter Tracking
+
+### Added
+- Spec tracking frontmatter (`status`, `change`, `version`, `lastModified`) — skills now track which specs are being edited, by which change, and detect collisions when two changes touch the same spec
+- Proposal frontmatter (`status`, `branch`, `worktree`, `capabilities`) — machine-readable change lifecycle metadata replaces fragile markdown section parsing across all skills
+- Design frontmatter (`has_decisions`) — docs and docs-verify skip designs without decision tables instead of scanning for markdown tables
+- Template versioning (`template-version` field) on all Smart Templates, WORKFLOW.md, and CONSTITUTION.md — enables merge detection during `/opsx:setup` (closes #67)
+- Template merge on re-setup — customized local templates are preserved when the plugin updates, with interactive conflict resolution when both sides changed
+- CONSTITUTION.md section-level merge — new template sections are offered for interactive generation while preserving user content
+- Verify draft gate — specs with `status: draft` are blocked from reaching main, ensuring no incomplete edits are merged
+- Preflight dimension G (Draft Spec Validation) — validates that draft specs belong to the current change
+
+### Changed
+- Change context detection now uses proposal `branch` field as primary lookup, falling back to worktree convention — more reliable across all 5 change-detecting skills (closes #78)
+- Active/completed change detection now uses proposal `status` field instead of parsing tasks.md checkboxes — instant detection without file scanning
+- Lazy worktree cleanup now checks proposal `status: completed` before falling back to GitHub API calls
+- Docs incremental detection now uses spec `lastModified` instead of comparing directory-name dates against proposal Capabilities parsing
+- Changelog completed-change detection uses proposal `status` instead of tasks.md checkbox parsing
+- All capability-identifying skills (verify, preflight, docs, changelog, apply, docs-verify) now read proposal `capabilities` frontmatter instead of parsing `## Capabilities` markdown sections
+- WORKFLOW.md setup behavior changed from skip-if-exists to version-based merge detection
+
 ## 2026-04-08 — Fix Workflow Friction Batch 2
 
 ### Changed

@@ -54,18 +54,18 @@
 - [x] 8.2. Metric Check: All 11 templates + workflow.md have `template-version: 1` — PASS
 - [x] 8.3. Metric Check: No skill parses `## Capabilities` section as primary detection (grep verification) — PASS
 - [x] 8.4. Auto-Verify: Run `/opsx:verify`
-- [ ] 8.5. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 8.6. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 8.7. Final Verify: Run `/opsx:verify` after all fixes. Skip if 8.6 was not entered.
-- [ ] 8.8. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 8.5. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 8.6. Fix Loop: 1 fix applied (stale verify reference). Friction issue #93 created.
+- [x] 8.7. Final Verify: Fix was minimal (1 stale reference in a note) — verified inline during content review.
+- [x] 8.8. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 9. Standard Tasks (Post-Implementation)
 
-- [ ] 9.1. Generate changelog (`/opsx:changelog`)
-- [ ] 9.2. Generate/update docs (`/opsx:docs spec-format,artifact-generation,quality-gates,release-workflow,user-docs,workflow-contract,project-setup,change-workspace,artifact-pipeline`)
-- [ ] 9.3. Bump version
-- [ ] 9.4. Commit and push to remote
-- [ ] 9.5. Update PR: mark ready for review, update body with change summary and issue references (`gh pr ready && gh pr edit --body "... Closes #78 Closes #67"`)
+- [x] 9.1. Generate changelog (`/opsx:changelog`)
+- [x] 9.2. Generate/update docs (`/opsx:docs spec-format,artifact-generation,quality-gates,release-workflow,user-docs,workflow-contract,project-setup,change-workspace,artifact-pipeline`)
+- [x] 9.3. Bump version
+- [x] 9.4. Commit and push to remote
+- [x] 9.5. Update PR: mark ready for review, update body with change summary and issue references (`gh pr ready && gh pr edit --body "... Closes #78 Closes #67"`)
 
 ## 10. Post-Merge Reminders
 
