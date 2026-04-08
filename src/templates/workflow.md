@@ -15,10 +15,8 @@ apply:
 
     Post-apply workflow: /opsx:verify → commit and push implementation
     changes for review → pause for user approval →
-    /opsx:changelog → /opsx:docs → commit → execute constitution
+    /opsx:changelog → /opsx:docs → version bump → commit → execute constitution
     pre-merge standard tasks. Never skip steps.
-    IMPORTANT: /opsx:verify MUST run before proceeding.
-    Never proceed before implementation is verified.
 
     QA Loop automated steps: Metric Check and Auto-Verify are automated
     steps — execute them without pausing for user confirmation. Do NOT
