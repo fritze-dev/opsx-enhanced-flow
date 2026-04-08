@@ -44,11 +44,11 @@
 
 ## E. Duplication & Consistency
 
-- **Diff Scope Check vs Unintended Change Detection**: These two spec paragraphs describe overlapping behavior — both check whether changed files are traceable to tasks/design. The Diff Scope Check paragraph implies per-file flagging, while Unintended Change Detection specifies grouped reporting as a single SUGGESTION. The scenarios clarify intent: individual assessment per file, but grouped output. **WARNING** — the two paragraphs should be consolidated to avoid ambiguity. The Diff Scope Check paragraph could be folded into Unintended Change Detection, or the reporting format should be consistent.
+- ~~**Diff Scope Check vs Unintended Change Detection**: paragraph overlap~~ — **RESOLVED**: Paragraphs consolidated into a single "Diff Scope Check" paragraph during implementation. No longer overlapping.
 - **No contradictions with existing specs**: The new requirements are additive to the existing Post-Implementation Verification requirement. Severity classification (SUGGESTION for untraced files, WARNING for task-diff mismatch) is consistent with the existing "err on lower severity" principle.
 - **No cross-spec overlaps**: No other spec (task-implementation, human-approval-gate) covers diff-based verification.
 
-**Result: PASS WITH WARNINGS** — 1 warning (paragraph overlap).
+**Result: PASS** — no remaining issues.
 
 ## F. Assumption Audit
 
@@ -83,7 +83,7 @@ No `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers found in any change artif
 
 ### Findings
 - Blockers: 0
-- Warnings: 1 (Diff Scope Check / Unintended Change Detection paragraph overlap)
+- Warnings: 0
 - Info: 0
 
 ### Assumptions Audited
@@ -91,4 +91,4 @@ No `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers found in any change artif
 - Needs Clarification: 0
 - Blocking: 0
 
-**Verdict: PASS WITH WARNINGS**
+**Verdict: PASS**
