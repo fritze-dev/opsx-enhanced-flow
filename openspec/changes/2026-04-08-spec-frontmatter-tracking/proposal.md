@@ -13,11 +13,14 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - Migrate all 18 existing specs with `status: stable`, `version: 1`, `lastModified: 2026-04-08`
 - Add `version` field to all Smart Template frontmatter (integer, bumped on plugin changes)
 - Setup skill uses template `version` for merge detection: unchanged local templates are updated silently, customized templates trigger merge with conflict surfacing
-- Add YAML frontmatter to proposal.md: `status` (active/completed), `branch`, `worktree` (optional) — set at creation, flipped during verify completion
+- Add YAML frontmatter to proposal.md: `status` (active/completed), `branch`, `worktree` (optional), `capabilities` (structured new/modified/removed arrays) — set at creation, flipped during verify completion
+- Add YAML frontmatter to design.md: `has_decisions` (boolean) — set during generation
 - `/opsx:new` and `/opsx:ff` set proposal frontmatter at change creation
 - Active/completed change detection uses proposal `status` field instead of parsing tasks.md checkboxes
 - Worktree context detection uses proposal `branch` field instead of branch-name-to-directory convention
 - Lazy worktree cleanup uses proposal `status: completed` as signal
+- All skills that identify affected capabilities use proposal `capabilities` frontmatter instead of parsing `## Capabilities` markdown section (verify, preflight, changelog, docs, apply, docs-verify)
+- docs/docs-verify use design `has_decisions` to skip designs without decision tables
 
 ## Capabilities
 
@@ -34,8 +37,8 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - `user-docs`: Docs incremental detection uses spec `lastModified` instead of directory-date comparison with proposal parsing fallback
 - `workflow-contract`: Smart Template frontmatter format adds `version` field definition
 - `project-setup`: Setup uses template `version` for merge detection — skip overwrite when user has customized, merge new plugin template changes with local customizations, surface conflicts for manual resolution
-- `change-workspace`: Active/completed detection via proposal `status` field; worktree context detection via proposal `branch` field; lazy cleanup uses `status: completed` signal
-- `artifact-pipeline`: Proposal template adds frontmatter fields (`status`, `branch`, `worktree`); set at change creation
+- `change-workspace`: Active/completed detection via proposal `status` field; worktree context detection via proposal `branch` field; lazy cleanup uses `status: completed` signal; proposal `capabilities` field for machine-readable capability lookup
+- `artifact-pipeline`: Artifact Output Frontmatter requirement — proposal adds `status`, `branch`, `worktree`, `capabilities`; design adds `has_decisions`
 
 ### Removed Capabilities
 

@@ -12,7 +12,20 @@ Manages the change lifecycle including workspace creation (`/opsx:new`), date-pr
 
 The system SHALL create a change workspace when the user invokes `/opsx:new <change-name>`. The workspace directory SHALL use a creation-date prefix in the format `YYYY-MM-DD-<change-name>`, set at creation time and never changed. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement) and then create the change directory inside it via `mkdir -p <worktree>/openspec/changes/YYYY-MM-DD-<name>`. If worktree mode is not enabled, the workspace SHALL be created by running `mkdir -p openspec/changes/YYYY-MM-DD-<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
 
-When the first artifact (`proposal.md`) is created for a change, the skills SHALL include YAML frontmatter with tracking fields: `status: active`, `branch: <branch-name>`, and optionally `worktree: <worktree-path>` (only when worktree mode is enabled). These fields enable automated change context detection, active/completed filtering, and worktree association without relying on naming conventions.
+When the proposal artifact (`proposal.md`) is created for a change, the skills SHALL include YAML frontmatter with tracking fields:
+- `status: active` — change lifecycle (flipped to `completed` during verify completion)
+- `branch: <branch-name>` — git branch association
+- `worktree: <worktree-path>` — only when worktree mode is enabled
+- `capabilities` — structured list of affected capabilities:
+  ```yaml
+  capabilities:
+    new: [capability-one]
+    modified: [quality-gates, spec-format]
+    removed: []
+  ```
+  This machine-readable field mirrors the Capabilities section in the proposal body and eliminates the need for skills to parse markdown sections.
+
+These fields enable automated change context detection, active/completed filtering, worktree association, and capability lookup without relying on naming conventions or markdown parsing.
 
 **User Story:** As a developer I want to create a new change workspace with a date-prefixed directory, so that changes are chronologically ordered from creation and I can immediately begin the spec-driven workflow.
 
@@ -34,14 +47,15 @@ When the first artifact (`proposal.md`) is created for a change, the skills SHAL
 #### Scenario: Proposal created with tracking frontmatter
 
 - **GIVEN** a new change `add-user-auth` created on branch `add-user-auth` in worktree `.claude/worktrees/add-user-auth`
+- **AND** the proposal lists `user-auth` as a new capability and `quality-gates` as modified
 - **WHEN** the proposal artifact is generated
-- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active`, `branch: add-user-auth`, and `worktree: .claude/worktrees/add-user-auth`
+- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active`, `branch: add-user-auth`, `worktree: .claude/worktrees/add-user-auth`, and `capabilities: { new: [user-auth], modified: [quality-gates], removed: [] }`
 
 #### Scenario: Proposal frontmatter without worktree
 
 - **GIVEN** a new change created without worktree mode (`worktree.enabled: false`)
 - **WHEN** the proposal artifact is generated
-- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active` and `branch: <branch-name>`
+- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active`, `branch: <branch-name>`, and `capabilities`
 - **AND** the `worktree` field SHALL be absent
 
 #### Scenario: Reject invalid name format
