@@ -13,6 +13,11 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - Migrate all 18 existing specs with `status: stable`, `version: 1`, `lastModified: 2026-04-08`
 - Add `version` field to all Smart Template frontmatter (integer, bumped on plugin changes)
 - Setup skill uses template `version` for merge detection: unchanged local templates are updated silently, customized templates trigger merge with conflict surfacing
+- Add YAML frontmatter to proposal.md: `status` (active/completed), `branch`, `worktree` (optional) — set at creation, flipped during verify completion
+- `/opsx:new` and `/opsx:ff` set proposal frontmatter at change creation
+- Active/completed change detection uses proposal `status` field instead of parsing tasks.md checkboxes
+- Worktree context detection uses proposal `branch` field instead of branch-name-to-directory convention
+- Lazy worktree cleanup uses proposal `status: completed` as signal
 
 ## Capabilities
 
@@ -29,6 +34,8 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - `user-docs`: Docs incremental detection uses spec `lastModified` instead of directory-date comparison with proposal parsing fallback
 - `workflow-contract`: Smart Template frontmatter format adds `version` field definition
 - `project-setup`: Setup uses template `version` for merge detection — skip overwrite when user has customized, merge new plugin template changes with local customizations, surface conflicts for manual resolution
+- `change-workspace`: Active/completed detection via proposal `status` field; worktree context detection via proposal `branch` field; lazy cleanup uses `status: completed` signal
+- `artifact-pipeline`: Proposal template adds frontmatter fields (`status`, `branch`, `worktree`); set at change creation
 
 ### Removed Capabilities
 
@@ -45,29 +52,34 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
    - Docs detection → `user-docs` (owns incremental doc generation)
    - Template version field definition → `workflow-contract` (owns Smart Template format)
    - Template merge during setup → `project-setup` (owns setup behavior)
+   - Proposal frontmatter + active/completed/worktree detection → `change-workspace` (owns change lifecycle)
+   - Proposal template frontmatter fields → `artifact-pipeline` (owns pipeline artifact definitions)
 3. **Merge assessment**: N/A — no new specs proposed.
 
 ## Impact
 
 - **Spec template**: `src/templates/specs/spec.md` and `openspec/templates/specs/spec.md` — add new frontmatter fields to template output
 - **All Smart Templates**: 10 templates in `src/templates/` — add `version` field to frontmatter
-- **Skills**: `src/skills/ff/SKILL.md`, `src/skills/verify/SKILL.md`, `src/skills/changelog/SKILL.md`, `src/skills/docs/SKILL.md`, `src/skills/setup/SKILL.md`
+- **Proposal template**: `src/templates/proposal.md` and `openspec/templates/proposal.md` — add frontmatter fields to template output
+- **Skills**: `src/skills/ff/SKILL.md`, `src/skills/verify/SKILL.md`, `src/skills/changelog/SKILL.md`, `src/skills/docs/SKILL.md`, `src/skills/setup/SKILL.md`, `src/skills/new/SKILL.md`
 - **Existing specs**: 18 spec files need one-time frontmatter migration
-- **Backward compatibility**: New fields are optional — consumers without them continue to work. Skills handle absent fields gracefully. Setup falls back to overwrite behavior when local templates lack `version` field.
+- **Backward compatibility**: New fields are optional — consumers without them continue to work. Skills handle absent fields gracefully. Setup falls back to overwrite behavior when local templates lack `version` field. Change detection falls back to tasks.md when proposal has no `status` field.
 
 ## Scope & Boundaries
 
 **In scope:**
 - Spec frontmatter field definitions and lifecycle rules
+- Proposal frontmatter fields (status, branch, worktree) and lifecycle
 - Smart Template `version` field definition and merge semantics
-- FF, verify, preflight, changelog, docs, setup skill updates
+- FF, verify, preflight, changelog, docs, setup, new skill updates
 - Spec template updates (both consumer and project)
+- Proposal template updates (both consumer and project)
 - All Smart Template updates (add `version: 1`)
 - Migration of 18 existing specs
+- Simplification of active/completed change detection, worktree context detection, and lazy cleanup
 - Setup merge detection: version comparison, customization detection, conflict surfacing
 
 **Out of scope:**
-- Proposal frontmatter changes (could complement but not needed for core goals)
 - Automated orphan draft detection/cleanup (enforced via verify gate instead)
 - Create date tracking (can be added later if needed)
 - WORKFLOW.md merge (special file — handled separately from Smart Templates)

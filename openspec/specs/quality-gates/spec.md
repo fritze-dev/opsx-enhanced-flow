@@ -93,7 +93,11 @@ The system SHALL verify the implementation against change artifacts when the use
 
 **Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
 
-**Verify completion (draft→stable flip):** When verify passes (no CRITICAL issues) and the change is approved for merge, the system SHALL finalize spec tracking fields for all specs that were modified by this change: set `status: stable`, remove the `change` field, increment `version` by 1, and set `lastModified` to the current date. This completion step runs as part of the post-apply workflow, after user approval and before the merge commit. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
+**Verify completion (draft→stable flip):** When verify passes (no CRITICAL issues) and the change is approved for merge, the system SHALL finalize tracking fields:
+- **Specs**: For all specs modified by this change: set `status: stable`, remove the `change` field, increment `version` by 1, and set `lastModified` to the current date.
+- **Proposal**: Set `proposal.md` frontmatter `status` to `completed`.
+
+This completion step runs as part of the post-apply workflow, after user approval and before the merge commit. Each issue found SHALL be classified as CRITICAL (must fix before proceeding), WARNING (should fix), or SUGGESTION (nice to fix). The system SHALL produce a verification report with a summary scorecard, issues grouped by priority, and specific actionable recommendations with file and line references where applicable. The system SHALL err on the side of lower severity when uncertain (SUGGESTION over WARNING, WARNING over CRITICAL).
 
 When a WARNING is **mechanically fixable** — i.e., it involves stale cross-references between artifacts, inconsistent naming, or outdated text that can be corrected by simple text replacement without judgment — the system SHALL auto-fix the issue inline before presenting the report. Auto-fixed issues SHALL still appear in the report as resolved WARNINGs with a note indicating the fix applied. WARNINGs that require user judgment (e.g., spec/design divergence where the user must choose which is correct) SHALL NOT be auto-fixed and SHALL be presented as open issues for user resolution.
 
@@ -117,13 +121,15 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **WHEN** the user invokes `/opsx:verify 2026-04-08-my-change`
 - **THEN** the report SHALL include a CRITICAL issue: "Spec quality-gates is still in draft status — must be finalized before merge"
 
-#### Scenario: Verify completion flips draft to stable
+#### Scenario: Verify completion flips draft to stable and proposal to completed
 - **GIVEN** a change `2026-04-08-my-change` that modified specs `quality-gates` (version 3) and `spec-format` (version 5)
+- **AND** `proposal.md` has `status: active`
 - **AND** verify passes with no CRITICAL issues
 - **AND** the user approves the change for merge
 - **WHEN** the verify completion step runs
 - **THEN** `quality-gates` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 4`, `lastModified: 2026-04-08`
 - **AND** `spec-format` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 6`, `lastModified: 2026-04-08`
+- **AND** `proposal.md` frontmatter SHALL be updated to `status: completed`
 
 #### Scenario: Verification with all checks passing
 
