@@ -25,7 +25,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    Show changes that have implementation tasks (tasks.md exists).
    Mark changes with incomplete tasks as "(In Progress)".
 
-   **IMPORTANT**: Do NOT auto-select from directory listing. Worktree context detection is acceptable.
+   **IMPORTANT**: Do NOT auto-select from directory listing. Change context detection (proposal frontmatter or worktree) is acceptable.
 
 2. **Check status**
 
