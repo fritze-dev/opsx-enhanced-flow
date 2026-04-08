@@ -77,7 +77,7 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 - FF, verify, preflight, changelog, docs, setup, new skill updates
 - Spec template updates (both consumer and project)
 - Proposal template updates (both consumer and project)
-- All Smart Template + workflow.md updates (add `template-version: 1`)
+- All Smart Template + workflow.md + CONSTITUTION.md updates (add `template-version: 1`)
 - Migration of 18 existing specs
 - Simplification of active/completed change detection, worktree context detection, and lazy cleanup
 - Setup merge detection: version comparison, customization detection, conflict surfacing
@@ -85,4 +85,4 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 **Out of scope:**
 - Automated orphan draft detection/cleanup (enforced via verify gate instead)
 - Create date tracking (can be added later if needed)
-- CONSTITUTION.md merge (user-owned content, not a plugin template)
+- Full template-body rewrite for CONSTITUTION.md (content is user-owned, only structural sections are merged)
