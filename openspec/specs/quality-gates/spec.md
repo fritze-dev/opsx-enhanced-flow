@@ -84,11 +84,9 @@ The system SHALL additionally read `preflight.md` and cross-check each side-effe
 
 The system SHALL additionally perform **diff-based verification** by comparing the set of files changed on the current branch against the base branch. If no common ancestor with the base branch is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report.
 
-**Diff Scope Check**: For each file in the diff, the system SHALL check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section. Files that appear in the diff but have no connection to any task or design component SHALL be flagged as SUGGESTION ("Unintended change: <file> not covered by any task or design component").
+**Diff Scope Check**: For each file in the diff, the system SHALL check whether the file is traceable to a task description in `tasks.md` or a component listed in `design.md`'s Architecture & Components section. Files that appear in the diff but have no connection to any task or design component SHALL be collected and reported as a single SUGGESTION with the list of untraced files, rather than one issue per file.
 
 **Task-Diff Mapping**: For each task marked complete in `tasks.md`, the system SHALL check whether at least one file in the diff corresponds to the task description (keyword match against file paths and diff content). Tasks marked complete that produced no corresponding changes in the diff SHALL be flagged as WARNING ("Task marked complete but no corresponding changes in diff: <task description>").
-
-**Unintended Change Detection**: The system SHALL compare the set of changed files against the set of files referenced in `design.md`'s Architecture & Components section and task descriptions. Files present in the diff but not referenced in any artifact SHALL be collected and reported as a single SUGGESTION with the list of untraced files, rather than one issue per file.
 
 The `/opsx:verify` command SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When invoked as a final verify after the fix loop, the command SHALL operate identically — checking completeness, correctness, and coherence against the current state of code and artifacts. No special flags or modes are needed; the verify skill is stateless and always checks the current state.
 
@@ -204,13 +202,6 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **THEN** all changed files are traceable to design components
 - **AND** no diff scope issues are raised
 
-#### Scenario: Diff scope check finds untraced file
-
-- **GIVEN** a change with design.md listing components in `src/skills/verify/`
-- **AND** the branch diff includes `src/skills/apply/SKILL.md` which is not referenced in any task or design component
-- **WHEN** the system performs diff scope verification
-- **THEN** the report includes a SUGGESTION: "Unintended change: src/skills/apply/SKILL.md not covered by any task or design component"
-
 #### Scenario: Task marked complete with no corresponding diff
 
 - **GIVEN** a change with tasks.md containing a completed task "Update error messages in auth module"
@@ -226,10 +217,10 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **THEN** the task is confirmed as having corresponding changes
 - **AND** no task-diff mapping issue is raised
 
-#### Scenario: Multiple untraced files reported as single suggestion
+#### Scenario: Untraced files reported as single suggestion
 
 - **GIVEN** a change where the branch diff includes 3 files not referenced in design.md or any task
-- **WHEN** the system performs unintended change detection
+- **WHEN** the system performs diff scope verification
 - **THEN** the report includes a single SUGGESTION listing all 3 untraced files
 - **AND** does not create separate issues per file
 
