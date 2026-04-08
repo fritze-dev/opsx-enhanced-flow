@@ -53,7 +53,7 @@ Before creating a new change, `/opsx:new` checks for stale worktrees. For each e
 
 ### Post-Merge Worktree Cleanup
 
-After a successful `gh pr merge` from within a worktree, the system immediately cleans up rather than leaving stale worktrees for the next `/opsx:new`. The cleanup sequence switches to the main worktree, removes the completed worktree, and deletes the merged branch. If the worktree has uncommitted changes and removal fails, the system reports the error and suggests manual cleanup without blocking the workflow. This complements lazy cleanup -- lazy cleanup catches worktrees from merges that happened outside the agent session, while post-merge cleanup handles in-session merges immediately.
+After a successful `gh pr merge` from within a worktree, the system immediately cleans up rather than leaving stale worktrees for the next `/opsx:new`. The cleanup sequence switches to the main worktree, removes the completed worktree, deletes the local branch, and deletes the remote branch. If the worktree has uncommitted changes and removal fails, the system reports the error and suggests manual cleanup without blocking the workflow. This complements lazy cleanup -- lazy cleanup catches worktrees from merges that happened outside the agent session, while post-merge cleanup handles in-session merges immediately.
 
 ### Active vs Completed Change Detection
 
