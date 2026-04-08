@@ -60,6 +60,7 @@ apply:
     1. Switch working directory to the main worktree
     2. Run `git worktree remove <worktree-path>`
     3. Run `git branch -D <branch-name>`
+    4. Run `git push origin --delete <branch-name>`
     If worktree remove fails (e.g., dirty state), report the error and
     suggest manual cleanup — do not block the workflow.
 
