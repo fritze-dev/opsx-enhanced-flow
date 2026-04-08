@@ -9,7 +9,7 @@ Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, 
 ## Requirements
 
 ### Requirement: WORKFLOW.md Pipeline Orchestration
-The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), and optionally `docs_language`. The markdown body MAY contain supplementary workflow documentation.
+The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, and `version` (integer, for template merge detection during `/opsx:setup`). The markdown body MAY contain supplementary workflow documentation.
 
 **User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place.
 
@@ -21,7 +21,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 #### Scenario: WORKFLOW.md frontmatter contains required fields
 - **GIVEN** a valid `openspec/WORKFLOW.md`
 - **WHEN** its frontmatter is inspected
-- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, and `context` fields
+- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and `version` fields
 
 ### Requirement: Smart Template Format
 All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `version` (integer, monotonically increasing — bumped when the template content changes). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them.

@@ -85,4 +85,4 @@ With delta-specs eliminated (ADR-037), there is no built-in mechanism to track w
 **Out of scope:**
 - Automated orphan draft detection/cleanup (enforced via verify gate instead)
 - Create date tracking (can be added later if needed)
-- WORKFLOW.md merge (special file — handled separately from Smart Templates)
+- CONSTITUTION.md merge (user-owned content, not a plugin template)
