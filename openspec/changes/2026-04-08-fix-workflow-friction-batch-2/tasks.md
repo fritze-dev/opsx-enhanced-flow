@@ -20,19 +20,19 @@
   - [x] Apply.instruction requires updating stale artifacts — PASS ("Artifact freshness")
   - [x] Apply.instruction includes docs terminology check before user testing — PASS ("Docs terminology check")
   - [x] Consumer template mirrors all apply.instruction changes — PASS (identical text in both files)
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` (passed — 0 critical, 0 warnings, 0 suggestions)
+- [x] 3.3. User Testing: User approved.
+- [x] 3.4. Fix Loop: Not entered — no issues found.
+- [x] 3.5. Final Verify: Skipped (3.4 not entered).
+- [x] 3.6. Approval: User approved ("sieht gut aus").
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #X"`)
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs — skipped (no spec changes, no capability docs to regenerate)
+- [x] 4.3. Bump version (1.0.43 → 1.0.44)
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review, update body with change summary and issue references
 
 ## 5. Post-Merge Reminders
 

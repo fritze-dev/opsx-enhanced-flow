@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-08 — Fix Workflow Friction Batch 2
+
+### Changed
+- Specs template now explicitly prohibits implementation details (concrete commands, file paths, API calls) — specs describe behavior only, implementation belongs in SKILL.md or design.md
+- Apply workflow now enforces verify re-run after any fix-loop change — Final Verify (step 3.5) must not be skipped when the fix loop was entered
+- Apply workflow now requires updating stale artifacts when a fix resolves a flagged issue — preflight verdicts and design notes must reflect current state
+- Apply workflow now checks docs for stale terminology before user testing — when specs change terminology, docs and README references are flagged early instead of waiting for `/opsx:docs` regeneration
+
 ## 2026-04-08 — Diff-Based Verification
 
 ### Changed
