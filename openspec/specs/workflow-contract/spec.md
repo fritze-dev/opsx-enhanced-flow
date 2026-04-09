@@ -13,13 +13,13 @@ Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, 
 ## Requirements
 
 ### Requirement: WORKFLOW.md Pipeline Orchestration
-The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of artifact IDs), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, and `template-version` (integer, for template merge detection during `/opsx:setup`). The markdown body MAY contain supplementary workflow documentation.
+The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of step IDs — both artifact steps and action steps), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, optionally `automation` (CI pipeline configuration), and `template-version` (integer, for template merge detection during `/opsx:setup`). The `pipeline` array SHALL be the single source of truth for the complete change lifecycle — from research through finalization. The markdown body MAY contain supplementary workflow documentation.
 
-**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place.
+**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place — including both artifact generation and action steps.
 
 #### Scenario: Skill reads WORKFLOW.md for pipeline configuration
 - **GIVEN** a project with `openspec/WORKFLOW.md` containing pipeline frontmatter
-- **WHEN** any artifact-generating skill is invoked
+- **WHEN** any pipeline-executing skill is invoked
 - **THEN** the skill SHALL read WORKFLOW.md frontmatter for `templates_dir`, `pipeline`, `apply`, and `post_artifact` configuration
 
 #### Scenario: WORKFLOW.md frontmatter contains required fields
@@ -27,36 +27,63 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - **WHEN** its frontmatter is inspected
 - **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and `template-version` fields
 
+#### Scenario: Pipeline array contains both artifact and action steps
+- **GIVEN** a valid `openspec/WORKFLOW.md`
+- **WHEN** the `pipeline` array is inspected
+- **THEN** it MAY contain both artifact step IDs (e.g., `research`, `proposal`) and action step IDs (e.g., `apply`, `verify`, `changelog`)
+- **AND** each ID SHALL map to a template file at `<templates_dir>/<id>.md`
+
 ### Requirement: Smart Template Format
-All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `template-version` (integer, monotonically increasing — bumped when the plugin changes the template content). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `template-version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them. The field is named `template-version` (not `version`) to distinguish it from spec `version` (content version tracking).
+All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (step identifier), `description` (brief purpose), `requires` (array of dependency step IDs), `instruction` (AI behavioral constraints for execution), and `template-version` (integer, monotonically increasing — bumped when the plugin changes the template content).
 
-**User Story:** As a developer I want each template to be self-describing with its own instruction and metadata, so that I can understand what a template does without consulting a separate schema file.
+Templates SHALL support two types via an optional `type` field:
+- **`type: artifact`** (default when `type` is absent): Generates a file. Frontmatter SHALL additionally contain `generates` (output file path relative to change directory). The markdown body SHALL define the output structure for the generated artifact. Status is determined by file existence at the `generates` path.
+- **`type: action`**: Executes a skill or action. Frontmatter SHALL additionally contain `status_check` (how to determine if this step is complete). The `status_check` field SHALL use one of: `tasks_complete` (all checkboxes in tasks.md are checked), `proposal_completed` (proposal frontmatter `status == completed`), `file_exists: <path>` (a specific file exists outside the change directory, e.g., `CHANGELOG.md`), or `always_run` (no persistent status — step always executes when reached). Action templates MAY have a markdown body for supplementary documentation but it is not used as output structure.
 
-#### Scenario: Smart Template contains required frontmatter fields
-- **GIVEN** a Smart Template file (e.g., `openspec/templates/research.md`)
+The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation or execution. The `template-version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them. The field is named `template-version` (not `version`) to distinguish it from spec `version` (content version tracking).
+
+**User Story:** As a developer I want each pipeline step to be self-describing with its own instruction and metadata, so that I can understand what a step does and whether it generates an artifact or executes an action.
+
+#### Scenario: Artifact template contains required frontmatter fields
+- **GIVEN** a Smart Template file with `type: artifact` (or no `type` field)
 - **WHEN** its YAML frontmatter is inspected
 - **THEN** it SHALL contain `id`, `description`, `generates`, `requires`, `instruction`, and `template-version` fields
 
+#### Scenario: Action template contains required frontmatter fields
+- **GIVEN** a Smart Template file with `type: action`
+- **WHEN** its YAML frontmatter is inspected
+- **THEN** it SHALL contain `id`, `description`, `requires`, `instruction`, `status_check`, and `template-version` fields
+- **AND** SHALL NOT require a `generates` field
+
 #### Scenario: Skill reads instruction from template frontmatter
 - **GIVEN** a Smart Template with an `instruction` field in its frontmatter
-- **WHEN** a skill generates an artifact using this template
+- **WHEN** a skill executes a step using this template
 - **THEN** the skill SHALL apply the instruction as behavioral constraints
-- **AND** SHALL NOT copy the instruction text into the generated artifact file
+- **AND** SHALL NOT copy the instruction text into generated artifacts
 
-#### Scenario: Template body defines output structure
-- **GIVEN** a Smart Template with markdown headings in its body
+#### Scenario: Template body defines output structure for artifacts
+- **GIVEN** a Smart Template with `type: artifact` and markdown headings in its body
 - **WHEN** a skill generates an artifact using this template
 - **THEN** the generated artifact SHALL follow the section structure defined in the template body
+
+#### Scenario: Action template status check determines completion
+- **GIVEN** a Smart Template with `type: action` and `status_check: tasks_complete`
+- **WHEN** a skill checks whether this step is complete
+- **THEN** it SHALL parse `tasks.md` checkboxes and report complete only if all are checked
 
 #### Scenario: All templates use Smart Template format
 - **GIVEN** the `openspec/templates/` directory
 - **WHEN** all template files are inspected
-- **THEN** every template (pipeline artifacts, docs, constitution) SHALL have YAML frontmatter with at minimum `id` and `description` fields
+- **THEN** every template (pipeline artifacts, actions, docs, constitution) SHALL have YAML frontmatter with at minimum `id` and `description` fields
 
 ### Requirement: Skill Reading Pattern
-Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each artifact in `pipeline`, read `<templates_dir>/<id>.md` to get `generates`, `requires`, and `instruction` from frontmatter and output structure from body, (3) check artifact status via file existence at `openspec/changes/<name>/<generates>`, (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) execute `post_artifact` from WORKFLOW.md after artifact creation.
+Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each step in `pipeline`, read `<templates_dir>/<id>.md` to get frontmatter fields and (for artifact types) output structure from body, (3) check step status: for artifact steps (`type: artifact` or no `type`), check file existence at `openspec/changes/<name>/<generates>`; for action steps (`type: action`), evaluate the `status_check` field, (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) for artifact steps, execute `post_artifact` from WORKFLOW.md after artifact creation.
 
-**User Story:** As a skill author I want a clear, documented pattern for reading pipeline configuration, so that all skills interact with the pipeline consistently.
+When executing action steps, skills SHALL use the Agent tool to spawn an isolated sub-agent for each step. The sub-agent SHALL receive the template's `instruction` as its primary directive and only the artifacts listed in `requires` as input context (read from disk). This bounded-context approach prevents context window exhaustion during full pipeline execution.
+
+Skills SHALL support checkpoint/resume: if invoked on a change with existing artifacts or completed actions, they SHALL skip completed steps and resume from the first incomplete step. If a step's status check indicates failure (e.g., preflight verdict BLOCKED), the skill SHALL stop and report the failure.
+
+**User Story:** As a skill author I want a clear, documented pattern for reading pipeline configuration, so that all skills interact with the pipeline consistently — whether the step generates an artifact or executes an action.
 
 #### Scenario: Skill resolves template path from WORKFLOW.md
 - **GIVEN** WORKFLOW.md with `templates_dir: openspec/templates` and `pipeline: [research, ...]`
@@ -65,9 +92,28 @@ Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontm
 
 #### Scenario: Skill checks artifact status via file existence
 - **GIVEN** a change workspace at `openspec/changes/my-change/`
-- **AND** a Smart Template with `generates: research.md`
-- **WHEN** the skill checks artifact status
+- **AND** a Smart Template with `type: artifact` and `generates: research.md`
+- **WHEN** the skill checks step status
 - **THEN** it SHALL check if `openspec/changes/my-change/research.md` exists and is non-empty
+
+#### Scenario: Skill checks action status via status_check
+- **GIVEN** a change workspace at `openspec/changes/my-change/`
+- **AND** a Smart Template with `type: action` and `status_check: tasks_complete`
+- **WHEN** the skill checks step status
+- **THEN** it SHALL parse `openspec/changes/my-change/tasks.md` for checkbox completion
+
+#### Scenario: Skill executes action step as sub-agent
+- **GIVEN** a pipeline step with `type: action` and `requires: [tasks]`
+- **WHEN** the skill executes this step
+- **THEN** it SHALL spawn a sub-agent via the Agent tool
+- **AND** the sub-agent SHALL receive the template's `instruction` and the required artifacts as input
+- **AND** SHALL NOT receive the orchestrator's full conversation history
+
+#### Scenario: Skill resumes from checkpoint
+- **GIVEN** a change with `research.md` and `proposal.md` already created
+- **WHEN** a pipeline-executing skill is invoked
+- **THEN** it SHALL detect existing artifacts and skip completed steps
+- **AND** SHALL resume from the first incomplete step
 
 ### Requirement: Automation Configuration
 
@@ -100,55 +146,31 @@ WORKFLOW.md frontmatter SHALL support an optional `automation` section that conf
 - **THEN** the `docs` step SHALL be skipped
 - **AND** all other steps SHALL execute normally
 
-### Requirement: Pipeline Orchestrator Pattern
+### Requirement: Full Pipeline Execution
 
-The workflow contract SHALL define a pattern for end-to-end pipeline orchestration via a single skill invocation. An orchestrator skill (e.g., `/opsx:auto`) SHALL read the `pipeline` array from WORKFLOW.md and execute each step as an isolated sub-agent using the Agent tool. Each sub-agent SHALL receive only the artifacts it needs as input (read from disk), produce its output artifact (written to disk), and return control to the orchestrator. The orchestrator SHALL validate the handoff between steps by checking artifact existence and frontmatter status before proceeding to the next step. If a handoff validation fails, the orchestrator SHALL stop, report the failure, and NOT proceed to subsequent steps.
+The `/opsx:ff` skill SHALL support executing the complete `pipeline` array from WORKFLOW.md, including both artifact steps and action steps. When the pipeline contains action steps beyond the traditional artifact pipeline, ff SHALL process them using the sub-agent pattern defined in the Skill Reading Pattern requirement. The skill SHALL preserve all existing human gates defined in the QA loop (human-approval-gate spec) by default, pausing at action steps that require user interaction. An optional `--auto-approve` flag SHALL replace human approval with the verify skill's pass/fail assessment, enabling fully autonomous pipeline execution.
 
-The orchestrator SHALL support checkpoint/resume: if invoked on a change with existing artifacts, it SHALL skip completed steps (artifacts already exist) and resume from the first incomplete step. The orchestrator SHALL preserve all existing human gates defined in the QA loop (human-approval-gate spec) by default, with an optional `--auto-approve` flag that replaces human approval with the verify skill's pass/fail assessment.
+**User Story:** As a developer I want to run the entire OpenSpec pipeline with a single `/opsx:ff` command, so that routine changes can be processed end-to-end without manually invoking each step.
 
-**User Story:** As a developer I want to run the entire OpenSpec pipeline with a single command, so that routine changes can be processed end-to-end without manually invoking each step.
+#### Scenario: ff executes full pipeline including action steps
+- **GIVEN** a WORKFLOW.md with `pipeline: [research, proposal, specs, design, preflight, tasks, apply, verify, changelog, docs, version-bump]`
+- **AND** a new change with no artifacts
+- **WHEN** the user invokes `/opsx:ff`
+- **THEN** ff SHALL execute each step in order, using artifact generation for artifact steps and sub-agent invocation for action steps
 
-#### Scenario: Orchestrator runs full pipeline from scratch
-- **GIVEN** a new change with no artifacts
-- **WHEN** the user invokes `/opsx:auto`
-- **THEN** the orchestrator SHALL read the `pipeline` array from WORKFLOW.md
-- **AND** SHALL execute each pipeline step as an isolated sub-agent
-- **AND** each sub-agent SHALL read its predecessor's artifacts from disk
-- **AND** SHALL write its output artifact to the change directory
-
-#### Scenario: Orchestrator resumes from checkpoint
-- **GIVEN** a change with `research.md` and `proposal.md` already created
-- **WHEN** the user invokes `/opsx:auto`
-- **THEN** the orchestrator SHALL detect existing artifacts
-- **AND** SHALL skip the research and proposal steps
-- **AND** SHALL resume from the specs step
-
-#### Scenario: Handoff validation fails
-- **GIVEN** a change where the preflight step produced a verdict of BLOCKED
-- **WHEN** the orchestrator checks the handoff gate after preflight
-- **THEN** the orchestrator SHALL stop execution
-- **AND** SHALL report: "Pipeline stopped: preflight verdict is BLOCKED"
-- **AND** SHALL NOT proceed to task creation
-
-#### Scenario: Sub-agent receives bounded context
-- **GIVEN** the orchestrator is executing the design step
-- **WHEN** the design sub-agent is spawned via the Agent tool
-- **THEN** the sub-agent SHALL receive the design template instruction, the proposal, and the specs as input
-- **AND** SHALL NOT receive the full conversation history of the orchestrator
-
-#### Scenario: Human gate preserved by default
-- **GIVEN** the orchestrator has completed the verify step with no CRITICAL issues
+#### Scenario: ff pauses at human gates
+- **GIVEN** a pipeline execution has completed the verify action step with no CRITICAL issues
 - **AND** the `--auto-approve` flag was NOT provided
-- **WHEN** the orchestrator reaches the approval gate
-- **THEN** the orchestrator SHALL pause and ask the user for explicit approval
-- **AND** SHALL NOT proceed to post-apply steps without approval
+- **WHEN** ff reaches the approval gate in the QA loop
+- **THEN** ff SHALL pause and ask the user for explicit approval
+- **AND** SHALL NOT proceed to post-apply action steps without approval
 
-#### Scenario: Auto-approve bypasses human gate
-- **GIVEN** the orchestrator is invoked with `--auto-approve`
+#### Scenario: Auto-approve enables autonomous execution
+- **GIVEN** ff is invoked with `--auto-approve`
 - **AND** the verify step passes with no CRITICAL issues
-- **WHEN** the orchestrator reaches the approval gate
-- **THEN** the orchestrator SHALL skip the human approval step
-- **AND** SHALL proceed directly to post-apply steps
+- **WHEN** ff reaches the approval gate
+- **THEN** ff SHALL skip the human approval step
+- **AND** SHALL proceed directly to post-apply action steps
 
 ## Edge Cases
 
@@ -158,10 +180,12 @@ The orchestrator SHALL support checkpoint/resume: if invoked on a change with ex
 - **WORKFLOW.md with malformed YAML**: Skills SHALL report a parse error and stop.
 - **Empty `pipeline` array**: Skills SHALL report that no artifacts are defined and stop.
 - **`templates_dir` points to nonexistent directory**: Skills SHALL report the missing directory and suggest running `/opsx:setup`.
-- **Automation section with unknown step**: If `automation.post_approval.steps` contains a step identifier that does not map to a known action (changelog, docs, version-bump), the system SHALL skip the unknown step and report a warning.
-- **Orchestrator invoked on completed change**: If the proposal has `status: completed`, the orchestrator SHALL report that the change is already complete and stop.
-- **Sub-agent fails mid-pipeline**: If a sub-agent exits with an error, the orchestrator SHALL report the error, note which step failed, and stop. Artifacts created by previous steps remain on disk (no rollback of successfully completed steps).
-- **Concurrent orchestrator invocations**: If two orchestrator instances run on the same change simultaneously, they may conflict on file writes. The system does not prevent this — the user is responsible for avoiding concurrent runs.
+- **Automation section with unknown step**: If `automation.post_approval.steps` contains a step identifier that does not map to a known action, the system SHALL skip the unknown step and report a warning.
+- **Pipeline step without template file**: If a step ID in the `pipeline` array has no corresponding template at `<templates_dir>/<id>.md`, the skill SHALL report the missing template and stop.
+- **Action step with unknown status_check**: If an action template's `status_check` uses an unrecognized value, the skill SHALL treat it as `always_run` and report a warning.
+- **ff invoked on completed change**: If the proposal has `status: completed`, ff SHALL report that the change is already complete and stop.
+- **Sub-agent fails mid-pipeline**: If a sub-agent exits with an error, ff SHALL report the error, note which step failed, and stop. Artifacts created by previous steps remain on disk (no rollback of successfully completed steps).
+- **Concurrent pipeline invocations**: If two pipeline executions run on the same change simultaneously, they may conflict on file writes. The system does not prevent this — the user is responsible for avoiding concurrent runs.
 
 ## Assumptions
 

@@ -16,8 +16,9 @@ All post-implementation steps (changelog, docs, version-bump) are manual, creati
 - **WORKFLOW.md `automation` block**: new frontmatter section defining CI trigger behavior (post-approval pipeline steps, labels, opt-out/opt-in). WORKFLOW.md remains single source of truth — no separate GitHub Action YAML needed, existing `claude.yml` reads this config.
 - **Label-based state machine**: `automation/running`, `automation/complete`, `automation/failed` labels track pipeline progress on PRs
 - **Opt-out/opt-in labels**: `skip-docs` to skip docs generation, `auto-merge` for automatic merge after successful pipeline
-- **New `/opsx:auto` skill**: orchestrator that runs the full OpenSpec pipeline (research → ... → tasks → apply → verify → finalize) as a single command
+- **Extended `/opsx:ff`**: ff reads the full pipeline (including action steps like apply, verify, changelog, docs, version-bump) and executes everything. Optional `--auto-approve` flag for fully autonomous execution.
 - **Sub-agent architecture**: each pipeline step runs as an isolated sub-agent (via Agent tool) with only the relevant artifacts as input, solving context window exhaustion
+- **Action templates**: new `type: action` templates with `status_check` field for non-artifact pipeline steps
 - **Post-approval pipeline automation**: changelog → docs → version-bump → commit → push runs automatically on PR review approval via existing `claude.yml` integration
 
 ## Capabilities
@@ -43,10 +44,10 @@ None.
 
 ## Impact
 
-- **New files**: `src/skills/auto/SKILL.md`
-- **Modified files**: `openspec/WORKFLOW.md` (add `automation` frontmatter block), `openspec/CONSTITUTION.md` (add CI automation conventions), `.github/workflows/claude.yml` (add post-approval trigger path)
+- **New files**: Action templates in `openspec/templates/` (apply.md, verify.md, changelog.md, docs.md, version-bump.md) and consumer copies in `src/templates/`
+- **Modified files**: `openspec/WORKFLOW.md` (extend `pipeline` array, add `automation` block), `src/skills/ff/SKILL.md` (handle action-type templates + sub-agents), `openspec/CONSTITUTION.md` (add CI automation conventions), `.github/workflows/claude.yml` (add post-approval trigger path)
 - **Dependencies**: `claude-code-action@v1` (already used), `gh` CLI (already used)
-- **No changes to existing skills**: verify, changelog, docs, ff, apply remain immutable
+- **No new skills**: ff extended to handle action steps (skill modification, not project-specific — allowed per immutability rule)
 - **No new GitHub Action files**: existing `claude.yml` extended to handle post-approval pipeline
 
 ## Scope & Boundaries
