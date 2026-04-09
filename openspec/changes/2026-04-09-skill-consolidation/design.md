@@ -101,9 +101,20 @@ Each stub is ~5 lines (frontmatter + include directive). The router logic lives 
 - All existing spec behavior preserved: PASS if apply + propose produce equivalent results to current apply + ff + verify
 - Pipeline includes review: PASS if `pipeline` array in WORKFLOW.md has 7 entries ending with `review`
 
+### Spec Merges
+
+Three spec merges align specs with the consolidated command structure:
+
+| Merge | Result | Rationale |
+|-------|--------|-----------|
+| `project-setup` + `project-bootstrap` | `project-init` | Both map to `init` command. Shared actor, trigger, data model |
+| `artifact-generation` | absorbed into `artifact-pipeline` | propose = pipeline traversal, already described in artifact-pipeline |
+| `user-docs` + `architecture-docs` + `decision-docs` | `documentation` | All map to finalize/docs. Shared output directory, trigger |
+
+After merges: 18 specs → 12 specs (- 7 removed, + 2 new, - 1 interactive-discovery).
+
 ## Non-Goals
 
-- Spec merges (e.g., merging project-setup + project-bootstrap into one spec)
 - Consumer migration tooling (manual `/opsx:init` sufficient)
 - Closing PR #97 (done after this change lands)
 
@@ -124,15 +135,21 @@ Each stub is ~5 lines (frontmatter + include directive). The router logic lives 
 - **review.md staleness after manual code changes** → Mitigation: apply deletes review.md at start, regenerates at end. Propose can re-run individual steps.
 - **Breaking change for consumers on template-version 1** → Mitigation: `/opsx:init` handles migration. template-version 3 is an explicit signal.
 
-### Auto-Approve Flag
+### Auto-Approve Config
 
-`/opsx:propose --auto-approve` enables fully autonomous pipeline execution:
+WORKFLOW.md supports an optional `auto_approve: true` setting:
+
+```yaml
+auto_approve: true  # project-level, not per-invocation
+```
+
+When enabled:
 - propose generates artifacts (research → tasks)
 - apply implements + generates review.md
 - If review.md verdict is PASS → skip human approval gate → run finalize automatically
-- If review.md verdict is FAIL → stop and report (same as without flag)
+- If review.md verdict is FAIL → stop and report (same as without auto-approve)
 
-Default behavior (no flag): propose pauses after review.md PASS for explicit user approval before finalize. This preserves the mandatory human gate from the QA loop.
+Default behavior (`auto_approve` absent or false): propose pauses after review.md PASS, actively asks "Approved? Continue to finalize?" — this IS the human gate. Auto-approve is a project-level decision in WORKFLOW.md, not a per-invocation flag, because propose is often started automatically.
 
 ### GitHub Actions Pipeline (`.github/workflows/pipeline.yml`)
 

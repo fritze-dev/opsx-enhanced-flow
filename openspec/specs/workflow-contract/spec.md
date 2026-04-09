@@ -22,6 +22,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - `pipeline` (ordered array of artifact step IDs — each generates a file)
 - `actions` (object defining inline action definitions — see Requirement: Inline Action Definitions)
 - `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
+- `auto_approve` (optional boolean, when `true` pipeline traversal proceeds without user confirmation at checkpoints)
 - `automation` (optional CI pipeline configuration — see Requirement: Automation Configuration)
 - `docs_language` (optional, defaults to English)
 
@@ -83,9 +84,9 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 WORKFLOW.md frontmatter SHALL support an `actions` section that defines workflow actions inline. Each action SHALL have: `specs` (array of spec names the action references for behavioral requirements), and `instruction` (multi-line string with procedural guidance for the AI agent). Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL spawn a sub-agent via the Agent tool with the action's `instruction` as its primary directive and the specs listed in `specs` loaded as behavioral context.
 
 The system SHALL support these actions:
-- `init`: Project initialization and health check (specs: project-setup, project-bootstrap, constitution-management, quality-gates)
+- `init`: Project initialization and health check (specs: project-init, constitution-management, quality-gates)
 - `apply`: Task implementation with review.md generation (specs: task-implementation, quality-gates)
-- `finalize`: Post-approval changelog, docs, and version-bump (specs: release-workflow, user-docs, architecture-docs, decision-docs)
+- `finalize`: Post-approval changelog, docs, and version-bump (specs: release-workflow, documentation)
 
 **User Story:** As a plugin maintainer I want action definitions inline in WORKFLOW.md alongside the pipeline, so that all workflow orchestration lives in one file without separate action template files.
 

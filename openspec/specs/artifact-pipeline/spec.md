@@ -201,7 +201,7 @@ Each Smart Template's `instruction` field SHALL contain workflow rules that appl
 #### Scenario: Apply instruction in WORKFLOW.md includes post-apply workflow
 - **GIVEN** `openspec/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL contain the post-apply sequence: `/opsx:apply` → `/opsx:changelog` → `/opsx:docs`
+- **THEN** it SHALL contain the post-apply sequence: `/opsx:apply` → `/opsx:finalize`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 
@@ -302,6 +302,34 @@ The specs Smart Template's `instruction` field SHALL include an overlap verifica
 - **WHEN** the agent begins the specs artifact phase and performs overlap verification
 - **THEN** the agent SHALL reclassify `admin-filters` as a Modified Capability on `admin-table-view` and update the proposal before editing the spec file
 
+### Requirement: Propose as Single Entry Point for Pipeline Traversal
+The `/opsx:propose` command SHALL serve as the single entry point for all pipeline traversal operations. This includes: (1) creating new change workspaces (with worktree if enabled), (2) checkpoint/resume of partially completed pipelines, and (3) full lifecycle execution from research through tasks. When invoked with a description or name and no existing change matches, propose SHALL create a new change workspace. When invoked without a change name and existing changes are present, propose SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, propose SHALL derive a kebab-case name and create a new change. The `auto_approve` workflow configuration (when set to `true` in WORKFLOW.md frontmatter) controls whether pipeline traversal proceeds without user confirmation at checkpoints. Propose SHALL display artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
+
+**User Story:** As a developer I want a single command that handles workspace creation, progress display, and artifact generation, so that I don't need to remember different commands for different pipeline states.
+
+#### Scenario: Propose creates new workspace from description
+- **GIVEN** the user invokes `/opsx:propose` with a description like "add user authentication"
+- **AND** no change with a matching name exists
+- **WHEN** the action processes the input
+- **THEN** it SHALL derive a kebab-case name (e.g., `add-user-auth`) and create a new change directory
+- **AND** SHALL create a worktree if worktree mode is enabled in WORKFLOW.md
+
+#### Scenario: Propose displays artifact status
+- **GIVEN** a change workspace where research.md and proposal.md are complete
+- **WHEN** the user runs `/opsx:propose`
+- **THEN** the system SHALL display the status of all pipeline artifacts (research: done, proposal: done, specs: ready, design: blocked, preflight: blocked, tasks: blocked)
+
+#### Scenario: Propose detects existing change and offers selection
+- **GIVEN** existing changes under `openspec/changes/` and the user invokes `/opsx:propose` without specifying a name
+- **WHEN** the action detects active changes
+- **THEN** it SHALL present a list of active changes using AskUserQuestion
+- **AND** SHALL mark the most recently modified change as recommended
+
+#### Scenario: Propose asks what to build when no context provided
+- **GIVEN** no active changes exist and the user invokes `/opsx:propose` without a description
+- **WHEN** the action processes the input
+- **THEN** it SHALL ask the user what they want to build
+
 ## Edge Cases
 
 - If an artifact file exists but is empty (0 bytes), the system SHALL treat it as incomplete.
@@ -319,7 +347,7 @@ The specs Smart Template's `instruction` field SHALL include an overlap verifica
 - **Branch already exists:** The agent SHALL reuse the existing branch rather than failing.
 - **Network failure during PR creation:** The pipeline SHALL NOT be blocked.
 - **Auto-continue transitions:** The `post_artifact` hook runs after each artifact individually.
-- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `/opsx:new`.
+- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `/opsx:propose`.
 - **Worktree config with empty path_pattern**: SHALL default to `.claude/worktrees/{change}`.
 
 ## Assumptions
