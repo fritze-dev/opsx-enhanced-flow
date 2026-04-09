@@ -28,7 +28,7 @@
   - [ ] Post-approval CI pipeline commits changelog + docs + version-bump to PR branch within one run — PASS / FAIL
   - [ ] Pipeline sets correct labels at each state — PASS / FAIL
   - [ ] Sub-agents receive bounded context (not full conversation) — PASS / FAIL
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify`
+- [x] 3.2. Auto-Verify: Run `/opsx:verify` — PASS (1 false positive dismissed, 1 warning auto-fixed: added fallback for template-version 1 consumers in ff SKILL.md)
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
 - [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.

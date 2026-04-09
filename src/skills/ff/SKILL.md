@@ -83,7 +83,7 @@ Fast-forward through the OpenSpec pipeline — generate artifacts and optionally
 
    Use the **TodoWrite tool** to track progress through the pipeline.
 
-   Also read `openspec/WORKFLOW.md`'s `## Context` body section for project-level context instructions (typically points to CONSTITUTION.md).
+   Also read project-level context from `openspec/WORKFLOW.md`'s `## Context` body section (or `context` frontmatter field as fallback for template-version 1).
 
    Loop through steps in the `pipeline` order:
 
@@ -95,7 +95,7 @@ Fast-forward through the OpenSpec pipeline — generate artifacts and optionally
       - Read any completed dependency files for context
       - Create the artifact file using the template body as the structure
       - Apply the instruction as constraints — but do NOT copy it into the file
-      - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `## Post-Artifact Hook` body section. If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
+      - **Post-artifact hook**: Read `openspec/WORKFLOW.md`'s `## Post-Artifact Hook` body section (or `post_artifact` frontmatter field as fallback for template-version 1). If present, execute its instructions (commit, push, and on first push create a draft PR). If absent, skip silently.
       - Show brief progress: "Created <artifact-id>"
 
    b. **For each action step whose dependencies are met** (`type: action`):
