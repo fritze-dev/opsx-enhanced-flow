@@ -23,7 +23,6 @@ Read `openspec/WORKFLOW.md`. Extract from YAML frontmatter:
 
 Read from markdown body:
 - `## Context` section — follow its instructions (typically: read CONSTITUTION.md)
-- `## Post-Artifact Hook` section — used after artifact creation
 - `## Action: <name>` sections — each contains `### Instruction` (procedural guidance for the action)
 
 If WORKFLOW.md is missing and action is not `init`, tell the user to run `/opsx:workflow init` first and stop.
@@ -89,7 +88,12 @@ For `propose`, `apply`, `finalize`:
 
 1. Read all change artifacts (if change exists) and the propose instruction from WORKFLOW.md
 2. For each step in `pipeline` array: read Smart Template at `<templates_dir>/<id>.md`, check artifact status, generate if ready
-3. Execute Post-Artifact Hook after each artifact
+3. **After each artifact**, commit and push:
+   - `git add openspec/changes/<change-dir>/ openspec/specs/`
+   - `git commit -m "WIP: <change-name> — <artifact-id>"`
+   - `git push`
+   - On first push (no PR exists): `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
+   - Skip PR creation if `gh` unavailable. Continue on push failure.
 4. Follow the instruction from `## Action: propose` for checkpoint behavior, workspace creation, and pipeline gates
 
 ### `apply` — Sub-Agent Execution

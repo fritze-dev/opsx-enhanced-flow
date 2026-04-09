@@ -33,23 +33,6 @@ Always read and follow openspec/CONSTITUTION.md before proceeding.
 All workflow artifacts (research, proposal, specs, design, preflight, tasks, review)
 must be written in English regardless of docs_language.
 
-## Post-Artifact Hook
-
-After creating any artifact, commit and push the change:
-1. Check current branch: `git rev-parse --abbrev-ref HEAD`
-   - If already on `<change-name>` branch (e.g., in a worktree): skip branch creation
-   - If on main: `git checkout -b <change-name>`
-   - If on another branch: `git checkout <change-name>`
-2. Stage change artifacts: `git add openspec/changes/<change-dir>/`
-3. Stage spec edits (if specs stage): `git add openspec/specs/`
-4. Commit: `git commit -m "WIP: <change-name> — <artifact-id>"`
-5. Push: `git push -u origin <change-name>`
-6. On FIRST push only (no existing PR for this branch):
-   `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
-
-If `gh` CLI is unavailable or not authenticated, skip PR creation.
-If push fails, continue with local commit — do not block the pipeline.
-
 ## Action: propose
 
 ### Instruction
@@ -61,7 +44,6 @@ Checkpoint/resume: skip completed artifacts, resume from first incomplete step.
 Design review checkpoint: pause after design for user alignment (constitutional requirement).
 Preflight checkpoint: PASS → continue, PASS WITH WARNINGS → pause for acknowledgment, BLOCKED → stop.
 review artifact: stop before review and suggest /opsx:workflow apply (review is generated during apply, not propose).
-Execute Post-Artifact Hook after each artifact.
 
 ## Action: init
 
