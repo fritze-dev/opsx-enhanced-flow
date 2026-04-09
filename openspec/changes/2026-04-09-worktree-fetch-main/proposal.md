@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: worktree-fetch-main
 worktree: .claude/worktrees/worktree-fetch-main
 capabilities:

@@ -2,7 +2,7 @@
 title: "Change Workspace"
 capability: "change-workspace"
 description: "Create and manage change workspaces with worktree isolation, proposal-based context detection, and structured change lifecycle tracking"
-lastUpdated: "2026-04-08"
+lastUpdated: "2026-04-09"
 ---
 
 # Change Workspace
@@ -42,7 +42,7 @@ When the proposal artifact is generated, it includes YAML frontmatter with `stat
 
 ### Worktree-Based Workspace Creation
 
-When `worktree.enabled` is `true` in WORKFLOW.md, `/opsx:new` creates a git worktree instead of a plain directory. The system runs `git worktree add <path> -b <change-name>`, creates the change directory inside the worktree, and reports the path and branch name. If the worktree path already exists, the system suggests switching to it.
+When `worktree.enabled` is `true` in WORKFLOW.md, `/opsx:new` creates a git worktree instead of a plain directory. The system first fetches the latest remote main branch, then creates the worktree based on the fetched remote main. This ensures the new branch starts from the latest code, preventing merge conflicts caused by a stale local main. The system creates the change directory inside the worktree and reports the path and branch name. If the worktree path already exists, the system suggests switching to it.
 
 ### Change Context Detection
 

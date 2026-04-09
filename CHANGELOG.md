@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-09 — Worktree Fetch Latest Main
+
+### Changed
+- `/opsx:new` now fetches the latest remote main before creating a worktree — new branches are based on `origin/main` instead of the potentially stale local HEAD, preventing avoidable merge conflicts (closes #95)
+
 ## 2026-04-09 — Verify Content-Level Check
 
 ### Changed
