@@ -43,7 +43,7 @@ jobs:
           plugins: 'opsx@opsx-enhanced-flow'
           prompt: |
             Read openspec/WORKFLOW.md automation.post_approval config.
-            Execute /opsx:finalize for PR #${{ github.event.pull_request.number }}.
+            Execute /opsx:workflow finalize for PR #${{ github.event.pull_request.number }}.
             Manage labels as defined in the config.
             Commit and push all changes to the PR branch.
             If any step fails, set the failed label and post error details as a PR comment.

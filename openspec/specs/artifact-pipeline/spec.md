@@ -95,12 +95,12 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 
 #### Scenario: Apply is blocked without tasks
 - **GIVEN** a change workspace where preflight.md is the latest completed artifact and tasks.md does not exist
-- **WHEN** the user invokes `/opsx:apply`
+- **WHEN** the user invokes `/opsx:workflow apply`
 - **THEN** the system SHALL reject the apply attempt and report that tasks.md must be generated first
 
 #### Scenario: Apply proceeds after tasks completion
 - **GIVEN** a change workspace with all 6 artifacts completed including tasks.md
-- **WHEN** the user invokes `/opsx:apply`
+- **WHEN** the user invokes `/opsx:workflow apply`
 - **THEN** the system SHALL begin implementation, reading the task checklist from tasks.md
 
 #### Scenario: Apply tracks progress in tasks.md
@@ -130,7 +130,7 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the skill SHALL treat worktree mode as disabled and use existing directory-based behavior
 
 ### Requirement: Post-Artifact Commit and PR Integration
-WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:propose` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md, the skill SHALL skip post-artifact operations.
+WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:workflow propose` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md, the skill SHALL skip post-artifact operations.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
@@ -162,7 +162,7 @@ WORKFLOW.md SHALL define a `post_artifact` field containing instructions that th
 
 ### Requirement: Post-Implementation Commit Before Approval
 
-The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:workflow apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
 
 **User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
 
@@ -201,7 +201,7 @@ Each Smart Template's `instruction` field SHALL contain workflow rules that appl
 #### Scenario: Apply instruction in WORKFLOW.md includes post-apply workflow
 - **GIVEN** `openspec/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL contain the post-apply sequence: `/opsx:apply` → `/opsx:finalize`
+- **THEN** it SHALL contain the post-apply sequence: `/opsx:workflow apply` → `/opsx:workflow finalize`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 
@@ -303,12 +303,12 @@ The specs Smart Template's `instruction` field SHALL include an overlap verifica
 - **THEN** the agent SHALL reclassify `admin-filters` as a Modified Capability on `admin-table-view` and update the proposal before editing the spec file
 
 ### Requirement: Propose as Single Entry Point for Pipeline Traversal
-The `/opsx:propose` command SHALL serve as the single entry point for all pipeline traversal operations. This includes: (1) creating new change workspaces (with worktree if enabled), (2) checkpoint/resume of partially completed pipelines, and (3) full lifecycle execution from research through tasks. When invoked with a description or name and no existing change matches, propose SHALL create a new change workspace. When invoked without a change name and existing changes are present, propose SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, propose SHALL derive a kebab-case name and create a new change. The `auto_approve` workflow configuration (when set to `true` in WORKFLOW.md frontmatter) controls whether pipeline traversal proceeds without user confirmation at checkpoints. Propose SHALL display artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
+The `/opsx:workflow propose` command SHALL serve as the single entry point for all pipeline traversal operations. This includes: (1) creating new change workspaces (with worktree if enabled), (2) checkpoint/resume of partially completed pipelines, and (3) full lifecycle execution from research through tasks. When invoked with a description or name and no existing change matches, propose SHALL create a new change workspace. When invoked without a change name and existing changes are present, propose SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, propose SHALL derive a kebab-case name and create a new change. The `auto_approve` workflow configuration (when set to `true` in WORKFLOW.md frontmatter) controls whether pipeline traversal proceeds without user confirmation at checkpoints. Propose SHALL display artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
 
 **User Story:** As a developer I want a single command that handles workspace creation, progress display, and artifact generation, so that I don't need to remember different commands for different pipeline states.
 
 #### Scenario: Propose creates new workspace from description
-- **GIVEN** the user invokes `/opsx:propose` with a description like "add user authentication"
+- **GIVEN** the user invokes `/opsx:workflow propose` with a description like "add user authentication"
 - **AND** no change with a matching name exists
 - **WHEN** the action processes the input
 - **THEN** it SHALL derive a kebab-case name (e.g., `add-user-auth`) and create a new change directory
@@ -316,17 +316,17 @@ The `/opsx:propose` command SHALL serve as the single entry point for all pipeli
 
 #### Scenario: Propose displays artifact status
 - **GIVEN** a change workspace where research.md and proposal.md are complete
-- **WHEN** the user runs `/opsx:propose`
+- **WHEN** the user runs `/opsx:workflow propose`
 - **THEN** the system SHALL display the status of all pipeline artifacts (research: done, proposal: done, specs: ready, design: blocked, preflight: blocked, tasks: blocked)
 
 #### Scenario: Propose detects existing change and offers selection
-- **GIVEN** existing changes under `openspec/changes/` and the user invokes `/opsx:propose` without specifying a name
+- **GIVEN** existing changes under `openspec/changes/` and the user invokes `/opsx:workflow propose` without specifying a name
 - **WHEN** the action detects active changes
 - **THEN** it SHALL present a list of active changes using AskUserQuestion
 - **AND** SHALL mark the most recently modified change as recommended
 
 #### Scenario: Propose asks what to build when no context provided
-- **GIVEN** no active changes exist and the user invokes `/opsx:propose` without a description
+- **GIVEN** no active changes exist and the user invokes `/opsx:workflow propose` without a description
 - **WHEN** the action processes the input
 - **THEN** it SHALL ask the user what they want to build
 
@@ -347,7 +347,7 @@ The `/opsx:propose` command SHALL serve as the single entry point for all pipeli
 - **Branch already exists:** The agent SHALL reuse the existing branch rather than failing.
 - **Network failure during PR creation:** The pipeline SHALL NOT be blocked.
 - **Auto-continue transitions:** The `post_artifact` hook runs after each artifact individually.
-- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `/opsx:propose`.
+- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `/opsx:workflow propose`.
 - **Worktree config with empty path_pattern**: SHALL default to `.claude/worktrees/{change}`.
 
 ## Assumptions

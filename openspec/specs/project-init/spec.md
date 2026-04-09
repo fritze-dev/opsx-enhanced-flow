@@ -8,12 +8,12 @@ change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Handles project initialization via `/opsx:init`, including template installation, constitution generation, codebase scanning, and project health checks (spec drift, docs drift detection from the former docs-verify functionality).
+Handles project initialization via `/opsx:workflow init`, including template installation, constitution generation, codebase scanning, and project health checks (spec drift, docs drift detection from the former docs-verify functionality).
 
 ## Requirements
 
 ### Requirement: Install OpenSpec Workflow
-The system SHALL provide `/opsx:init` as the single entry point for project setup. The init command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) copy `openspec/WORKFLOW.md` from the plugin's workflow template at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` (skip if WORKFLOW.md already exists), and (3) create `openspec/CONSTITUTION.md` placeholder if none exists. The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
+The system SHALL provide `/opsx:workflow init` as the single entry point for project setup. The init command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) copy `openspec/WORKFLOW.md` from the plugin's workflow template at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` (skip if WORKFLOW.md already exists), and (3) create `openspec/CONSTITUTION.md` placeholder if none exists. The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
 
 The init command SHALL check for `gh` CLI availability and authentication. If `gh` is available and authenticated, the init command SHALL ask the user whether to enable worktree-based change isolation. If the user opts in, the init command SHALL uncomment the `worktree:` section in the generated WORKFLOW.md and set `enabled: true`. The init command SHALL also offer to configure the GitHub repository merge strategy for rebase-merge via `gh api`.
 
@@ -21,45 +21,45 @@ The init command SHALL NOT install any external CLI tools or require Node.js/npm
 
 The init command SHALL ensure target directories exist (via `mkdir -p`) before copying files.
 
-**User Story:** As a new user I want a single `/opsx:init` command that sets up everything including optional worktree mode, so that I do not have to manually configure the project.
+**User Story:** As a new user I want a single `/opsx:workflow init` command that sets up everything including optional worktree mode, so that I do not have to manually configure the project.
 
 #### Scenario: First-time project initialization
 - **GIVEN** a project directory without the opsx-enhanced workflow installed
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL copy Smart Templates from `${CLAUDE_PLUGIN_ROOT}/templates/` to `openspec/templates/`, copy WORKFLOW.md from `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, create `openspec/CONSTITUTION.md` placeholder, and verify the setup
 
 #### Scenario: Idempotent re-initialization
 - **GIVEN** a project that has already been initialized
-- **WHEN** the user runs `/opsx:init` again
+- **WHEN** the user runs `/opsx:workflow init` again
 - **THEN** the system SHALL skip already-completed steps, preserve existing CONSTITUTION.md and WORKFLOW.md, and report what was already in place
 
 #### Scenario: WORKFLOW.md copied from template
 - **GIVEN** a project directory without `openspec/WORKFLOW.md`
 - **AND** the plugin has `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL copy workflow.md to `openspec/WORKFLOW.md`
 
 #### Scenario: Worktree opt-in during init
 - **GIVEN** the `gh` CLI is installed and authenticated
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL ask whether to enable worktree-based change isolation
 - **AND** if the user opts in, SHALL uncomment the `worktree:` section in WORKFLOW.md and set `enabled: true`
 - **AND** SHALL offer to configure the GitHub repo for rebase-merge
 
 #### Scenario: No gh CLI available
 - **GIVEN** the `gh` CLI is not installed or not authenticated
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL skip the worktree opt-in question
 - **AND** SHALL leave the `worktree:` section commented out in WORKFLOW.md
 
 ### Requirement: Legacy Migration
 The init command SHALL detect legacy project layouts (presence of `openspec/schemas/opsx-enhanced/schema.yaml` without `openspec/WORKFLOW.md`) and perform migration: (1) generate WORKFLOW.md from schema.yaml content and config.yaml settings, (2) move templates from `openspec/schemas/opsx-enhanced/templates/` to `openspec/templates/` converting them to Smart Template format, (3) rename `openspec/constitution.md` to `openspec/CONSTITUTION.md`, (4) remove the `openspec/schemas/` directory and `openspec/config.yaml` after successful migration.
 
-**User Story:** As an existing user I want `/opsx:init` to automatically migrate my project from the old schema layout, so that I don't have to manually restructure files.
+**User Story:** As an existing user I want `/opsx:workflow init` to automatically migrate my project from the old schema layout, so that I don't have to manually restructure files.
 
 #### Scenario: Legacy layout detected and migrated
 - **GIVEN** a project with `openspec/schemas/opsx-enhanced/schema.yaml` but no `openspec/WORKFLOW.md`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL generate WORKFLOW.md, move and convert templates, rename constitution, and remove legacy files
 
 #### Scenario: Migration preserves existing content
@@ -69,11 +69,11 @@ The init command SHALL detect legacy project layouts (presence of `openspec/sche
 
 #### Scenario: Already migrated project is not re-migrated
 - **GIVEN** a project with `openspec/WORKFLOW.md` already present
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL skip migration and report that WORKFLOW.md already exists
 
 ### Requirement: Template Merge on Re-Init
-When `/opsx:init` runs on an already-initialized project (re-init after plugin update), the system SHALL use Smart Template `template-version` fields to detect user customizations and merge plugin updates instead of blindly overwriting. For each template file in `${CLAUDE_PLUGIN_ROOT}/templates/`:
+When `/opsx:workflow init` runs on an already-initialized project (re-init after plugin update), the system SHALL use Smart Template `template-version` fields to detect user customizations and merge plugin updates instead of blindly overwriting. For each template file in `${CLAUDE_PLUGIN_ROOT}/templates/`:
 
 1. **Read** the plugin template's `template-version` field and the local template's `template-version` field at `openspec/templates/<path>`.
 2. **Compare versions:**
@@ -88,46 +88,46 @@ The merge detection SHALL apply to all Smart Templates including docs templates 
 
 For CONSTITUTION.md, the merge operates at **section level**: the system SHALL compare the template's section headings (e.g., `## Tech Stack`, `## Architecture Rules`, `## Standard Tasks`) against the existing CONSTITUTION.md. Missing sections from a newer template version SHALL be offered to the user for interactive generation (the agent reads the codebase and proposes content for the new section, as bootstrap does). Existing sections with user content SHALL be preserved. The generated CONSTITUTION.md SHALL include a `template-version` field in YAML frontmatter to track which template version generated its structure.
 
-**User Story:** As a user who has customized my templates I want plugin updates to preserve my customizations, so that re-running `/opsx:init` after a plugin update does not silently destroy my changes.
+**User Story:** As a user who has customized my templates I want plugin updates to preserve my customizations, so that re-running `/opsx:workflow init` after a plugin update does not silently destroy my changes.
 
 #### Scenario: Unchanged template updated silently
 - **GIVEN** a local template `openspec/templates/research.md` with `template-version: 1` matching the plugin template content exactly
 - **AND** the plugin update has `template-version: 2` with updated instruction text
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the local template SHALL be replaced with the plugin's template-version 2 template
 - **AND** the report SHALL show "Template research.md updated (v1 → v2)"
 
 #### Scenario: User-customized template preserved
 - **GIVEN** a local template `openspec/templates/research.md` with `template-version: 1` but modified instruction content
 - **AND** the plugin template also has `template-version: 1`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the local template SHALL NOT be overwritten
 - **AND** the report SHALL show "Template research.md has local customizations — skipped"
 
 #### Scenario: Customized template with plugin update triggers merge
 - **GIVEN** a local template with `template-version: 1` and custom content
 - **AND** the plugin template has `template-version: 2` with new content
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL present both versions and ask the user to resolve
 - **AND** SHALL NOT overwrite the local template without user confirmation
 
 #### Scenario: Constitution gets new section from template update
 - **GIVEN** an existing `openspec/CONSTITUTION.md` with `template-version: 1` containing Tech Stack, Architecture Rules, Code Style, Constraints, Conventions
 - **AND** the plugin's constitution template has `template-version: 2` with a new `## Security Rules` section
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL detect the missing "Security Rules" section
 - **AND** SHALL offer to generate content for it based on the codebase
 - **AND** SHALL preserve all existing sections and their user content
 
 #### Scenario: Constitution with all sections up to date
 - **GIVEN** an existing CONSTITUTION.md with `template-version: 2` matching the plugin template
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL skip CONSTITUTION.md (already up to date)
 
 #### Scenario: Legacy template without version field
 - **GIVEN** a local template with no `template-version` field in frontmatter
 - **AND** the plugin template has `template-version: 1`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL treat the local version as 0
 - **AND** SHALL update silently if content matches the plugin template, or prompt for merge if customized
 
@@ -148,7 +148,7 @@ The init command SHALL validate after all steps complete. Validation SHALL confi
 
 ### Requirement: WORKFLOW.md Template File
 
-The plugin SHALL include a workflow template file at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` containing the default WORKFLOW.md content with YAML frontmatter (`templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, `docs_language`) and a commented-out `worktree:` section. The `/opsx:init` skill SHALL copy this template to `openspec/WORKFLOW.md` instead of generating the content inline. This ensures WORKFLOW.md is maintained as a template file consistent with the constitution template pattern.
+The plugin SHALL include a workflow template file at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` containing the default WORKFLOW.md content with YAML frontmatter (`templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, `docs_language`) and a commented-out `worktree:` section. The `/opsx:workflow init` skill SHALL copy this template to `openspec/WORKFLOW.md` instead of generating the content inline. This ensures WORKFLOW.md is maintained as a template file consistent with the constitution template pattern.
 
 **User Story:** As a plugin maintainer I want WORKFLOW.md content maintained as a template file, so that it is consistent with the constitution template and easier to update across versions.
 
@@ -173,27 +173,27 @@ The init command SHALL check the environment for: (1) `gh` CLI availability by r
 #### Scenario: gh CLI detected and authenticated
 
 - **GIVEN** the `gh` CLI is installed and authenticated
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system reports "gh CLI: available and authenticated"
 - **AND** offers worktree mode and merge strategy configuration
 
 #### Scenario: gh CLI not installed
 
 - **GIVEN** the `gh` CLI is not installed
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system reports "gh CLI: not found"
 - **AND** skips worktree and merge strategy options
 
 #### Scenario: Git version supports worktrees
 
 - **GIVEN** git version is 2.5 or higher
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system reports "git: version X.Y (worktree support: yes)"
 
 #### Scenario: Git version too old for worktrees
 
 - **GIVEN** git version is below 2.5
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system reports "git: version X.Y (worktree support: no — requires 2.5+)"
 - **AND** skips the worktree opt-in question
 
@@ -208,7 +208,7 @@ The init command SHALL check the environment for: (1) `gh` CLI availability by r
 #### Scenario: Gitignore already has .claude/ entry
 
 - **GIVEN** `.gitignore` already contains `/.claude/`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system reports ".gitignore: /.claude/ entry present"
 
 ### Requirement: GitHub Merge Strategy Configuration
@@ -234,13 +234,13 @@ When the user opts in during init and `gh` CLI is available, the system SHALL co
 - **AND** continues with the rest of init
 
 ### Requirement: First-Run Codebase Scan
-The `/opsx:init` command SHALL analyze the entire project codebase on first run (when no `openspec/CONSTITUTION.md` exists or it is a placeholder). The scan SHALL identify the tech stack, frameworks, languages, file structure, configuration patterns, dependency management approach, and coding conventions. The scan results SHALL be used as input for constitution generation. The init command SHALL handle projects of any size, skipping binary files and respecting `.gitignore` patterns.
+The `/opsx:workflow init` command SHALL analyze the entire project codebase on first run (when no `openspec/CONSTITUTION.md` exists or it is a placeholder). The scan SHALL identify the tech stack, frameworks, languages, file structure, configuration patterns, dependency management approach, and coding conventions. The scan results SHALL be used as input for constitution generation. The init command SHALL handle projects of any size, skipping binary files and respecting `.gitignore` patterns.
 
 **User Story:** As a developer adopting spec-driven development on an existing project I want init to understand my codebase automatically, so that the generated constitution reflects my actual project rather than generic defaults.
 
 #### Scenario: First-run scan of an existing project
 - **GIVEN** a project with source code, configuration files, and dependencies but no `openspec/CONSTITUTION.md`
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL scan the entire codebase and identify the tech stack, languages, frameworks, file structure, and coding conventions
 
 #### Scenario: Large project with binary files
@@ -249,7 +249,7 @@ The `/opsx:init` command SHALL analyze the entire project codebase on first run 
 - **THEN** the system SHALL skip binary files and files matching `.gitignore` patterns, analyzing only text-based source and configuration files
 
 ### Requirement: Constitution Generation
-The `/opsx:init` command SHALL generate a `CONSTITUTION.md` file based on the observed patterns from the codebase scan. The constitution SHALL include Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks sections. The Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections SHALL be populated with project-specific values from the scan. The Standard Tasks section SHALL be generated empty with an HTML comment explaining its purpose, so that new projects are aware of the feature and know where to define project-specific post-implementation steps.
+The `/opsx:workflow init` command SHALL generate a `CONSTITUTION.md` file based on the observed patterns from the codebase scan. The constitution SHALL include Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks sections. The Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections SHALL be populated with project-specific values from the scan. The Standard Tasks section SHALL be generated empty with an HTML comment explaining its purpose, so that new projects are aware of the feature and know where to define project-specific post-implementation steps.
 
 **User Story:** As a developer I want the constitution to be auto-generated from my codebase, so that it accurately captures my project's existing patterns rather than requiring me to write it from scratch.
 
@@ -270,43 +270,43 @@ The `/opsx:init` command SHALL generate a `CONSTITUTION.md` file based on the ob
 - **THEN** the Code Style section SHALL reflect the 4-space indentation and camelCase convention, and the Conventions section SHALL reference the conventional commits format
 
 ### Requirement: Initial Change Creation
-After generating the constitution, the `/opsx:init` command SHALL create an initial change workspace using the OpenSpec CLI and hand off to the standard pipeline. The initial change SHALL be named according to the project context (e.g., `initial-spec`). The init command SHALL then inform the user to continue with the standard pipeline.
+After generating the constitution, the `/opsx:workflow init` command SHALL create an initial change workspace using the OpenSpec CLI and hand off to the standard pipeline. The initial change SHALL be named according to the project context (e.g., `initial-spec`). The init command SHALL then inform the user to continue with the standard pipeline.
 
 **User Story:** As a developer I want init to create my first change workspace automatically, so that I can immediately start the spec-driven workflow without manual setup.
 
 #### Scenario: Initial change workspace created after constitution
 - **GIVEN** the constitution has been generated successfully
 - **WHEN** the initial change creation phase runs
-- **THEN** the system SHALL create a change workspace via the OpenSpec CLI with an appropriate name and inform the user to run `/opsx:propose` to generate artifacts
+- **THEN** the system SHALL create a change workspace via the OpenSpec CLI with an appropriate name and inform the user to run `/opsx:workflow propose` to generate artifacts
 
 #### Scenario: Handoff to standard pipeline
 - **GIVEN** the initial change workspace has been created
 - **WHEN** the init command completes
-- **THEN** the system SHALL report the created change name and inform the user to run `/opsx:propose` to generate artifacts, followed by `/opsx:apply`, then `/opsx:finalize`
+- **THEN** the system SHALL report the created change name and inform the user to run `/opsx:workflow propose` to generate artifacts, followed by `/opsx:workflow apply`, then `/opsx:workflow finalize`
 
 ### Requirement: Recovery Mode (Spec Drift Detection)
-The `/opsx:init` command SHALL detect when specs already exist in `openspec/specs/`. When existing specs are found, the init command SHALL enter recovery mode: scanning the current codebase, comparing it against existing specs, and reporting drift findings. Recovery mode SHALL NOT overwrite existing specs or the constitution. Instead, it SHALL produce a drift report listing discrepancies between the codebase and the specs, and suggest corrective actions (e.g., `/opsx:propose hotfix-xyz` for small drift or a full re-bootstrap for large drift).
+The `/opsx:workflow init` command SHALL detect when specs already exist in `openspec/specs/`. When existing specs are found, the init command SHALL enter recovery mode: scanning the current codebase, comparing it against existing specs, and reporting drift findings. Recovery mode SHALL NOT overwrite existing specs or the constitution. Instead, it SHALL produce a drift report listing discrepancies between the codebase and the specs, and suggest corrective actions (e.g., `/opsx:workflow propose hotfix-xyz` for small drift or a full re-bootstrap for large drift).
 
 **User Story:** As a maintainer whose codebase has drifted from its specs I want init to detect and report the drift, so that I can decide how to reconcile without losing existing spec work.
 
 #### Scenario: Recovery mode with minor drift
 - **GIVEN** a project with existing specs and a codebase where two functions have been renamed without spec updates
-- **WHEN** the user runs `/opsx:init`
-- **THEN** the system SHALL detect the existing specs, enter recovery mode, report the two naming discrepancies, and suggest using `/opsx:propose hotfix-xyz` to create a targeted change for the drift
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL detect the existing specs, enter recovery mode, report the two naming discrepancies, and suggest using `/opsx:workflow propose hotfix-xyz` to create a targeted change for the drift
 
 #### Scenario: Recovery mode with major drift
 - **GIVEN** a project with existing specs and a codebase where an entire module has been rewritten without spec updates
-- **WHEN** the user runs `/opsx:init`
+- **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL detect the existing specs, enter recovery mode, report the extensive drift, and suggest a full re-bootstrap after backing up existing specs
 
 #### Scenario: Recovery mode does not overwrite
 - **GIVEN** a project with existing specs and constitution
-- **WHEN** the user runs `/opsx:init` and recovery mode activates
+- **WHEN** the user runs `/opsx:workflow init` and recovery mode activates
 - **THEN** the system SHALL NOT modify any existing spec files or the constitution, only producing a read-only drift report
 
 ### Requirement: Documentation Drift Verification (Health Check)
 
-The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `/opsx:init` project-level health checks. The verification SHALL assess three dimensions:
+The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `/opsx:workflow init` project-level health checks. The verification SHALL assess three dimensions:
 
 1. **Capability Docs vs Specs** — For each spec in `openspec/specs/*/spec.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
 
@@ -319,7 +319,7 @@ Each issue found SHALL be classified as:
 - **WARNING** — documentation exists but has drifted from specs (e.g., requirement not reflected in capability doc, stale ADR reference)
 - **INFO** — minor discrepancy or observation that may be intentional (e.g., manual ADR with no matching design decision, capability doc has extra context beyond spec)
 
-The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:finalize` to regenerate drifted documentation.
+The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:workflow finalize` to regenerate drifted documentation.
 
 The system SHALL gracefully handle missing documentation directories: if `docs/capabilities/` does not exist, the system SHALL report all capabilities as missing (CRITICAL) rather than erroring. If `docs/decisions/` does not exist, the system SHALL skip the ADR dimension and note it. If `docs/README.md` does not exist, the system SHALL report it as a single CRITICAL issue.
 
@@ -330,7 +330,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **GIVEN** a project with 5 capabilities, each having a corresponding capability doc in `docs/capabilities/`
 - **AND** all completed changes' design decisions have corresponding ADRs in `docs/decisions/`
 - **AND** `docs/README.md` lists all 5 capabilities and references valid ADRs
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system produces a verification report
 - **AND** all three dimensions show no issues
 - **AND** the verdict is "CLEAN"
@@ -339,9 +339,9 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 - **GIVEN** a project with specs for "user-auth" and "data-export"
 - **AND** `docs/capabilities/` contains only `user-auth.md` (no `data-export.md`)
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the Capability Docs dimension reports a CRITICAL issue: "Missing capability doc for data-export"
-- **AND** the recommendation is "Run `/opsx:finalize` to generate the missing documentation"
+- **AND** the recommendation is "Run `/opsx:workflow finalize` to generate the missing documentation"
 - **AND** the verdict is "OUT OF SYNC"
 
 #### Scenario: Capability doc omits a requirement from spec
@@ -358,7 +358,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **AND** `docs/README.md` capabilities table lists only 5 of them
 - **WHEN** the system checks README vs Current State
 - **THEN** the report includes a CRITICAL issue: "README capabilities table missing: <capability-name>"
-- **AND** recommends "Run `/opsx:finalize` to regenerate the README"
+- **AND** recommends "Run `/opsx:workflow finalize` to regenerate the README"
 
 #### Scenario: Stale ADR reference in README
 
@@ -370,15 +370,15 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 #### Scenario: Documentation directory does not exist
 
 - **GIVEN** a project where `docs/capabilities/` has not been created yet
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system reports each spec as a CRITICAL missing capability doc
 - **AND** does not error or abort
-- **AND** recommends "Run `/opsx:finalize` to generate initial documentation"
+- **AND** recommends "Run `/opsx:workflow finalize` to generate initial documentation"
 
 #### Scenario: No design decisions to check
 
 - **GIVEN** a project with no completed changes in `openspec/changes/`
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system skips the ADR dimension
 - **AND** notes "No design decisions to verify against"
 - **AND** still checks the other two dimensions
@@ -409,7 +409,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Multiple specs mapping to one doc**: If a documentation restructuring merged multiple specs into one doc, the system SHALL report this as INFO rather than flagging missing docs.
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
-- **Concurrent docs regeneration**: If `/opsx:finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **Concurrent docs regeneration**: If `/opsx:workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
 
 ## Assumptions
 

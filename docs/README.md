@@ -78,7 +78,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Deterministic slug renames (ADR-008)**: Slug change causes ADR file renames for existing ADRs; all links regenerate to match.
 - **Consolidated README (ADR-009)**: Breaking external links to previous file locations; low impact since docs are internal.
 - **"Read before write" is advisory (ADR-010)**: Agent compliance depends on well-written guidance; not hard-enforced.
-- **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:init; low impact since the old command was not working anyway.
+- **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:workflow init; low impact since the old command was not working anyway.
 - **Incremental generation date comparison (ADR-012)**: Agent may misinterpret date comparison logic; worst case is unnecessary regeneration, which is a safe failure mode.
 - **ADR consolidation heuristics (ADR-012)**: May misjudge grouping in edge cases; conservative rules minimize false consolidation.
 - **Internal-only ADR references (ADR-013)**: Less direct traceability to GitHub issues; readers must follow change backlink then read proposal.md to find issue references.

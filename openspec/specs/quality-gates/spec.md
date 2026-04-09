@@ -8,7 +8,7 @@ change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `/opsx:apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `/opsx:init` as a project-level health check.
+Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `/opsx:workflow apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `/opsx:workflow init` as a project-level health check.
 
 ## Requirements
 
@@ -89,11 +89,11 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 - **WHEN** the user invokes `/opsx:preflight`
 - **THEN** the system SHALL abort the preflight
 - **AND** SHALL report which required artifacts are missing
-- **AND** SHALL suggest running `/opsx:propose` to generate them
+- **AND** SHALL suggest running `/opsx:workflow propose` to generate them
 
 ### Requirement: Post-Implementation Verification (review.md)
 
-The system SHALL verify the implementation against change artifacts as part of `/opsx:apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
+The system SHALL verify the implementation against change artifacts as part of `/opsx:workflow apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
 
 **Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
 
@@ -277,7 +277,7 @@ The review.md generation SHALL serve as both the initial verification (tasks.md 
 
 ### Requirement: Documentation Drift Verification (init health check)
 
-The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `/opsx:init` project-level health checks. The verification SHALL assess three dimensions:
+The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `/opsx:workflow init` project-level health checks. The verification SHALL assess three dimensions:
 
 1. **Capability Docs vs Specs** — For each spec in `openspec/specs/*/spec.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
 
@@ -290,7 +290,7 @@ Each issue found SHALL be classified as:
 - **WARNING** — documentation exists but has drifted from specs (e.g., requirement not reflected in capability doc, stale ADR reference)
 - **INFO** — minor discrepancy or observation that may be intentional (e.g., manual ADR with no matching design decision, capability doc has extra context beyond spec)
 
-The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:finalize` to regenerate drifted documentation.
+The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:workflow finalize` to regenerate drifted documentation.
 
 The system SHALL gracefully handle missing documentation directories: if `docs/capabilities/` does not exist, the system SHALL report all capabilities as missing (CRITICAL) rather than erroring. If `docs/decisions/` does not exist, the system SHALL skip the ADR dimension and note it. If `docs/README.md` does not exist, the system SHALL report it as a single CRITICAL issue.
 
@@ -301,7 +301,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **GIVEN** a project with 5 capabilities, each having a corresponding capability doc in `docs/capabilities/`
 - **AND** all completed changes' design decisions have corresponding ADRs in `docs/decisions/`
 - **AND** `docs/README.md` lists all 5 capabilities and references valid ADRs
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system produces a verification report
 - **AND** all three dimensions show no issues
 - **AND** the verdict is "CLEAN"
@@ -310,9 +310,9 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 - **GIVEN** a project with specs for "user-auth" and "data-export"
 - **AND** `docs/capabilities/` contains only `user-auth.md` (no `data-export.md`)
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the Capability Docs dimension reports a CRITICAL issue: "Missing capability doc for data-export"
-- **AND** the recommendation is "Run `/opsx:finalize` to generate the missing documentation"
+- **AND** the recommendation is "Run `/opsx:workflow finalize` to generate the missing documentation"
 - **AND** the verdict is "OUT OF SYNC"
 
 #### Scenario: Capability doc omits a requirement from spec
@@ -329,7 +329,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **AND** `docs/README.md` capabilities table lists only 5 of them
 - **WHEN** the system checks README vs Current State
 - **THEN** the report includes a CRITICAL issue: "README capabilities table missing: <capability-name>"
-- **AND** recommends "Run `/opsx:finalize` to regenerate the README"
+- **AND** recommends "Run `/opsx:workflow finalize` to regenerate the README"
 
 #### Scenario: Stale ADR reference in README
 
@@ -341,15 +341,15 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 #### Scenario: Documentation directory does not exist
 
 - **GIVEN** a project where `docs/capabilities/` has not been created yet
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system reports each spec as a CRITICAL missing capability doc
 - **AND** does not error or abort
-- **AND** recommends "Run `/opsx:finalize` to generate initial documentation"
+- **AND** recommends "Run `/opsx:workflow finalize` to generate initial documentation"
 
 #### Scenario: No design decisions to check
 
 - **GIVEN** a project with no completed changes in `openspec/changes/`
-- **WHEN** the user invokes `/opsx:init`
+- **WHEN** the user invokes `/opsx:workflow init`
 - **THEN** the system skips the ADR dimension
 - **AND** notes "No design decisions to verify against"
 - **AND** still checks the other two dimensions
@@ -375,7 +375,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Multiple specs mapping to one doc**: If a documentation restructuring merged multiple specs into one doc, the system SHALL report this as INFO rather than flagging missing docs.
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
-- **Concurrent docs regeneration**: If `/opsx:finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **Concurrent docs regeneration**: If `/opsx:workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
 - **No merge base for diff checks**: If `git merge-base` fails (orphan branch, detached HEAD, first commit), all diff-based checks are skipped gracefully with a note in the report. Keyword-based verification proceeds as normal.
 - **Task description too generic for diff matching**: If a task description is too vague to produce meaningful file path matches (e.g., "Clean up code"), the system SHALL skip that task's diff mapping and note it as inconclusive rather than raising a false warning.
 - **Change artifacts in diff**: Files under `openspec/changes/` and `openspec/specs/` are expected in the diff for any change and SHALL be excluded from unintended change detection (they are always traceable to the change itself).

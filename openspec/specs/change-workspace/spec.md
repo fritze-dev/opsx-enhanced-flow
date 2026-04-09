@@ -8,13 +8,13 @@ change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Manages the change lifecycle including workspace creation (now part of `/opsx:propose`), date-prefixed workspace structure, worktree isolation, worktree context detection (now handled by the router), lazy worktree cleanup, and active/completed change detection based on task status.
+Manages the change lifecycle including workspace creation (now part of `/opsx:workflow propose`), date-prefixed workspace structure, worktree isolation, worktree context detection (now handled by the router), lazy worktree cleanup, and active/completed change detection based on task status.
 
 ## Requirements
 
 ### Requirement: Create Change Workspace
 
-The system SHALL create a change workspace when the user invokes `/opsx:propose <change-name>`. The workspace directory SHALL use a creation-date prefix in the format `YYYY-MM-DD-<change-name>`, set at creation time and never changed. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement) and then create the change directory inside it via `mkdir -p <worktree>/openspec/changes/YYYY-MM-DD-<name>`. If worktree mode is not enabled, the workspace SHALL be created by running `mkdir -p openspec/changes/YYYY-MM-DD-<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
+The system SHALL create a change workspace when the user invokes `/opsx:workflow propose <change-name>`. The workspace directory SHALL use a creation-date prefix in the format `YYYY-MM-DD-<change-name>`, set at creation time and never changed. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement) and then create the change directory inside it via `mkdir -p <worktree>/openspec/changes/YYYY-MM-DD-<name>`. If worktree mode is not enabled, the workspace SHALL be created by running `mkdir -p openspec/changes/YYYY-MM-DD-<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
 
 When the proposal artifact (`proposal.md`) is created for a change, the propose action SHALL include YAML frontmatter with tracking fields:
 - `status: active` — change lifecycle (flipped to `completed` during verify completion)
@@ -37,13 +37,13 @@ These fields enable automated change context detection, active/completed filteri
 
 - **GIVEN** no change named "add-user-auth" exists
 - **AND** today's date is 2026-04-01
-- **WHEN** the user invokes `/opsx:propose add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system creates the workspace at `openspec/changes/2026-04-01-add-user-auth/`
 - **AND** reads WORKFLOW.md to determine the artifact pipeline and displays the artifact status
 
 #### Scenario: Derive name from description
 
-- **WHEN** the user invokes `/opsx:propose` and provides the description "add user authentication"
+- **WHEN** the user invokes `/opsx:workflow propose` and provides the description "add user authentication"
 - **AND** today's date is 2026-04-01
 - **THEN** the system derives the kebab-case name `add-user-auth`
 - **AND** creates the workspace at `openspec/changes/2026-04-01-add-user-auth/`
@@ -72,7 +72,7 @@ These fields enable automated change context detection, active/completed filteri
 #### Scenario: Change name already exists
 
 - **GIVEN** a change directory matching `*-add-user-auth` already exists under `openspec/changes/`
-- **WHEN** the user invokes `/opsx:propose add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system SHALL NOT create a duplicate workspace
 - **AND** SHALL suggest continuing the existing change instead
 
@@ -98,7 +98,7 @@ The created workspace SHALL contain the artifacts defined by the pipeline in WOR
 
 ### Requirement: Create Worktree-Based Workspace
 
-The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:propose <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). Before creating the worktree, the system SHALL fetch the latest remote main branch. The system SHALL use the fetched remote main as the start-point for the new branch. The system SHALL then run `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
+The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:workflow propose <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). Before creating the worktree, the system SHALL fetch the latest remote main branch. The system SHALL use the fetched remote main as the start-point for the new branch. The system SHALL then run `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
 
 **User Story:** As a developer I want each change to be created in its own git worktree, so that parallel changes are fully isolated and cannot conflict with each other.
 
@@ -107,7 +107,7 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 - **GIVEN** WORKFLOW.md has `worktree.enabled: true` and `worktree.path_pattern: .claude/worktrees/{change}`
 - **AND** no worktree for "add-user-auth" exists
 - **AND** today's date is 2026-04-01
-- **WHEN** the user invokes `/opsx:propose add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system fetches the latest remote main branch
 - **AND** creates a worktree based on the fetched remote main
 - **AND** creates `openspec/changes/2026-04-01-add-user-auth/` inside the worktree
@@ -117,7 +117,7 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 
 - **GIVEN** WORKFLOW.md has `worktree.enabled: true`
 - **AND** a worktree at `.claude/worktrees/add-user-auth` already exists
-- **WHEN** the user invokes `/opsx:propose add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system SHALL NOT create a duplicate worktree
 - **AND** SHALL suggest switching to the existing worktree
 
@@ -125,7 +125,7 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 
 - **GIVEN** WORKFLOW.md does not have `worktree.enabled: true` (absent or false)
 - **AND** today's date is 2026-04-01
-- **WHEN** the user invokes `/opsx:propose add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system SHALL create `openspec/changes/2026-04-01-add-user-auth/` in the current working tree
 
 ### Requirement: Change Context Detection
@@ -170,7 +170,7 @@ If a match is found, the router SHALL auto-select the change and announce: "Dete
 
 ### Requirement: Lazy Worktree Cleanup at Change Creation
 
-The `/opsx:propose` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed:
+The `/opsx:workflow propose` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed:
 
 1. **Proposal status check**: Find the change directory in the worktree matching the branch name (`openspec/changes/*-<branch>/proposal.md`). If the proposal has `status: completed`, the change is done.
 2. **Fallback — PR status**: If no proposal status is available, run `gh pr view <branch-name> --json state --jq '.state'`. If `MERGED`, the change is done.
@@ -184,7 +184,7 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 
 - **GIVEN** a worktree exists at `.claude/worktrees/fix-auth` on branch `fix-auth`
 - **AND** `openspec/changes/2026-04-01-fix-auth/proposal.md` in the main tree has `status: completed`
-- **WHEN** the user invokes `/opsx:propose add-logging`
+- **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system removes the worktree and deletes the branch
 - **AND** reports "Cleaned up stale worktree: fix-auth (completed)"
 
@@ -192,20 +192,20 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 
 - **GIVEN** a worktree on branch `fix-auth` with no proposal `status` field
 - **AND** the PR for `fix-auth` has state "MERGED"
-- **WHEN** the user invokes `/opsx:propose add-logging`
+- **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system removes the worktree and deletes the branch
 
 #### Scenario: No stale worktrees
 
 - **GIVEN** no worktrees exist besides the main working tree
-- **WHEN** the user invokes `/opsx:propose add-logging`
+- **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system proceeds directly to change creation without cleanup messages
 
 #### Scenario: Worktree with active change preserved
 
 - **GIVEN** a worktree exists at `.claude/worktrees/wip-feature` on branch `wip-feature`
 - **AND** the proposal has `status: active`
-- **WHEN** the user invokes `/opsx:propose add-logging`
+- **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system SHALL NOT remove the `wip-feature` worktree
 
 #### Scenario: Cleanup without gh CLI and no proposal status
@@ -219,9 +219,9 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 
 ### Requirement: Post-Merge Worktree Cleanup
 
-When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:propose` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
+When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:workflow propose` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
 
-**User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:propose`.
+**User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:workflow propose`.
 
 #### Scenario: Cleanup after successful local merge
 
@@ -261,26 +261,26 @@ Actions that operate on active changes (propose, apply) SHALL filter to active c
 #### Scenario: Active change detected via proposal status
 
 - **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with `proposal.md` containing `status: active`
-- **WHEN** `/opsx:apply` lists available changes
+- **WHEN** `/opsx:workflow apply` lists available changes
 - **THEN** the change is shown as available for implementation
 
 #### Scenario: Completed change detected via proposal status
 
 - **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with `proposal.md` containing `status: completed`
-- **WHEN** `/opsx:finalize` lists available changes
+- **WHEN** `/opsx:workflow finalize` lists available changes
 - **THEN** the change is included in changelog generation
 
 #### Scenario: Change without proposal frontmatter falls back to tasks.md
 
 - **GIVEN** a change at `openspec/changes/2026-03-01-legacy/` with `proposal.md` without YAML frontmatter
 - **AND** `tasks.md` contains unchecked items
-- **WHEN** `/opsx:apply` lists available changes
+- **WHEN** `/opsx:workflow apply` lists available changes
 - **THEN** the change is shown as active (fallback to tasks.md parsing)
 
 #### Scenario: Change without tasks.md is active
 
 - **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with research.md and proposal.md (`status: active`) but no tasks.md
-- **WHEN** `/opsx:propose` lists available changes
+- **WHEN** `/opsx:workflow propose` lists available changes
 - **THEN** the change is shown as available for artifact generation
 
 ## Edge Cases

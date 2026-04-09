@@ -17,7 +17,7 @@ Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, 
 The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format with a clear separation of concerns:
 
 **YAML frontmatter** — structured configuration only:
-- `template-version` (integer, for template merge detection during `/opsx:init`)
+- `template-version` (integer, for template merge detection during `/opsx:workflow init`)
 - `templates_dir` (path to Smart Templates directory)
 - `pipeline` (ordered array of artifact step IDs — each generates a file)
 - `actions` (object defining inline action definitions — see Requirement: Inline Action Definitions)
@@ -54,7 +54,7 @@ The `pipeline` array SHALL be the single source of truth for the artifact genera
 
 ### Requirement: Smart Template Format
 
-All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `template-version` (integer, monotonically increasing — bumped when the plugin changes the template content). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `template-version` field enables `/opsx:init` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them.
+All template files SHALL use the Smart Template format: markdown with YAML frontmatter containing `id` (artifact identifier), `description` (brief purpose), `generates` (output file path relative to change directory), `requires` (array of dependency artifact IDs), `instruction` (AI behavioral constraints for artifact generation), and `template-version` (integer, monotonically increasing — bumped when the plugin changes the template content). The markdown body SHALL define the output structure for the generated artifact. The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation. The `template-version` field enables `/opsx:workflow init` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them.
 
 **User Story:** As a developer I want each template to be self-describing with its own instruction and metadata, so that I can understand what a template does without consulting a separate schema file.
 
@@ -94,7 +94,7 @@ The system SHALL support these actions: `init` (project initialization and healt
 - **AND** it SHALL contain `### Instruction` with procedural guidance text
 
 #### Scenario: Router executes action as sub-agent
-- **GIVEN** a user invokes `/opsx:apply`
+- **GIVEN** a user invokes `/opsx:workflow apply`
 - **WHEN** the router reads `## Action: apply` from WORKFLOW.md body
 - **THEN** it SHALL parse the requirement links from `### Requirements`
 - **AND** SHALL load each linked requirement section from the target spec files
@@ -121,23 +121,23 @@ The system SHALL provide a single router skill that handles all user-facing comm
 #### Scenario: Router detects change from branch
 - **GIVEN** the user is on branch `my-feature`
 - **AND** `openspec/changes/2026-04-09-my-feature/proposal.md` has `branch: my-feature` in frontmatter
-- **WHEN** the user invokes `/opsx:apply`
+- **WHEN** the user invokes `/opsx:workflow apply`
 - **THEN** the router SHALL auto-detect the change and announce "Detected change context: using change '2026-04-09-my-feature'"
 
 #### Scenario: Router dispatches propose to pipeline traversal
-- **GIVEN** the user invokes `/opsx:propose my-feature`
+- **GIVEN** the user invokes `/opsx:workflow propose my-feature`
 - **WHEN** the router processes the command
 - **THEN** it SHALL create the change workspace if needed
 - **AND** SHALL traverse the `pipeline` array, generating artifacts in sequence
 - **AND** SHALL support checkpoint/resume (skip completed artifacts)
 
 #### Scenario: Router dispatches apply to sub-agent
-- **GIVEN** the user invokes `/opsx:apply`
+- **GIVEN** the user invokes `/opsx:workflow apply`
 - **WHEN** the router detects the change and reads `actions.apply`
 - **THEN** it SHALL spawn a sub-agent with the apply instruction and referenced specs
 
 #### Scenario: Init runs without change context
-- **GIVEN** the user invokes `/opsx:init`
+- **GIVEN** the user invokes `/opsx:workflow init`
 - **WHEN** the router processes the command
 - **THEN** it SHALL skip change context detection
 - **AND** SHALL execute the init action directly
@@ -160,12 +160,12 @@ WORKFLOW.md frontmatter SHALL support an optional `automation` section that conf
 
 ## Edge Cases
 
-- **WORKFLOW.md missing**: Router SHALL report an error and suggest running `/opsx:init`.
+- **WORKFLOW.md missing**: Router SHALL report an error and suggest running `/opsx:workflow init`.
 - **Smart Template missing frontmatter**: Router SHALL treat the file as a plain template (no instruction, no metadata) and report a warning.
 - **Smart Template missing template-version field**: Init SHALL treat the template as version 0 (always eligible for update).
 - **WORKFLOW.md with malformed YAML**: Router SHALL report a parse error and stop.
 - **Empty `pipeline` array**: Router SHALL report that no artifacts are defined and stop.
-- **`templates_dir` points to nonexistent directory**: Router SHALL report the missing directory and suggest running `/opsx:init`.
+- **`templates_dir` points to nonexistent directory**: Router SHALL report the missing directory and suggest running `/opsx:workflow init`.
 - **Unknown action referenced**: If an action name does not match a defined action in `actions:`, the router SHALL report the error and list available actions.
 - **Action with missing spec**: If a spec listed in an action's `specs` array does not exist at `openspec/specs/<name>/spec.md`, the sub-agent SHALL proceed without it and note the missing spec.
 

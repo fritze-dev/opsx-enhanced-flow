@@ -69,7 +69,7 @@ Lazy worktree cleanup: before creating, check for stale worktrees (completed pro
 Checkpoint/resume: skip completed artifacts, resume from first incomplete step.
 Design review checkpoint: pause after design for user alignment (constitutional requirement).
 Preflight checkpoint: PASS → continue, PASS WITH WARNINGS → pause for acknowledgment, BLOCKED → stop.
-review artifact: stop before review and suggest /opsx:apply (review is generated during apply, not propose).
+review artifact: stop before review and suggest /opsx:workflow apply (review is generated during apply, not propose).
 Execute Post-Artifact Hook after each artifact.
 
 ## Action: init
@@ -91,7 +91,7 @@ Mode detection:
 - Fresh (no WORKFLOW.md): install templates, scan codebase, generate constitution
 - Update (templates outdated): merge plugin template updates with local customizations
 - Re-sync (all installed): detect spec drift (code vs specs) + docs drift (docs vs specs)
-Report findings, suggest /opsx:propose for changes needed.
+Report findings, suggest /opsx:workflow propose for changes needed.
 
 ## Action: apply
 
