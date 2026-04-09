@@ -52,15 +52,6 @@ If push fails, continue with local commit — do not block the pipeline.
 
 ## Action: propose
 
-### Requirements
-
-- [Propose as Single Entry Point for Pipeline Traversal](openspec/specs/artifact-pipeline/spec.md#requirement-propose-as-single-entry-point-for-pipeline-traversal)
-- [Seven-Stage Pipeline](openspec/specs/artifact-pipeline/spec.md#requirement-seven-stage-pipeline)
-- [Artifact Dependencies](openspec/specs/artifact-pipeline/spec.md#requirement-artifact-dependencies)
-- [Change Workspace Creation](openspec/specs/change-workspace/spec.md#requirement-change-workspace-creation)
-- [Worktree Isolation](openspec/specs/change-workspace/spec.md#requirement-worktree-isolation)
-- [Lazy Worktree Cleanup](openspec/specs/change-workspace/spec.md#requirement-lazy-worktree-cleanup)
-
 ### Instruction
 
 Create change workspace if needed, then traverse the pipeline generating artifacts.
@@ -74,16 +65,6 @@ Execute Post-Artifact Hook after each artifact.
 
 ## Action: init
 
-### Requirements
-
-- [Install OpenSpec Workflow](openspec/specs/project-init/spec.md#requirement-install-openspec-workflow)
-- [Template Merge on Re-Init](openspec/specs/project-init/spec.md#requirement-template-merge-on-re-init)
-- [First-Run Codebase Scan](openspec/specs/project-init/spec.md#requirement-first-run-codebase-scan)
-- [Constitution Generation](openspec/specs/project-init/spec.md#requirement-constitution-generation)
-- [Documentation Drift Verification](openspec/specs/project-init/spec.md#requirement-documentation-drift-verification)
-- [Constitution Lifecycle](openspec/specs/constitution-management/spec.md#requirement-constitution-lifecycle)
-- [Pre-Implementation Quality Checks](openspec/specs/quality-gates/spec.md#requirement-pre-implementation-quality-checks)
-
 ### Instruction
 
 Project initialization and health check.
@@ -94,14 +75,6 @@ Mode detection:
 Report findings, suggest /opsx:workflow propose for changes needed.
 
 ## Action: apply
-
-### Requirements
-
-- [Implement Tasks from Task List](openspec/specs/task-implementation/spec.md#requirement-implement-tasks-from-task-list)
-- [Progress Tracking](openspec/specs/task-implementation/spec.md#requirement-progress-tracking)
-- [Standard Tasks Exclusion from Apply Scope](openspec/specs/task-implementation/spec.md#requirement-standard-tasks-exclusion-from-apply-scope)
-- [Spec Edits During Implementation](openspec/specs/task-implementation/spec.md#requirement-spec-edits-during-implementation)
-- [Post-Implementation Verification](openspec/specs/quality-gates/spec.md#requirement-post-implementation-verification)
 
 ### Instruction
 
@@ -117,15 +90,6 @@ Before committing, mark all standard task checkboxes as complete except post-mer
 After review.md PASS, commit and push implementation before pausing for user approval.
 
 ## Action: finalize
-
-### Requirements
-
-- [Changelog Generation](openspec/specs/release-workflow/spec.md#requirement-changelog-generation)
-- [Version Bump Convention](openspec/specs/release-workflow/spec.md#requirement-version-bump-convention)
-- [Generate Enriched Capability Documentation](openspec/specs/documentation/spec.md#requirement-generate-enriched-capability-documentation)
-- [Incremental Generation](openspec/specs/documentation/spec.md#requirement-incremental-generation)
-- [Generate Architecture Overview](openspec/specs/documentation/spec.md#requirement-generate-architecture-overview)
-- [ADR Generation](openspec/specs/documentation/spec.md#requirement-adr-generation)
 
 ### Instruction
 
