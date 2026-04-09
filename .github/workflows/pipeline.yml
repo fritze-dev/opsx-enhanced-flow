@@ -1,0 +1,49 @@
+name: Pipeline
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+concurrency:
+  group: pipeline-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Check all reviews approved
+        id: check
+        run: |
+          DECISION=$(gh pr view ${{ github.event.pull_request.number }} --json reviewDecision -q '.reviewDecision')
+          echo "approved=$([ "$DECISION" = "APPROVED" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Checkout repository
+        if: steps.check.outputs.approved == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Run post-approval pipeline
+        if: steps.check.outputs.approved == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          plugin_marketplaces: './'
+          plugins: 'opsx@opsx-enhanced-flow'
+          prompt: |
+            Read openspec/WORKFLOW.md automation.post_approval config.
+            Execute the steps listed there for PR #${{ github.event.pull_request.number }}.
+            Manage labels as defined in the config.
+            Commit and push all changes to the PR branch.
+            If any step fails, set the failed label and post error details as a PR comment.

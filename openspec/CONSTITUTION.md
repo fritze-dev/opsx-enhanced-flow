@@ -39,7 +39,22 @@ template-version: 1
 - **Workflow friction:** When workflow execution reveals friction, capture it as a GitHub Issue with the `friction` label. Include: what happened, expected behavior, and suggested fix.
 - **Design review checkpoint:** After creating specs + design artifacts, always pause for user alignment before proceeding to preflight/tasks. The design phase is the mandatory review checkpoint in every OpenSpec workflow.
 - **No ADR references in specs:** Specs MUST NOT reference ADRs (e.g., "see ADR-019"). ADRs are generated after implementation — specs exist before ADRs do. Specs describe requirements; ADRs document the decisions that shaped them.
-- **Template synchronization:** Changes to `openspec/WORKFLOW.md` behavior fields (`apply.instruction`, `post_artifact`, `context`) must also be reflected in `src/templates/workflow.md`. The `worktree` config may intentionally differ between project and consumer template (e.g., `enabled: true` in project, commented out in consumer).
+- **Template synchronization:** Changes to `openspec/WORKFLOW.md` (frontmatter config fields, body sections, or `automation` block) must also be reflected in `src/templates/workflow.md`. Action template changes in `openspec/templates/` must be mirrored in `src/templates/`. The `worktree` and `automation` configs may intentionally differ between project and consumer template (e.g., `enabled: true` in project, commented out in consumer).
+
+## CI Automation
+
+- **Post-approval pipeline**: Defined in WORKFLOW.md `automation.post_approval`. Triggered by `.github/workflows/pipeline.yml` on PR review approval (`reviewDecision == APPROVED`).
+- **Labels**: `automation/running`, `automation/complete`, `automation/failed` track pipeline state on PRs.
+- **Plugin self-reference**: CI loads the opsx plugin from the repo checkout via `plugin_marketplaces: './'`.
+
+## Worktree Lifecycle
+
+- **Post-merge worktree cleanup**: After a successful `gh pr merge` from within a worktree, clean up immediately:
+  1. Switch working directory to the main worktree
+  2. Run `git worktree remove <worktree-path>`
+  3. Run `git branch -D <branch-name>`
+  4. Run `git push origin --delete <branch-name>`
+  If worktree remove fails (e.g., dirty state), report the error and suggest manual cleanup — do not block the workflow.
 
 ## Standard Tasks
 

@@ -38,7 +38,13 @@ Implement tasks from an OpenSpec change.
 
 3. **Read context files**
 
-   Read `openspec/WORKFLOW.md`'s `apply.instruction` field for apply guidance and the `context` field for project-level context instructions. Then read all completed artifact files in the change directory as context:
+   Read apply guidance from one of these sources (in priority order):
+   1. The action template at `<templates_dir>/apply.md` — read its `instruction` frontmatter field
+   2. **Fallback**: `openspec/WORKFLOW.md`'s `apply.instruction` frontmatter field (for consumers on template-version 1)
+
+   Read project-level context from `openspec/WORKFLOW.md`'s `## Context` body section (or `context` frontmatter field as fallback for template-version 1).
+
+   Then read all completed artifact files in the change directory as context:
    - `openspec/changes/<change-dir>/research.md`
    - `openspec/changes/<change-dir>/proposal.md`
    - `openspec/changes/<change-dir>/design.md`
