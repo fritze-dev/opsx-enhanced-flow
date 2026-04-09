@@ -50,9 +50,10 @@ For `propose`, `apply`, `finalize`:
 - [Propose as Single Entry Point for Pipeline Traversal](openspec/specs/artifact-pipeline/spec.md#requirement-propose-as-single-entry-point-for-pipeline-traversal)
 - [Seven-Stage Pipeline](openspec/specs/artifact-pipeline/spec.md#requirement-seven-stage-pipeline)
 - [Artifact Dependencies](openspec/specs/artifact-pipeline/spec.md#requirement-artifact-dependencies)
-- [Change Workspace Creation](openspec/specs/change-workspace/spec.md#requirement-change-workspace-creation)
-- [Worktree Isolation](openspec/specs/change-workspace/spec.md#requirement-worktree-isolation)
-- [Lazy Worktree Cleanup](openspec/specs/change-workspace/spec.md#requirement-lazy-worktree-cleanup)
+- [Create Change Workspace](openspec/specs/change-workspace/spec.md#requirement-create-change-workspace)
+- [Create Worktree-Based Workspace](openspec/specs/change-workspace/spec.md#requirement-create-worktree-based-workspace)
+- [Lazy Worktree Cleanup at Change Creation](openspec/specs/change-workspace/spec.md#requirement-lazy-worktree-cleanup-at-change-creation)
+- [Change Context Detection](openspec/specs/change-workspace/spec.md#requirement-change-context-detection)
 
 ### Action: apply — Requirements
 
@@ -64,12 +65,13 @@ For `propose`, `apply`, `finalize`:
 
 ### Action: finalize — Requirements
 
-- [Changelog Generation](openspec/specs/release-workflow/spec.md#requirement-changelog-generation)
-- [Version Bump Convention](openspec/specs/release-workflow/spec.md#requirement-version-bump-convention)
+- [Generate Changelog from Completed Changes](openspec/specs/release-workflow/spec.md#requirement-generate-changelog-from-completed-changes)
+- [Auto Patch Version Bump](openspec/specs/release-workflow/spec.md#requirement-auto-patch-version-bump)
+- [Version Sync Between Plugin Files](openspec/specs/release-workflow/spec.md#requirement-version-sync-between-plugin-files)
 - [Generate Enriched Capability Documentation](openspec/specs/documentation/spec.md#requirement-generate-enriched-capability-documentation)
-- [Incremental Generation](openspec/specs/documentation/spec.md#requirement-incremental-generation)
+- [Incremental Capability Documentation Generation](openspec/specs/documentation/spec.md#requirement-incremental-capability-documentation-generation)
 - [Generate Architecture Overview](openspec/specs/documentation/spec.md#requirement-generate-architecture-overview)
-- [ADR Generation](openspec/specs/documentation/spec.md#requirement-adr-generation)
+- [ADR Generation from Change Decisions](openspec/specs/documentation/spec.md#requirement-adr-generation-from-change-decisions)
 
 ### Action: init — Requirements
 
@@ -78,27 +80,17 @@ For `propose`, `apply`, `finalize`:
 - [First-Run Codebase Scan](openspec/specs/project-init/spec.md#requirement-first-run-codebase-scan)
 - [Constitution Generation](openspec/specs/project-init/spec.md#requirement-constitution-generation)
 - [Documentation Drift Verification](openspec/specs/project-init/spec.md#requirement-documentation-drift-verification)
-- [Constitution Lifecycle](openspec/specs/constitution-management/spec.md#requirement-constitution-lifecycle)
-- [Pre-Implementation Quality Checks](openspec/specs/quality-gates/spec.md#requirement-pre-implementation-quality-checks)
+- [Constitution Update](openspec/specs/constitution-management/spec.md#requirement-constitution-update)
+- [Preflight Quality Check](openspec/specs/quality-gates/spec.md#requirement-preflight-quality-check)
 
 ## Step 5: Dispatch
 
 ### `propose` — Pipeline Traversal
 
-1. **If no change exists**: Ask the user what they want to build (if not provided as argument). Derive kebab-case name. Create workspace:
-   - If `worktree.enabled`: fetch origin main, `git worktree add <path> -b <name> origin/main`, `mkdir -p <worktree>/openspec/changes/YYYY-MM-DD-<name>`
-   - Otherwise: `mkdir -p openspec/changes/YYYY-MM-DD-<name>`
-   - **Lazy worktree cleanup**: Before creating, check for stale worktrees (proposal `status: completed` or merged PRs) and clean them up.
-
-2. **Traverse pipeline**: For each step in `pipeline` array:
-   - Read Smart Template at `<templates_dir>/<id>.md` (for specs: `<templates_dir>/specs/spec.md`)
-   - Check if artifact exists at `openspec/changes/<change-dir>/<generates>`
-   - If done: skip. If ready (dependencies met): generate artifact using template instruction + body structure. Execute Post-Artifact Hook after each.
-   - **Checkpoint model**: After preflight, check verdict. PASS → continue. PASS WITH WARNINGS → pause for acknowledgment. BLOCKED → stop.
-   - **Design review checkpoint**: After design, pause for user alignment (constitutional requirement).
-   - **review artifact**: The review step is the last pipeline step but is generated during apply, not during propose. If pipeline reaches review and tasks exist but review.md doesn't, stop and suggest `/opsx:workflow apply`.
-
-3. **Show status**: Display pipeline progress and next steps.
+1. Read all change artifacts (if change exists) and the propose instruction from WORKFLOW.md
+2. For each step in `pipeline` array: read Smart Template at `<templates_dir>/<id>.md`, check artifact status, generate if ready
+3. Execute Post-Artifact Hook after each artifact
+4. Follow the instruction from `## Action: propose` for checkpoint behavior, workspace creation, and pipeline gates
 
 ### `apply` — Sub-Agent Execution
 
