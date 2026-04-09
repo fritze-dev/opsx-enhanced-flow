@@ -21,6 +21,7 @@ Skills duplicate 60-70% of spec content (1,593 lines across 11 SKILL.md files). 
 - Actions (init, apply, finalize) defined inline in WORKFLOW.md with `specs:` references and `instruction:` blocks
 - Remove `type: action` Smart Template concept from PR #97 — actions live in WORKFLOW.md, not template files
 - CI automation config (`automation.post_approval`) for finalize action
+- GitHub Actions workflow (`.github/workflows/pipeline.yml`) that triggers finalize on PR approval
 
 ## Capabilities
 
@@ -71,6 +72,5 @@ Skills duplicate 60-70% of spec content (1,593 lines across 11 SKILL.md files). 
 
 **Out of scope:**
 - Spec merges (e.g., merging project-setup + project-bootstrap into one spec)
-- CI pipeline implementation (GitHub Actions for finalize) — config defined, implementation deferred
-- Consumer migration tooling (manual `/opsx:setup` is sufficient)
+- Consumer migration tooling (manual `/opsx:init` is sufficient)
 - Closing PR #97 (done after this change lands)

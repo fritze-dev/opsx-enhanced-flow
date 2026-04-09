@@ -104,7 +104,6 @@ Each stub is ~5 lines (frontmatter + include directive). The router logic lives 
 ## Non-Goals
 
 - Spec merges (e.g., merging project-setup + project-bootstrap into one spec)
-- CI pipeline GitHub Actions implementation (config defined, implementation deferred)
 - Consumer migration tooling (manual `/opsx:init` sufficient)
 - Closing PR #97 (done after this change lands)
 
@@ -124,6 +123,18 @@ Each stub is ~5 lines (frontmatter + include directive). The router logic lives 
 - **Plugin stub indirection** → Mitigation: stubs are trivially simple ("Read and follow router.md"). If plugin system doesn't support cross-file includes, inline the router into each stub (increases from ~100 to ~320 lines, still 80% reduction).
 - **review.md staleness after manual code changes** → Mitigation: apply deletes review.md at start, regenerates at end. Propose can re-run individual steps.
 - **Breaking change for consumers on template-version 1** → Mitigation: `/opsx:init` handles migration. template-version 3 is an explicit signal.
+
+### GitHub Actions Pipeline (`.github/workflows/pipeline.yml`)
+
+CI workflow triggered on PR approval that runs finalize automatically:
+- Triggered by `pull_request_review` event with `state == 'approved'`
+- Checks all required reviews are approved
+- Uses `claude-code-action` to read WORKFLOW.md `automation.post_approval` config
+- Executes the finalize action (changelog → docs → version-bump)
+- Manages labels (`automation/running`, `automation/complete`, `automation/failed`)
+- Commits and pushes results to PR branch
+
+The action reads `automation.post_approval.action: finalize` from WORKFLOW.md — the action name maps to `actions.finalize` which defines specs and instruction. This means CI behavior is driven by the same WORKFLOW.md config as local execution.
 
 ## Open Questions
 
