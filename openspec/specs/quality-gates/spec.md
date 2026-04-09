@@ -1,13 +1,14 @@
 ---
 order: 8
 category: development
-status: stable
+status: draft
 version: 1
-lastModified: 2026-04-08
+lastModified: 2026-04-09
+change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and `/opsx:verify` for post-implementation verification of completeness, correctness, and coherence.
+Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `/opsx:apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `/opsx:init` as a project-level health check.
 
 ## Requirements
 
@@ -88,11 +89,11 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 - **WHEN** the user invokes `/opsx:preflight`
 - **THEN** the system SHALL abort the preflight
 - **AND** SHALL report which required artifacts are missing
-- **AND** SHALL suggest running `/opsx:continue` or `/opsx:ff` to generate them
+- **AND** SHALL suggest running `/opsx:propose` to generate them
 
-### Requirement: Post-Implementation Verification
+### Requirement: Post-Implementation Verification (review.md)
 
-The system SHALL verify the implementation against change artifacts when the user invokes `/opsx:verify`. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
+The system SHALL verify the implementation against change artifacts as part of `/opsx:apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
 
 **Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
 
@@ -114,14 +115,14 @@ The system SHALL load the branch diff (full content and file list) as part of co
 
 **Preflight Side-Effect Cross-Check**: The system SHALL read `preflight.md` Section C and cross-check each identified side-effect against `tasks.md` entries, diff content, and codebase evidence. Side-effects with neither a matching task nor detectable evidence SHALL be reported as WARNING. If Section C contains no actionable side-effects, the system SHALL skip the cross-check and note it in the report.
 
-The `/opsx:verify` command SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When invoked as a final verify after the fix loop, the command SHALL operate identically — checking implementation and scope against the current state of code and artifacts. No special flags or modes are needed; the verify skill is stateless and always checks the current state.
+The review.md generation SHALL serve as both the initial verification (tasks.md step 3.2) and the final verification (step 3.5) in the QA loop. When run as a final verify after the fix loop, the verification SHALL operate identically — checking implementation and scope against the current state of code and artifacts. No special flags or modes are needed; the verification is stateless and always checks the current state. The review.md artifact is persisted in the change directory, replacing the previous transient verify report.
 
 **User Story:** As a developer I want post-implementation verification that checks my code against the specs, so that I can catch gaps, divergences, and inconsistencies before proceeding.
 
 #### Scenario: Verify gates on draft spec status
 - **GIVEN** a change `2026-04-08-my-change` that modified spec `quality-gates`
 - **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
-- **WHEN** the user invokes `/opsx:verify 2026-04-08-my-change`
+- **WHEN** apply generates review.md for `2026-04-08-my-change`
 - **THEN** the report SHALL include a CRITICAL issue: "Spec quality-gates is still in draft status — must be finalized before merge"
 
 #### Scenario: Verify completion flips draft to stable and proposal to completed
@@ -138,7 +139,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 
 - **GIVEN** a change "add-user-auth" with all tasks complete
 - **AND** all spec requirements are implemented and all design decisions are followed
-- **WHEN** the user invokes `/opsx:verify add-user-auth`
+- **WHEN** apply generates review.md for `add-user-auth`
 - **THEN** the system produces a verification report
 - **AND** the Implementation dimension shows all tasks complete, requirements verified, and scenarios covered
 - **AND** the Scope dimension shows design adherence and no untraced changes
@@ -148,7 +149,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 
 - **GIVEN** a change with 5 of 7 tasks marked complete
 - **AND** one spec requirement has no corresponding implementation in the codebase
-- **WHEN** the user invokes `/opsx:verify`
+- **WHEN** apply generates review.md
 - **THEN** the report lists 2 CRITICAL issues: incomplete tasks and missing requirement implementation
 - **AND** each issue includes a specific recommendation (e.g., "Complete task: Add rate limiting middleware" and "Implement requirement: Session Timeout -- no session timeout logic found in auth module")
 - **AND** the final assessment states "2 critical issue(s) found. Fix before proceeding."
@@ -165,7 +166,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 
 - **GIVEN** a change where `proposal.md` references an artifact filename that was renamed during the specs stage
 - **AND** the stale reference is a simple text replacement (old filename → new filename)
-- **WHEN** the system runs `/opsx:verify`
+- **WHEN** the system generates review.md
 - **THEN** the system SHALL auto-fix the stale reference in `proposal.md`
 - **AND** the verification report SHALL list the fix as "WARNING (auto-fixed): Updated stale reference in proposal.md"
 - **AND** the report SHALL NOT present it as an open issue requiring user action
@@ -174,7 +175,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 
 - **GIVEN** a spec requiring JWT authentication
 - **AND** the implementation uses session cookies instead
-- **WHEN** the system runs `/opsx:verify`
+- **WHEN** the system generates review.md
 - **THEN** the system SHALL NOT auto-fix the divergence
 - **AND** SHALL present it as an open WARNING for the user to decide whether to update the spec or the code
 
@@ -189,7 +190,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Graceful degradation with missing artifacts
 
 - **GIVEN** a change with only tasks.md (no specs or design)
-- **WHEN** the user invokes `/opsx:verify`
+- **WHEN** apply generates review.md
 - **THEN** the system verifies task completion only
 - **AND** skips requirement verification and scope checks
 - **AND** notes in the report which checks were skipped and why
@@ -197,7 +198,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Verification with no spec changes
 
 - **GIVEN** a change that has tasks but the proposal lists no capability modifications
-- **WHEN** the user invokes `/opsx:verify`
+- **WHEN** apply generates review.md
 - **THEN** the system skips requirement-level verification
 - **AND** focuses on task completion and scope checks
 
@@ -205,7 +206,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 
 - **GIVEN** a change where the initial verify found 2 CRITICAL issues
 - **AND** the developer fixed both issues in the fix loop
-- **WHEN** the developer runs `/opsx:verify` as the final verification step (3.5)
+- **WHEN** the system regenerates review.md as the final verification step (3.5)
 - **THEN** the verification report SHALL show 0 CRITICAL issues
 - **AND** the report SHALL reflect the current state of all artifacts (including any specs updated during the fix loop)
 - **AND** the final assessment SHALL be "All checks passed. Ready to proceed." or note remaining warnings
@@ -215,7 +216,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **GIVEN** a change where preflight Section C identifies "Regression to existing auth middleware" as a side-effect
 - **AND** no task in tasks.md addresses auth middleware regression
 - **AND** no codebase evidence of auth middleware changes
-- **WHEN** the user invokes `/opsx:verify`
+- **WHEN** apply generates review.md
 - **THEN** the report includes a WARNING: "Preflight side-effect not addressed: Regression to existing auth middleware"
 - **AND** recommends "Add a task or verify that this side-effect is handled in the implementation"
 
@@ -231,7 +232,7 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 #### Scenario: Preflight Section C has no side-effects
 
 - **GIVEN** a change where preflight Section C shows all risks assessed as NONE
-- **WHEN** the user invokes `/opsx:verify`
+- **WHEN** apply generates review.md
 - **THEN** the system skips the side-effect cross-check
 - **AND** notes "No preflight side-effects to verify" in the report
 
@@ -274,9 +275,9 @@ The `/opsx:verify` command SHALL serve as both the initial verification (tasks.m
 - **AND** notes "No merge base available — diff checks skipped" in the report
 - **AND** proceeds with keyword-based verification as normal
 
-### Requirement: Documentation Drift Verification
+### Requirement: Documentation Drift Verification (init health check)
 
-The system SHALL verify that generated documentation accurately reflects the current state of specs when the user invokes `/opsx:docs-verify`. The verification SHALL assess three dimensions:
+The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `/opsx:init` project-level health checks. The verification SHALL assess three dimensions:
 
 1. **Capability Docs vs Specs** — For each spec in `openspec/specs/*/spec.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
 
@@ -289,7 +290,7 @@ Each issue found SHALL be classified as:
 - **WARNING** — documentation exists but has drifted from specs (e.g., requirement not reflected in capability doc, stale ADR reference)
 - **INFO** — minor discrepancy or observation that may be intentional (e.g., manual ADR with no matching design decision, capability doc has extra context beyond spec)
 
-The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:docs` or `/opsx:docs <capability>` to regenerate drifted documentation.
+The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `/opsx:finalize` to regenerate drifted documentation.
 
 The system SHALL gracefully handle missing documentation directories: if `docs/capabilities/` does not exist, the system SHALL report all capabilities as missing (CRITICAL) rather than erroring. If `docs/decisions/` does not exist, the system SHALL skip the ADR dimension and note it. If `docs/README.md` does not exist, the system SHALL report it as a single CRITICAL issue.
 
@@ -300,7 +301,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **GIVEN** a project with 5 capabilities, each having a corresponding capability doc in `docs/capabilities/`
 - **AND** all completed changes' design decisions have corresponding ADRs in `docs/decisions/`
 - **AND** `docs/README.md` lists all 5 capabilities and references valid ADRs
-- **WHEN** the user invokes `/opsx:docs-verify`
+- **WHEN** the user invokes `/opsx:init`
 - **THEN** the system produces a verification report
 - **AND** all three dimensions show no issues
 - **AND** the verdict is "CLEAN"
@@ -309,9 +310,9 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 - **GIVEN** a project with specs for "user-auth" and "data-export"
 - **AND** `docs/capabilities/` contains only `user-auth.md` (no `data-export.md`)
-- **WHEN** the user invokes `/opsx:docs-verify`
+- **WHEN** the user invokes `/opsx:init`
 - **THEN** the Capability Docs dimension reports a CRITICAL issue: "Missing capability doc for data-export"
-- **AND** the recommendation is "Run `/opsx:docs data-export` to generate the missing documentation"
+- **AND** the recommendation is "Run `/opsx:finalize` to generate the missing documentation"
 - **AND** the verdict is "OUT OF SYNC"
 
 #### Scenario: Capability doc omits a requirement from spec
@@ -328,7 +329,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **AND** `docs/README.md` capabilities table lists only 5 of them
 - **WHEN** the system checks README vs Current State
 - **THEN** the report includes a CRITICAL issue: "README capabilities table missing: <capability-name>"
-- **AND** recommends "Run `/opsx:docs` to regenerate the README"
+- **AND** recommends "Run `/opsx:finalize` to regenerate the README"
 
 #### Scenario: Stale ADR reference in README
 
@@ -340,15 +341,15 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 #### Scenario: Documentation directory does not exist
 
 - **GIVEN** a project where `docs/capabilities/` has not been created yet
-- **WHEN** the user invokes `/opsx:docs-verify`
+- **WHEN** the user invokes `/opsx:init`
 - **THEN** the system reports each spec as a CRITICAL missing capability doc
 - **AND** does not error or abort
-- **AND** recommends "Run `/opsx:docs` to generate initial documentation"
+- **AND** recommends "Run `/opsx:finalize` to generate initial documentation"
 
 #### Scenario: No design decisions to check
 
 - **GIVEN** a project with no completed changes in `openspec/changes/`
-- **WHEN** the user invokes `/opsx:docs-verify`
+- **WHEN** the user invokes `/opsx:init`
 - **THEN** the system skips the ADR dimension
 - **AND** notes "No design decisions to verify against"
 - **AND** still checks the other two dimensions
@@ -374,7 +375,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Multiple specs mapping to one doc**: If a documentation restructuring merged multiple specs into one doc, the system SHALL report this as INFO rather than flagging missing docs.
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
-- **Concurrent docs regeneration**: If `/opsx:docs` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **Concurrent docs regeneration**: If `/opsx:finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
 - **No merge base for diff checks**: If `git merge-base` fails (orphan branch, detached HEAD, first commit), all diff-based checks are skipped gracefully with a note in the report. Keyword-based verification proceeds as normal.
 - **Task description too generic for diff matching**: If a task description is too vague to produce meaningful file path matches (e.g., "Clean up code"), the system SHALL skip that task's diff mapping and note it as inconclusive rather than raising a false warning.
 - **Change artifacts in diff**: Files under `openspec/changes/` and `openspec/specs/` are expected in the diff for any change and SHALL be excluded from unintended change detection (they are always traceable to the change itself).

@@ -1,13 +1,14 @@
 ---
 order: 13
 category: reference
-status: stable
+status: draft
 version: 1
-lastModified: 2026-04-08
+lastModified: 2026-04-09
+change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Defines the three-layer architecture (Constitution, WORKFLOW.md + Smart Templates, Skills) that structures the opsx-enhanced plugin. Each layer has distinct responsibilities, separation rules, and interaction patterns that allow independent modification.
+Defines the three-layer architecture (Constitution, WORKFLOW.md + Smart Templates, Router + Actions) that structures the opsx-enhanced plugin. Each layer has distinct responsibilities, separation rules, and interaction patterns that allow independent modification.
 
 ## Requirements
 
@@ -46,50 +47,50 @@ The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Sma
 - **WHEN** the apply configuration is inspected
 - **THEN** it SHALL require the `tasks` artifact to be complete before implementation begins
 
-### Requirement: Skills Layer
-The system SHALL deliver all commands as `skills/*/SKILL.md` files within the Claude Code plugin system. Skills SHALL be categorized as workflow (new, ff, apply, verify), governance (setup, bootstrap, discover, preflight, docs-verify), or documentation (changelog, docs). All skills SHALL be model-invocable (disable-model-invocation: false or absent).
+### Requirement: Router + Actions Layer (4 commands: init, propose, apply, finalize)
+The system SHALL deliver all commands through a single router SKILL.md that dispatches to inline actions defined in WORKFLOW.md. The 4 commands are: `init` (project setup and health checks), `propose` (workspace creation and full artifact pipeline), `apply` (task implementation with review.md QA output), and `finalize` (changelog, docs, version bump, commit). The router SHALL be model-invocable (disable-model-invocation: false or absent).
 
-**User Story:** As a developer I want every command delivered as a SKILL.md file, so that Claude Code can discover and invoke them through its plugin system.
+**User Story:** As a developer I want a single router that dispatches to 4 actions, so that the command surface is minimal and all behavior is defined declaratively in WORKFLOW.md.
 
-#### Scenario: All skills are present
+#### Scenario: Router dispatches to actions
 - **GIVEN** a fully installed plugin
 - **WHEN** the `skills/` directory is listed
-- **THEN** every subdirectory SHALL contain a `SKILL.md` file
+- **THEN** it SHALL contain a single router `SKILL.md` that dispatches to init, propose, apply, and finalize actions
 
-#### Scenario: All skills are model-invocable
-- **GIVEN** any skill in the `skills/` directory
+#### Scenario: Router is model-invocable
+- **GIVEN** the router `SKILL.md`
 - **WHEN** its YAML frontmatter is inspected
 - **THEN** the `disable-model-invocation` field SHALL be set to `false` or be absent (defaulting to false)
 
 ### Requirement: Layer Separation
-The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templates SHALL NOT embed skill logic; instead, skills SHALL depend on WORKFLOW.md and Smart Templates by reading them directly for pipeline configuration, artifact definitions, instructions, and dependencies. The constitution SHALL NOT contain pipeline-specific artifact definitions. Modifications to one layer SHALL NOT require changes to another layer unless the interface contract between them changes.
+The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templates SHALL NOT embed action logic; instead, the router and actions SHALL depend on WORKFLOW.md and Smart Templates by reading them directly for pipeline configuration, artifact definitions, instructions, and dependencies. The constitution SHALL NOT contain pipeline-specific artifact definitions. Modifications to one layer SHALL NOT require changes to another layer unless the interface contract between them changes.
 
-**User Story:** As a maintainer I want each layer to be independently modifiable, so that I can update pipeline stages without rewriting skills, or change global rules without touching the workflow contract.
+**User Story:** As a maintainer I want each layer to be independently modifiable, so that I can update pipeline stages without rewriting actions, or change global rules without touching the workflow contract.
 
 #### Scenario: WORKFLOW.md change does not require skill changes
 - **GIVEN** WORKFLOW.md is updated with a new post_artifact instruction
 - **WHEN** the change is applied
-- **THEN** existing skills SHALL continue to function without modification because they read WORKFLOW.md dynamically at runtime
+- **THEN** existing actions SHALL continue to function without modification because they read WORKFLOW.md dynamically at runtime
 
 #### Scenario: Constitution update does not require WORKFLOW.md changes
 - **GIVEN** a new code style rule is added to CONSTITUTION.md
 - **WHEN** the constitution is updated
 - **THEN** WORKFLOW.md SHALL remain unchanged because it does not embed constitution rules
 
-#### Scenario: Skill update does not require constitution or WORKFLOW.md changes
-- **GIVEN** a skill's instruction text needs refinement
-- **WHEN** the skill's SKILL.md is updated
-- **THEN** neither the constitution nor WORKFLOW.md SHALL require modification
+#### Scenario: Action update does not require constitution or WORKFLOW.md changes
+- **GIVEN** an action's instruction text needs refinement
+- **WHEN** the action definition in WORKFLOW.md is updated
+- **THEN** neither the constitution nor the router SKILL.md SHALL require modification
 
 ## Edge Cases
 
-- If the constitution is missing or empty, skills SHALL report an error rather than proceeding without rules.
-- If WORKFLOW.md is malformed YAML, skills SHALL report a read error rather than proceeding with invalid data.
-- If a skill directory exists but contains no SKILL.md file, the Claude Code plugin system SHALL not register that command.
-- If a new skill is added without updating documentation, the system still functions but documentation is stale (detected by `/opsx:verify`).
+- If the constitution is missing or empty, the router SHALL report an error rather than proceeding without rules.
+- If WORKFLOW.md is malformed YAML, the router SHALL report a read error rather than proceeding with invalid data.
+- If the router SKILL.md is missing, the Claude Code plugin system SHALL not register any commands.
+- If a new action is added without updating documentation, the system still functions but documentation is stale (detected by review.md generation during apply).
 
 ## Assumptions
 
-- The Claude Code plugin system discovers skills by scanning `skills/*/SKILL.md` files and uses YAML frontmatter for configuration. <!-- ASSUMPTION: Skill discovery mechanism -->
-- The WORKFLOW.md `context` field reliably enforces constitution reading before skill execution. <!-- ASSUMPTION: Context enforcement -->
+- The Claude Code plugin system discovers the router by scanning `skills/*/SKILL.md` files and uses YAML frontmatter for configuration. <!-- ASSUMPTION: Router discovery mechanism -->
+- The WORKFLOW.md `context` field reliably enforces constitution reading before action execution. <!-- ASSUMPTION: Context enforcement -->
 No further assumptions beyond those marked above.

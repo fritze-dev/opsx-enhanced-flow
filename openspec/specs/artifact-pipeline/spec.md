@@ -1,25 +1,26 @@
 ---
 order: 4
 category: change-workflow
-status: stable
+status: draft
 version: 1
-lastModified: 2026-04-08
+lastModified: 2026-04-09
+change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Defines the 6-stage artifact pipeline (research, proposal, specs, design, preflight, tasks) driven by WORKFLOW.md and Smart Templates, with strict dependency gating that ensures no stage is skipped and implementation is gated by task completion.
+Defines the 7-stage artifact pipeline (research, proposal, specs, design, preflight, tasks, review) driven by WORKFLOW.md and Smart Templates, with strict dependency gating that ensures no stage is skipped, implementation is gated by task completion, and verification produces a review.md artifact.
 
 ## Requirements
 
-### Requirement: Six-Stage Pipeline
-The system SHALL define a 6-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, and tasks. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, and tasks requires preflight. No stage SHALL be skippable; each MUST complete before the next can begin. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
+### Requirement: Seven-Stage Pipeline
+The system SHALL define a 7-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, tasks, and review. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, tasks requires preflight, and review requires tasks. The review artifact is generated during the apply phase (after implementation) rather than during artifact-forward generation. No stage SHALL be skippable; each MUST complete before the change is considered complete. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
 
 **User Story:** As a developer I want a structured pipeline that guides me from research through to implementation tasks, so that no critical thinking step is skipped and every decision is documented.
 
 #### Scenario: Pipeline stages execute in dependency order
 - **GIVEN** a new change workspace with no artifacts generated
 - **WHEN** the user progresses through the pipeline
-- **THEN** the system SHALL enforce the order: research first, then proposal, then specs, then design, then preflight, then tasks
+- **THEN** the system SHALL enforce the order: research first, then proposal, then specs, then design, then preflight, then tasks, then review
 
 #### Scenario: Skipping a stage is prevented
 - **GIVEN** a change workspace where only research.md has been generated
@@ -29,7 +30,7 @@ The system SHALL define a 6-stage artifact pipeline with the following stages in
 #### Scenario: All stages produce verifiable artifacts
 - **GIVEN** a completed pipeline run
 - **WHEN** the change workspace is inspected
-- **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, and tasks.md
+- **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, tasks.md, and review.md
 
 ### Requirement: Artifact Output Frontmatter
 Certain pipeline artifacts SHALL include YAML frontmatter in their generated output for machine-readable metadata:
@@ -115,7 +116,8 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 #### Scenario: WORKFLOW.md contains pipeline orchestration
 - **GIVEN** the `openspec/WORKFLOW.md` file
 - **WHEN** its frontmatter is inspected
-- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, and `context` fields
+- **THEN** it SHALL contain `templates_dir`, `pipeline`, `actions`, and `template-version` fields
+- **AND** the `pipeline` array SHALL include `review` as the final stage
 
 #### Scenario: WORKFLOW.md contains optional worktree configuration
 - **GIVEN** the `openspec/WORKFLOW.md` file with worktree mode enabled
@@ -128,7 +130,7 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the skill SHALL treat worktree mode as disabled and use existing directory-based behavior
 
 ### Requirement: Post-Artifact Commit and PR Integration
-WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:ff` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md, the skill SHALL skip post-artifact operations.
+WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:propose` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md, the skill SHALL skip post-artifact operations.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
@@ -160,7 +162,7 @@ WORKFLOW.md SHALL define a `post_artifact` field containing instructions that th
 
 ### Requirement: Post-Implementation Commit Before Approval
 
-The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:verify` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
 
 **User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
 
@@ -199,7 +201,7 @@ Each Smart Template's `instruction` field SHALL contain workflow rules that appl
 #### Scenario: Apply instruction in WORKFLOW.md includes post-apply workflow
 - **GIVEN** `openspec/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL contain the post-apply sequence: `/opsx:verify` → `/opsx:changelog` → `/opsx:docs`
+- **THEN** it SHALL contain the post-apply sequence: `/opsx:apply` → `/opsx:changelog` → `/opsx:docs`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 

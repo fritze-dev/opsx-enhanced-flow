@@ -1,9 +1,10 @@
 ---
 order: 9
 category: development
-status: stable
+status: draft
 version: 1
-lastModified: 2026-04-08
+lastModified: 2026-04-09
+change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
@@ -15,7 +16,7 @@ Handles `/opsx:apply` for working through task checklists in tasks.md, with sequ
 
 The system SHALL work through pending task checkboxes in the change's `tasks.md` file when the user invokes `/opsx:apply`. For each task, the system SHALL read the task description, make the required code changes, and mark the task as complete by changing `- [ ]` to `- [x]` in the tasks file. The system SHALL read all context files (proposal, design, tasks) from the change directory and specs from `openspec/specs/` for the capabilities listed in the proposal before beginning implementation. The system SHALL read the `apply.instruction` field from WORKFLOW.md for apply guidance. The system SHALL pause and request clarification if a task is ambiguous, if implementation reveals a design issue, or if a blocker is encountered. The system SHALL NOT guess when requirements are unclear.
 
-The QA Loop's Metric Check and Auto-Verify steps are **automated steps** — the system SHALL execute them without pausing for user confirmation. The first human gate in the QA Loop is User Testing. The system SHALL NOT pause or ask for permission before running `/opsx:verify`; it SHALL invoke the command automatically after the metric check passes.
+The QA Loop's Metric Check and Auto-Verify steps are **automated steps** — the system SHALL execute them without pausing for user confirmation. The first human gate in the QA Loop is User Testing. The system SHALL NOT pause or ask for permission before generating `review.md`; it SHALL generate the review artifact automatically after the metric check passes using the review template.
 
 **User Story:** As a developer I want the AI to systematically work through my task list and implement each item, so that I can focus on review and guidance rather than manual coding of each task.
 
@@ -44,7 +45,7 @@ The QA Loop's Metric Check and Auto-Verify steps are **automated steps** — the
 - **AND** the system reaches the QA Loop Metric Check
 - **WHEN** the metric check passes
 - **THEN** the system SHALL immediately proceed to Auto-Verify without pausing
-- **AND** SHALL invoke `/opsx:verify` automatically
+- **AND** SHALL generate `review.md` in the change directory automatically using the review template
 - **AND** SHALL only pause at User Testing to wait for human approval
 
 #### Scenario: Pause on ambiguous task
@@ -155,7 +156,7 @@ The system SHALL allow implementation tasks to modify spec files (`openspec/spec
 - **Empty tasks.md**: If tasks.md exists but contains no checkbox items, the system SHALL report "0/0 tasks" and suggest the tasks file may need to be regenerated.
 - **Malformed checkboxes**: If tasks.md contains checkbox-like items that do not follow the `- [ ]` / `- [x]` format exactly, the system SHALL ignore them in the count and note the discrepancy.
 - **Tasks modified externally**: If the user manually edits tasks.md between apply invocations (adding, removing, or reordering tasks), the system SHALL re-read the file and compute progress from the current state.
-- If tasks.md does not exist but the change has artifacts, the system SHALL inform the user and suggest running `/opsx:continue` or `/opsx:ff` to generate tasks first.
+- If tasks.md does not exist but the change has artifacts, the system SHALL inform the user and suggest running `/opsx:propose` to generate tasks first.
 - **Mixed checkbox states mid-file**: If completed tasks appear after pending tasks (out of order), the system SHALL still count correctly and work on pending tasks regardless of position.
 - **Single task remaining**: The system SHALL handle the case where only one task remains with the same progress reporting format ("6/7 tasks complete").
 - **No standard tasks in constitution:** If the project constitution does not define a `## Standard Tasks` section, the tasks.md SHALL omit the Post-Implementation section entirely. Apply behavior is unchanged.
