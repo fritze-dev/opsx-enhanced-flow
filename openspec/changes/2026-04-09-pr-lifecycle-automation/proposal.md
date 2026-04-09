@@ -17,7 +17,6 @@ All post-implementation steps (changelog, docs, version-bump) are manual, creati
 - **WORKFLOW.md `automation` block**: new frontmatter section defining CI trigger behavior (post-approval pipeline steps, labels). WORKFLOW.md defines WHAT to do; a thin GitHub Action YAML defines WHEN to trigger.
 - **Thin trigger YAML** (`.github/workflows/opsx-pipeline.yml`): minimal workflow triggered by PR approval, reads WORKFLOW.md `automation` config, delegates to `claude-code-action`. No pipeline logic in the YAML itself.
 - **Label-based state machine**: `automation/running`, `automation/complete`, `automation/failed` labels track pipeline progress on PRs
-- **Opt-in auto-merge**: `auto-merge` label for automatic merge after successful pipeline
 - **Extended `/opsx:ff`**: ff reads the full pipeline (including action steps like apply, verify, changelog, docs, version-bump) and executes everything. Optional `--auto-approve` flag for fully autonomous execution.
 - **Sub-agent architecture**: each pipeline step runs as an isolated sub-agent (via Agent tool) with only the relevant artifacts as input, solving context window exhaustion
 - **Action templates**: new `type: action` templates for non-artifact pipeline steps (actions handle their own idempotency, no status tracking needed)
@@ -30,7 +29,7 @@ None.
 
 ### Modified Capabilities
 - `workflow-contract`: Add `automation` section to WORKFLOW.md frontmatter for CI trigger configuration. Extend Smart Template format with `type: action`. Extend Skill Reading Pattern with sub-agent execution for action steps. Extend ff to execute full pipeline including action steps.
-- `release-workflow`: Add post-approval CI pipeline requirement — automated execution of changelog → docs → version-bump on PR review approval, with label state tracking and auto-merge opt-in.
+- `release-workflow`: Add post-approval CI pipeline requirement — automated execution of changelog → docs → version-bump on PR review approval, with label state tracking.
 
 ### Removed Capabilities
 None.
@@ -59,7 +58,6 @@ None.
 - Action template format (`type: action`)
 - Handoff protocol (artifact gates between agents)
 - Label management for pipeline state tracking
-- Auto-merge opt-in via label
 
 **Out of scope:**
 - CI-based verify (decided: verify stays local only)

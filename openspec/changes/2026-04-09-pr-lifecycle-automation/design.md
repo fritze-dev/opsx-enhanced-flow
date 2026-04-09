@@ -48,7 +48,6 @@ automation:
       running: automation/running
       complete: automation/complete
       failed: automation/failed
-    auto_merge: false
 
 # docs_language: English
 ---
@@ -197,7 +196,7 @@ Add CI automation convention:
 ## CI Automation
 
 - **Post-approval pipeline**: Defined in WORKFLOW.md `automation.post_approval`. Triggered by GitHub Action on PR review approval.
-- **Labels**: `automation/running`, `automation/complete`, `automation/failed` track pipeline state. `auto-merge` enables auto-merge after successful pipeline.
+- **Labels**: `automation/running`, `automation/complete`, `automation/failed` track pipeline state.
 - **Plugin self-reference**: CI loads the opsx plugin from the repo checkout via `plugin_marketplaces: './'`.
 ```
 
