@@ -109,7 +109,7 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the system SHALL mark the corresponding `- [ ]` checkbox as `- [x]` in tasks.md
 
 ### Requirement: WORKFLOW.md Owns Pipeline Configuration
-`openspec/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `post_artifact` instructions for commit/push/PR, `context` pointing to the constitution, optionally `docs_language`, and optionally `worktree` object with `enabled` (boolean), `path_pattern` (string with `{change}` placeholder), and `auto_cleanup` (boolean). Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
+`openspec/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `context` pointing to the constitution, optionally `docs_language`, and optionally `worktree` object with `enabled` (boolean), `path_pattern` (string with `{change}` placeholder), and `auto_cleanup` (boolean). Post-artifact commit/push/PR logic is handled by the skill during propose pipeline traversal. Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
 
 **User Story:** As a workflow maintainer I want pipeline orchestration in a single WORKFLOW.md file, so that all pipeline configuration lives in one place.
 
@@ -130,7 +130,7 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the skill SHALL treat worktree mode as disabled and use existing directory-based behavior
 
 ### Requirement: Post-Artifact Commit and PR Integration
-WORKFLOW.md SHALL define a `post_artifact` field containing instructions that the `/opsx:workflow propose` skill executes after creating each artifact. The `post_artifact` instruction SHALL direct the agent to: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. If the `post_artifact` field is absent from WORKFLOW.md, the skill SHALL skip post-artifact operations.
+The `/opsx:workflow propose` skill SHALL execute post-artifact commit logic after creating each artifact during pipeline traversal. The skill SHALL: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. This logic lives in the skill (SKILL.md), not in WORKFLOW.md.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
@@ -155,14 +155,14 @@ WORKFLOW.md SHALL define a `post_artifact` field containing instructions that th
 - **WHEN** the agent finishes creating the first artifact
 - **THEN** the agent SHALL create the branch, commit, attempt push, and skip PR creation
 
-#### Scenario: WORKFLOW.md without post_artifact field
-- **GIVEN** a WORKFLOW.md that does not contain a `post_artifact` field
+#### Scenario: Post-artifact commit logic is in the skill
+- **GIVEN** the propose skill with post-artifact commit logic defined in SKILL.md
 - **WHEN** the agent finishes creating an artifact
-- **THEN** the agent SHALL skip post-artifact operations and proceed normally
+- **THEN** the skill SHALL execute its built-in commit/push/PR logic without requiring a WORKFLOW.md field
 
 ### Requirement: Post-Implementation Commit Before Approval
 
-The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:workflow apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as `post_artifact` (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `/opsx:workflow apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as post-artifact commit (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
 
 **User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
 
@@ -346,7 +346,7 @@ The `/opsx:workflow propose` command SHALL serve as the single entry point for a
 - **Project without constitution:** Universal template steps still appear; constitution extras are simply absent.
 - **Branch already exists:** The agent SHALL reuse the existing branch rather than failing.
 - **Network failure during PR creation:** The pipeline SHALL NOT be blocked.
-- **Auto-continue transitions:** The `post_artifact` hook runs after each artifact individually.
+- **Auto-continue transitions:** The skill's post-artifact commit logic runs after each artifact individually.
 - **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `/opsx:workflow propose`.
 - **Worktree config with empty path_pattern**: SHALL default to `.claude/worktrees/{change}`.
 

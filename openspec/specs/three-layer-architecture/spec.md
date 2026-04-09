@@ -28,7 +28,7 @@ The system SHALL have a `CONSTITUTION.md` file at `openspec/CONSTITUTION.md` tha
 - **THEN** the file SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections
 
 ### Requirement: Schema Layer
-The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `openspec/templates/` to define the 6-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, post-artifact hook, and project context. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
+The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `openspec/templates/` to define the 6-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, and project context. Post-artifact commit/push logic is handled by the skill during propose pipeline traversal. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
 
 **User Story:** As a developer I want the artifact pipeline defined declaratively in WORKFLOW.md and self-describing templates, so that I can understand and modify the workflow without editing skill code.
 
@@ -68,7 +68,7 @@ The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templa
 **User Story:** As a maintainer I want each layer to be independently modifiable, so that I can update pipeline stages without rewriting actions, or change global rules without touching the workflow contract.
 
 #### Scenario: WORKFLOW.md change does not require skill changes
-- **GIVEN** WORKFLOW.md is updated with a new post_artifact instruction
+- **GIVEN** WORKFLOW.md is updated with a new action instruction
 - **WHEN** the change is applied
 - **THEN** existing actions SHALL continue to function without modification because they read WORKFLOW.md dynamically at runtime
 

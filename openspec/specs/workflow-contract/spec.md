@@ -28,7 +28,6 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 
 **Markdown body** — prose instructions as named sections:
 - `## Context` — project-level behavioral context (e.g., constitution reference, language rules)
-- `## Post-Artifact Hook` — instructions executed after each artifact creation (branch management, commit, push, draft PR)
 
 The `pipeline` array SHALL be the single source of truth for the artifact generation sequence. Frontmatter SHALL NOT contain multi-line prose instructions — these belong in body sections or in action `instruction` fields.
 
@@ -38,7 +37,6 @@ The `pipeline` array SHALL be the single source of truth for the artifact genera
 - **GIVEN** a project with `openspec/WORKFLOW.md` containing frontmatter and body sections
 - **WHEN** any command is invoked
 - **THEN** the router SHALL read frontmatter for `templates_dir`, `pipeline`, and `actions` configuration
-- **AND** SHALL read the `## Post-Artifact Hook` body section for post-artifact instructions
 - **AND** SHALL read the `## Context` body section for behavioral context
 
 #### Scenario: WORKFLOW.md frontmatter contains required structured fields
@@ -50,7 +48,7 @@ The `pipeline` array SHALL be the single source of truth for the artifact genera
 #### Scenario: WORKFLOW.md body contains instruction sections
 - **GIVEN** a valid `openspec/WORKFLOW.md`
 - **WHEN** its markdown body is inspected
-- **THEN** it SHALL contain `## Context` and `## Post-Artifact Hook` sections with prose instructions
+- **THEN** it SHALL contain `## Context` and `## Action: <name>` sections with prose instructions
 
 ### Requirement: Smart Template Format
 
