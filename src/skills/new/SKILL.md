@@ -44,14 +44,15 @@ Start a new change using the experimental artifact-driven approach.
    **If `worktree.enabled` is `true`:**
    1. Compute the worktree path by replacing `{change}` in `worktree.path_pattern` with the change name (default pattern: `.claude/worktrees/{change}`)
    2. Check if a worktree at that path already exists (`git worktree list`). If so, suggest switching to it instead and stop.
-   3. Create the worktree: `git worktree add <path> -b <change-name>`
+   3. Fetch the latest main from the remote: `git fetch origin main`
+   4. Create the worktree based on the fetched remote main: `git worktree add <path> -b <change-name> origin/main`
       - If the branch already exists, try: `git worktree add <path> <change-name>`
       - If the path already exists but is not a git worktree, fail with an error.
-   4. Create the change directory inside the worktree with date prefix:
+   5. Create the change directory inside the worktree with date prefix:
       ```bash
       mkdir -p <worktree-path>/openspec/changes/YYYY-MM-DD-<name>
       ```
-   5. Report the worktree path and branch name. Instruct the user to switch their working directory to the worktree.
+   6. Report the worktree path and branch name. Instruct the user to switch their working directory to the worktree.
 
    **If `worktree.enabled` is absent, commented out, or `false`:**
    ```bash

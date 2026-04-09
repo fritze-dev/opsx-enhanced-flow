@@ -3,7 +3,7 @@ order: 3
 category: change-workflow
 status: stable
 version: 1
-lastModified: 2026-04-08
+lastModified: 2026-04-09
 ---
 ## Purpose
 
@@ -97,7 +97,7 @@ The created workspace SHALL contain the artifacts defined by the pipeline in WOR
 
 ### Requirement: Create Worktree-Based Workspace
 
-The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). The system SHALL run `git worktree add <path> -b <change-name>` to create the worktree and then `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
+The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). Before creating the worktree, the system SHALL fetch the latest remote main branch. The system SHALL use the fetched remote main as the start-point for the new branch. The system SHALL then run `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
 
 **User Story:** As a developer I want each change to be created in its own git worktree, so that parallel changes are fully isolated and cannot conflict with each other.
 
@@ -107,7 +107,8 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 - **AND** no worktree for "add-user-auth" exists
 - **AND** today's date is 2026-04-01
 - **WHEN** the user invokes `/opsx:new add-user-auth`
-- **THEN** the system runs `git worktree add .claude/worktrees/add-user-auth -b add-user-auth`
+- **THEN** the system fetches the latest remote main branch
+- **AND** creates a worktree based on the fetched remote main
 - **AND** creates `openspec/changes/2026-04-01-add-user-auth/` inside the worktree
 - **AND** reports the worktree path and branch name
 
