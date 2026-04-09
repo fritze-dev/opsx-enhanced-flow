@@ -71,16 +71,16 @@ Guidelines:
 
 ## Behavior
 
-<!-- For capabilities that involve multiple commands or phases
-     (e.g., quality-gates covers /opsx:preflight and /opsx:verify),
+<!-- For capabilities that involve multiple workflow phases
+     (e.g., quality-gates covers preflight during propose and review.md during apply),
      add a brief workflow sequence note at the TOP of this section:
-     "Run /opsx:preflight before tasks (pre-implementation).
-      Run /opsx:verify after implementation (post-implementation)."
+     "Run /opsx:workflow propose for pre-implementation checks (preflight).
+      Run /opsx:workflow apply for post-implementation verification (review.md)."
 -->
 
 <!-- For multi-command capabilities, include the command name in behavior subsection
      headers for quick scanning.
-     Example: "### Step-by-Step Generation (/opsx:continue)" rather than just
+     Example: "### Step-by-Step Generation (/opsx:workflow propose)" rather than just
      "### Step-by-Step Generation". This helps users find the command they need. -->
 
 ### [Feature Group]

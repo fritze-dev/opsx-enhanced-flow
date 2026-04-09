@@ -27,7 +27,7 @@ The enriched sections SHALL appear in this order: Overview, Purpose, Rationale, 
 
 **Behavior depth:** Each distinct Gherkin scenario group in the spec SHALL produce at least one Behavior subsection. The agent SHALL NOT merge multiple distinct scenarios into fewer subsections than the spec defines.
 
-For capabilities that involve multiple commands or phases (e.g., quality-gates covers both `/opsx:preflight` and `/opsx:workflow apply`), the agent SHALL add a brief workflow sequence note at the top of the Behavior section explaining when each command is used relative to the overall workflow. For multi-command capabilities, the agent SHALL include the command name in behavior subsection headers for quick scanning (e.g., `### Step-by-Step Generation (/opsx:workflow propose)` rather than just `### Step-by-Step Generation`).
+For capabilities that involve multiple workflow phases (e.g., quality-gates covers preflight during `/opsx:workflow propose` and review.md during `/opsx:workflow apply`), the agent SHALL add a brief workflow sequence note at the top of the Behavior section explaining when each phase is used relative to the overall workflow. For multi-phase capabilities, the agent SHALL include the action name in behavior subsection headers for quick scanning (e.g., `### Step-by-Step Generation (/opsx:workflow propose)` rather than just `### Step-by-Step Generation`).
 
 The Edge Cases section SHALL only include surprising states, error conditions, or non-obvious interactions. Normal flow variants and expected UX behaviors SHALL be placed in the Behavior section instead. A good test: if a user would not be surprised by the behavior, it belongs in Behavior, not Edge Cases.
 
@@ -89,7 +89,7 @@ If no relevant completed changes exist for a capability, the agent SHALL fall ba
 - **THEN** the Rationale describes the current design in present tense (e.g., "X handles the common case. Y covers edge cases where Z occurs.") and does NOT narrate change history (e.g., "The initial design used X. A later change added Y.")
 
 #### Scenario: Multi-command capability includes workflow sequence note
-- **GIVEN** a capability that spans multiple commands (e.g., quality-gates covers `/opsx:preflight` and `/opsx:workflow apply`)
+- **GIVEN** a capability that spans multiple workflow phases (e.g., quality-gates covers preflight during `/opsx:workflow propose` and review.md during `/opsx:workflow apply`)
 - **WHEN** the agent generates the Behavior section
 - **THEN** the top of the Behavior section includes a brief workflow sequence note explaining when each command is used
 

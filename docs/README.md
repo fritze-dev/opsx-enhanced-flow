@@ -8,7 +8,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 7-stage artifact pipeline (research → review), inline action definitions (init, apply, finalize), optional worktree configuration, automation config, and project context. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection. Together they are the single source of truth for pipeline structure, artifact generation, and action orchestration.
 
-3. **Router + Actions** (`skills/router.md` + `skills/*/SKILL.md`) — 4 commands (init, propose, apply, finalize) delivered via stub SKILL.md files that delegate to a shared router. The router handles change context detection, WORKFLOW.md loading, and dispatches to pipeline traversal (propose) or sub-agent execution (apply, finalize, init). All commands are model-invocable.
+3. **Workflow Skill** (`skills/workflow/SKILL.md`) — Single skill exposing 4 actions (init, propose, apply, finalize) via `/opsx:workflow <action>`. The skill handles change context detection, WORKFLOW.md loading, and dispatches to pipeline traversal (propose) or sub-agent execution (apply, finalize, init). All actions are model-invocable.
 
 Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
