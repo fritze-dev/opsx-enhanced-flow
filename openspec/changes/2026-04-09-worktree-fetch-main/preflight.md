@@ -3,13 +3,11 @@
 ## A. Traceability Matrix
 
 - [x] Story: "As a developer I want each change to be created in its own git worktree, so that parallel changes are fully isolated" → Scenario: "Create worktree when enabled" (fetch + start-point) → `src/skills/new/SKILL.md` step 4.3
-- [x] Story: (same) → Scenario: "Create worktree when fetch fails" (graceful fallback) → `src/skills/new/SKILL.md` step 4.3
 
 ## B. Gap Analysis
 
 No gaps identified:
 - Happy path covered: fetch succeeds, worktree based on `origin/main`
-- Error path covered: fetch fails, fallback to local HEAD with warning
 - Existing edge cases (branch exists, worktree path exists, worktree disabled) are unaffected by this change
 
 ## C. Side-Effect Analysis

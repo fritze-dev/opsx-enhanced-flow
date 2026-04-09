@@ -6,11 +6,11 @@ No foundation tasks — no new dependencies or infrastructure needed.
 
 ## 2. Implementation
 
-- [ ] 2.1. Update `src/skills/new/SKILL.md` step 4.3: add `git fetch origin main` before worktree creation, use `origin/main` as start-point, add fallback on fetch failure with user warning
+- [ ] 2.1. Update `src/skills/new/SKILL.md` step 4.3: add `git fetch origin main` before worktree creation, use `origin/main` as start-point
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Check: Worktree based on `origin/main` after fetch — PASS / FAIL. Fallback to local HEAD on network failure with warning — PASS / FAIL.
+- [ ] 3.1. Metric Check: Worktree based on `origin/main` after fetch — PASS / FAIL.
 - [ ] 3.2. Auto-Verify: Run `/opsx:verify`
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.

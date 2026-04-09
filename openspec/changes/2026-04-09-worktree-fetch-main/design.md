@@ -10,14 +10,13 @@ has_decisions: true
 ## Architecture & Components
 
 **Affected files:**
-- `src/skills/new/SKILL.md` — Step 4.3: add fetch before worktree creation, use `origin/main` as start-point, handle fetch failure with fallback.
+- `src/skills/new/SKILL.md` — Step 4.3: add fetch before worktree creation, use `origin/main` as start-point.
 
 No other skills, templates, or modules are affected.
 
 ## Goals & Success Metrics
 
 * Worktree created by `/opsx:new` SHALL be based on `origin/main` after a successful fetch — PASS/FAIL by inspecting `git log -1` in the new worktree vs `git ls-remote origin main`.
-* When network is unavailable, `/opsx:new` SHALL warn and fall back to local HEAD without blocking — PASS/FAIL by testing with an unreachable remote.
 
 ## Non-Goals
 
@@ -30,12 +29,10 @@ No other skills, templates, or modules are affected.
 | Decision | Rationale | Alternatives |
 |----------|-----------|--------------|
 | Use `origin/main` as start-point instead of updating local `main` | Simpler — no need to touch local main, which may have diverged; one fewer failure mode | Update local main with `git merge --ff-only` — more complex, may fail if local main diverged |
-| Warn and fall back on fetch failure | Non-blocking — offline work should still be possible; worktree from stale local is better than no worktree | Abort on fetch failure — too restrictive for offline scenarios |
 
 ## Risks & Trade-offs
 
 - [Network latency] → `git fetch origin main` is single-branch and fast; negligible impact on `/opsx:new` startup time.
-- [Offline usage] → Mitigated by graceful fallback to local HEAD with a user-visible warning.
 
 ## Open Questions
 

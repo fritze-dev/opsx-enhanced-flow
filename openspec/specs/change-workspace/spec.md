@@ -97,7 +97,7 @@ The created workspace SHALL contain the artifacts defined by the pipeline in WOR
 
 ### Requirement: Create Worktree-Based Workspace
 
-The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). Before creating the worktree, the system SHALL fetch the latest remote main branch. The system SHALL use the fetched remote main as the start-point for the new branch. If the fetch fails (e.g., network unavailable), the system SHALL warn the user and fall back to creating the worktree from the local HEAD. The system SHALL then run `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
+The system SHALL create a git worktree with a dedicated feature branch when the user invokes `/opsx:new <change-name>` and `worktree.enabled` is `true` in WORKFLOW.md. The worktree path SHALL be computed by replacing `{change}` in the `worktree.path_pattern` field with the change name (without date prefix). Before creating the worktree, the system SHALL fetch the latest remote main branch. The system SHALL use the fetched remote main as the start-point for the new branch. The system SHALL then run `mkdir -p openspec/changes/YYYY-MM-DD-<name>` inside the worktree. The system SHALL report the worktree path and branch name in its output. If the worktree path already exists as a git worktree, the system SHALL suggest switching to it instead of creating a new one.
 
 **User Story:** As a developer I want each change to be created in its own git worktree, so that parallel changes are fully isolated and cannot conflict with each other.
 
@@ -111,15 +111,6 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 - **AND** creates a worktree based on the fetched remote main
 - **AND** creates `openspec/changes/2026-04-01-add-user-auth/` inside the worktree
 - **AND** reports the worktree path and branch name
-
-#### Scenario: Create worktree when fetch fails
-
-- **GIVEN** WORKFLOW.md has `worktree.enabled: true`
-- **AND** the remote is unreachable (network unavailable)
-- **WHEN** the user invokes `/opsx:new add-user-auth`
-- **THEN** the system SHALL warn the user that the remote could not be reached
-- **AND** SHALL create the worktree from the local HEAD as a fallback
-- **AND** SHALL proceed with change creation normally
 
 #### Scenario: Worktree already exists
 
@@ -300,7 +291,6 @@ Skills that operate on active changes (apply, ff, verify, discover, preflight) S
 - **`gh` CLI unavailable during cleanup**: Fall back to `git branch -d`. If that also fails, skip this worktree and continue.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
-- **Network unavailable during worktree creation**: If `git fetch` fails before worktree creation, warn the user and fall back to local HEAD. Do not block the workflow.
 - **Proposal without frontmatter (legacy)**: Skills SHALL fall back to tasks.md-based detection for active/completed status and branch-name convention for worktree context.
 - **Multiple proposals match same branch**: If two change directories have proposals with the same `branch` value, skills SHALL use the most recently modified one and warn about the conflict.
 - **Branch renamed after change creation**: The `branch` field in proposal.md reflects the branch at creation time. If the branch is renamed, the field becomes stale — skills fall through to worktree convention detection.

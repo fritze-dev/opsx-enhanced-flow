@@ -15,7 +15,6 @@ When `/opsx:new` creates a worktree, it bases the new branch on the local `main`
 
 - Add a `git fetch origin main` step before worktree creation in `/opsx:new`
 - Use `origin/main` as the explicit start-point for `git worktree add` instead of implicit local HEAD
-- Add graceful fallback: if fetch fails (offline), warn the user and proceed with local HEAD
 
 ## Capabilities
 
@@ -25,7 +24,7 @@ None.
 
 ### Modified Capabilities
 
-- `change-workspace`: The "Create Worktree-Based Workspace" requirement needs to specify that the system SHALL fetch the latest remote main and use `origin/main` as the start-point, with a fallback to local HEAD on network failure.
+- `change-workspace`: The "Create Worktree-Based Workspace" requirement needs to specify that the system SHALL fetch the latest remote main and use `origin/main` as the start-point.
 
 ### Removed Capabilities
 
@@ -47,7 +46,6 @@ N/A — no new specs proposed. The change modifies an existing requirement withi
 **In scope:**
 - Fetch + start-point change in the `/opsx:new` skill
 - Spec update for the worktree creation requirement
-- Graceful fallback on network failure
 
 **Out of scope:**
 - Updating local `main` branch (unnecessary — worktree branches directly from `origin/main`)

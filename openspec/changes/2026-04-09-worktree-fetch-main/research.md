@@ -28,7 +28,6 @@
 
 ## 4. Risks & Constraints
 
-- **Network unavailable:** `git fetch` will fail if the remote is unreachable (offline work, VPN down). The skill should handle this gracefully — warn the user and fall back to creating the worktree from the local HEAD.
 - **No breaking changes:** This is purely additive behavior. Existing worktrees are unaffected.
 - **Non-default remote name:** The skill hardcodes `origin`. This is the standard convention and matches the existing `post_artifact` hook in WORKFLOW.md which also uses `origin`. Not a new limitation.
 - **Performance:** `git fetch origin main` is fast (single branch). Negligible impact on `/opsx:new` latency.
