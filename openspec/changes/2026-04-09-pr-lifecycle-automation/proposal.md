@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: pr-lifecycle-automation
 worktree: .claude/worktrees/pr-lifecycle-automation
 capabilities:

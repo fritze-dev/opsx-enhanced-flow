@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-09 — PR Lifecycle Automation
+
+### Added
+- Smart Template `type: action` for pipeline steps that execute skills instead of generating artifacts — apply, verify, changelog, docs, and version-bump are now formal pipeline steps
+- Post-approval CI pipeline that automatically runs changelog, docs, and version-bump when a PR receives all required review approvals (closes #60, closes #37, closes #38)
+- `/opsx:ff --auto-approve` flag for fully autonomous pipeline execution without human approval gate
+- WORKFLOW.md `automation.post_approval` configuration for CI pipeline steps and label state machine
+
+### Changed
+- WORKFLOW.md restructured — structured config in YAML frontmatter (~20 lines), prose instructions in markdown body sections (`## Context`, `## Post-Artifact Hook`), eliminating ~50 lines of YAML multi-line strings
+- Pipeline extended from 6 artifact steps to 11 steps (research through version-bump) — the `pipeline` array is now the single source of truth for the complete change lifecycle
+- `/opsx:ff` processes the full pipeline including action steps via isolated sub-agents with bounded context
+- `/opsx:apply` reads instructions from action template instead of WORKFLOW.md frontmatter, with backward-compatible fallback
+
 ## 2026-04-09 — Worktree Fetch Latest Main
 
 ### Changed

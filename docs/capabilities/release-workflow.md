@@ -2,11 +2,11 @@
 title: "Release Workflow"
 capability: "release-workflow"
 description: "Version management, automated releases, plugin distribution, changelog generation, and consumer update process."
-lastUpdated: "2026-04-08"
+lastUpdated: "2026-04-09"
 ---
 # Release Workflow
 
-The release workflow handles version management for the plugin, including automatic patch bumps during the post-apply workflow, automated GitHub Releases via CI, plugin source distribution from the `src/` subdirectory, consumer version pinning, developer local marketplace workflow, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
+The release workflow handles version management for the plugin, including automatic patch bumps during the post-apply workflow, automated GitHub Releases via CI, post-approval CI pipeline automation, plugin source distribution from the `src/` subdirectory, consumer version pinning, developer local marketplace workflow, changelog generation via `/opsx:changelog`, and documented processes for manual releases and consumer updates.
 
 ## Purpose
 
@@ -28,6 +28,8 @@ The auto-bump is implemented as a constitution convention rather than a skill mo
 - **Consumer update guidance** -- clear steps for consumers to get the latest plugin version
 - **Changelog generation** -- `/opsx:changelog` produces release notes from completed changes in Keep a Changelog format, using proposal frontmatter for change detection
 - **Language-aware changelog** -- changelog entries can be generated in the language configured in `docs_language`
+- **Post-approval CI pipeline** -- when a PR receives all required review approvals, changelog, docs, and version-bump run automatically via GitHub Actions
+- **Pipeline state labels** -- `automation/running`, `automation/complete`, and `automation/failed` labels track pipeline progress on PRs
 - **Post-apply next steps** -- apply output includes guidance for the complete post-apply workflow
 
 ## Behavior
@@ -88,6 +90,14 @@ The complete update path is: `claude plugin marketplace update` followed by `cla
 
 For developers using the local marketplace, running `claude plugin update opsx@opsx-enhanced-flow` detects the local version change and updates the cached plugin. For developers using the GitHub marketplace, the existing `marketplace update` + `plugin update` flow applies.
 
+### Post-Approval CI Pipeline
+
+When a PR receives all required review approvals, a GitHub Action automatically runs the post-approval pipeline steps defined in WORKFLOW.md's `automation.post_approval.steps` (typically changelog, docs, and version-bump). The pipeline adds an `automation/running` label at the start and replaces it with `automation/complete` on success or `automation/failed` on failure. All generated artifacts are committed and pushed to the PR branch. The pipeline checks that the branch HEAD has not changed since the trigger event before committing — if someone pushed during the pipeline run, it aborts safely.
+
+### Single Approval Does Not Trigger Pipeline
+
+When a PR requires multiple reviewers, the pipeline only runs once all required reviews are met. A single approval from one reviewer does not trigger the pipeline prematurely.
+
 ### Post-Apply Workflow Next Steps
 
 After a completed change, the post-apply workflow includes next steps: verify, changelog, docs, version bump, and commit.
@@ -141,3 +151,5 @@ If the documentation language is changed after entries have already been generat
 - If a consumer adds the marketplace before the `src/` restructuring, the old cache is replaced on the next `plugin update`.
 - If the version field contains a non-semver value, the system warns and skips the bump rather than producing an invalid version.
 - If the change directory contains changes with only internal refactoring, the changelog agent either omits the entry or uses a minimal note to avoid fabricating user-facing changes.
+- If the post-approval pipeline fails, the `automation/failed` label is set and a PR comment describes the error — the pipeline does not block manual intervention.
+- If the PR branch HEAD changes while the pipeline is running, the pipeline aborts without committing and sets the `automation/failed` label.

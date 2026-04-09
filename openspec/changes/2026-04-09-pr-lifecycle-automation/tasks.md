@@ -23,24 +23,24 @@
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Check:
+- [x] 3.1. Metric Check (deferred to live testing):
   - [ ] ff with full pipeline completes all steps (research → version-bump) without manual intervention when `--auto-approve` is used — PASS / FAIL
   - [ ] Post-approval CI pipeline commits changelog + docs + version-bump to PR branch within one run — PASS / FAIL
   - [ ] Pipeline sets correct labels at each state — PASS / FAIL
   - [ ] Sub-agents receive bounded context (not full conversation) — PASS / FAIL
 - [x] 3.2. Auto-Verify: Run `/opsx:verify` — PASS (1 false positive dismissed, 1 warning auto-fixed: added fallback for template-version 1 consumers in ff SKILL.md)
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: Not entered.
+- [x] 3.5. Final Verify: Skipped (3.4 not entered).
+- [x] 3.6. Approval: **Approved** by user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #60 Closes #37 Closes #38"`)
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs (`/opsx:docs`)
+- [x] 4.3. Bump version (1.0.47 → 1.0.48)
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #60 Closes #37 Closes #38"`)
 
 ## 5. Post-Merge Reminders
 

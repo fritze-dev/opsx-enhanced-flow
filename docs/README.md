@@ -110,6 +110,8 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
 - **Proposal frontmatter set once at generation (ADR-040)**: If the user manually edits the Capabilities section without updating frontmatter, skills use stale data. Mitigated by preflight cross-checking.
 - **Template-version bump is manual (ADR-040)**: Plugin maintainers must remember to bump `template-version` when changing template content; if forgotten, consumers receive no update.
+- **Sub-agent execution unverified in practice (ADR-041)**: The assumption that SKILL.md instructions can direct Agent tool usage needs real-world confirmation; mitigated by fallback to direct execution.
+- **WORKFLOW.md restructuring is a breaking change (ADR-041)**: Consumers on template-version 1 need to re-run `/opsx:setup`; mitigated by backward-compatible fallbacks in ff and apply skills.
 
 ## Conventions
 
@@ -151,14 +153,14 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 
 | Capability | Description |
 |---|---|
-| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation with frontmatter-based detection, and consumer updates |
+| [Release Workflow](capabilities/release-workflow.md) | Version management, post-approval CI pipeline, changelog generation, and consumer updates |
 
 ### Reference
 
 | Capability | Description |
 |---|---|
 | [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers with independent modifiability |
-| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format with template versioning, and skill reading pattern |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format with artifact and action types, and skill reading pattern |
 | [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking fields |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
 

@@ -1,10 +1,9 @@
 ---
 order: 12
 category: finalization
-status: draft
-change: 2026-04-09-pr-lifecycle-automation
-version: 1
-lastModified: 2026-04-08
+status: stable
+version: 2
+lastModified: 2026-04-09
 ---
 ## Purpose
 
