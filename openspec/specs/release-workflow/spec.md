@@ -1,7 +1,8 @@
 ---
 order: 12
 category: finalization
-status: stable
+status: draft
+change: 2026-04-09-pr-lifecycle-automation
 version: 1
 lastModified: 2026-04-08
 ---
@@ -240,6 +241,73 @@ A GitHub Actions workflow SHALL automatically create a git tag and GitHub Releas
 - **AND** a push to `main` with version `1.0.29` in `src/.claude-plugin/plugin.json`
 - **WHEN** the GitHub Actions workflow triggers
 - **THEN** the workflow SHALL create tag `v1.0.29` and a corresponding GitHub Release
+
+### Requirement: Post-Approval CI Pipeline
+
+When a PR receives all required review approvals (`reviewDecision == APPROVED`), the system SHALL automatically execute the post-approval pipeline steps defined in `openspec/WORKFLOW.md`'s `automation.post_approval.steps` array. The pipeline SHALL be executed via `claude-code-action` using the existing interactive Claude workflow (`.github/workflows/claude.yml`). The system SHALL load the opsx plugin from the repository checkout using local marketplace configuration (`plugin_marketplaces: './'`).
+
+The pipeline SHALL manage PR labels to track state: add `automation/running` at pipeline start, replace with `automation/complete` on success, or replace with `automation/failed` on failure. On failure, the system SHALL also post a PR comment with error details.
+
+The pipeline SHALL commit all generated artifacts (changelog, docs, version bump) to the PR branch and push. The pipeline SHALL verify that the PR branch HEAD has not changed since the trigger event before committing — if the HEAD has diverged, the pipeline SHALL abort and set the `automation/failed` label.
+
+The pipeline SHALL respect opt-out labels defined in `automation.post_approval.opt_out`: if a listed label is present on the PR, the corresponding step SHALL be skipped. The pipeline SHALL support opt-in auto-merge: if the `auto-merge` label is present AND `automation.post_approval.auto_merge` is `true` AND the pipeline completes successfully AND all status checks pass, the system SHALL enable auto-merge on the PR.
+
+The pipeline SHALL use a concurrency group scoped to the PR number with `cancel-in-progress: false` (queue, don't cancel) to prevent corruption of in-flight commits.
+
+**User Story:** As a plugin maintainer I want the post-approval steps (changelog, docs, version-bump) to run automatically after PR review approval, so that I don't have to manually run each step before merging.
+
+#### Scenario: Pipeline runs after all reviews approved
+- **GIVEN** a non-draft PR with all required reviewers having approved
+- **AND** `openspec/WORKFLOW.md` has `automation.post_approval.steps: [changelog, docs, version-bump]`
+- **WHEN** the final required reviewer submits an approval
+- **THEN** the system SHALL add the `automation/running` label
+- **AND** SHALL execute changelog, docs, and version-bump in order
+- **AND** SHALL commit and push the results to the PR branch
+- **AND** SHALL replace the label with `automation/complete`
+
+#### Scenario: Pipeline fails and reports error
+- **GIVEN** a post-approval pipeline is running
+- **AND** the docs step fails with an error
+- **WHEN** the error is caught
+- **THEN** the system SHALL replace the `automation/running` label with `automation/failed`
+- **AND** SHALL post a PR comment describing the failure
+- **AND** SHALL NOT execute subsequent steps (version-bump)
+
+#### Scenario: Pipeline aborts on HEAD divergence
+- **GIVEN** a post-approval pipeline is about to commit
+- **AND** a new push has been made to the PR branch since the pipeline started
+- **WHEN** the pipeline checks the branch HEAD before committing
+- **THEN** the pipeline SHALL abort without committing
+- **AND** SHALL set the `automation/failed` label
+- **AND** SHALL post a PR comment: "Pipeline aborted: branch HEAD changed during execution"
+
+#### Scenario: Opt-out label skips docs step
+- **GIVEN** a PR with the `skip-docs` label
+- **AND** `automation.post_approval.opt_out` contains `skip-docs`
+- **WHEN** the post-approval pipeline runs
+- **THEN** the docs step SHALL be skipped
+- **AND** changelog and version-bump SHALL execute normally
+
+#### Scenario: Auto-merge after successful pipeline
+- **GIVEN** a PR with the `auto-merge` label
+- **AND** `automation.post_approval.auto_merge` is `true`
+- **AND** the pipeline completes successfully
+- **AND** all required status checks pass
+- **WHEN** the pipeline finishes
+- **THEN** the system SHALL enable auto-merge on the PR
+
+#### Scenario: Pipeline uses concurrency group
+- **GIVEN** two approval events fire in rapid succession for the same PR
+- **WHEN** the first pipeline run is in progress
+- **THEN** the second run SHALL be queued (not cancel the first)
+- **AND** at most one pipeline run SHALL execute at a time per PR
+
+#### Scenario: Single approval does not trigger pipeline
+- **GIVEN** a PR requiring 2 reviewers
+- **AND** only 1 reviewer has approved
+- **WHEN** the first approval event fires
+- **THEN** the pipeline SHALL NOT execute
+- **AND** SHALL wait until `reviewDecision == APPROVED` (all required reviews met)
 
 ### Requirement: Consumer Version Pinning
 

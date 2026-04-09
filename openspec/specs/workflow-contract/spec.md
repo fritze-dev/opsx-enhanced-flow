@@ -1,7 +1,8 @@
 ---
 order: 3
 category: reference
-status: stable
+status: draft
+change: 2026-04-09-pr-lifecycle-automation
 version: 1
 lastModified: 2026-04-08
 ---
@@ -68,6 +69,87 @@ Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontm
 - **WHEN** the skill checks artifact status
 - **THEN** it SHALL check if `openspec/changes/my-change/research.md` exists and is non-empty
 
+### Requirement: Automation Configuration
+
+WORKFLOW.md frontmatter SHALL support an optional `automation` section that configures CI-triggered pipeline behavior. The `automation` section SHALL contain: `post_approval` (object defining what happens when a PR receives all required review approvals). The `post_approval` object SHALL contain: `steps` (ordered array of step identifiers — e.g., `[changelog, docs, version-bump]`), `labels` (object mapping state names to GitHub label names — `running`, `complete`, `failed`), `opt_out` (array of opt-out label names — e.g., `[skip-docs]`), and `auto_merge` (boolean, default `false` — when `true` AND an `auto-merge` label is present on the PR, the system SHALL enable auto-merge after successful pipeline completion). The `automation` section is the single source of truth for CI pipeline behavior — GitHub Action workflows SHALL read this configuration rather than hardcoding steps.
+
+**User Story:** As a plugin maintainer I want CI automation behavior defined in WORKFLOW.md, so that the pipeline configuration stays centralized alongside the rest of the workflow contract.
+
+#### Scenario: WORKFLOW.md contains automation configuration
+- **GIVEN** a valid `openspec/WORKFLOW.md`
+- **AND** the project has CI automation enabled
+- **WHEN** the frontmatter is inspected
+- **THEN** it SHALL contain an `automation.post_approval` section with `steps`, `labels`, `opt_out`, and `auto_merge` fields
+
+#### Scenario: CI workflow reads automation config from WORKFLOW.md
+- **GIVEN** a GitHub Actions workflow triggered by PR review approval
+- **WHEN** the workflow starts executing
+- **THEN** it SHALL read `openspec/WORKFLOW.md` frontmatter for `automation.post_approval` configuration
+- **AND** SHALL execute the steps listed in `automation.post_approval.steps` in order
+
+#### Scenario: Automation section is optional
+- **GIVEN** a valid `openspec/WORKFLOW.md` without an `automation` section
+- **WHEN** a skill or CI workflow checks for automation config
+- **THEN** the system SHALL treat automation as disabled
+- **AND** SHALL NOT report an error
+
+#### Scenario: Opt-out label skips a step
+- **GIVEN** `automation.post_approval.opt_out` contains `skip-docs`
+- **AND** a PR has the label `skip-docs`
+- **WHEN** the post-approval pipeline runs
+- **THEN** the `docs` step SHALL be skipped
+- **AND** all other steps SHALL execute normally
+
+### Requirement: Pipeline Orchestrator Pattern
+
+The workflow contract SHALL define a pattern for end-to-end pipeline orchestration via a single skill invocation. An orchestrator skill (e.g., `/opsx:auto`) SHALL read the `pipeline` array from WORKFLOW.md and execute each step as an isolated sub-agent using the Agent tool. Each sub-agent SHALL receive only the artifacts it needs as input (read from disk), produce its output artifact (written to disk), and return control to the orchestrator. The orchestrator SHALL validate the handoff between steps by checking artifact existence and frontmatter status before proceeding to the next step. If a handoff validation fails, the orchestrator SHALL stop, report the failure, and NOT proceed to subsequent steps.
+
+The orchestrator SHALL support checkpoint/resume: if invoked on a change with existing artifacts, it SHALL skip completed steps (artifacts already exist) and resume from the first incomplete step. The orchestrator SHALL preserve all existing human gates defined in the QA loop (human-approval-gate spec) by default, with an optional `--auto-approve` flag that replaces human approval with the verify skill's pass/fail assessment.
+
+**User Story:** As a developer I want to run the entire OpenSpec pipeline with a single command, so that routine changes can be processed end-to-end without manually invoking each step.
+
+#### Scenario: Orchestrator runs full pipeline from scratch
+- **GIVEN** a new change with no artifacts
+- **WHEN** the user invokes `/opsx:auto`
+- **THEN** the orchestrator SHALL read the `pipeline` array from WORKFLOW.md
+- **AND** SHALL execute each pipeline step as an isolated sub-agent
+- **AND** each sub-agent SHALL read its predecessor's artifacts from disk
+- **AND** SHALL write its output artifact to the change directory
+
+#### Scenario: Orchestrator resumes from checkpoint
+- **GIVEN** a change with `research.md` and `proposal.md` already created
+- **WHEN** the user invokes `/opsx:auto`
+- **THEN** the orchestrator SHALL detect existing artifacts
+- **AND** SHALL skip the research and proposal steps
+- **AND** SHALL resume from the specs step
+
+#### Scenario: Handoff validation fails
+- **GIVEN** a change where the preflight step produced a verdict of BLOCKED
+- **WHEN** the orchestrator checks the handoff gate after preflight
+- **THEN** the orchestrator SHALL stop execution
+- **AND** SHALL report: "Pipeline stopped: preflight verdict is BLOCKED"
+- **AND** SHALL NOT proceed to task creation
+
+#### Scenario: Sub-agent receives bounded context
+- **GIVEN** the orchestrator is executing the design step
+- **WHEN** the design sub-agent is spawned via the Agent tool
+- **THEN** the sub-agent SHALL receive the design template instruction, the proposal, and the specs as input
+- **AND** SHALL NOT receive the full conversation history of the orchestrator
+
+#### Scenario: Human gate preserved by default
+- **GIVEN** the orchestrator has completed the verify step with no CRITICAL issues
+- **AND** the `--auto-approve` flag was NOT provided
+- **WHEN** the orchestrator reaches the approval gate
+- **THEN** the orchestrator SHALL pause and ask the user for explicit approval
+- **AND** SHALL NOT proceed to post-apply steps without approval
+
+#### Scenario: Auto-approve bypasses human gate
+- **GIVEN** the orchestrator is invoked with `--auto-approve`
+- **AND** the verify step passes with no CRITICAL issues
+- **WHEN** the orchestrator reaches the approval gate
+- **THEN** the orchestrator SHALL skip the human approval step
+- **AND** SHALL proceed directly to post-apply steps
+
 ## Edge Cases
 
 - **WORKFLOW.md missing**: Skills SHALL report an error and suggest running `/opsx:setup`.
@@ -76,8 +158,14 @@ Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontm
 - **WORKFLOW.md with malformed YAML**: Skills SHALL report a parse error and stop.
 - **Empty `pipeline` array**: Skills SHALL report that no artifacts are defined and stop.
 - **`templates_dir` points to nonexistent directory**: Skills SHALL report the missing directory and suggest running `/opsx:setup`.
+- **Automation section with unknown step**: If `automation.post_approval.steps` contains a step identifier that does not map to a known action (changelog, docs, version-bump), the system SHALL skip the unknown step and report a warning.
+- **Orchestrator invoked on completed change**: If the proposal has `status: completed`, the orchestrator SHALL report that the change is already complete and stop.
+- **Sub-agent fails mid-pipeline**: If a sub-agent exits with an error, the orchestrator SHALL report the error, note which step failed, and stop. Artifacts created by previous steps remain on disk (no rollback of successfully completed steps).
+- **Concurrent orchestrator invocations**: If two orchestrator instances run on the same change simultaneously, they may conflict on file writes. The system does not prevent this — the user is responsible for avoiding concurrent runs.
 
 ## Assumptions
 
 - Claude natively parses YAML frontmatter from markdown files when instructed to read and interpret them. <!-- ASSUMPTION: Claude YAML frontmatter parsing -->
-No further assumptions beyond those marked above.
+- The Agent tool is available in the execution environment and supports spawning sub-agents with custom prompts and bounded context. <!-- ASSUMPTION: Agent tool availability -->
+- Sub-agents spawned via the Agent tool can read and write files in the same working directory as the orchestrator. <!-- ASSUMPTION: Sub-agent file access -->
+- GitHub Actions workflows can read WORKFLOW.md frontmatter when invoked via `claude-code-action`. <!-- ASSUMPTION: CI WORKFLOW.md access -->
