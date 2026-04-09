@@ -81,12 +81,12 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 
 ### Requirement: Inline Action Definitions
 
-WORKFLOW.md frontmatter SHALL support an `actions` section that defines workflow actions inline. Each action SHALL have: `specs` (array of spec names the action references for behavioral requirements), and `instruction` (multi-line string with procedural guidance for the AI agent). Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL spawn a sub-agent via the Agent tool with the action's `instruction` as its primary directive and the specs listed in `specs` loaded as behavioral context.
+WORKFLOW.md frontmatter SHALL support an `actions` section that defines workflow actions inline. Each action SHALL have: `specs` (array of objects mapping spec names to specific requirement names), and `instruction` (multi-line string with procedural guidance for the AI agent). The `specs` field uses a structured format where each entry names a spec and lists the specific requirements the action needs — this ensures the sub-agent receives focused context rather than entire specs. Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL spawn a sub-agent via the Agent tool with the action's `instruction` as its primary directive and the specific requirements from each listed spec loaded as behavioral context.
 
 The system SHALL support these actions:
-- `init`: Project initialization and health check (specs: project-init, constitution-management, quality-gates)
-- `apply`: Task implementation with review.md generation (specs: task-implementation, quality-gates)
-- `finalize`: Post-approval changelog, docs, and version-bump (specs: release-workflow, documentation)
+- `init`: Project initialization and health check (specs: project-init [Install OpenSpec Workflow, Template Merge on Re-Init, First-Run Codebase Scan, Constitution Generation, Documentation Drift Verification], constitution-management [Constitution Lifecycle], quality-gates [Pre-Implementation Quality Checks])
+- `apply`: Task implementation with review.md generation (specs: task-implementation [Implement Tasks from Task List, Progress Tracking, Standard Tasks Exclusion, Spec Edits During Implementation], quality-gates [Post-Implementation Verification])
+- `finalize`: Post-approval changelog, docs, and version-bump (specs: release-workflow [Changelog Generation, Version Bump Convention], documentation [Generate Enriched Capability Documentation, Incremental Generation, Generate Architecture Overview, ADR Generation])
 
 **User Story:** As a plugin maintainer I want action definitions inline in WORKFLOW.md alongside the pipeline, so that all workflow orchestration lives in one file without separate action template files.
 

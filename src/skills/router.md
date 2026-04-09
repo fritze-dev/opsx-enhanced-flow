@@ -51,27 +51,27 @@ For `propose`, `apply`, `finalize`:
 ### `apply` — Sub-Agent Execution
 
 1. Read `actions.apply` from WORKFLOW.md frontmatter
-2. Load specs listed in `actions.apply.specs` from `openspec/specs/<name>/spec.md`
+2. For each entry in `actions.apply.specs`, load the spec from `openspec/specs/<name>/spec.md` and note which requirements are listed. When building the sub-agent prompt, include only the listed requirements (not the full spec) so the agent has focused context.
 3. Read all change artifacts (research, proposal, design, tasks, specs)
 4. Spawn sub-agent via Agent tool with:
    - `actions.apply.instruction` as primary directive
-   - Loaded specs as behavioral context
+   - The specific requirements from each spec as behavioral context
    - Change directory path and artifact paths
    - The sub-agent implements tasks, generates review.md, runs the QA loop
 
 ### `finalize` — Sub-Agent Execution
 
 1. Read `actions.finalize` from WORKFLOW.md frontmatter
-2. Load specs listed in `actions.finalize.specs`
+2. For each entry in `actions.finalize.specs`, load the spec and extract only the listed requirements
 3. Read change artifacts for context (proposal, review.md)
-4. Spawn sub-agent with instruction + specs + change context
+4. Spawn sub-agent with instruction + specific requirements + change context
 
 ### `init` — Sub-Agent Execution
 
 1. Read `actions.init` from WORKFLOW.md frontmatter (if WORKFLOW.md exists)
 2. If WORKFLOW.md missing: this IS the fresh install — proceed with init action
-3. Load specs listed in `actions.init.specs` (if they exist)
-4. Spawn sub-agent with instruction + specs
+3. For each entry in `actions.init.specs`, load the spec and extract only the listed requirements (if specs exist)
+4. Spawn sub-agent with instruction + specific requirements
 
 ## Guardrails
 

@@ -5,7 +5,17 @@ pipeline: [research, proposal, specs, design, preflight, tasks, review]
 
 actions:
   init:
-    specs: [project-init, constitution-management, quality-gates]
+    specs:
+      - project-init:
+        - Install OpenSpec Workflow
+        - Template Merge on Re-Init
+        - First-Run Codebase Scan
+        - Constitution Generation
+        - Documentation Drift Verification
+      - constitution-management:
+        - Constitution Lifecycle
+      - quality-gates:
+        - Pre-Implementation Quality Checks
     instruction: |
       Project initialization and health check.
       Mode detection:
@@ -15,7 +25,14 @@ actions:
       Report findings, suggest /opsx:propose for changes needed.
 
   apply:
-    specs: [task-implementation, quality-gates]
+    specs:
+      - task-implementation:
+        - Implement Tasks from Task List
+        - Progress Tracking
+        - Standard Tasks Exclusion from Apply Scope
+        - Spec Edits During Implementation
+      - quality-gates:
+        - Post-Implementation Verification
     instruction: |
       Implement tasks from tasks.md, then generate review.md.
       QA loop: implement → generate review.md → fix if FAIL → regenerate review.md → until PASS.
@@ -29,7 +46,15 @@ actions:
       After review.md PASS, commit and push implementation before pausing for user approval.
 
   finalize:
-    specs: [release-workflow, documentation]
+    specs:
+      - release-workflow:
+        - Changelog Generation
+        - Version Bump Convention
+      - documentation:
+        - Generate Enriched Capability Documentation
+        - Incremental Generation
+        - Generate Architecture Overview
+        - ADR Generation
     instruction: |
       Post-approval finalization, executed sequentially:
       1. Changelog: incremental entries from completed change
