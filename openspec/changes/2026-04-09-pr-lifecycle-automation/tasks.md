@@ -2,10 +2,10 @@
 
 ## 1. Foundation
 
-- [ ] 1.1. Create action templates in `openspec/templates/`: `apply.md`, `verify.md`, `changelog.md`, `docs.md`, `version-bump.md` — each with `type: action`, `requires`, and `instruction` (extract from current `apply.instruction` prose + constitution conventions)
-- [ ] 1.2. Copy action templates to `src/templates/` (consumer copies)
-- [ ] 1.3. Restructure `openspec/WORKFLOW.md`: move `post_artifact` and `context` from frontmatter to body sections (`## Context`, `## Post-Artifact Hook`), remove `apply.instruction`, extend `pipeline` array, add `automation` block, bump `template-version` to 2
-- [ ] 1.4. Update `src/templates/workflow.md` (consumer template): mirror restructured frontmatter, add body sections, add commented `automation` block, bump `template-version` to 2
+- [x] 1.1. Create action templates in `openspec/templates/`: `apply.md`, `verify.md`, `changelog.md`, `docs.md`, `version-bump.md` — each with `type: action`, `requires`, and `instruction` (extract from current `apply.instruction` prose + constitution conventions)
+- [x] 1.2. Copy action templates to `src/templates/` (consumer copies)
+- [x] 1.3. Restructure `openspec/WORKFLOW.md`: move `post_artifact` and `context` from frontmatter to body sections (`## Context`, `## Post-Artifact Hook`), remove `apply.instruction`, extend `pipeline` array, add `automation` block, bump `template-version` to 2
+- [x] 1.4. Update `src/templates/workflow.md` (consumer template): mirror restructured frontmatter, add body sections, add commented `automation` block, bump `template-version` to 2
 
 ## 2. Implementation
 
