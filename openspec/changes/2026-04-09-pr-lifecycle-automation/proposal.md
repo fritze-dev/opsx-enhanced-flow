@@ -13,13 +13,14 @@ All post-implementation steps (changelog, docs, version-bump) are manual, creati
 
 ## What Changes
 
-- **WORKFLOW.md `automation` block**: new frontmatter section defining CI trigger behavior (post-approval pipeline steps, labels, opt-out/opt-in). WORKFLOW.md remains single source of truth — no separate GitHub Action YAML needed, existing `claude.yml` reads this config.
+- **WORKFLOW.md `automation` block**: new frontmatter section defining CI trigger behavior (post-approval pipeline steps, labels, opt-out/opt-in). WORKFLOW.md defines WHAT to do; a thin GitHub Action YAML defines WHEN to trigger.
+- **Thin trigger YAML** (`.github/workflows/opsx-pipeline.yml`): minimal workflow triggered by PR approval, reads WORKFLOW.md `automation` config, delegates to `claude-code-action`. No pipeline logic in the YAML itself.
 - **Label-based state machine**: `automation/running`, `automation/complete`, `automation/failed` labels track pipeline progress on PRs
 - **Opt-out/opt-in labels**: `skip-docs` to skip docs generation, `auto-merge` for automatic merge after successful pipeline
 - **Extended `/opsx:ff`**: ff reads the full pipeline (including action steps like apply, verify, changelog, docs, version-bump) and executes everything. Optional `--auto-approve` flag for fully autonomous execution.
 - **Sub-agent architecture**: each pipeline step runs as an isolated sub-agent (via Agent tool) with only the relevant artifacts as input, solving context window exhaustion
-- **Action templates**: new `type: action` templates with `status_check` field for non-artifact pipeline steps
-- **Post-approval pipeline automation**: changelog → docs → version-bump → commit → push runs automatically on PR review approval via existing `claude.yml` integration
+- **Action templates**: new `type: action` templates for non-artifact pipeline steps (actions handle their own idempotency, no status tracking needed)
+- **Post-approval pipeline automation**: changelog → docs → version-bump → commit → push runs automatically on PR review approval
 
 ## Capabilities
 
@@ -27,7 +28,7 @@ All post-implementation steps (changelog, docs, version-bump) are manual, creati
 None.
 
 ### Modified Capabilities
-- `workflow-contract`: Add `automation` section to WORKFLOW.md frontmatter for CI trigger configuration and post-approval pipeline behavior. Add orchestrator pattern requirement for `/opsx:auto` skill that uses sub-agents with artifact-based handoff gates.
+- `workflow-contract`: Add `automation` section to WORKFLOW.md frontmatter for CI trigger configuration. Extend Smart Template format with `type: action`. Extend Skill Reading Pattern with sub-agent execution for action steps. Extend ff to execute full pipeline including action steps.
 - `release-workflow`: Add post-approval CI pipeline requirement — automated execution of changelog → docs → version-bump on PR review approval, with label state tracking and opt-out/opt-in support.
 
 ### Removed Capabilities
@@ -38,23 +39,23 @@ None.
 2. Overlap assessment:
    - CI automation config naturally belongs in `workflow-contract` — WORKFLOW.md is already the pipeline orchestration contract, adding an `automation` block extends it without creating a new concept
    - Post-approval pipeline steps (changelog, docs, version-bump) are already defined as conventions in `release-workflow` — automating their CI execution is a requirement extension, not a new capability
-   - `/opsx:auto` orchestrator follows the same pipeline reading pattern as `/opsx:ff` (defined in workflow-contract's skill reading pattern) — extending it with sub-agent orchestration is a natural fit
+   - Full pipeline orchestration extends `/opsx:ff` with sub-agent execution for action steps — same skill reading pattern, no new skill needed
    - Handoff protocol is already implicit in the pipeline contract (artifact existence + frontmatter = dependency gates)
 3. Merge assessment: N/A — no new specs proposed
 
 ## Impact
 
-- **New files**: Action templates in `openspec/templates/` (apply.md, verify.md, changelog.md, docs.md, version-bump.md) and consumer copies in `src/templates/`
-- **Modified files**: `openspec/WORKFLOW.md` (extend `pipeline` array, add `automation` block), `src/skills/ff/SKILL.md` (handle action-type templates + sub-agents), `openspec/CONSTITUTION.md` (add CI automation conventions), `.github/workflows/claude.yml` (add post-approval trigger path)
+- **New files**: `.github/workflows/opsx-pipeline.yml` (thin trigger YAML), action templates in `openspec/templates/` (apply.md, verify.md, changelog.md, docs.md, version-bump.md) and consumer copies in `src/templates/`
+- **Modified files**: `openspec/WORKFLOW.md` (extend `pipeline` array, add `automation` block), `src/skills/ff/SKILL.md` (handle action-type templates + sub-agents), `openspec/CONSTITUTION.md` (add CI automation conventions)
 - **Dependencies**: `claude-code-action@v1` (already used), `gh` CLI (already used)
-- **No new skills**: ff extended to handle action steps (skill modification, not project-specific — allowed per immutability rule)
-- **No new GitHub Action files**: existing `claude.yml` extended to handle post-approval pipeline
+- **No new skills**: ff extended to handle action steps (plugin-level enhancement, not project-specific — allowed per immutability rule)
 
 ## Scope & Boundaries
 
 **In scope:**
-- Post-approval GitHub Action (one action)
-- `/opsx:auto` orchestrator skill with sub-agent architecture
+- Post-approval GitHub Action (thin trigger YAML + WORKFLOW.md config)
+- Extended ff with sub-agent architecture for action steps
+- Action template format (`type: action`)
 - Handoff protocol (artifact gates between agents)
 - Label management for pipeline state tracking
 - Auto-merge opt-in via label
@@ -62,7 +63,6 @@ None.
 **Out of scope:**
 - CI-based verify (decided: verify stays local only)
 - Pre-review automation (existing code-review action is sufficient)
-- New GitHub Action workflow files (use existing `claude.yml`)
-- Changes to existing skills (skill immutability rule)
+- New skills (ff extended instead)
 - Remote agent triggers (RemoteTrigger API — premature for MVP)
 - Multi-project orchestration
