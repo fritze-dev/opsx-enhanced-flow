@@ -1,5 +1,6 @@
 ---
 id: design
+template-version: 1
 description: Architecture, success metrics, and non-goals
 generates: design.md
 requires: [specs]
@@ -29,6 +30,12 @@ instruction: |
   Focus on architecture and approach, not line-by-line implementation.
   Reference the proposal for motivation and specs for requirements.
 ---
+<!-- Design tracking frontmatter — set by skills at generation time.
+     has_decisions: true if the Decisions section contains at least one entry.
+---
+has_decisions: false
+---
+-->
 # Technical Design: [Feature Name]
 
 ## Context

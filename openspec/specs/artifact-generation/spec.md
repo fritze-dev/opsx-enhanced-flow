@@ -1,6 +1,9 @@
 ---
 order: 5
 category: change-workflow
+status: stable
+version: 1
+lastModified: 2026-04-08
 ---
 ## Purpose
 
@@ -9,11 +12,23 @@ Provides the fast-forward (`/opsx:ff`) command for generating pipeline artifacts
 ## Requirements
 
 ### Requirement: Fast-Forward Generation
-The system SHALL provide `/opsx:ff` as the sole command for generating pipeline artifacts. Fast-forward SHALL determine the current pipeline status by reading WORKFLOW.md and Smart Templates and checking file existence, identify all pending artifacts, and generate them sequentially following dependency order. During the **specs stage**, the agent SHALL edit specs directly at `openspec/specs/<capability>/spec.md`. After completion, ff SHALL report a summary of all generated artifacts. If all artifacts are already complete, ff SHALL inform the user and suggest `/opsx:apply`. The design review checkpoint is governed by the project constitution convention, not by ff skill logic. If the preflight verdict is PASS WITH WARNINGS, ff SHALL pause and require explicit user acknowledgment before generating tasks.
+The system SHALL provide `/opsx:ff` as the sole command for generating pipeline artifacts. Fast-forward SHALL determine the current pipeline status by reading WORKFLOW.md and Smart Templates and checking file existence, identify all pending artifacts, and generate them sequentially following dependency order. During the **specs stage**, the agent SHALL edit specs directly at `openspec/specs/<capability>/spec.md` and SHALL update spec frontmatter tracking fields: set `status: draft`, `change: <change-directory-name>`, and `lastModified: <current-date-YYYY-MM-DD>`. For new specs, the agent SHALL also set `version: 1`. For existing specs, the agent SHALL preserve the current `version` value (version is only bumped during verify completion). Before editing a spec, the agent SHALL check the spec's `status` and `change` fields — if `status: draft` and `change` references a different change, the agent SHALL warn the user about the collision and ask for confirmation before proceeding. After completion, ff SHALL report a summary of all generated artifacts. If all artifacts are already complete, ff SHALL inform the user and suggest `/opsx:apply`. The design review checkpoint is governed by the project constitution convention, not by ff skill logic. If the preflight verdict is PASS WITH WARNINGS, ff SHALL pause and require explicit user acknowledgment before generating tasks.
 
 When invoked without a change name and existing changes are present, ff SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, ff SHALL derive a kebab-case name and create a new change.
 
 **User Story:** As a developer I want a single command that generates all remaining artifacts, so that I can progress the pipeline efficiently whether starting a new change or continuing an existing one.
+
+#### Scenario: Fast-forward sets spec tracking frontmatter
+- **GIVEN** a stable spec at `openspec/specs/user-auth/spec.md` with `status: stable`, `version: 2`
+- **WHEN** `/opsx:ff` reaches the specs stage and edits this spec
+- **THEN** the spec frontmatter SHALL be updated to `status: draft`, `change: <change-dir>`, `lastModified: <today>`
+- **AND** `version` SHALL remain `2`
+
+#### Scenario: Fast-forward detects spec collision
+- **GIVEN** a spec at `openspec/specs/quality-gates/spec.md` with `status: draft` and `change: 2026-04-01-other-change`
+- **WHEN** `/opsx:ff` for change `2026-04-08-my-change` reaches the specs stage and needs to edit this spec
+- **THEN** the agent SHALL warn the user that `quality-gates` is currently being edited by `2026-04-01-other-change`
+- **AND** SHALL ask for confirmation before proceeding
 
 #### Scenario: Fast-forward from research to tasks
 - **GIVEN** a change workspace where only research.md is complete

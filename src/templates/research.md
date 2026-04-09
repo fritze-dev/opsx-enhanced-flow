@@ -1,5 +1,6 @@
 ---
 id: research
+template-version: 1
 description: Discovery research, coverage assessment, and clarification questions
 generates: research.md
 requires: []

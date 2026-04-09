@@ -6,7 +6,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 1. **Constitution** (`openspec/CONSTITUTION.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, and dependencies in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
 
 3. **Skills** (`skills/*/SKILL.md`) — 11 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (4: new, ff, apply, verify), governance (5: setup, bootstrap, discover, preflight, docs-verify), and documentation (2: changelog, docs). All skills are model-invocable.
 
@@ -15,7 +15,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 ## Tech Stack
 
 - **Primary format:** Markdown (artifacts, specs, skills, documentation)
-- **Configuration:** YAML (WORKFLOW.md frontmatter, Smart Template frontmatter)
+- **Configuration:** YAML (WORKFLOW.md frontmatter, Smart Template frontmatter, spec frontmatter)
 - **Shell:** Bash (skill command execution)
 - **Platform:** Claude Code plugin system
 - **No external dependencies:** Skills read WORKFLOW.md and Smart Templates directly — no CLI tools, Node.js, or npm required
@@ -64,6 +64,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Eliminate delta specs, sync, and archive — edit specs directly, flat changes directory | Single spec format, no merge step, completion by tasks.md status not directory location | [ADR-037](decisions/adr-037-eliminate-delta-specs-sync-and-archive.md) |
 | Commit before approval in apply.instruction; WIP commit after verify, before user testing | Consistent with post_artifact pattern; WORKFLOW.md owns commit behavior; template stays clean | [ADR-038](decisions/adr-038-commit-before-approval-in-apply-instruction.md) |
 | Automated QA steps in apply.instruction; verify auto-fix for mechanical WARNINGs; template sync convention; post-merge worktree cleanup | Instruction text is the enforcement layer; mechanical auto-fix scoped narrowly; constitution owns conventions; cleanup complements lazy detection | [ADR-039](decisions/adr-039-fix-friction-batch-agent-guidance.md) |
+| Spec frontmatter tracking with structured metadata across specs, proposals, designs, and templates | Eliminates fragile markdown parsing; enables collision detection, incremental detection via lastModified, and version-aware template merge on re-setup | [ADR-040](decisions/adr-040-spec-frontmatter-tracking.md) |
 
 ### Notable Trade-offs
 
@@ -80,8 +81,8 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:init; low impact since the old command was not working anyway.
 - **Incremental generation date comparison (ADR-012)**: Agent may misinterpret date comparison logic; worst case is unnecessary regeneration, which is a safe failure mode.
 - **ADR consolidation heuristics (ADR-012)**: May misjudge grouping in edge cases; conservative rules minimize false consolidation.
-- **Internal-only ADR references (ADR-013)**: Less direct traceability to GitHub issues; readers must follow archive backlink then read proposal.md to find issue references.
-- **Cross-reference heuristic (ADR-013)**: May miss some relationships when connections are not explicit in archive content; manual review can supplement.
+- **Internal-only ADR references (ADR-013)**: Less direct traceability to GitHub issues; readers must follow change backlink then read proposal.md to find issue references.
+- **Cross-reference heuristic (ADR-013)**: May miss some relationships when connections are not explicit in change content; manual review can supplement.
 - **~~Baseline spec exclusion (ADR-014)~~**: Superseded by ADR-037 — specs are now edited directly during implementation.
 - **Auto-continue surprises (ADR-015)**: Users accustomed to per-artifact pauses may be surprised by auto-continue behavior.
 - **Checkpoint enforcement is advisory (ADR-015)**: Text-based instructions in skills have no hard runtime enforcement; agents may still deviate.
@@ -107,6 +108,8 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:docs <capability>` override and preflight traceability.
 - **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
 - **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
+- **Proposal frontmatter set once at generation (ADR-040)**: If the user manually edits the Capabilities section without updating frontmatter, skills use stale data. Mitigated by preflight cross-checking.
+- **Template-version bump is manual (ADR-040)**: Plugin maintainers must remember to bump `template-version` when changing template content; if forgotten, consumers receive no update.
 
 ## Conventions
 
@@ -123,16 +126,16 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization with template-based WORKFLOW.md, environment checks, and worktree opt-in |
+| [Project Setup](capabilities/project-setup.md) | One-time project initialization with version-aware template merge, environment checks, and worktree opt-in |
 | [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
 
 ### Change Workflow
 
 | Capability | Description |
 |---|---|
-| [Change Workspace](capabilities/change-workspace.md) | Create and manage change workspaces with worktree isolation and date-prefixed naming |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline driven by WORKFLOW.md and Smart Templates with dependency gating and worktree-aware PR integration |
-| [Artifact Generation](capabilities/artifact-generation.md) | Fast-forward generation with smart checkpoints and change selection |
+| [Change Workspace](capabilities/change-workspace.md) | Create and manage change workspaces with proposal-based context detection and worktree isolation |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline with artifact output frontmatter, dependency gating, and worktree-aware PR integration |
+| [Artifact Generation](capabilities/artifact-generation.md) | Fast-forward generation with spec tracking, collision detection, and smart checkpoints |
 | [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features |
 
 ### Development
@@ -140,7 +143,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Capability | Description |
 |---|---|
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
-| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks, post-implementation verification, and documentation drift detection |
+| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks with draft spec validation, post-implementation verification with draft gate, and documentation drift detection |
 | [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and pause-on-blocker |
 | [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with mandatory explicit human approval before completion |
 
@@ -148,21 +151,21 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 
 | Capability | Description |
 |---|---|
-| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer updates |
+| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation with frontmatter-based detection, and consumer updates |
 
 ### Reference
 
 | Capability | Description |
 |---|---|
 | [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers with independent modifiability |
-| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format, and skill reading pattern |
-| [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions and Gherkin scenarios |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format with template versioning, and skill reading pattern |
+| [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking fields |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
 
 ### Meta
 
 | Capability | Description |
 |---|---|
-| [User Docs](capabilities/user-docs.md) | Enriched user-facing capability documentation generated by /opsx:docs |
+| [User Docs](capabilities/user-docs.md) | Enriched user-facing capability documentation with spec-based incremental detection |
 | [Architecture Docs](capabilities/architecture-docs.md) | Cross-cutting architecture overview and documentation entry point |
 | [Decision Docs](capabilities/decision-docs.md) | Architecture Decision Records generated from completed changes' design decisions |

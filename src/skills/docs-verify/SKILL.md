@@ -21,7 +21,7 @@ Verify that generated documentation accurately reflects the current state of spe
    - **Specs**: Glob `openspec/specs/*/spec.md` to find all capabilities. The directory name is the capability ID.
    - **Capability docs**: Glob `docs/capabilities/*.md`. If `docs/capabilities/` does not exist, note it and treat all capabilities as missing docs.
    - **ADRs**: Glob `docs/decisions/adr-*.md`. Separate generated ADRs (`adr-[0-9]*.md`) from manual ADRs (`adr-M*.md`). If `docs/decisions/` does not exist, note it.
-   - **Completed changes**: Glob `openspec/changes/*/design.md` to find design decisions from completed changes (all tasks checked in tasks.md). If no completed changes exist, note it.
+   - **Completed changes**: Glob `openspec/changes/*/design.md` to find design decisions from completed changes (proposal frontmatter `status: completed`, or fallback: all tasks checked in tasks.md). For each design.md, check frontmatter `has_decisions` field — if `false` or absent, skip (no decisions to verify). If no completed changes with decisions exist, note it.
    - **README**: Check if `docs/README.md` exists.
    - **Constitution**: Read `openspec/CONSTITUTION.md` for README architecture checks.
 

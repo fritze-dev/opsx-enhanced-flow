@@ -9,6 +9,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `/opsx:verify` now reads implementation files and compares content against spec requirements instead of relying on shallow keyword matching — terminology mismatches, stale headings, and incomplete coverage are now detected by reading the relevant sections and comparing them against spec language (closes #93)
 - Verification heuristics updated to prioritize content comparison over keyword search — keyword search is now used only for initial file discovery, not as the primary verification method
 
+## 2026-04-08 — Spec Frontmatter Tracking
+
+### Added
+- Spec tracking frontmatter (`status`, `change`, `version`, `lastModified`) — skills now track which specs are being edited, by which change, and detect collisions when two changes touch the same spec
+- Proposal frontmatter (`status`, `branch`, `worktree`, `capabilities`) — machine-readable change lifecycle metadata replaces fragile markdown section parsing across all skills
+- Design frontmatter (`has_decisions`) — docs and docs-verify skip designs without decision tables instead of scanning for markdown tables
+- Template versioning (`template-version` field) on all Smart Templates, WORKFLOW.md, and CONSTITUTION.md — enables merge detection during `/opsx:setup` (closes #67)
+- Template merge on re-setup — customized local templates are preserved when the plugin updates, with interactive conflict resolution when both sides changed
+- CONSTITUTION.md section-level merge — new template sections are offered for interactive generation while preserving user content
+- Verify draft gate — specs with `status: draft` are blocked from reaching main, ensuring no incomplete edits are merged
+- Preflight dimension G (Draft Spec Validation) — validates that draft specs belong to the current change
+
+### Changed
+- Change context detection now uses proposal `branch` field as primary lookup, falling back to worktree convention — more reliable across all 5 change-detecting skills (closes #78)
+- Active/completed change detection now uses proposal `status` field instead of parsing tasks.md checkboxes — instant detection without file scanning
+- Lazy worktree cleanup now checks proposal `status: completed` before falling back to GitHub API calls
+- Docs incremental detection now uses spec `lastModified` instead of comparing directory-name dates against proposal Capabilities parsing
+- Changelog completed-change detection uses proposal `status` instead of tasks.md checkbox parsing
+- All capability-identifying skills (verify, preflight, docs, changelog, apply, docs-verify) now read proposal `capabilities` frontmatter instead of parsing `## Capabilities` markdown sections
+- WORKFLOW.md setup behavior changed from skip-if-exists to version-based merge detection
+
+## 2026-04-08 — Fix Workflow Friction Batch 2
+
+### Changed
+- Specs template now explicitly prohibits implementation details (concrete commands, file paths, API calls) — specs describe behavior only, implementation belongs in SKILL.md or design.md
+- Apply workflow now enforces verify re-run after any fix-loop change — Final Verify (step 3.5) must not be skipped when the fix loop was entered
+- Apply workflow now requires updating stale artifacts when a fix resolves a flagged issue — preflight verdicts and design notes must reflect current state
+- Apply workflow now checks docs for stale terminology before user testing — when specs change terminology, docs and README references are flagged early instead of waiting for `/opsx:docs` regeneration
+
+## 2026-04-08 — Diff-Based Verification
+
+### Changed
+- `/opsx:verify` now uses the branch diff as its **primary evidence source** — instead of only searching the codebase with keywords, verification reads the actual diff content to assess whether changes match requirement intent (closes #83)
+- Verify flow restructured from 10 steps to 6 — three dimensions (Completeness, Correctness, Coherence) consolidated into two: **Implementation** (Completeness + Correctness) and **Scope** (Coherence + Side-Effects)
+- Task-Diff Mapping now checks file paths AND diff content — a file-level match alone is no longer sufficient; the diff content must relate to the task description
+- Requirement verification checks both existence and correctness in a single pass using diff evidence, with codebase keyword search as fallback for pre-existing code
+
+### Added
+- Diff Scope Check — flags files in the diff not covered by any task or design component as a grouped suggestion
+- Task-Diff Mapping — detects tasks marked complete that produced no corresponding changes in the diff
+- Graceful skip when no merge base is available (orphan branch, first commit) — diff checks are skipped with a note, keyword-based verification proceeds as normal
+
 ## 2026-04-08 — Fix Friction Batch
 
 ### Changed

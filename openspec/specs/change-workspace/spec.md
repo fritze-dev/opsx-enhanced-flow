@@ -1,6 +1,9 @@
 ---
 order: 3
 category: change-workflow
+status: stable
+version: 1
+lastModified: 2026-04-08
 ---
 ## Purpose
 
@@ -11,6 +14,21 @@ Manages the change lifecycle including workspace creation (`/opsx:new`), date-pr
 ### Requirement: Create Change Workspace
 
 The system SHALL create a change workspace when the user invokes `/opsx:new <change-name>`. The workspace directory SHALL use a creation-date prefix in the format `YYYY-MM-DD-<change-name>`, set at creation time and never changed. If `worktree.enabled` is `true` in WORKFLOW.md, the system SHALL create a git worktree (see "Create Worktree-Based Workspace" requirement) and then create the change directory inside it via `mkdir -p <worktree>/openspec/changes/YYYY-MM-DD-<name>`. If worktree mode is not enabled, the workspace SHALL be created by running `mkdir -p openspec/changes/YYYY-MM-DD-<name>`. The change name MUST be in kebab-case format. If the user provides a description instead of a name, the system SHALL derive a kebab-case name from the description. The system SHALL NOT proceed without a valid change name.
+
+When the proposal artifact (`proposal.md`) is created for a change, the skills SHALL include YAML frontmatter with tracking fields:
+- `status: active` — change lifecycle (flipped to `completed` during verify completion)
+- `branch: <branch-name>` — git branch association
+- `worktree: <worktree-path>` — only when worktree mode is enabled
+- `capabilities` — structured list of affected capabilities:
+  ```yaml
+  capabilities:
+    new: [capability-one]
+    modified: [quality-gates, spec-format]
+    removed: []
+  ```
+  This machine-readable field mirrors the Capabilities section in the proposal body and eliminates the need for skills to parse markdown sections.
+
+These fields enable automated change context detection, active/completed filtering, worktree association, and capability lookup without relying on naming conventions or markdown parsing.
 
 **User Story:** As a developer I want to create a new change workspace with a date-prefixed directory, so that changes are chronologically ordered from creation and I can immediately begin the spec-driven workflow.
 
@@ -28,6 +46,20 @@ The system SHALL create a change workspace when the user invokes `/opsx:new <cha
 - **AND** today's date is 2026-04-01
 - **THEN** the system derives the kebab-case name `add-user-auth`
 - **AND** creates the workspace at `openspec/changes/2026-04-01-add-user-auth/`
+
+#### Scenario: Proposal created with tracking frontmatter
+
+- **GIVEN** a new change `add-user-auth` created on branch `add-user-auth` in worktree `.claude/worktrees/add-user-auth`
+- **AND** the proposal lists `user-auth` as a new capability and `quality-gates` as modified
+- **WHEN** the proposal artifact is generated
+- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active`, `branch: add-user-auth`, `worktree: .claude/worktrees/add-user-auth`, and `capabilities: { new: [user-auth], modified: [quality-gates], removed: [] }`
+
+#### Scenario: Proposal frontmatter without worktree
+
+- **GIVEN** a new change created without worktree mode (`worktree.enabled: false`)
+- **WHEN** the proposal artifact is generated
+- **THEN** `proposal.md` SHALL include YAML frontmatter with `status: active`, `branch: <branch-name>`, and `capabilities`
+- **AND** the `worktree` field SHALL be absent
 
 #### Scenario: Reject invalid name format
 
@@ -94,54 +126,72 @@ The system SHALL create a git worktree with a dedicated feature branch when the 
 - **WHEN** the user invokes `/opsx:new add-user-auth`
 - **THEN** the system SHALL create `openspec/changes/2026-04-01-add-user-auth/` in the current working tree
 
-### Requirement: Worktree Context Detection
+### Requirement: Change Context Detection
 
-All change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) SHALL detect the active change from worktree context before falling through to directory-based detection. The detection SHALL: (1) check if the current working directory is inside a git worktree by inspecting `git rev-parse --git-dir` for a path containing `/worktrees/`, (2) derive the change name from the current branch via `git rev-parse --abbrev-ref HEAD` (the branch name matches the change name without the date prefix), (3) search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree. If a match is found, the skill SHALL auto-select this change and announce: "Detected worktree context: using change '<name>'". If no matching directory exists, the skill SHALL fall through to normal detection logic.
+All change-detecting skills (`ff`, `apply`, `verify`, `discover`, `preflight`) SHALL detect the active change using proposal frontmatter before falling through to legacy detection. The detection sequence SHALL be:
 
-**User Story:** As a developer working in a worktree I want skills to automatically know which change I'm working on, so that I don't have to specify the change name every time.
+1. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose `branch` field matches the current branch (`git rev-parse --abbrev-ref HEAD`). If found, auto-select that change.
+2. **Fallback — worktree convention**: If no proposal has a matching `branch` field, check if the current working directory is inside a git worktree (inspect `git rev-parse --git-dir` for `/worktrees/`), derive the change name from the branch, and search for `openspec/changes/*-<branch-name>/`.
+3. **Fallback — directory listing**: If not in a worktree, list active changes and prompt the user.
 
-#### Scenario: Auto-detect change from worktree
+If a match is found, the skill SHALL auto-select the change and announce: "Detected change context: using change '<name>'". An explicit argument always overrides auto-detection.
 
-- **GIVEN** the user is in a git worktree on branch `add-user-auth`
-- **AND** `openspec/changes/2026-04-01-add-user-auth/` exists in the worktree
+**User Story:** As a developer I want skills to automatically know which change I'm working on using structured metadata, so that detection is reliable regardless of naming conventions.
+
+#### Scenario: Auto-detect change via proposal branch field
+
+- **GIVEN** the user is on branch `add-user-auth`
+- **AND** `openspec/changes/2026-04-01-add-user-auth/proposal.md` has frontmatter `branch: add-user-auth`
 - **WHEN** any change-detecting skill is invoked without an explicit change name
 - **THEN** the skill SHALL auto-select "2026-04-01-add-user-auth"
-- **AND** announce "Detected worktree context: using change 'add-user-auth'"
+- **AND** announce "Detected change context: using change 'add-user-auth'"
 
-#### Scenario: Fall through when not in worktree
+#### Scenario: Fallback to worktree convention when proposal has no branch field
+
+- **GIVEN** the user is in a git worktree on branch `legacy-change`
+- **AND** `openspec/changes/2026-03-01-legacy-change/proposal.md` has no YAML frontmatter
+- **WHEN** any change-detecting skill is invoked
+- **THEN** the skill SHALL fall back to worktree convention detection (branch name → directory glob)
+
+#### Scenario: Fall through to directory listing when not in worktree
 
 - **GIVEN** the user is in the main working tree (not a worktree)
+- **AND** no proposal has a `branch` field matching the current branch
 - **WHEN** any change-detecting skill is invoked without an explicit change name
-- **THEN** the skill SHALL use existing directory-based detection logic
+- **THEN** the skill SHALL list active changes and prompt the user
 
-#### Scenario: Fall through when change directory missing
+#### Scenario: Explicit argument overrides auto-detection
 
-- **GIVEN** the user is in a git worktree on branch `some-branch`
-- **AND** no directory matching `openspec/changes/*-some-branch/` exists
-- **WHEN** any change-detecting skill is invoked
-- **THEN** the skill SHALL fall through to normal detection logic
-
-#### Scenario: Explicit argument overrides worktree detection
-
-- **GIVEN** the user is in a worktree on branch `add-user-auth`
+- **GIVEN** the user is on branch `add-user-auth`
 - **WHEN** a skill is invoked with explicit argument `other-change`
-- **THEN** the skill SHALL use "other-change" regardless of worktree context
+- **THEN** the skill SHALL use "other-change" regardless of proposal frontmatter or worktree context
 
 ### Requirement: Lazy Worktree Cleanup at Change Creation
 
-The `/opsx:new` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), check whether the associated branch has been merged by running `gh pr view <branch-name> --json state --jq '.state'`. If the PR state is `MERGED`, the system SHALL automatically remove the worktree via `git worktree remove <path>` and delete the branch via `git branch -D <branch-name>`. If `gh` is unavailable or no PR exists, the system SHALL fall back to `git branch -d <branch-name>` (which only deletes if merged). The system SHALL report cleaned-up worktrees before proceeding with new change creation.
+The `/opsx:new` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed:
+
+1. **Proposal status check**: Find the change directory in the worktree matching the branch name (`openspec/changes/*-<branch>/proposal.md`). If the proposal has `status: completed`, the change is done.
+2. **Fallback — PR status**: If no proposal status is available, run `gh pr view <branch-name> --json state --jq '.state'`. If `MERGED`, the change is done.
+3. **Fallback — git branch**: If `gh` is unavailable, try `git branch -d <branch-name>` (only deletes if merged).
+
+For completed changes, the system SHALL remove the worktree via `git worktree remove <path>`, delete the local branch via `git branch -D <branch-name>`, and delete the remote branch. The system SHALL report cleaned-up worktrees before proceeding.
 
 **User Story:** As a developer I want stale worktrees cleaned up automatically when I start a new change, so that merged branches don't accumulate on disk.
 
-#### Scenario: Cleanup merged worktree at new change creation
+#### Scenario: Cleanup worktree with completed proposal status
 
 - **GIVEN** a worktree exists at `.claude/worktrees/fix-auth` on branch `fix-auth`
+- **AND** `openspec/changes/2026-04-01-fix-auth/proposal.md` in the main tree has `status: completed`
+- **WHEN** the user invokes `/opsx:new add-logging`
+- **THEN** the system removes the worktree and deletes the branch
+- **AND** reports "Cleaned up stale worktree: fix-auth (completed)"
+
+#### Scenario: Cleanup worktree via PR status fallback
+
+- **GIVEN** a worktree on branch `fix-auth` with no proposal `status` field
 - **AND** the PR for `fix-auth` has state "MERGED"
 - **WHEN** the user invokes `/opsx:new add-logging`
-- **THEN** the system runs `git worktree remove .claude/worktrees/fix-auth`
-- **AND** runs `git branch -D fix-auth`
-- **AND** reports "Cleaned up stale worktree: fix-auth (merged)"
-- **AND** proceeds to create the new change
+- **THEN** the system removes the worktree and deletes the branch
 
 #### Scenario: No stale worktrees
 
@@ -149,18 +199,17 @@ The `/opsx:new` skill SHALL check for stale worktrees before creating a new chan
 - **WHEN** the user invokes `/opsx:new add-logging`
 - **THEN** the system proceeds directly to change creation without cleanup messages
 
-#### Scenario: Worktree with unmerged branch preserved
+#### Scenario: Worktree with active change preserved
 
 - **GIVEN** a worktree exists at `.claude/worktrees/wip-feature` on branch `wip-feature`
-- **AND** the PR for `wip-feature` is still open (state "OPEN")
+- **AND** the proposal has `status: active`
 - **WHEN** the user invokes `/opsx:new add-logging`
 - **THEN** the system SHALL NOT remove the `wip-feature` worktree
-- **AND** proceeds to create the new change
 
-#### Scenario: Cleanup without gh CLI
+#### Scenario: Cleanup without gh CLI and no proposal status
 
 - **GIVEN** a worktree exists on branch `fix-auth`
-- **AND** `gh` CLI is unavailable
+- **AND** proposal has no `status` field and `gh` CLI is unavailable
 - **WHEN** the system attempts cleanup
 - **THEN** the system falls back to `git branch -d fix-auth`
 - **AND** if the branch was fully merged to main, it is deleted and the worktree removed
@@ -168,7 +217,7 @@ The `/opsx:new` skill SHALL check for stale worktrees before creating a new chan
 
 ### Requirement: Post-Merge Worktree Cleanup
 
-When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) run `git worktree remove <path>` to remove the completed worktree, (3) run `git branch -D <branch-name>` to delete the merged branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:new` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
+When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:new` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
 
 **User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:new`.
 
@@ -178,8 +227,9 @@ When a PR is merged from within a worktree (via `gh pr merge` or equivalent), th
 - **AND** the agent runs `gh pr merge` which succeeds
 - **WHEN** the merge completes
 - **THEN** the system SHALL switch the working directory to the main worktree
-- **AND** run `git worktree remove .claude/worktrees/fix-auth`
-- **AND** run `git branch -D fix-auth`
+- **AND** remove the worktree
+- **AND** delete the local branch
+- **AND** delete the remote branch
 - **AND** report "Cleaned up worktree: fix-auth (merged)"
 
 #### Scenario: Cleanup skipped when not in worktree
@@ -198,25 +248,36 @@ When a PR is merged from within a worktree (via `gh pr merge` or equivalent), th
 
 ### Requirement: Active vs Completed Change Detection
 
-Skills SHALL distinguish active from completed changes based on task completion status. A change is considered **active** if its `tasks.md` contains at least one unchecked item (`- [ ]`) or if `tasks.md` does not exist (artifacts still in progress). A change is considered **completed** if its `tasks.md` exists and all items are checked (`- [x]`). Skills that operate on active changes (apply, ff, verify, discover, preflight) SHALL filter to active changes when listing available changes. Skills that operate on completed changes (changelog, docs) SHALL filter to completed changes.
+Skills SHALL distinguish active from completed changes using the proposal's `status` frontmatter field. A change is considered **active** if its `proposal.md` has `status: active` or has no `status` field (legacy/early pipeline). A change is considered **completed** if its `proposal.md` has `status: completed`. The `status` field is set to `active` at change creation and flipped to `completed` during verify completion (same step that flips spec `draft → stable`).
 
-**User Story:** As a developer I want the system to automatically distinguish between active and completed changes, so that skills operate on the right set of changes without manual tagging.
+**Fallback** (for proposals without frontmatter): A change is active if its `tasks.md` contains at least one unchecked item (`- [ ]`) or if `tasks.md` does not exist. A change is completed if its `tasks.md` exists and all items are checked (`- [x]`).
 
-#### Scenario: Active change has unchecked tasks
+Skills that operate on active changes (apply, ff, verify, discover, preflight) SHALL filter to active changes. Skills that operate on completed changes (changelog, docs) SHALL filter to completed changes.
 
-- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with tasks.md containing 3 unchecked items
+**User Story:** As a developer I want the system to distinguish active from completed changes using structured metadata, so that detection is instant and does not require parsing task checkboxes.
+
+#### Scenario: Active change detected via proposal status
+
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with `proposal.md` containing `status: active`
 - **WHEN** `/opsx:apply` lists available changes
 - **THEN** the change is shown as available for implementation
 
-#### Scenario: Completed change has all tasks checked
+#### Scenario: Completed change detected via proposal status
 
-- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with tasks.md where all items are `- [x]`
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with `proposal.md` containing `status: completed`
 - **WHEN** `/opsx:changelog` lists available changes
 - **THEN** the change is included in changelog generation
 
+#### Scenario: Change without proposal frontmatter falls back to tasks.md
+
+- **GIVEN** a change at `openspec/changes/2026-03-01-legacy/` with `proposal.md` without YAML frontmatter
+- **AND** `tasks.md` contains unchecked items
+- **WHEN** `/opsx:apply` lists available changes
+- **THEN** the change is shown as active (fallback to tasks.md parsing)
+
 #### Scenario: Change without tasks.md is active
 
-- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with research.md and proposal.md but no tasks.md
+- **GIVEN** a change at `openspec/changes/2026-04-01-add-auth/` with research.md and proposal.md (`status: active`) but no tasks.md
 - **WHEN** `/opsx:ff` lists available changes
 - **THEN** the change is shown as available for artifact generation
 
@@ -229,6 +290,9 @@ Skills SHALL distinguish active from completed changes based on task completion 
 - **`gh` CLI unavailable during cleanup**: Fall back to `git branch -d`. If that also fails, skip this worktree and continue.
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
+- **Proposal without frontmatter (legacy)**: Skills SHALL fall back to tasks.md-based detection for active/completed status and branch-name convention for worktree context.
+- **Multiple proposals match same branch**: If two change directories have proposals with the same `branch` value, skills SHALL use the most recently modified one and warn about the conflict.
+- **Branch renamed after change creation**: The `branch` field in proposal.md reflects the branch at creation time. If the branch is renamed, the field becomes stale — skills fall through to worktree convention detection.
 
 ## Assumptions
 

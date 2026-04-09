@@ -28,7 +28,7 @@ Read `openspec/WORKFLOW.md` and extract the `docs_language` field from its YAML 
 Glob `openspec/changes/*/` to find all change directories.
 The directory name follows the pattern `YYYY-MM-DD-<change-name>`.
 
-**Filter to completed changes:** For each change directory, check if `tasks.md` exists and all checkbox items are marked `- [x]` (no `- [ ]` items). Only include changes where all tasks are complete.
+**Filter to completed changes:** For each change directory, check if the proposal's YAML frontmatter has `status: completed`. Fallback: check if `tasks.md` exists and all checkbox items are marked `- [x]` (no `- [ ]` items). Only include changes where all tasks are complete.
 
 If no completed changes exist, create an empty `CHANGELOG.md` with proper headers and stop.
 
@@ -47,7 +47,7 @@ If no new entries exist, report and stop.
 From each new completed change directory, read:
 - `proposal.md` — Problem statement, motivation, capabilities
 
-Then read the current specs for the capabilities listed in the proposal's Capabilities section:
+Then identify affected capabilities from the proposal's YAML frontmatter `capabilities` field (fall back to parsing the `## Capabilities` section if frontmatter is absent). Read the current specs:
 - `openspec/specs/<capability>/spec.md` — User-facing behavior (stories + scenarios)
 
 Also read from the change directory:
@@ -55,7 +55,7 @@ Also read from the change directory:
 
 If `proposal.md` is missing, skip the entry with a warning.
 
-**Fallback for proposals without structured Capabilities section:** If the proposal does not have a parseable Capabilities section (e.g., early changes with different formats), derive the change description from the proposal's "What Changes" and "Why" sections instead of looking up specs.
+**Fallback for proposals without capabilities frontmatter or structured Capabilities section:** Derive the change description from the proposal's "What Changes" and "Why" sections instead of looking up specs.
 
 ### Step 5: Classify Changes
 

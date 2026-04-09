@@ -1,6 +1,9 @@
 ---
 order: 4
 category: change-workflow
+status: stable
+version: 1
+lastModified: 2026-04-08
 ---
 ## Purpose
 
@@ -27,6 +30,37 @@ The system SHALL define a 6-stage artifact pipeline with the following stages in
 - **GIVEN** a completed pipeline run
 - **WHEN** the change workspace is inspected
 - **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, and tasks.md
+
+### Requirement: Artifact Output Frontmatter
+Certain pipeline artifacts SHALL include YAML frontmatter in their generated output for machine-readable metadata:
+
+- **proposal.md**: SHALL include frontmatter with `status` (active/completed), `branch`, optionally `worktree`, and `capabilities` (structured list of new/modified/removed capability names mirroring the body's Capabilities section). Skills that create proposals SHALL populate these fields. Skills that read proposals SHALL use frontmatter fields preferentially over parsing markdown sections.
+- **design.md**: SHALL include frontmatter with `has_decisions` (boolean, `true` if the Decisions section contains at least one entry). Skills that scan for design decisions (docs, docs-verify) SHALL check this field to skip designs without decisions.
+
+Other artifacts (research.md, preflight.md, tasks.md) do not require output frontmatter.
+
+**User Story:** As a skill author I want artifacts to carry machine-readable metadata, so that downstream skills can query artifact properties without parsing markdown sections.
+
+#### Scenario: Proposal includes capabilities frontmatter
+- **GIVEN** a proposal that lists `user-auth` as new and `quality-gates` as modified
+- **WHEN** the proposal is generated
+- **THEN** `proposal.md` SHALL include frontmatter `capabilities: { new: [user-auth], modified: [quality-gates], removed: [] }`
+
+#### Scenario: Design includes has_decisions frontmatter
+- **GIVEN** a design artifact with a Decisions table containing 3 entries
+- **WHEN** the design is generated
+- **THEN** `design.md` SHALL include frontmatter `has_decisions: true`
+
+#### Scenario: Design without decisions table
+- **GIVEN** a design artifact with no Decisions section (e.g., simple implementation with no architectural choices)
+- **WHEN** the design is generated
+- **THEN** `design.md` SHALL include frontmatter `has_decisions: false`
+
+#### Scenario: Skills prefer frontmatter over markdown parsing
+- **GIVEN** a proposal with frontmatter `capabilities: { new: [user-auth], modified: [], removed: [] }`
+- **WHEN** a skill needs to identify affected capabilities
+- **THEN** the skill SHALL read the `capabilities` frontmatter field
+- **AND** SHALL NOT parse the `## Capabilities` markdown section
 
 ### Requirement: Artifact Dependencies
 Each artifact in the pipeline SHALL declare its dependencies explicitly in the Smart Template's YAML frontmatter `requires` field. Skills SHALL enforce these dependencies by reading WORKFLOW.md and Smart Templates and checking artifact completion status via file existence before allowing generation of a dependent artifact. An artifact SHALL be considered complete when its corresponding file exists and is non-empty in the change workspace. For artifacts with glob patterns in the `generates` field (e.g., `specs/**/*.md`), completion SHALL be determined by at least one matching file existing.

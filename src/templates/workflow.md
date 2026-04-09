@@ -1,4 +1,5 @@
 ---
+template-version: 1
 templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks]
 
@@ -23,6 +24,21 @@ apply:
     ask for permission before running /opsx:verify. The first human gate
     is User Testing — only pause there.
 
+    Fix loop discipline: After ANY fix-loop change (code, specs, or
+    artifacts), always re-run /opsx:verify before presenting to the user.
+    Never skip step 3.5 (Final Verify) when the fix loop was entered.
+
+    Artifact freshness: When a fix resolves an issue flagged in
+    preflight.md or design.md, update the affected artifact to reflect
+    the resolution. Stale verdicts must not persist (e.g., preflight
+    showing "PASS WITH WARNINGS" after the warning is fixed).
+
+    Docs terminology check: Before user testing (step 3.3), check
+    whether docs/capabilities/ and docs/README.md reference terminology
+    that was changed in specs during this change. Flag stale references
+    early — /opsx:docs in standard tasks handles regeneration, but the
+    agent should identify drift before asking for approval.
+
     After /opsx:verify passes, commit and push all implementation changes
     before pausing for user approval:
     1. Stage all changed files: `git add -A`
@@ -45,6 +61,7 @@ apply:
     1. Switch working directory to the main worktree
     2. Run `git worktree remove <worktree-path>`
     3. Run `git branch -D <branch-name>`
+    4. Run `git push origin --delete <branch-name>`
     If worktree remove fails (e.g., dirty state), report the error and
     suggest manual cleanup — do not block the workflow.
 

@@ -1,3 +1,6 @@
+---
+template-version: 1
+---
 # Project Constitution
 
 ## Tech Stack

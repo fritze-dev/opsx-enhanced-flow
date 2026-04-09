@@ -1,5 +1,6 @@
 ---
 id: docs-capability
+template-version: 1
 description: Capability documentation template
 generates: "docs/capabilities/*.md"
 requires: []

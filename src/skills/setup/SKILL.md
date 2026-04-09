@@ -26,33 +26,54 @@ Check if `openspec/schemas/opsx-enhanced/schema.yaml` exists but `openspec/WORKF
 
 If both `openspec/WORKFLOW.md` and `openspec/schemas/` exist (partial manual migration), preserve WORKFLOW.md and skip migration.
 
-### 1. Copy Smart Templates from plugin
+### 1. Install Smart Templates (with merge detection)
 
 ```bash
 mkdir -p openspec/templates/specs openspec/templates/docs
-cp -r "${CLAUDE_PLUGIN_ROOT}/templates/." openspec/templates/
 ```
 
-### 2. Create WORKFLOW.md (skip if exists)
+For each template file in `${CLAUDE_PLUGIN_ROOT}/templates/` (excluding `workflow.md`):
 
-Only if `openspec/WORKFLOW.md` does **not** already exist:
+1. Read the plugin template's `template-version` field from YAML frontmatter.
+2. Check if the corresponding local file exists at `openspec/templates/<path>`.
+3. **Compare and decide:**
+   - **Local file does not exist**: Copy the plugin template. Report: "Template `<name>` installed."
+   - **Local `template-version` matches plugin AND content identical**: Skip. Report: "Template `<name>` up to date."
+   - **Local `template-version` matches plugin BUT content differs**: User has customized. Keep local. Report: "Template `<name>` has local customizations — preserved."
+   - **Plugin `template-version` is higher AND local content matches previous plugin version**: Update silently. Report: "Template `<name>` updated (v`<old>` → v`<new>`)."
+   - **Plugin `template-version` is higher AND local content has been customized**: Present both versions to the user. Ask them to resolve differences (keep local, accept plugin, or merge manually). Report: "Template `<name>` has both local customizations and plugin updates — merge required."
+   - **No local `template-version` field (legacy)**: Treat as version 0. Apply the same logic.
+   - **Plugin `template-version` is lower**: Warn and skip (do not downgrade).
 
-1. Copy the workflow template from the plugin: `cp "${CLAUDE_PLUGIN_ROOT}/templates/workflow.md" openspec/WORKFLOW.md`
-2. If the template file does not exist at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, report an error and suggest reinstalling the plugin.
+### 2. Install WORKFLOW.md (with merge detection)
 
-If it already exists, report: "WORKFLOW.md already exists — preserved."
+Apply the same `template-version` merge detection as Step 1, but between `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` and `openspec/WORKFLOW.md`:
 
-### 3. Create CONSTITUTION.md placeholder (skip if exists)
+- **Does not exist**: Copy from plugin template. Report: "WORKFLOW.md created from template."
+- **Same version, same content**: Skip. Report: "WORKFLOW.md up to date."
+- **Same version, different content**: User customized. Preserve. Report: "WORKFLOW.md has local customizations — preserved."
+- **Plugin version higher, no customizations**: Update silently. Report: "WORKFLOW.md updated (v`<old>` → v`<new>`)."
+- **Plugin version higher, with customizations**: Present both to user for merge. Report: "WORKFLOW.md needs merge."
+- **No `template-version` (legacy)**: Treat as version 0.
 
-Only if `openspec/CONSTITUTION.md` does **not** already exist, create it:
+If the plugin template file does not exist at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, report an error and suggest reinstalling the plugin.
 
-```markdown
-# Project Constitution
+### 3. Install/Update CONSTITUTION.md (with section-level merge)
 
-> Run `/opsx:bootstrap` to generate project-specific rules from your codebase.
-```
+1. If `openspec/CONSTITUTION.md` does **not** exist, create it from the plugin template with `template-version` frontmatter:
+   ```markdown
+   ---
+   template-version: 1
+   ---
+   # Project Constitution
 
-If it already exists, report: "CONSTITUTION.md already exists — preserved."
+   > Run `/opsx:bootstrap` to generate project-specific rules from your codebase.
+   ```
+
+2. If `openspec/CONSTITUTION.md` **exists**, compare `template-version` fields:
+   - **Same version**: Skip. Report: "CONSTITUTION.md up to date."
+   - **Plugin version higher**: Compare section headings (e.g., `## Tech Stack`, `## Architecture Rules`) between the template and the local file. For each section in the template that is missing from the local file, offer to generate it interactively (read codebase for context, propose content, let user review). Preserve all existing sections and their content. Update `template-version` after merge. Report: "CONSTITUTION.md — N new sections offered."
+   - **No `template-version` (legacy)**: Treat as version 0.
 
 ### 4. Environment checks
 

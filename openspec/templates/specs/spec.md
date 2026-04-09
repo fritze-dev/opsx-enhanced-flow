@@ -1,10 +1,15 @@
 ---
 id: specs
+template-version: 1
 description: Requirements with Gherkin scenarios (BDD) and optional user stories
 generates: "specs/**/*.md"
 requires: [proposal]
 instruction: |
   Edit spec files that define WHAT the system should do.
+
+  Specs describe behavior, not implementation. Do NOT include concrete
+  commands (e.g., git commands), file paths, or API calls in requirement
+  text or scenarios. Implementation details belong in SKILL.md or design.md.
 
   Overlap Verification (before editing any spec files):
   1. Read the proposal's Consolidation Check section.
@@ -36,13 +41,15 @@ instruction: |
   If zero assumptions were made, state: "No assumptions made."
   Specs should be testable — each scenario is a potential test case.
 ---
-<!-- Optional: YAML frontmatter for documentation ordering.
-     Set order (integer) and category (kebab-case string) to control
-     how this capability appears in generated docs.
-     Define categories that match your project's workflow phases.
+<!-- YAML frontmatter for documentation ordering and tracking.
+     order/category: control how this capability appears in generated docs.
+     status/change/version/lastModified: managed by skills for lifecycle tracking.
 ---
 order: [number]
 category: [category]
+status: stable
+version: 1
+lastModified: [YYYY-MM-DD]
 ---
 -->
 

@@ -12,17 +12,17 @@ Implement tasks from an OpenSpec change.
 
 1. **Select the change**
 
-   **Worktree context detection** (runs first, before directory listing):
+   **Change context detection** (runs first, before directory listing):
    If no explicit change name was provided as an argument:
-   1. Run: `git rev-parse --git-dir`
-   2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
-   4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+   1. Get current branch: `git rev-parse --abbrev-ref HEAD`
+   2. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose YAML frontmatter `branch` field matches the current branch. If found, auto-select that change.
+   3. **Fallback — worktree convention**: If no matching proposal frontmatter, check if inside a worktree (`git rev-parse --git-dir` contains `/worktrees/`), derive change name from branch, search for `openspec/changes/*-<branch-name>/`.
+   4. If valid: auto-select and announce "Detected change context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists (active = has unchecked tasks or no tasks.md)
+   - Auto-select if only one active change exists (proposal `status: active`, or fallback: unchecked tasks/no tasks.md)
    - If ambiguous, list active change directories under `openspec/changes/` and use the **AskUserQuestion tool** to let the user select
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
@@ -44,7 +44,7 @@ Implement tasks from an OpenSpec change.
    - `openspec/changes/<change-dir>/design.md`
    - `openspec/changes/<change-dir>/tasks.md`
 
-   Also read specs for the capabilities listed in the proposal's Capabilities section:
+   Also read specs for the capabilities listed in the proposal's YAML frontmatter `capabilities` field (fall back to parsing the `## Capabilities` section if frontmatter is absent):
    - `openspec/specs/<capability>/spec.md` for each capability mentioned
 
 4. **Show current progress**

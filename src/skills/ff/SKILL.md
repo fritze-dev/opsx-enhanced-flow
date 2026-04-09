@@ -12,15 +12,15 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 1. **If no clear input provided, check for existing changes first**
 
-   **Worktree context detection** (runs first, before directory listing):
+   **Change context detection** (runs first, before directory listing):
    If no explicit change name was provided as an argument:
-   1. Run: `git rev-parse --git-dir`
-   2. If the result contains `/worktrees/`, derive change name from branch: `git rev-parse --abbrev-ref HEAD`
-   3. Search for a directory matching `openspec/changes/*-<branch-name>/` in the current working tree
-   4. If valid: auto-select this change and announce "Detected worktree context: using change '<name>'"
+   1. Get current branch: `git rev-parse --abbrev-ref HEAD`
+   2. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose YAML frontmatter `branch` field matches the current branch. If found, auto-select that change.
+   3. **Fallback — worktree convention**: If no matching proposal frontmatter, check if inside a worktree (`git rev-parse --git-dir` contains `/worktrees/`), derive change name from branch, search for `openspec/changes/*-<branch-name>/`.
+   4. If valid: auto-select and announce "Detected change context: using change '<name>'"
    5. If not valid: fall through to normal detection below
 
-   List directories under `openspec/changes/`. Filter to **active changes** — those where `tasks.md` does not exist or contains at least one `- [ ]` item. If active changes exist, use the **AskUserQuestion tool** to let the user choose:
+   List directories under `openspec/changes/`. Filter to **active changes** — those whose `proposal.md` has frontmatter `status: active` or has no `status` field. Fallback: `tasks.md` does not exist or contains at least one `- [ ]` item. If active changes exist, use the **AskUserQuestion tool** to let the user choose:
    - Present existing changes as options (top 3-4, most recently modified first, mark most recent as "(Recommended)")
    - Include an option to create a new change
 
@@ -54,6 +54,31 @@ Fast-forward through artifact creation - generate everything needed to start imp
    - **blocked**: not done, and at least one artifact in `requires` is not done
 
    **Special handling for `specs` artifact**: The specs stage does NOT create files in the change directory. Instead, it edits specs directly at `openspec/specs/<capability>/spec.md`. To check if the specs stage is "done", verify that the proposal's Capabilities section lists capabilities and the corresponding spec files exist or have been recently modified.
+
+   **Spec frontmatter tracking**: During the specs stage, when editing any spec file:
+   1. **Collision check**: Before editing, read the spec's frontmatter. If `status: draft` and `change` references a different change directory, warn the user about the collision and ask for confirmation before proceeding.
+   2. **Set tracking fields**: Update the spec's YAML frontmatter to set `status: draft`, `change: <change-directory-name>`, and `lastModified: <current-date-YYYY-MM-DD>`. For new specs, also set `version: 1`. For existing specs, preserve the current `version` value (version is only bumped during verify completion).
+
+   **Proposal frontmatter**: When creating `proposal.md`, include YAML frontmatter before the `## Why` section:
+   ```yaml
+   ---
+   status: active
+   branch: <current-branch-name>
+   worktree: <worktree-path>  # only if worktree mode is enabled
+   capabilities:
+     new: [<capability-names-from-New-Capabilities-section>]
+     modified: [<capability-names-from-Modified-Capabilities-section>]
+     removed: [<capability-names-from-Removed-Capabilities-section>]
+   ---
+   ```
+   Populate `capabilities` from the proposal body's Capabilities section after writing it.
+
+   **Design frontmatter**: When creating `design.md`, include YAML frontmatter before `# Technical Design`:
+   ```yaml
+   ---
+   has_decisions: true  # or false if Decisions section has no entries
+   ---
+   ```
 
 4. **Create artifacts in sequence until apply-ready**
 

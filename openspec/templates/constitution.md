@@ -1,5 +1,6 @@
 ---
 id: constitution
+template-version: 1
 description: Project governance template for bootstrap
 generates: CONSTITUTION.md
 requires: []
