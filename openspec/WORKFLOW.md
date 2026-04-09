@@ -3,65 +3,7 @@ template-version: 3
 templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks, review]
 
-actions:
-  init:
-    specs:
-      - project-init:
-        - Install OpenSpec Workflow
-        - Template Merge on Re-Init
-        - First-Run Codebase Scan
-        - Constitution Generation
-        - Documentation Drift Verification
-      - constitution-management:
-        - Constitution Lifecycle
-      - quality-gates:
-        - Pre-Implementation Quality Checks
-    instruction: |
-      Project initialization and health check.
-      Mode detection:
-      - Fresh (no WORKFLOW.md): install templates, scan codebase, generate constitution
-      - Update (templates outdated): merge plugin template updates with local customizations
-      - Re-sync (all installed): detect spec drift (code vs specs) + docs drift (docs vs specs)
-      Report findings, suggest /opsx:propose for changes needed.
-
-  apply:
-    specs:
-      - task-implementation:
-        - Implement Tasks from Task List
-        - Progress Tracking
-        - Standard Tasks Exclusion from Apply Scope
-        - Spec Edits During Implementation
-      - quality-gates:
-        - Post-Implementation Verification
-    instruction: |
-      Implement tasks from tasks.md, then generate review.md.
-      QA loop: implement → generate review.md → fix if FAIL → regenerate review.md → until PASS.
-      Delete existing review.md before starting implementation.
-      Pause only at user testing gate.
-      Fix loop: after any fix, regenerate review.md before presenting to user.
-      Artifact freshness: update preflight/design if fix resolves flagged issues.
-      Standard Tasks (post-implementation section) are NOT part of apply.
-      Constitution standard tasks: pre-merge executed during post-apply, post-merge remain as reminders.
-      Before committing, mark all standard task checkboxes as complete except post-merge.
-      After review.md PASS, commit and push implementation before pausing for user approval.
-
-  finalize:
-    specs:
-      - release-workflow:
-        - Changelog Generation
-        - Version Bump Convention
-      - documentation:
-        - Generate Enriched Capability Documentation
-        - Incremental Generation
-        - Generate Architecture Overview
-        - ADR Generation
-    instruction: |
-      Post-approval finalization, executed sequentially:
-      1. Changelog: incremental entries from completed change
-      2. Docs: regenerate affected capability docs, ADRs, README
-      3. Version-bump: increment patch in src/.claude-plugin/plugin.json, sync .claude-plugin/marketplace.json
-      On error in one step: continue with next, report failures at end.
-      Check review.md exists with verdict PASS before proceeding.
+actions: [init, apply, finalize]
 
 worktree:
   enabled: true
@@ -107,3 +49,67 @@ After creating any artifact, commit and push the change:
 
 If `gh` CLI is unavailable or not authenticated, skip PR creation.
 If push fails, continue with local commit — do not block the pipeline.
+
+## Action: init
+
+### Requirements
+
+- [Install OpenSpec Workflow](openspec/specs/project-init/spec.md#requirement-install-openspec-workflow)
+- [Template Merge on Re-Init](openspec/specs/project-init/spec.md#requirement-template-merge-on-re-init)
+- [First-Run Codebase Scan](openspec/specs/project-init/spec.md#requirement-first-run-codebase-scan)
+- [Constitution Generation](openspec/specs/project-init/spec.md#requirement-constitution-generation)
+- [Documentation Drift Verification](openspec/specs/project-init/spec.md#requirement-documentation-drift-verification)
+- [Constitution Lifecycle](openspec/specs/constitution-management/spec.md#requirement-constitution-lifecycle)
+- [Pre-Implementation Quality Checks](openspec/specs/quality-gates/spec.md#requirement-pre-implementation-quality-checks)
+
+### Instruction
+
+Project initialization and health check.
+Mode detection:
+- Fresh (no WORKFLOW.md): install templates, scan codebase, generate constitution
+- Update (templates outdated): merge plugin template updates with local customizations
+- Re-sync (all installed): detect spec drift (code vs specs) + docs drift (docs vs specs)
+Report findings, suggest /opsx:propose for changes needed.
+
+## Action: apply
+
+### Requirements
+
+- [Implement Tasks from Task List](openspec/specs/task-implementation/spec.md#requirement-implement-tasks-from-task-list)
+- [Progress Tracking](openspec/specs/task-implementation/spec.md#requirement-progress-tracking)
+- [Standard Tasks Exclusion from Apply Scope](openspec/specs/task-implementation/spec.md#requirement-standard-tasks-exclusion-from-apply-scope)
+- [Spec Edits During Implementation](openspec/specs/task-implementation/spec.md#requirement-spec-edits-during-implementation)
+- [Post-Implementation Verification](openspec/specs/quality-gates/spec.md#requirement-post-implementation-verification)
+
+### Instruction
+
+Implement tasks from tasks.md, then generate review.md.
+QA loop: implement → generate review.md → fix if FAIL → regenerate review.md → until PASS.
+Delete existing review.md before starting implementation.
+Pause only at user testing gate.
+Fix loop: after any fix, regenerate review.md before presenting to user.
+Artifact freshness: update preflight/design if fix resolves flagged issues.
+Standard Tasks (post-implementation section) are NOT part of apply.
+Constitution standard tasks: pre-merge executed during post-apply, post-merge remain as reminders.
+Before committing, mark all standard task checkboxes as complete except post-merge.
+After review.md PASS, commit and push implementation before pausing for user approval.
+
+## Action: finalize
+
+### Requirements
+
+- [Changelog Generation](openspec/specs/release-workflow/spec.md#requirement-changelog-generation)
+- [Version Bump Convention](openspec/specs/release-workflow/spec.md#requirement-version-bump-convention)
+- [Generate Enriched Capability Documentation](openspec/specs/documentation/spec.md#requirement-generate-enriched-capability-documentation)
+- [Incremental Generation](openspec/specs/documentation/spec.md#requirement-incremental-generation)
+- [Generate Architecture Overview](openspec/specs/documentation/spec.md#requirement-generate-architecture-overview)
+- [ADR Generation](openspec/specs/documentation/spec.md#requirement-adr-generation)
+
+### Instruction
+
+Post-approval finalization, executed sequentially:
+1. Changelog: incremental entries from completed change
+2. Docs: regenerate affected capability docs, ADRs, README
+3. Version-bump: increment patch in src/.claude-plugin/plugin.json, sync .claude-plugin/marketplace.json
+On error in one step: continue with next, report failures at end.
+Check review.md exists with verdict PASS before proceeding.

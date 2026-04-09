@@ -9,11 +9,12 @@ Determine which command was invoked from the SKILL.md that loaded this router. T
 ## Step 2: Load WORKFLOW.md
 
 Read `openspec/WORKFLOW.md`. Extract from YAML frontmatter:
-- `templates_dir`, `pipeline`, `actions`, `worktree`, `auto_approve`, `automation`
+- `templates_dir`, `pipeline`, `actions` (array of action names), `worktree`, `auto_approve`, `automation`
 
 Read from markdown body:
 - `## Context` section — follow its instructions (typically: read CONSTITUTION.md)
 - `## Post-Artifact Hook` section — used after artifact creation
+- `## Action: <name>` sections — each contains `### Requirements` (clickable links to spec requirements) and `### Instruction` (procedural guidance)
 
 If WORKFLOW.md is missing, tell the user to run `/opsx:init` first and stop.
 
@@ -50,28 +51,31 @@ For `propose`, `apply`, `finalize`:
 
 ### `apply` — Sub-Agent Execution
 
-1. Read `actions.apply` from WORKFLOW.md frontmatter
-2. For each entry in `actions.apply.specs`, load the spec from `openspec/specs/<name>/spec.md` and note which requirements are listed. When building the sub-agent prompt, include only the listed requirements (not the full spec) so the agent has focused context.
-3. Read all change artifacts (research, proposal, design, tasks, specs)
-4. Spawn sub-agent via Agent tool with:
-   - `actions.apply.instruction` as primary directive
-   - The specific requirements from each spec as behavioral context
+1. Read `## Action: apply` from WORKFLOW.md body
+2. Parse `### Requirements` — each link has format `[Name](openspec/specs/<spec>/spec.md#requirement-<slug>)`. For each link, read the target spec file and extract only the referenced requirement section (the `### Requirement: <Name>` block including its scenarios).
+3. Read `### Instruction` for the procedural directive
+4. Read all change artifacts (research, proposal, design, tasks, specs)
+5. Spawn sub-agent via Agent tool with:
+   - The instruction text as primary directive
+   - The extracted requirement sections as behavioral context
    - Change directory path and artifact paths
    - The sub-agent implements tasks, generates review.md, runs the QA loop
 
 ### `finalize` — Sub-Agent Execution
 
-1. Read `actions.finalize` from WORKFLOW.md frontmatter
-2. For each entry in `actions.finalize.specs`, load the spec and extract only the listed requirements
-3. Read change artifacts for context (proposal, review.md)
-4. Spawn sub-agent with instruction + specific requirements + change context
+1. Read `## Action: finalize` from WORKFLOW.md body
+2. Parse `### Requirements` links, load each referenced requirement section from specs
+3. Read `### Instruction` for the directive
+4. Read change artifacts for context (proposal, review.md)
+5. Spawn sub-agent with instruction + extracted requirements + change context
 
 ### `init` — Sub-Agent Execution
 
-1. Read `actions.init` from WORKFLOW.md frontmatter (if WORKFLOW.md exists)
-2. If WORKFLOW.md missing: this IS the fresh install — proceed with init action
-3. For each entry in `actions.init.specs`, load the spec and extract only the listed requirements (if specs exist)
-4. Spawn sub-agent with instruction + specific requirements
+1. Read `## Action: init` from WORKFLOW.md body (if WORKFLOW.md exists)
+2. If WORKFLOW.md missing: this IS the fresh install — proceed with default init behavior
+3. Parse `### Requirements` links, load each referenced requirement section (if specs exist)
+4. Read `### Instruction` for the directive
+5. Spawn sub-agent with instruction + extracted requirements
 
 ## Guardrails
 

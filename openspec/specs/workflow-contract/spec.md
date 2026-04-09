@@ -81,25 +81,24 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 
 ### Requirement: Inline Action Definitions
 
-WORKFLOW.md frontmatter SHALL support an `actions` section that defines workflow actions inline. Each action SHALL have: `specs` (array of objects mapping spec names to specific requirement names), and `instruction` (multi-line string with procedural guidance for the AI agent). The `specs` field uses a structured format where each entry names a spec and lists the specific requirements the action needs — this ensures the sub-agent receives focused context rather than entire specs. Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL spawn a sub-agent via the Agent tool with the action's `instruction` as its primary directive and the specific requirements from each listed spec loaded as behavioral context.
+WORKFLOW.md SHALL define actions as named sections in the markdown body (not frontmatter). The frontmatter SHALL contain only `actions` as an array of action names (e.g., `actions: [init, apply, finalize]`). Each action SHALL have a corresponding `## Action: <name>` section in the body containing: `### Requirements` (list of clickable markdown links to specific spec requirements using the format `[Requirement Name](openspec/specs/<spec>/spec.md#requirement-<slug>)`), and `### Instruction` (procedural guidance for the AI agent). This structure ensures requirement references are clickable in editors, prose stays out of frontmatter, and the sub-agent receives focused context (only the linked requirements, not entire specs). Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL parse the requirement links, load the referenced requirement sections from specs, and spawn a sub-agent via the Agent tool with the instruction text as primary directive and the extracted requirements as behavioral context.
 
-The system SHALL support these actions:
-- `init`: Project initialization and health check (specs: project-init [Install OpenSpec Workflow, Template Merge on Re-Init, First-Run Codebase Scan, Constitution Generation, Documentation Drift Verification], constitution-management [Constitution Lifecycle], quality-gates [Pre-Implementation Quality Checks])
-- `apply`: Task implementation with review.md generation (specs: task-implementation [Implement Tasks from Task List, Progress Tracking, Standard Tasks Exclusion, Spec Edits During Implementation], quality-gates [Post-Implementation Verification])
-- `finalize`: Post-approval changelog, docs, and version-bump (specs: release-workflow [Changelog Generation, Version Bump Convention], documentation [Generate Enriched Capability Documentation, Incremental Generation, Generate Architecture Overview, ADR Generation])
+The system SHALL support these actions: `init` (project initialization and health check), `apply` (task implementation with review.md generation), and `finalize` (post-approval changelog, docs, and version-bump). Each action's specific requirement links are defined in the corresponding `## Action: <name>` body section of WORKFLOW.md.
 
 **User Story:** As a plugin maintainer I want action definitions inline in WORKFLOW.md alongside the pipeline, so that all workflow orchestration lives in one file without separate action template files.
 
-#### Scenario: Action defined with specs and instruction
-- **GIVEN** a WORKFLOW.md with an `actions.apply` section
+#### Scenario: Action defined as body section with requirements and instruction
+- **GIVEN** a WORKFLOW.md with a `## Action: apply` body section
 - **WHEN** the section is inspected
-- **THEN** it SHALL contain `specs` (array) and `instruction` (multi-line string) fields
+- **THEN** it SHALL contain `### Requirements` with clickable markdown links to spec requirements
+- **AND** it SHALL contain `### Instruction` with procedural guidance text
 
 #### Scenario: Router executes action as sub-agent
 - **GIVEN** a user invokes `/opsx:apply`
-- **WHEN** the router reads `actions.apply` from WORKFLOW.md
-- **THEN** it SHALL spawn a sub-agent with the action's `instruction` as primary directive
-- **AND** SHALL load each spec listed in `actions.apply.specs` as behavioral context for the sub-agent
+- **WHEN** the router reads `## Action: apply` from WORKFLOW.md body
+- **THEN** it SHALL parse the requirement links from `### Requirements`
+- **AND** SHALL load each linked requirement section from the target spec files
+- **AND** SHALL spawn a sub-agent with `### Instruction` text as primary directive and extracted requirements as behavioral context
 - **AND** the sub-agent SHALL NOT receive the router's full conversation history
 
 #### Scenario: Actions are not pipeline steps
