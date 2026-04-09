@@ -6,11 +6,11 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 1. **Constitution** (`openspec/CONSTITUTION.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 6-stage artifact pipeline order, apply gate, post-artifact hook, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure and artifact generation.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 7-stage artifact pipeline (research → review), inline action definitions (init, apply, finalize), optional worktree configuration, automation config, and project context. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection. Together they are the single source of truth for pipeline structure, artifact generation, and action orchestration.
 
-3. **Skills** (`skills/*/SKILL.md`) — 11 commands delivered as SKILL.md files within the Claude Code plugin system. Categorized as workflow (4: new, ff, apply, verify), governance (5: setup, bootstrap, discover, preflight, docs-verify), and documentation (2: changelog, docs). All skills are model-invocable.
+3. **Router + Actions** (`skills/router.md` + `skills/*/SKILL.md`) — 4 commands (init, propose, apply, finalize) delivered via stub SKILL.md files that delegate to a shared router. The router handles change context detection, WORKFLOW.md loading, and dispatches to pipeline traversal (propose) or sub-agent execution (apply, finalize, init). All commands are model-invocable.
 
-Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed skill logic, skills depend on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
+Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
 ## Tech Stack
 
@@ -18,7 +18,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Configuration:** YAML (WORKFLOW.md frontmatter, Smart Template frontmatter, spec frontmatter)
 - **Shell:** Bash (skill command execution)
 - **Platform:** Claude Code plugin system
-- **No external dependencies:** Skills read WORKFLOW.md and Smart Templates directly — no CLI tools, Node.js, or npm required
+- **No external dependencies:** Router reads WORKFLOW.md and Smart Templates directly — no CLI tools, Node.js, or npm required
 
 ## Key Design Decisions
 
@@ -126,46 +126,36 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 
 | Capability | Description |
 |---|---|
-| [Project Setup](capabilities/project-setup.md) | One-time project initialization with version-aware template merge, environment checks, and worktree opt-in |
-| [Project Bootstrap](capabilities/project-bootstrap.md) | Codebase scanning, constitution generation, and drift detection |
+| [Project Init](capabilities/project-init.md) | Project initialization, template installation, constitution generation, codebase scanning, and docs drift health checks |
 
 ### Change Workflow
 
 | Capability | Description |
 |---|---|
 | [Change Workspace](capabilities/change-workspace.md) | Create and manage change workspaces with proposal-based context detection and worktree isolation |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 6-stage pipeline with artifact output frontmatter, dependency gating, and worktree-aware PR integration |
-| [Artifact Generation](capabilities/artifact-generation.md) | Fast-forward generation with spec tracking, collision detection, and smart checkpoints |
-| [Interactive Discovery](capabilities/interactive-discovery.md) | Standalone interactive research with targeted Q&A for complex features |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 7-stage pipeline (research → review) with propose as single entry point, dependency gating, and worktree-aware PR integration |
 
 ### Development
 
 | Capability | Description |
 |---|---|
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
-| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation checks with draft spec validation, post-implementation verification with draft gate, and documentation drift detection |
-| [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and pause-on-blocker |
-| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with mandatory explicit human approval before completion |
+| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation preflight checks, post-implementation review.md artifact generation |
+| [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking, review.md generation, and pause-on-blocker |
+| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md verdict as approval gate |
 
 ### Finalization
 
 | Capability | Description |
 |---|---|
-| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation with frontmatter-based detection, and consumer updates |
+| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer updates |
+| [Documentation](capabilities/documentation.md) | Capability docs, ADRs, and consolidated README generated from specs and changes |
 
 ### Reference
 
 | Capability | Description |
 |---|---|
-| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates, and Skills layers with independent modifiability |
-| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration format, Smart Template format with template versioning, and skill reading pattern |
+| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates + Actions, and Router layers |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration, inline actions, Smart Template format, and router dispatch pattern |
 | [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking fields |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
-
-### Meta
-
-| Capability | Description |
-|---|---|
-| [User Docs](capabilities/user-docs.md) | Enriched user-facing capability documentation with spec-based incremental detection |
-| [Architecture Docs](capabilities/architecture-docs.md) | Cross-cutting architecture overview and documentation entry point |
-| [Decision Docs](capabilities/decision-docs.md) | Architecture Decision Records generated from completed changes' design decisions |
