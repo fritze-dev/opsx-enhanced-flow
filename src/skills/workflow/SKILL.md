@@ -49,6 +49,7 @@ For `propose`, `apply`, `finalize`:
 - [Propose as Single Entry Point for Pipeline Traversal](openspec/specs/artifact-pipeline/spec.md#requirement-propose-as-single-entry-point-for-pipeline-traversal)
 - [Seven-Stage Pipeline](openspec/specs/artifact-pipeline/spec.md#requirement-seven-stage-pipeline)
 - [Artifact Dependencies](openspec/specs/artifact-pipeline/spec.md#requirement-artifact-dependencies)
+- [Post-Artifact Commit and PR Integration](openspec/specs/artifact-pipeline/spec.md#requirement-post-artifact-commit-and-pr-integration)
 - [Create Change Workspace](openspec/specs/change-workspace/spec.md#requirement-create-change-workspace)
 - [Create Worktree-Based Workspace](openspec/specs/change-workspace/spec.md#requirement-create-worktree-based-workspace)
 - [Lazy Worktree Cleanup at Change Creation](openspec/specs/change-workspace/spec.md#requirement-lazy-worktree-cleanup-at-change-creation)
@@ -60,17 +61,25 @@ For `propose`, `apply`, `finalize`:
 - [Progress Tracking](openspec/specs/task-implementation/spec.md#requirement-progress-tracking)
 - [Standard Tasks Exclusion from Apply Scope](openspec/specs/task-implementation/spec.md#requirement-standard-tasks-exclusion-from-apply-scope)
 - [Spec Edits During Implementation](openspec/specs/task-implementation/spec.md#requirement-spec-edits-during-implementation)
+- [Apply Gate](openspec/specs/artifact-pipeline/spec.md#requirement-apply-gate)
+- [Post-Implementation Commit Before Approval](openspec/specs/artifact-pipeline/spec.md#requirement-post-implementation-commit-before-approval)
 - [Post-Implementation Verification](openspec/specs/quality-gates/spec.md#requirement-post-implementation-verification)
+- [QA Loop with Mandatory Approval](openspec/specs/human-approval-gate/spec.md#requirement-qa-loop-with-mandatory-approval)
+- [Fix Loop](openspec/specs/human-approval-gate/spec.md#requirement-fix-loop)
+- [Active vs Completed Change Detection](openspec/specs/change-workspace/spec.md#requirement-active-vs-completed-change-detection)
 
 ### Action: finalize — Requirements
 
 - [Generate Changelog from Completed Changes](openspec/specs/release-workflow/spec.md#requirement-generate-changelog-from-completed-changes)
+- [Completion Workflow Next Steps](openspec/specs/release-workflow/spec.md#requirement-completion-workflow-next-steps)
 - [Auto Patch Version Bump](openspec/specs/release-workflow/spec.md#requirement-auto-patch-version-bump)
 - [Version Sync Between Plugin Files](openspec/specs/release-workflow/spec.md#requirement-version-sync-between-plugin-files)
 - [Generate Enriched Capability Documentation](openspec/specs/documentation/spec.md#requirement-generate-enriched-capability-documentation)
 - [Incremental Capability Documentation Generation](openspec/specs/documentation/spec.md#requirement-incremental-capability-documentation-generation)
 - [Generate Architecture Overview](openspec/specs/documentation/spec.md#requirement-generate-architecture-overview)
+- [Generate Documentation Table of Contents](openspec/specs/documentation/spec.md#requirement-generate-documentation-table-of-contents)
 - [ADR Generation from Change Decisions](openspec/specs/documentation/spec.md#requirement-adr-generation-from-change-decisions)
+- [Post-Merge Worktree Cleanup](openspec/specs/change-workspace/spec.md#requirement-post-merge-worktree-cleanup)
 
 ### Action: init — Requirements
 
@@ -78,7 +87,8 @@ For `propose`, `apply`, `finalize`:
 - [Template Merge on Re-Init](openspec/specs/project-init/spec.md#requirement-template-merge-on-re-init)
 - [First-Run Codebase Scan](openspec/specs/project-init/spec.md#requirement-first-run-codebase-scan)
 - [Constitution Generation](openspec/specs/project-init/spec.md#requirement-constitution-generation)
-- [Documentation Drift Verification](openspec/specs/project-init/spec.md#requirement-documentation-drift-verification)
+- [Documentation Drift Verification](openspec/specs/project-init/spec.md#requirement-documentation-drift-verification-health-check)
+- [Recovery Mode](openspec/specs/project-init/spec.md#requirement-recovery-mode-spec-drift-detection)
 - [Constitution Update](openspec/specs/constitution-management/spec.md#requirement-constitution-update)
 - [Preflight Quality Check](openspec/specs/quality-gates/spec.md#requirement-preflight-quality-check)
 
