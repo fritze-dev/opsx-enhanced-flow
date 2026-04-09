@@ -148,7 +148,10 @@ Fires per reviewer. Does NOT indicate "all required reviews met" — only that o
 | 3 | Should the post-approval pipeline check `reviewDecision == APPROVED` (all required reviews) or trigger on any single approval? | Edge Cases | Medium |
 
 ## 7. Decisions
-<!-- Filled after user feedback. -->
 
 | # | Decision | Rationale | Alternatives Considered |
 |---|----------|-----------|------------------------|
+| 1 | `/opsx:auto` as lightweight orchestrator, existing skills as sub-agents via Agent tool, artifacts on disk as shared state | Solves context window exhaustion — each sub-agent gets fresh context with only relevant inputs. Handoff protocol (#38) emerges naturally: artifact existence + frontmatter status = gate between agents. | Single monolithic skill (context exhaustion risk); guided chain of user-invoked skills (loses one-command UX); RemoteTrigger-based (loses shared filesystem) |
+| 2 | No CI-Verify action — verify stays local only | Verify already runs locally as part of the apply workflow. Code-review action provides independent CI check. Saves API credits and complexity. | CI verify on ready_for_review (redundant, costly); CI replaces local verify (longer feedback loop) |
+| 3 | Post-approval pipeline triggers on `reviewDecision == APPROVED` (all required reviews) | Prevents unnecessary pipeline runs in multi-reviewer setups. Single approval could trigger pipeline prematurely. | Trigger on any single approval (may run multiple times); manual label trigger (extra step) |
+| 4 | Plugin self-reference via `plugin_marketplaces: './'` | Simplest approach, leverages existing marketplace.json. Confirmed working in claude-code-action source. | `--plugin-dir` via claude_args (session-only, less integrated); published version (chicken-and-egg problem) |
