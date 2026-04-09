@@ -124,6 +124,16 @@ Each stub is ~5 lines (frontmatter + include directive). The router logic lives 
 - **review.md staleness after manual code changes** → Mitigation: apply deletes review.md at start, regenerates at end. Propose can re-run individual steps.
 - **Breaking change for consumers on template-version 1** → Mitigation: `/opsx:init` handles migration. template-version 3 is an explicit signal.
 
+### Auto-Approve Flag
+
+`/opsx:propose --auto-approve` enables fully autonomous pipeline execution:
+- propose generates artifacts (research → tasks)
+- apply implements + generates review.md
+- If review.md verdict is PASS → skip human approval gate → run finalize automatically
+- If review.md verdict is FAIL → stop and report (same as without flag)
+
+Default behavior (no flag): propose pauses after review.md PASS for explicit user approval before finalize. This preserves the mandatory human gate from the QA loop.
+
 ### GitHub Actions Pipeline (`.github/workflows/pipeline.yml`)
 
 CI workflow triggered on PR approval that runs finalize automatically:

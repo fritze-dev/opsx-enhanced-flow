@@ -22,6 +22,7 @@ Skills duplicate 60-70% of spec content (1,593 lines across 11 SKILL.md files). 
 - Remove `type: action` Smart Template concept from PR #97 — actions live in WORKFLOW.md, not template files
 - CI automation config (`automation.post_approval`) for finalize action
 - GitHub Actions workflow (`.github/workflows/pipeline.yml`) that triggers finalize on PR approval
+- `--auto-approve` flag for `/opsx:propose` — skips human approval gate after passing review, enables fully autonomous pipeline execution for routine changes
 
 ## Capabilities
 
