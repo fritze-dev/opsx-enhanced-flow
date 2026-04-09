@@ -35,7 +35,6 @@ automation:
       running: automation/running
       complete: automation/complete
       failed: automation/failed
-    opt_out: [skip-docs]
     auto_merge: false
 ```
 
@@ -148,7 +147,7 @@ Add CI automation convention:
 ## CI Automation
 
 - **Post-approval pipeline**: Defined in WORKFLOW.md `automation.post_approval`. Triggered by GitHub Action on PR review approval.
-- **Labels**: `automation/running`, `automation/complete`, `automation/failed` track pipeline state. `skip-docs` opts out of docs generation. `auto-merge` enables auto-merge after successful pipeline.
+- **Labels**: `automation/running`, `automation/complete`, `automation/failed` track pipeline state. `auto-merge` enables auto-merge after successful pipeline.
 - **Plugin self-reference**: CI loads the opsx plugin from the repo checkout via `plugin_marketplaces: './'`.
 ```
 
@@ -156,7 +155,6 @@ Add CI automation convention:
 
 - ff with full pipeline completes all steps (research → version-bump) without manual intervention when `--auto-approve` is used — PASS/FAIL: run on a test change
 - Post-approval CI pipeline commits changelog + docs + version-bump to PR branch within one run — PASS/FAIL: approve a test PR, verify artifacts committed
-- Pipeline respects `skip-docs` label — PASS/FAIL: add label, approve, verify docs step skipped
 - Pipeline sets correct labels at each state — PASS/FAIL: check label transitions during run
 - Sub-agents receive bounded context (not full conversation) — PASS/FAIL: verify agent prompt size is proportional to required artifacts, not conversation history
 

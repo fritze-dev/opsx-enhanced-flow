@@ -112,7 +112,7 @@ Skills SHALL support checkpoint/resume: if invoked on a change with existing art
 
 ### Requirement: Automation Configuration
 
-WORKFLOW.md frontmatter SHALL support an optional `automation` section that configures CI-triggered pipeline behavior. The `automation` section SHALL contain: `post_approval` (object defining what happens when a PR receives all required review approvals). The `post_approval` object SHALL contain: `steps` (ordered array of step identifiers — e.g., `[changelog, docs, version-bump]`), `labels` (object mapping state names to GitHub label names — `running`, `complete`, `failed`), `opt_out` (array of opt-out label names — e.g., `[skip-docs]`), and `auto_merge` (boolean, default `false` — when `true` AND an `auto-merge` label is present on the PR, the system SHALL enable auto-merge after successful pipeline completion). The `automation` section is the single source of truth for CI pipeline behavior — GitHub Action workflows SHALL read this configuration rather than hardcoding steps.
+WORKFLOW.md frontmatter SHALL support an optional `automation` section that configures CI-triggered pipeline behavior. The `automation` section SHALL contain: `post_approval` (object defining what happens when a PR receives all required review approvals). The `post_approval` object SHALL contain: `steps` (ordered array of step identifiers — e.g., `[changelog, docs, version-bump]`), `labels` (object mapping state names to GitHub label names — `running`, `complete`, `failed`), and `auto_merge` (boolean, default `false` — when `true` AND an `auto-merge` label is present on the PR, the system SHALL enable auto-merge after successful pipeline completion). The `automation` section is the single source of truth for CI pipeline behavior — GitHub Action workflows SHALL read this configuration rather than hardcoding steps.
 
 **User Story:** As a plugin maintainer I want CI automation behavior defined in WORKFLOW.md, so that the pipeline configuration stays centralized alongside the rest of the workflow contract.
 
@@ -120,7 +120,7 @@ WORKFLOW.md frontmatter SHALL support an optional `automation` section that conf
 - **GIVEN** a valid `openspec/WORKFLOW.md`
 - **AND** the project has CI automation enabled
 - **WHEN** the frontmatter is inspected
-- **THEN** it SHALL contain an `automation.post_approval` section with `steps`, `labels`, `opt_out`, and `auto_merge` fields
+- **THEN** it SHALL contain an `automation.post_approval` section with `steps`, `labels`, and `auto_merge` fields
 
 #### Scenario: CI workflow reads automation config from WORKFLOW.md
 - **GIVEN** a GitHub Actions workflow triggered by PR review approval
@@ -133,13 +133,6 @@ WORKFLOW.md frontmatter SHALL support an optional `automation` section that conf
 - **WHEN** a skill or CI workflow checks for automation config
 - **THEN** the system SHALL treat automation as disabled
 - **AND** SHALL NOT report an error
-
-#### Scenario: Opt-out label skips a step
-- **GIVEN** `automation.post_approval.opt_out` contains `skip-docs`
-- **AND** a PR has the label `skip-docs`
-- **WHEN** the post-approval pipeline runs
-- **THEN** the `docs` step SHALL be skipped
-- **AND** all other steps SHALL execute normally
 
 ### Requirement: Full Pipeline Execution
 

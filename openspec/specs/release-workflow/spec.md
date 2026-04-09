@@ -250,7 +250,7 @@ The pipeline SHALL manage PR labels to track state: add `automation/running` at 
 
 The pipeline SHALL commit all generated artifacts (changelog, docs, version bump) to the PR branch and push. The pipeline SHALL verify that the PR branch HEAD has not changed since the trigger event before committing — if the HEAD has diverged, the pipeline SHALL abort and set the `automation/failed` label.
 
-The pipeline SHALL respect opt-out labels defined in `automation.post_approval.opt_out`: if a listed label is present on the PR, the corresponding step SHALL be skipped. The pipeline SHALL support opt-in auto-merge: if the `auto-merge` label is present AND `automation.post_approval.auto_merge` is `true` AND the pipeline completes successfully AND all status checks pass, the system SHALL enable auto-merge on the PR.
+The pipeline SHALL support opt-in auto-merge: if the `auto-merge` label is present AND `automation.post_approval.auto_merge` is `true` AND the pipeline completes successfully AND all status checks pass, the system SHALL enable auto-merge on the PR.
 
 The pipeline SHALL use a concurrency group scoped to the PR number with `cancel-in-progress: false` (queue, don't cancel) to prevent corruption of in-flight commits.
 
@@ -280,13 +280,6 @@ The pipeline SHALL use a concurrency group scoped to the PR number with `cancel-
 - **THEN** the pipeline SHALL abort without committing
 - **AND** SHALL set the `automation/failed` label
 - **AND** SHALL post a PR comment: "Pipeline aborted: branch HEAD changed during execution"
-
-#### Scenario: Opt-out label skips docs step
-- **GIVEN** a PR with the `skip-docs` label
-- **AND** `automation.post_approval.opt_out` contains `skip-docs`
-- **WHEN** the post-approval pipeline runs
-- **THEN** the docs step SHALL be skipped
-- **AND** changelog and version-bump SHALL execute normally
 
 #### Scenario: Auto-merge after successful pipeline
 - **GIVEN** a PR with the `auto-merge` label
