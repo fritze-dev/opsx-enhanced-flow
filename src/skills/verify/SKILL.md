@@ -62,33 +62,41 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
      - Add CRITICAL issue for each incomplete task
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
-   **Spec Coverage**:
+   **Spec Coverage** (read-then-compare):
    - Read specs for capabilities listed in the proposal's Capabilities section
    - For each requirement in the relevant specs:
-     - Search codebase for keywords related to the requirement
-     - Assess if implementation likely exists
-   - If requirements appear unimplemented:
-     - Add CRITICAL issue: "Requirement not found: <requirement name>"
-     - Recommendation: "Implement requirement X: <description>"
+     1. **Identify** the implementation file(s) that should contain this requirement — use design.md references, proposal Impact section, or file naming conventions to locate them
+     2. **Read** the relevant section of each implementation file (do NOT just grep for keywords)
+     3. **Extract** key terms from the spec requirement: normative language, field names, headings, behavioral descriptions
+     4. **Compare** those terms against the implementation content in context:
+        - Are the spec's key terms present in the correct section (not just anywhere in the file)?
+        - Does the implementation cover the full scope of the requirement?
+     5. If the requirement has no corresponding implementation section:
+        - Add CRITICAL issue: "Requirement not found: <requirement name>"
+        - Recommendation: "Implement requirement X: <description>"
 
 6. **Verify Correctness**
 
-   **Requirement Implementation Mapping**:
+   **Requirement Implementation Mapping** (content comparison):
    - For each requirement from the relevant specs:
-     - Search codebase for implementation evidence
-     - If found, note file paths and line ranges
-     - Assess if implementation matches requirement intent
-     - If divergence detected:
-       - Add WARNING: "Implementation may diverge from spec: <details>"
-       - Recommendation: "Review <file>:<lines> against requirement X"
+     1. **Read** the implementation file section that should contain this requirement (identified during Completeness check)
+     2. **Compare terminology**: extract headings, field names, and normative language from the spec requirement, then check if the implementation uses the same terms
+        - If the spec says "X" but the implementation says "Y" (e.g., spec says "Change context detection" but implementation says "Worktree context detection"), flag as terminology mismatch
+     3. **Compare scope**: if the spec lists N items, fields, or steps, verify the implementation covers all N (not just some)
+     4. If terminology mismatch or scope gap detected:
+       - Add WARNING: "Implementation diverges from spec: <spec term> vs <implementation term>" or "Implementation covers N of M items from requirement"
+       - Recommendation: "Review <file>:<line> — update implementation to match spec terminology, or update spec if the implementation term is correct"
 
-   **Scenario Coverage**:
+   **Scenario Coverage** (read-and-verify):
    - For each scenario in the relevant specs (marked with "#### Scenario:"):
-     - Check if conditions are handled in code
-     - Check if tests exist covering the scenario
-     - If scenario appears uncovered:
-       - Add WARNING: "Scenario not covered: <scenario name>"
-       - Recommendation: "Add test or implementation for scenario: <description>"
+     1. **Read** the implementation section that should handle the scenario's GIVEN/WHEN/THEN conditions
+     2. **Verify preconditions** (GIVEN): does the implementation handle the initial state described?
+     3. **Verify triggers** (WHEN): does the implementation respond to the action described?
+     4. **Verify assertions** (THEN): does the implementation produce the expected outcome?
+     5. Also check if tests exist covering the scenario
+     - If the implementation does not cover a scenario's conditions:
+       - Add WARNING: "Scenario not covered: <scenario name> — <specific gap, e.g., 'THEN clause expects X but implementation does Y'>"
+       - Recommendation: "Add implementation or test for scenario: <description>"
 
 7. **Verify Coherence**
 
@@ -177,7 +185,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 **Verification Heuristics**
 
 - **Completeness**: Focus on objective checklist items (checkboxes, requirements list)
-- **Correctness**: Use keyword search, file path analysis, reasonable inference - don't require perfect certainty
+- **Correctness**: Read implementation files and compare content against spec requirements — use keyword search only for initial file discovery, then read and compare the relevant sections. Don't require perfect certainty, but DO read the actual content before concluding a requirement is covered
 - **Coherence**: Look for glaring inconsistencies, don't nitpick style
 - **Side-Effects**: Use keyword matching from preflight Section C against tasks and codebase — skip entries that are too generic for meaningful matching
 - **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
