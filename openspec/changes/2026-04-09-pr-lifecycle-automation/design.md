@@ -134,15 +134,15 @@ Affected specs: openspec/specs/{capabilities}/spec.md
 
 ### 4. Post-Approval CI Trigger
 
-**File**: `.github/workflows/opsx-pipeline.yml` (new, ~30 lines)
+**File**: `.github/workflows/pipeline.yml` (new, ~30 lines)
 
 ```yaml
-name: OpenSpec Pipeline
+name: Pipeline
 on:
   pull_request_review:
     types: [submitted]
 concurrency:
-  group: opsx-pipeline-${{ github.event.pull_request.number }}
+  group: pipeline-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 jobs:
   pipeline:

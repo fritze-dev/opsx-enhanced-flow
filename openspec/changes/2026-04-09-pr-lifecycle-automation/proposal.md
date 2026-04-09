@@ -15,7 +15,7 @@ All post-implementation steps (changelog, docs, version-bump) are manual, creati
 
 - **WORKFLOW.md restructuring**: Clean separation — structured config in YAML frontmatter (~20 lines), prose instructions in markdown body sections. `apply.instruction` (~50 lines) eliminated, distributed across action templates. `post_artifact` and `context` move from frontmatter to body sections.
 - **WORKFLOW.md `automation` block**: new frontmatter section defining CI trigger behavior (post-approval pipeline steps, labels). WORKFLOW.md defines WHAT to do; a thin GitHub Action YAML defines WHEN to trigger.
-- **Thin trigger YAML** (`.github/workflows/opsx-pipeline.yml`): minimal workflow triggered by PR approval, reads WORKFLOW.md `automation` config, delegates to `claude-code-action`. No pipeline logic in the YAML itself.
+- **Thin trigger YAML** (`.github/workflows/pipeline.yml`): minimal workflow triggered by PR approval, reads WORKFLOW.md `automation` config, delegates to `claude-code-action`. No pipeline logic in the YAML itself.
 - **Label-based state machine**: `automation/running`, `automation/complete`, `automation/failed` labels track pipeline progress on PRs
 - **Extended `/opsx:ff`**: ff reads the full pipeline (including action steps like apply, verify, changelog, docs, version-bump) and executes everything. Optional `--auto-approve` flag for fully autonomous execution.
 - **Sub-agent architecture**: each pipeline step runs as an isolated sub-agent (via Agent tool) with only the relevant artifacts as input, solving context window exhaustion
@@ -45,7 +45,7 @@ None.
 
 ## Impact
 
-- **New files**: `.github/workflows/opsx-pipeline.yml` (thin trigger YAML), action templates in `openspec/templates/` (apply.md, verify.md, changelog.md, docs.md, version-bump.md) and consumer copies in `src/templates/`
+- **New files**: `.github/workflows/pipeline.yml` (thin trigger YAML), action templates in `openspec/templates/` (apply.md, verify.md, changelog.md, docs.md, version-bump.md) and consumer copies in `src/templates/`
 - **Modified files**: `openspec/WORKFLOW.md` (restructure frontmatter/body, extend `pipeline`, add `automation`), `src/templates/workflow.md` (consumer template sync, bump template-version to 2), `src/skills/ff/SKILL.md` (action-type templates + sub-agents + body section reading), `src/skills/apply/SKILL.md` (read instruction from template instead of WORKFLOW.md), `openspec/CONSTITUTION.md` (add CI automation conventions, worktree lifecycle section)
 - **Dependencies**: `claude-code-action@v1` (already used), `gh` CLI (already used)
 - **No new skills**: ff extended to handle action steps (plugin-level enhancement, not project-specific — allowed per immutability rule)

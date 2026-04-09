@@ -244,7 +244,7 @@ A GitHub Actions workflow SHALL automatically create a git tag and GitHub Releas
 
 ### Requirement: Post-Approval CI Pipeline
 
-When a PR receives all required review approvals (`reviewDecision == APPROVED`), the system SHALL automatically execute the post-approval pipeline steps defined in `openspec/WORKFLOW.md`'s `automation.post_approval.steps` array. The pipeline SHALL be executed via `claude-code-action` using the existing interactive Claude workflow (`.github/workflows/claude.yml`). The system SHALL load the opsx plugin from the repository checkout using local marketplace configuration (`plugin_marketplaces: './'`).
+When a PR receives all required review approvals (`reviewDecision == APPROVED`), the system SHALL automatically execute the post-approval pipeline steps defined in `openspec/WORKFLOW.md`'s `automation.post_approval.steps` array. The pipeline SHALL be executed via `claude-code-action` using a dedicated workflow (`.github/workflows/pipeline.yml`). The system SHALL load the opsx plugin from the repository checkout using local marketplace configuration (`plugin_marketplaces: './'`).
 
 The pipeline SHALL manage PR labels to track state: add `automation/running` at pipeline start, replace with `automation/complete` on success, or replace with `automation/failed` on failure. On failure, the system SHALL also post a PR comment with error details.
 
