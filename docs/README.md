@@ -26,7 +26,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 |----------|-----------|-----|
 | Organize 15 capabilities (not one per skill) | Groups related behavior logically; comprehensive coverage without 1:1 skill mapping burden | [ADR-001](decisions/adr-001-initial-spec-organization.md) |
 | WORKFLOW.md + Smart Templates own workflow rules | Clear separation: WORKFLOW.md and templates for universal rules, constitution for project-specific rules | [ADR-002](decisions/adr-002-workflow-rule-ownership.md) |
-| Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently specifiable and testable; single entry point via /opsx:docs | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
+| Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently specifiable and testable; single entry point via /opsx:workflow finalize | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
 | Convention in constitution for release workflow; patch-only auto-bump | Skills remain generic shared code; 95%+ of changes are patches; prevents forgotten bumps | [ADR-004](decisions/adr-004-release-workflow.md) |
 | Single docs_language field in WORKFLOW.md; translation at generation time | Central, backward-compatible; one set of templates for all languages | [ADR-005](decisions/adr-005-configurable-documentation-language.md) |
 | Design review checkpoint as constitution convention | Respects skill immutability; design is the last cheap feedback point before quality gates | [ADR-006](decisions/adr-006-design-review-checkpoint.md) |
@@ -100,12 +100,12 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
-- **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:new`.
+- **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:workflow propose`.
 - **~~No opt-out for auto-sync (ADR-034)~~**: Superseded by ADR-037 — sync and archive eliminated.
-- **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting. (Now used in lazy worktree cleanup at `/opsx:new`.)
+- **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting. (Now used in lazy worktree cleanup at `/opsx:workflow propose`.)
 - **~~LLM may ignore blocking prompt context (ADR-036)~~**: Superseded by ADR-037 — sync eliminated.
 - **Spec conflicts on shared branches (ADR-037)**: Two parallel changes editing the same baseline spec produce git merge conflicts; mitigated by worktree isolation for local changes.
-- **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:docs <capability>` override and preflight traceability.
+- **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:workflow finalize <capability>` override and preflight traceability.
 - **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
 - **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
 - **Proposal frontmatter set once at generation (ADR-040)**: If the user manually edits the Capabilities section without updating frontmatter, skills use stale data. Mitigated by preflight cross-checking.

@@ -35,7 +35,7 @@ Concrete improvements and planned features for the project SHALL be tracked as G
 #### Scenario: Roadmap issues are actionable
 - **GIVEN** a roadmap issue titled "Support YAML spec format alongside Markdown"
 - **WHEN** a developer reads the issue
-- **THEN** the issue contains a description explaining what the feature would do, why it is valuable, and any known constraints -- sufficient to start a `/opsx:new` change for it
+- **THEN** the issue contains a description explaining what the feature would do, why it is valuable, and any known constraints -- sufficient to start a `/opsx:workflow propose` change for it
 
 #### Scenario: Improvement discovered during development tracked
 - **GIVEN** a developer working on a current change notices a potential improvement outside the current scope
@@ -54,7 +54,7 @@ Concrete improvements and planned features for the project SHALL be tracked as G
 - **Roadmap label does not exist in repository**: The first time a roadmap issue is created, the `roadmap` label may need to be created in the GitHub repository. The developer or agent SHALL create the label if it does not exist.
 - **Large number of roadmap issues**: If the roadmap grows to many issues, the team MAY use GitHub milestones or project boards for grouping, but the `roadmap` label and README link SHALL remain as the primary entry point.
 - **Stale roadmap issues**: Issues that have been open for a long time without activity. The team SHOULD periodically review and close or update stale roadmap issues to keep the roadmap meaningful.
-- **Roadmap items that become full changes**: A roadmap issue may grow in scope and require the full spec-driven workflow (`/opsx:new`). The issue SHALL be referenced in the change's research or proposal for traceability, and closed when the change is complete.
+- **Roadmap items that become full changes**: A roadmap issue may grow in scope and require the full spec-driven workflow (`/opsx:workflow propose`). The issue SHALL be referenced in the change's research or proposal for traceability, and closed when the change is complete.
 
 ## Assumptions
 

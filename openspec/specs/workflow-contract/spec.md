@@ -20,7 +20,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - `template-version` (integer, for template merge detection during `/opsx:workflow init`)
 - `templates_dir` (path to Smart Templates directory)
 - `pipeline` (ordered array of artifact step IDs — each generates a file)
-- `actions` (object defining inline action definitions — see Requirement: Inline Action Definitions)
+- `actions` (array of action names, e.g., `[init, propose, apply, finalize]` — each has a corresponding `## Action: <name>` body section)
 - `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
 - `auto_approve` (optional boolean, when `true` pipeline traversal proceeds without user confirmation at checkpoints)
 - `automation` (optional CI pipeline configuration — see Requirement: Automation Configuration)
@@ -81,29 +81,30 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 
 ### Requirement: Inline Action Definitions
 
-WORKFLOW.md SHALL define actions as named sections in the markdown body (not frontmatter). The frontmatter SHALL contain only `actions` as an array of action names (e.g., `actions: [init, apply, finalize]`). Each action SHALL have a corresponding `## Action: <name>` section in the body containing: `### Requirements` (list of clickable markdown links to specific spec requirements using the format `[Requirement Name](openspec/specs/<spec>/spec.md#requirement-<slug>)`), and `### Instruction` (procedural guidance for the AI agent). This structure ensures requirement references are clickable in editors, prose stays out of frontmatter, and the sub-agent receives focused context (only the linked requirements, not entire specs). Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL parse the requirement links, load the referenced requirement sections from specs, and spawn a sub-agent via the Agent tool with the instruction text as primary directive and the extracted requirements as behavioral context.
+WORKFLOW.md frontmatter SHALL contain `actions` as a simple array of action names (e.g., `actions: [init, propose, apply, finalize]`). Each action SHALL have a corresponding `## Action: <name>` section in the WORKFLOW.md markdown body containing only `### Instruction` (procedural guidance for the AI agent). Requirement links (clickable markdown links to specific spec requirements using the format `[Requirement Name](openspec/specs/<spec>/spec.md#requirement-<slug>)`) SHALL live in the SKILL.md file for each action, NOT in WORKFLOW.md. This structure ensures prose stays out of frontmatter, the sub-agent receives focused context, and requirement wiring is managed at the skill level. Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command. When executing an action, the router SHALL read the `### Instruction` from the WORKFLOW.md body section and the requirement links from the SKILL.md, load the referenced requirement sections from specs, and spawn a sub-agent via the Agent tool with the instruction text as primary directive and the extracted requirements as behavioral context.
 
-The system SHALL support these actions: `init` (project initialization and health check), `apply` (task implementation with review.md generation), and `finalize` (post-approval changelog, docs, and version-bump). Each action's specific requirement links are defined in the corresponding `## Action: <name>` body section of WORKFLOW.md.
+The system SHALL support these actions: `init` (project initialization and health check), `propose` (pipeline traversal for artifact generation), `apply` (task implementation with review.md generation), and `finalize` (post-approval changelog, docs, and version-bump).
 
 **User Story:** As a plugin maintainer I want action definitions inline in WORKFLOW.md alongside the pipeline, so that all workflow orchestration lives in one file without separate action template files.
 
-#### Scenario: Action defined as body section with requirements and instruction
+#### Scenario: Action defined as body section with instruction
 - **GIVEN** a WORKFLOW.md with a `## Action: apply` body section
 - **WHEN** the section is inspected
-- **THEN** it SHALL contain `### Requirements` with clickable markdown links to spec requirements
-- **AND** it SHALL contain `### Instruction` with procedural guidance text
+- **THEN** it SHALL contain `### Instruction` with procedural guidance text
+- **AND** it SHALL NOT contain requirement links (those live in the SKILL.md)
 
 #### Scenario: Router executes action as sub-agent
 - **GIVEN** a user invokes `/opsx:workflow apply`
-- **WHEN** the router reads `## Action: apply` from WORKFLOW.md body
-- **THEN** it SHALL parse the requirement links from `### Requirements`
+- **WHEN** the router reads `## Action: apply` from WORKFLOW.md body and requirement links from the SKILL.md
+- **THEN** it SHALL parse the requirement links from the SKILL.md
 - **AND** SHALL load each linked requirement section from the target spec files
+- **AND** SHALL read the `### Instruction` from the WORKFLOW.md body section
 - **AND** SHALL spawn a sub-agent with `### Instruction` text as primary directive and extracted requirements as behavioral context
 - **AND** the sub-agent SHALL NOT receive the router's full conversation history
 
 #### Scenario: Actions are not pipeline steps
 - **GIVEN** a WORKFLOW.md with `pipeline: [research, proposal, specs, design, preflight, tasks, review]`
-- **AND** `actions: { init: ..., apply: ..., finalize: ... }`
+- **AND** `actions: [init, propose, apply, finalize]`
 - **WHEN** the pipeline is traversed
 - **THEN** actions SHALL NOT be included in the pipeline artifact sequence
 - **AND** SHALL only be invoked via direct command or automation trigger
@@ -167,7 +168,7 @@ WORKFLOW.md frontmatter SHALL support an optional `automation` section that conf
 - **Empty `pipeline` array**: Router SHALL report that no artifacts are defined and stop.
 - **`templates_dir` points to nonexistent directory**: Router SHALL report the missing directory and suggest running `/opsx:workflow init`.
 - **Unknown action referenced**: If an action name does not match a defined action in `actions:`, the router SHALL report the error and list available actions.
-- **Action with missing spec**: If a spec listed in an action's `specs` array does not exist at `openspec/specs/<name>/spec.md`, the sub-agent SHALL proceed without it and note the missing spec.
+- **Action with missing spec**: If a spec listed in the SKILL.md's requirement links does not exist at the referenced path, the sub-agent SHALL proceed without it and note the missing spec.
 
 ## Assumptions
 

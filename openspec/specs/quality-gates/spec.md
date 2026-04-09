@@ -8,13 +8,13 @@ change: 2026-04-09-skill-consolidation
 ---
 ## Purpose
 
-Provides `/opsx:preflight` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `/opsx:workflow apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `/opsx:workflow init` as a project-level health check.
+Provides `/opsx:workflow propose` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `/opsx:workflow apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `/opsx:workflow init` as a project-level health check.
 
 ## Requirements
 
 ### Requirement: Preflight Quality Check
 
-The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:preflight`. The preflight check SHALL cover seven dimensions: (A) Traceability Matrix -- mapping each capability from the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent) to its corresponding spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md, and (G) Draft Spec Validation -- verifying that all specs with `status: draft` have a `change` value matching the current change directory name. Specs with `status: draft` belonging to a different change SHALL be flagged as BLOCKED. Specs with `status: draft` and no `change` field SHALL be flagged as WARNING. The Marker Audit SHALL:
+The system SHALL run a mandatory quality review before task creation when the user invokes `/opsx:workflow propose`. The preflight check SHALL cover seven dimensions: (A) Traceability Matrix -- mapping each capability from the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent) to its corresponding spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md, and (G) Draft Spec Validation -- verifying that all specs with `status: draft` have a `change` value matching the current change directory name. Specs with `status: draft` belonging to a different change SHALL be flagged as BLOCKED. Specs with `status: draft` and no `change` field SHALL be flagged as WARNING. The Marker Audit SHALL:
 1. Collect all `<!-- ASSUMPTION: ... -->` tags and verify each has an accompanying visible list item. Assumptions written entirely inside HTML comments (no visible text) SHALL be flagged as format violations.
 2. Rate each valid assumption as Acceptable Risk, Needs Clarification, or Blocking.
 3. Scan for any remaining `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers. Any REVIEW marker found SHALL be rated as Blocking, because REVIEW markers must be resolved before implementation.
@@ -29,7 +29,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 - **GIVEN** a change named "add-user-auth" with complete specs and design artifacts
 - **AND** all requirements have scenarios, no gaps are detected, all assumptions have visible text, and no REVIEW markers remain
-- **WHEN** the user invokes `/opsx:preflight add-user-auth`
+- **WHEN** the user invokes `/opsx:workflow propose add-user-auth`
 - **THEN** the system reads constitution.md, all change artifacts, and existing specs
 - **AND** produces `preflight.md` covering all six dimensions
 - **AND** the verdict is "PASS"
@@ -38,7 +38,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 #### Scenario: Preflight finds invisible assumption
 
 - **GIVEN** a change with a spec containing `<!-- ASSUMPTION: External API rate limit is 1000/min -->` with no visible list item
-- **WHEN** the user invokes `/opsx:preflight`
+- **WHEN** the user invokes `/opsx:workflow propose`
 - **THEN** the Marker Audit flags the invisible assumption as a format violation
 - **AND** the verdict is "BLOCKED"
 - **AND** the system recommends adding visible text: `- External API rate limit is 1000/min. <!-- ASSUMPTION: API rate limit -->`
@@ -46,7 +46,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 #### Scenario: Preflight finds unresolved REVIEW marker
 
 - **GIVEN** a change where design.md contains `<!-- REVIEW: confirm caching strategy -->`
-- **WHEN** the user invokes `/opsx:preflight`
+- **WHEN** the user invokes `/opsx:workflow propose`
 - **THEN** the Marker Audit flags the REVIEW marker as Blocking
 - **AND** the verdict is "BLOCKED"
 - **AND** the system informs the user that REVIEW markers must be resolved before proceeding
@@ -64,7 +64,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 - **GIVEN** a change where all requirements have scenarios, all assumptions have visible text, and no REVIEW markers remain
 - **BUT** a minor gap is detected (missing error handling for an unlikely edge case)
-- **WHEN** the user invokes `/opsx:preflight`
+- **WHEN** the user invokes `/opsx:workflow propose`
 - **THEN** the verdict is "PASS WITH WARNINGS"
 - **AND** each warning is listed with a recommendation
 - **AND** the system SHALL pause and ask the user to acknowledge each warning
@@ -74,19 +74,19 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 - **GIVEN** a change named `2026-04-08-my-change`
 - **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
 - **AND** `openspec/specs/user-auth/spec.md` has `status: draft` and `change: 2026-04-01-other-change`
-- **WHEN** the user invokes `/opsx:preflight 2026-04-08-my-change`
+- **WHEN** the user invokes `/opsx:workflow propose 2026-04-08-my-change`
 - **THEN** the Draft Spec Validation dimension SHALL flag `user-auth` as BLOCKED (draft owned by different change)
 - **AND** SHALL confirm `quality-gates` as valid (draft owned by current change)
 
 #### Scenario: Preflight detects orphaned draft spec
 - **GIVEN** a spec with `status: draft` but no `change` field
-- **WHEN** the user invokes `/opsx:preflight`
+- **WHEN** the user invokes `/opsx:workflow propose`
 - **THEN** the Draft Spec Validation SHALL flag it as WARNING: "Draft spec with no change owner"
 
 #### Scenario: Required artifacts missing
 
 - **GIVEN** a change where specs exist but design.md has not been created
-- **WHEN** the user invokes `/opsx:preflight`
+- **WHEN** the user invokes `/opsx:workflow propose`
 - **THEN** the system SHALL abort the preflight
 - **AND** SHALL report which required artifacts are missing
 - **AND** SHALL suggest running `/opsx:workflow propose` to generate them
