@@ -38,7 +38,7 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 
 Templates SHALL support two types via an optional `type` field:
 - **`type: artifact`** (default when `type` is absent): Generates a file. Frontmatter SHALL additionally contain `generates` (output file path relative to change directory). The markdown body SHALL define the output structure for the generated artifact. Status is determined by file existence at the `generates` path.
-- **`type: action`**: Executes a skill or action. Frontmatter SHALL additionally contain `status_check` (how to determine if this step is complete). The `status_check` field SHALL use one of: `tasks_complete` (all checkboxes in tasks.md are checked), `proposal_completed` (proposal frontmatter `status == completed`), `file_exists: <path>` (a specific file exists outside the change directory, e.g., `CHANGELOG.md`), or `always_run` (no persistent status — step always executes when reached). Action templates MAY have a markdown body for supplementary documentation but it is not used as output structure.
+- **`type: action`**: Executes a skill or action. Action steps are always executed when their dependencies are satisfied — the action itself handles idempotency (e.g., `apply` checks which tasks are still open, `changelog` checks which entries already exist). Action templates MAY have a markdown body for supplementary documentation but it is not used as output structure.
 
 The `instruction` field content SHALL NOT be copied into generated artifacts — it serves as constraints for the AI during generation or execution. The `template-version` field enables `/opsx:setup` to detect whether a local template has been customized by the user and to merge plugin updates with local customizations instead of overwriting them. The field is named `template-version` (not `version`) to distinguish it from spec `version` (content version tracking).
 
@@ -52,7 +52,7 @@ The `instruction` field content SHALL NOT be copied into generated artifacts —
 #### Scenario: Action template contains required frontmatter fields
 - **GIVEN** a Smart Template file with `type: action`
 - **WHEN** its YAML frontmatter is inspected
-- **THEN** it SHALL contain `id`, `description`, `requires`, `instruction`, `status_check`, and `template-version` fields
+- **THEN** it SHALL contain `id`, `description`, `requires`, `instruction`, and `template-version` fields
 - **AND** SHALL NOT require a `generates` field
 
 #### Scenario: Skill reads instruction from template frontmatter
@@ -66,18 +66,13 @@ The `instruction` field content SHALL NOT be copied into generated artifacts —
 - **WHEN** a skill generates an artifact using this template
 - **THEN** the generated artifact SHALL follow the section structure defined in the template body
 
-#### Scenario: Action template status check determines completion
-- **GIVEN** a Smart Template with `type: action` and `status_check: tasks_complete`
-- **WHEN** a skill checks whether this step is complete
-- **THEN** it SHALL parse `tasks.md` checkboxes and report complete only if all are checked
-
 #### Scenario: All templates use Smart Template format
 - **GIVEN** the `openspec/templates/` directory
 - **WHEN** all template files are inspected
 - **THEN** every template (pipeline artifacts, actions, docs, constitution) SHALL have YAML frontmatter with at minimum `id` and `description` fields
 
 ### Requirement: Skill Reading Pattern
-Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each step in `pipeline`, read `<templates_dir>/<id>.md` to get frontmatter fields and (for artifact types) output structure from body, (3) check step status: for artifact steps (`type: artifact` or no `type`), check file existence at `openspec/changes/<name>/<generates>`; for action steps (`type: action`), evaluate the `status_check` field, (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) for artifact steps, execute `post_artifact` from WORKFLOW.md after artifact creation.
+Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each step in `pipeline`, read `<templates_dir>/<id>.md` to get frontmatter fields and (for artifact types) output structure from body, (3) check step status: for artifact steps (`type: artifact` or no `type`), check file existence at `openspec/changes/<name>/<generates>`; for action steps (`type: action`), always execute when dependencies are satisfied (the action handles its own idempotency), (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) for artifact steps, execute `post_artifact` from WORKFLOW.md after artifact creation.
 
 When executing action steps, skills SHALL use the Agent tool to spawn an isolated sub-agent for each step. The sub-agent SHALL receive the template's `instruction` as its primary directive and only the artifacts listed in `requires` as input context (read from disk). This bounded-context approach prevents context window exhaustion during full pipeline execution.
 
@@ -96,11 +91,11 @@ Skills SHALL support checkpoint/resume: if invoked on a change with existing art
 - **WHEN** the skill checks step status
 - **THEN** it SHALL check if `openspec/changes/my-change/research.md` exists and is non-empty
 
-#### Scenario: Skill checks action status via status_check
-- **GIVEN** a change workspace at `openspec/changes/my-change/`
-- **AND** a Smart Template with `type: action` and `status_check: tasks_complete`
-- **WHEN** the skill checks step status
-- **THEN** it SHALL parse `openspec/changes/my-change/tasks.md` for checkbox completion
+#### Scenario: Skill always executes action steps when dependencies met
+- **GIVEN** a pipeline with an action step `apply` that `requires: [tasks]`
+- **AND** the `tasks` artifact step is complete (file exists)
+- **WHEN** the skill reaches the `apply` step
+- **THEN** it SHALL execute the action (the action itself determines what work remains)
 
 #### Scenario: Skill executes action step as sub-agent
 - **GIVEN** a pipeline step with `type: action` and `requires: [tasks]`
@@ -182,7 +177,6 @@ The `/opsx:ff` skill SHALL support executing the complete `pipeline` array from 
 - **`templates_dir` points to nonexistent directory**: Skills SHALL report the missing directory and suggest running `/opsx:setup`.
 - **Automation section with unknown step**: If `automation.post_approval.steps` contains a step identifier that does not map to a known action, the system SHALL skip the unknown step and report a warning.
 - **Pipeline step without template file**: If a step ID in the `pipeline` array has no corresponding template at `<templates_dir>/<id>.md`, the skill SHALL report the missing template and stop.
-- **Action step with unknown status_check**: If an action template's `status_check` uses an unrecognized value, the skill SHALL treat it as `always_run` and report a warning.
 - **ff invoked on completed change**: If the proposal has `status: completed`, ff SHALL report that the change is already complete and stop.
 - **Sub-agent fails mid-pipeline**: If a sub-agent exits with an error, ff SHALL report the error, note which step failed, and stop. Artifacts created by previous steps remain on disk (no rollback of successfully completed steps).
 - **Concurrent pipeline invocations**: If two pipeline executions run on the same change simultaneously, they may conflict on file writes. The system does not prevent this — the user is responsible for avoiding concurrent runs.
