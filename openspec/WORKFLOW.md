@@ -3,7 +3,7 @@ template-version: 3
 templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks, review]
 
-actions: [init, apply, finalize]
+actions: [init, propose, apply, finalize]
 
 worktree:
   enabled: true
@@ -49,6 +49,28 @@ After creating any artifact, commit and push the change:
 
 If `gh` CLI is unavailable or not authenticated, skip PR creation.
 If push fails, continue with local commit — do not block the pipeline.
+
+## Action: propose
+
+### Requirements
+
+- [Propose as Single Entry Point for Pipeline Traversal](openspec/specs/artifact-pipeline/spec.md#requirement-propose-as-single-entry-point-for-pipeline-traversal)
+- [Seven-Stage Pipeline](openspec/specs/artifact-pipeline/spec.md#requirement-seven-stage-pipeline)
+- [Artifact Dependencies](openspec/specs/artifact-pipeline/spec.md#requirement-artifact-dependencies)
+- [Change Workspace Creation](openspec/specs/change-workspace/spec.md#requirement-change-workspace-creation)
+- [Worktree Isolation](openspec/specs/change-workspace/spec.md#requirement-worktree-isolation)
+- [Lazy Worktree Cleanup](openspec/specs/change-workspace/spec.md#requirement-lazy-worktree-cleanup)
+
+### Instruction
+
+Create change workspace if needed, then traverse the pipeline generating artifacts.
+If no change exists: ask user what to build, derive kebab-case name, create workspace (with worktree if enabled).
+Lazy worktree cleanup: before creating, check for stale worktrees (completed proposals or merged PRs) and clean up.
+Checkpoint/resume: skip completed artifacts, resume from first incomplete step.
+Design review checkpoint: pause after design for user alignment (constitutional requirement).
+Preflight checkpoint: PASS → continue, PASS WITH WARNINGS → pause for acknowledgment, BLOCKED → stop.
+review artifact: stop before review and suggest /opsx:apply (review is generated during apply, not propose).
+Execute Post-Artifact Hook after each artifact.
 
 ## Action: init
 
