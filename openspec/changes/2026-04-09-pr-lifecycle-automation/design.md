@@ -19,14 +19,27 @@ Constraints:
 
 ## Architecture & Components
 
-### 1. WORKFLOW.md Extension
+### 1. WORKFLOW.md Restructuring
 
 **File**: `openspec/WORKFLOW.md` (+ consumer template `src/templates/workflow.md`)
 
-Extended pipeline array and new automation block:
+The current WORKFLOW.md has ~95 lines of YAML frontmatter with multi-line prose (`apply.instruction`, `post_artifact`, `context`) and an empty body. This is restructured into a clean frontmatter/body split:
 
+**Frontmatter** — structured config only (~20 lines):
 ```yaml
+---
+template-version: 2
+templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks, apply, verify, changelog, docs, version-bump]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+
+worktree:
+  enabled: true
+  path_pattern: .claude/worktrees/{change}
+  auto_cleanup: true
 
 automation:
   post_approval:
@@ -36,9 +49,38 @@ automation:
       complete: automation/complete
       failed: automation/failed
     auto_merge: false
+
+# docs_language: English
+---
 ```
 
-The `apply` section remains for backward compatibility — its `instruction` field is still read by the apply skill. The extended `pipeline` array is the new authoritative sequence.
+**Body** — prose instructions as markdown sections:
+```markdown
+# Workflow
+
+Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → Verify → Changelog → Docs → Version Bump
+
+## Context
+
+Always read and follow openspec/CONSTITUTION.md before proceeding.
+All workflow artifacts must be written in English regardless of docs_language.
+
+## Post-Artifact Hook
+
+After creating any artifact, commit and push the change:
+1. Check current branch...
+2. Stage change artifacts...
+3. Commit...
+4. Push...
+5. On FIRST push only: create draft PR
+```
+
+Key changes:
+- **`apply.instruction` removed** — the ~50 lines of prose move into action templates where they belong (apply.md, verify.md, etc.)
+- **`post_artifact` moves from frontmatter to `## Post-Artifact Hook` body section** — prose belongs in markdown, not YAML
+- **`context` moves from frontmatter to `## Context` body section** — same principle
+- **`apply` block shrinks** to just `requires` + `tracks` (structural fields only)
+- **`template-version` bumps to 2** — triggers merge detection for consumers
 
 ### 2. Action Templates
 
@@ -70,6 +112,14 @@ Changes to ff:
 - **Action step status**: Action steps are always executed when dependencies are satisfied. The action itself handles idempotency.
 - **`--auto-approve` flag**: When present, skip the human approval gate in the QA loop. When absent (default), pause at the verify→approval boundary per the human-approval-gate spec.
 - **Pipeline scope**: ff processes ALL steps in the `pipeline` array, not just up to `tasks`.
+- **Post-artifact hook**: Read from WORKFLOW.md `## Post-Artifact Hook` body section instead of frontmatter `post_artifact` field.
+- **Context**: Read from WORKFLOW.md `## Context` body section instead of frontmatter `context` field.
+
+### 3b. Apply Skill Reading Pattern Change
+
+**File**: `src/skills/apply/SKILL.md`
+
+The apply skill currently reads `apply.instruction` from WORKFLOW.md frontmatter. After restructuring, it reads the `instruction` field from the `apply.md` action template instead. This aligns apply with how all other pipeline steps get their instructions — from their template, not from WORKFLOW.md.
 
 Sub-agent prompt structure:
 ```
@@ -170,6 +220,8 @@ Add CI automation convention:
 
 | Decision | Rationale | Alternatives |
 |----------|-----------|--------------|
+| Structured config in frontmatter, prose in body sections | Frontmatter for machine-readable config (~20 lines), body for human-readable instructions. Eliminates 50+ lines of YAML multi-line strings. | All in frontmatter (current, unwieldy); all in body (loses structured parsing) |
+| `apply.instruction` distributed across action templates | Each template carries its own instruction. Eliminates duplication when pipeline and apply.instruction describe the same steps. | Keep apply.instruction in WORKFLOW.md (duplication with action templates); move to constitution (wrong layer) |
 | Extend `pipeline` array with action steps instead of separate `post_pipeline` | Single source of truth; ff reads one array. Templates self-describe their type via `type` field. | Separate `post_pipeline` array (two config points); inline actions in WORKFLOW.md (bloats frontmatter) |
 | Action steps always execute (no status tracking) | Existing skills handle idempotency internally. Adding status tracking adds complexity without value. | `status_check` field per action template (overengineered); progress file in change dir (extra state) |
 | Sub-agent per action step via Agent tool | Prevents context window exhaustion. Each sub-agent gets fresh context with only required artifacts. | Single-context execution (context exhaustion risk); RemoteTrigger (loses filesystem access) |

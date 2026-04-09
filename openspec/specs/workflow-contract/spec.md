@@ -13,19 +13,42 @@ Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, 
 ## Requirements
 
 ### Requirement: WORKFLOW.md Pipeline Orchestration
-The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format. The YAML frontmatter SHALL contain: `templates_dir` (path to Smart Templates directory), `pipeline` (ordered array of step IDs — both artifact steps and action steps), `apply` (object with `requires`, `tracks`, and `instruction` fields), `post_artifact` (instructions executed after each artifact creation), `context` (path to constitution or behavioral context), optionally `docs_language`, optionally `automation` (CI pipeline configuration), and `template-version` (integer, for template merge detection during `/opsx:setup`). The `pipeline` array SHALL be the single source of truth for the complete change lifecycle — from research through finalization. The markdown body MAY contain supplementary workflow documentation.
+The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestration contract. WORKFLOW.md SHALL use markdown-with-YAML-frontmatter format with a clear separation of concerns:
 
-**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, so that all pipeline configuration lives in one place — including both artifact generation and action steps.
+**YAML frontmatter** — structured configuration only:
+- `template-version` (integer, for template merge detection during `/opsx:setup`)
+- `templates_dir` (path to Smart Templates directory)
+- `pipeline` (ordered array of step IDs — both artifact steps and action steps)
+- `apply` (object with `requires` and `tracks` fields)
+- `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
+- `automation` (optional CI pipeline configuration)
+- `docs_language` (optional, defaults to English)
+
+**Markdown body** — prose instructions as named sections:
+- `## Context` — project-level behavioral context (e.g., constitution reference, language rules)
+- `## Post-Artifact Hook` — instructions executed after each artifact creation (branch management, commit, push, draft PR)
+
+The `pipeline` array SHALL be the single source of truth for the complete change lifecycle — from research through finalization. Frontmatter SHALL NOT contain multi-line prose instructions — these belong in body sections or in action template `instruction` fields.
+
+**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration with structured config in frontmatter and prose instructions in the body, so that the file is both machine-readable and human-readable.
 
 #### Scenario: Skill reads WORKFLOW.md for pipeline configuration
-- **GIVEN** a project with `openspec/WORKFLOW.md` containing pipeline frontmatter
+- **GIVEN** a project with `openspec/WORKFLOW.md` containing frontmatter and body sections
 - **WHEN** any pipeline-executing skill is invoked
-- **THEN** the skill SHALL read WORKFLOW.md frontmatter for `templates_dir`, `pipeline`, `apply`, and `post_artifact` configuration
+- **THEN** the skill SHALL read frontmatter for `templates_dir`, `pipeline`, and `apply` configuration
+- **AND** SHALL read the `## Post-Artifact Hook` body section for post-artifact instructions
+- **AND** SHALL read the `## Context` body section for behavioral context
 
-#### Scenario: WORKFLOW.md frontmatter contains required fields
+#### Scenario: WORKFLOW.md frontmatter contains required structured fields
 - **GIVEN** a valid `openspec/WORKFLOW.md`
 - **WHEN** its frontmatter is inspected
-- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, `post_artifact`, `context`, and `template-version` fields
+- **THEN** it SHALL contain `templates_dir`, `pipeline`, `apply`, and `template-version` fields
+- **AND** SHALL NOT contain multi-line prose instructions
+
+#### Scenario: WORKFLOW.md body contains instruction sections
+- **GIVEN** a valid `openspec/WORKFLOW.md`
+- **WHEN** its markdown body is inspected
+- **THEN** it SHALL contain `## Context` and `## Post-Artifact Hook` sections with prose instructions
 
 #### Scenario: Pipeline array contains both artifact and action steps
 - **GIVEN** a valid `openspec/WORKFLOW.md`
@@ -72,7 +95,7 @@ The `instruction` field content SHALL NOT be copied into generated artifacts —
 - **THEN** every template (pipeline artifacts, actions, docs, constitution) SHALL have YAML frontmatter with at minimum `id` and `description` fields
 
 ### Requirement: Skill Reading Pattern
-Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each step in `pipeline`, read `<templates_dir>/<id>.md` to get frontmatter fields and (for artifact types) output structure from body, (3) check step status: for artifact steps (`type: artifact` or no `type`), check file existence at `openspec/changes/<name>/<generates>`; for action steps (`type: action`), always execute when dependencies are satisfied (the action handles its own idempotency), (4) read WORKFLOW.md's `context` field for project-level behavioral context, (5) for artifact steps, execute `post_artifact` from WORKFLOW.md after artifact creation.
+Skills SHALL follow this reading pattern: (1) read `openspec/WORKFLOW.md` frontmatter for `templates_dir` and `pipeline` array, (2) for each step in `pipeline`, read `<templates_dir>/<id>.md` to get frontmatter fields and (for artifact types) output structure from body, (3) check step status: for artifact steps (`type: artifact` or no `type`), check file existence at `openspec/changes/<name>/<generates>`; for action steps (`type: action`), always execute when dependencies are satisfied (the action handles its own idempotency), (4) read WORKFLOW.md's `## Context` body section for project-level behavioral context, (5) for artifact steps, execute the instructions from WORKFLOW.md's `## Post-Artifact Hook` body section after artifact creation.
 
 When executing action steps, skills SHALL use the Agent tool to spawn an isolated sub-agent for each step. The sub-agent SHALL receive the template's `instruction` as its primary directive and only the artifacts listed in `requires` as input context (read from disk). This bounded-context approach prevents context window exhaustion during full pipeline execution.
 
@@ -90,6 +113,17 @@ Skills SHALL support checkpoint/resume: if invoked on a change with existing art
 - **AND** a Smart Template with `type: artifact` and `generates: research.md`
 - **WHEN** the skill checks step status
 - **THEN** it SHALL check if `openspec/changes/my-change/research.md` exists and is non-empty
+
+#### Scenario: Skill reads context from WORKFLOW.md body
+- **GIVEN** a WORKFLOW.md with a `## Context` section in the markdown body
+- **WHEN** a skill needs project-level behavioral context
+- **THEN** it SHALL read the `## Context` section content
+- **AND** SHALL NOT look for a `context` field in the frontmatter
+
+#### Scenario: Skill reads post-artifact hook from WORKFLOW.md body
+- **GIVEN** a WORKFLOW.md with a `## Post-Artifact Hook` section in the markdown body
+- **WHEN** a skill has created an artifact
+- **THEN** it SHALL execute the instructions from the `## Post-Artifact Hook` section
 
 #### Scenario: Skill always executes action steps when dependencies met
 - **GIVEN** a pipeline with an action step `apply` that `requires: [tasks]`
