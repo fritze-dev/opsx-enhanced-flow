@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-09 — Verify Content-Level Check
+
+### Changed
+- `/opsx:verify` now reads implementation files and compares content against spec requirements instead of relying on shallow keyword matching — terminology mismatches, stale headings, and incomplete coverage are now detected by reading the relevant sections and comparing them against spec language (closes #93)
+- Verification heuristics updated to prioritize content comparison over keyword search — keyword search is now used only for initial file discovery, not as the primary verification method
+
 ## 2026-04-08 — Fix Friction Batch
 
 ### Changed

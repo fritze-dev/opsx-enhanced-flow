@@ -2,7 +2,7 @@
 title: "Quality Gates"
 capability: "quality-gates"
 description: "Provides pre-implementation quality checks via /opsx:preflight, post-implementation verification via /opsx:verify, and documentation drift detection via /opsx:docs-verify."
-lastUpdated: "2026-04-08"
+lastUpdated: "2026-04-09"
 ---
 
 # Quality Gates
@@ -137,8 +137,8 @@ Manual ADRs (files with the `adr-MNNN` prefix) are recognized and excluded from 
 
 ## Known Limitations
 
-- Verify uses heuristic keyword-based code search to find implementation evidence. If a requirement keyword matches unrelated code, the system prefers SUGGESTION severity to avoid false critical issues.
-- On very large codebases, verification scans focus on files referenced in the design and recently modified files rather than performing an exhaustive codebase search.
+- Verify reads implementation files and compares content against spec requirements, using keyword search only for initial file discovery. While this catches terminology mismatches and scope gaps, it still relies on heuristic comparison rather than formal equivalence checking. When uncertain, the system prefers SUGGESTION severity to avoid false critical issues.
+- On very large codebases, verification focuses on files referenced in the design and recently modified files rather than reading every file in the project.
 - When a preflight side-effect description is too generic to produce meaningful keyword matches, the system skips that entry and notes it as inconclusive rather than raising a false warning.
 - All change artifacts (specs, design) are assumed to be available and up to date when preflight is invoked.
 - Docs-verify does not perform deep content comparison -- it checks structural alignment (presence of requirements, capabilities, ADRs), not prose-level semantic equivalence.
