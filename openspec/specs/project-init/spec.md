@@ -2,17 +2,17 @@
 order: 12
 category: setup
 status: stable
-version: 2
+version: 3
 lastModified: 2026-04-10
 ---
 ## Purpose
 
-Handles project initialization via `/opsx:workflow init`, including template installation, constitution generation, codebase scanning, and project health checks (spec drift, docs drift detection from the former docs-verify functionality).
+Handles project initialization via `/opsx:workflow init`, including template installation, constitution generation, CLAUDE.md bootstrap, codebase scanning, and project health checks (spec drift, docs drift detection from the former docs-verify functionality).
 
 ## Requirements
 
 ### Requirement: Install OpenSpec Workflow
-The system SHALL provide `/opsx:workflow init` as the single entry point for project setup. The init command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) copy `openspec/WORKFLOW.md` from the plugin's workflow template at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` (skip if WORKFLOW.md already exists), and (3) create `openspec/CONSTITUTION.md` placeholder if none exists. The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
+The system SHALL provide `/opsx:workflow init` as the single entry point for project setup. The init command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) copy `openspec/WORKFLOW.md` from the plugin's workflow template at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` (skip if WORKFLOW.md already exists), (3) create `openspec/CONSTITUTION.md` placeholder if none exists, and (4) generate `CLAUDE.md` from the bootstrap template at `${CLAUDE_PLUGIN_ROOT}/templates/claude.md` if no CLAUDE.md exists (see "CLAUDE.md Bootstrap" requirement). The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
 
 The init command SHALL check for `gh` CLI availability and authentication. If `gh` is available and authenticated, the init command SHALL ask the user whether to enable worktree-based change isolation. If the user opts in, the init command SHALL uncomment the `worktree:` section in the generated WORKFLOW.md and set `enabled: true`. The init command SHALL also offer to configure the GitHub repository merge strategy for rebase-merge via `gh api`.
 
@@ -25,7 +25,7 @@ The init command SHALL ensure target directories exist (via `mkdir -p`) before c
 #### Scenario: First-time project initialization
 - **GIVEN** a project directory without the opsx-enhanced workflow installed
 - **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system SHALL copy Smart Templates from `${CLAUDE_PLUGIN_ROOT}/templates/` to `openspec/templates/`, copy WORKFLOW.md from `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, create `openspec/CONSTITUTION.md` placeholder, and verify the setup
+- **THEN** the system SHALL copy Smart Templates from `${CLAUDE_PLUGIN_ROOT}/templates/` to `openspec/templates/`, copy WORKFLOW.md from `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md`, create `openspec/CONSTITUTION.md` placeholder, generate `CLAUDE.md` from the bootstrap template, and verify the setup
 
 #### Scenario: Idempotent re-initialization
 - **GIVEN** a project that has already been initialized
@@ -268,6 +268,30 @@ The `/opsx:workflow init` command SHALL generate a `CONSTITUTION.md` file based 
 - **WHEN** the constitution is generated
 - **THEN** the Code Style section SHALL reflect the 4-space indentation and camelCase convention, and the Conventions section SHALL reference the conventional commits format
 
+### Requirement: CLAUDE.md Bootstrap
+The `/opsx:workflow init` command SHALL generate a `CLAUDE.md` file from the bootstrap template at `${CLAUDE_PLUGIN_ROOT}/templates/claude.md` when no `CLAUDE.md` exists in the project root. The generated CLAUDE.md SHALL contain at minimum: (1) a `## Workflow` section directing all changes through the OpenSpec flow, and (2) a `## Knowledge Management` section directing the agent to use transparent artifacts instead of auto-memory for project knowledge. The agent SHALL adapt the template content to include project-specific rules discovered during the codebase scan, using REVIEW markers for uncertain items (same pattern as constitution generation). If `CLAUDE.md` already exists, init SHALL skip generation and report "CLAUDE.md already exists — skipped."
+
+**User Story:** As a developer adopting the opsx-enhanced workflow I want init to generate a CLAUDE.md with standard agent directives, so that every session respects the workflow and knowledge transparency rules without manual configuration.
+
+#### Scenario: CLAUDE.md generated on fresh init
+- **GIVEN** a project without a `CLAUDE.md` file
+- **AND** the plugin has a bootstrap template at `${CLAUDE_PLUGIN_ROOT}/templates/claude.md`
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL generate `CLAUDE.md` at the project root
+- **AND** it SHALL contain a `## Workflow` section and a `## Knowledge Management` section
+
+#### Scenario: CLAUDE.md skipped when already exists
+- **GIVEN** a project with an existing `CLAUDE.md` file
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL NOT overwrite `CLAUDE.md`
+- **AND** SHALL report "CLAUDE.md already exists — skipped"
+
+#### Scenario: CLAUDE.md includes project-specific rules
+- **GIVEN** a project with specific conventions discovered during the codebase scan
+- **WHEN** the init command generates CLAUDE.md
+- **THEN** the generated file SHALL include project-specific agent rules beyond the standard sections
+- **AND** uncertain items SHALL be marked with `<!-- REVIEW -->` for user resolution
+
 ### Requirement: Initial Change Creation
 After generating the constitution, the `/opsx:workflow init` command SHALL create an initial change workspace using the OpenSpec CLI and hand off to the standard pipeline. The initial change SHALL be named according to the project context (e.g., `initial-spec`). The init command SHALL then inform the user to continue with the standard pipeline.
 
@@ -396,6 +420,8 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - If migration encounters both WORKFLOW.md and legacy schema.yaml (manual partial migration), init SHALL preserve WORKFLOW.md and skip migration.
 - If `openspec/constitution.md` (lowercase) and `openspec/CONSTITUTION.md` (caps) both exist during migration, init SHALL use the lowercase content and rename to caps.
 - **Workflow template missing from plugin**: If `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` does not exist, report an error and suggest reinstalling the plugin.
+- **CLAUDE.md bootstrap template missing from plugin**: If `${CLAUDE_PLUGIN_ROOT}/templates/claude.md` does not exist, skip CLAUDE.md generation and warn that the plugin may need updating. Do not block init.
+- **CLAUDE.md manually edited after init**: User edits to CLAUDE.md are authoritative. Re-running init SHALL NOT overwrite a manually edited CLAUDE.md.
 - **Template merge with subdirectories**: The merge detection SHALL recursively process templates in subdirectories (e.g., `templates/specs/spec.md`, `templates/docs/capability.md`).
 - **Plugin downgrades**: If the plugin `template-version` is lower than the local `template-version`, the system SHALL warn and skip (do not downgrade).
 - **gh CLI installed but not authenticated**: Report "gh CLI: installed but not authenticated" and skip worktree opt-in.
