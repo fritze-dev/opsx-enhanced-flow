@@ -19,7 +19,7 @@ If no action provided or unrecognized: list available actions from the array and
 ## Step 2: Load WORKFLOW.md
 
 Read `openspec/WORKFLOW.md`. Extract from YAML frontmatter:
-- `templates_dir`, `pipeline`, `actions` (array of action names), `worktree`, `auto_approve`, `automation`
+- `templates_dir`, `pipeline`, `actions` (array of action names), `worktree`, `auto_approve`
 
 Read from markdown body:
 - `## Context` section — follow its instructions (typically: read CONSTITUTION.md)
