@@ -1,6 +1,6 @@
 <!--
 ---
-status: active
+status: completed
 branch: worktree-auto-approve-full-flow
 capabilities:
   new: []

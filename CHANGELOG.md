@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Auto-Approve Full Flow (v2.0.5)
+
+### Changed
+- `auto_approve: true` now runs the full propose→apply→finalize flow end-to-end without checkpoints — design review, user testing, and cross-action transitions are all auto-continued on success paths; FAIL/BLOCKED/WARNING paths still pause (closes #105)
+
 ## 2026-04-10 — Remove Automation Config (v2.0.4)
 
 ### Removed

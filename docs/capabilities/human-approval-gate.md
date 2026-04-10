@@ -1,7 +1,7 @@
 ---
 title: "Human Approval Gate"
 capability: "human-approval-gate"
-description: "QA loop with review.md artifact, fix-verify cycles, auto_approve config, and mandatory human approval"
+description: "QA loop with review.md artifact, fix-verify cycles, auto_approve bypass, and mandatory human approval"
 lastUpdated: "2026-04-10"
 ---
 
