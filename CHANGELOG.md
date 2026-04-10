@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Init Health Check Fixes (v2.0.2)
+
+### Fixed
+- Three-layer-architecture spec: "6-stage" → "7-stage" pipeline and added "review" to the artifact ID list in Schema Layer requirement and scenario
+- Upstreamed `tasks.md` template customizations (Pre-Merge/Post-Merge subsection handling, Section 5) to `src/templates/tasks.md` with template-version bump to v2
+- Upstreamed `specs/spec.md` template customization (implementation-detail prohibition) to `src/templates/specs/spec.md` with template-version bump to v2
+- Added missing custom action hint comments to `openspec/WORKFLOW.md` after `actions:` array
+
 ## 2026-04-10 — Custom Actions (v2.0.1)
 
 ### Added
