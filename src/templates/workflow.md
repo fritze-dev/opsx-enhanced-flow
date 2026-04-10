@@ -14,14 +14,6 @@ actions: [init, propose, apply, finalize]
 
 auto_approve: true
 
-# automation:
-#   post_approval:
-#     action: finalize
-#     labels:
-#       running: automation/running
-#       complete: automation/complete
-#       failed: automation/failed
-
 # docs_language: English
 ---
 

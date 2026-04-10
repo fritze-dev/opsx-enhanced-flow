@@ -68,7 +68,7 @@ Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 # → You review specs + design, confirm alignment
 /opsx:workflow apply             # AI implements according to the plan + generates review.md
 # → You test the result, approve
-/opsx:workflow finalize          # Changelog + docs + version bump (or automated via CI after PR approval)
+/opsx:workflow finalize          # Changelog + docs + version bump
 ```
 
 ---
@@ -173,7 +173,7 @@ These design principles are enforced across the three-layer architecture — eac
 | 2. Review | *Manual* | Review specs + design, confirm alignment. |
 | 3. Execute | `/opsx:workflow apply` | AI implements according to `tasks.md`, generates `review.md`. |
 | 4. QA | *Manual* | User tests → approves (review.md is PR-visible). |
-| 5. Finalize | `/opsx:workflow finalize` | Changelog + docs + version bump (or automated via CI after PR approval). |
+| 5. Finalize | `/opsx:workflow finalize` | Changelog + docs + version bump. |
 
 #### Recovery Path
 
@@ -219,7 +219,6 @@ opsx-enhanced-flow/
 │   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
 ├── .github/workflows/                     # CI/CD
-│   ├── pipeline.yml                       # Post-approval finalize automation
 │   ├── release.yml                        # Auto tag + release on version change
 │   ├── claude.yml                         # @claude mention handler
 │   └── claude-code-review.yml             # Auto code review on PRs

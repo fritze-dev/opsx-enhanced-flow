@@ -7,24 +7,23 @@ lastUpdated: "2026-04-10"
 
 # Workflow Contract
 
-WORKFLOW.md, Smart Templates, and inline action definitions provide the declarative contract that the router reads to understand the pipeline structure, artifact definitions, action instructions, and automation configuration.
+WORKFLOW.md, Smart Templates, and inline action definitions provide the declarative contract that the router reads to understand the pipeline structure, artifact definitions, and action instructions.
 
 ## Purpose
 
-Without a standardized contract format, pipeline configuration scatters across multiple files, action instructions live separately from their templates, and commands must hardcode assumptions about where to find artifact definitions. The workflow contract centralizes pipeline orchestration, action definitions, and automation config in a single WORKFLOW.md file and makes each template self-describing, so that the router interacts with the pipeline through a consistent, inspectable interface.
+Without a standardized contract format, pipeline configuration scatters across multiple files, action instructions live separately from their templates, and commands must hardcode assumptions about where to find artifact definitions. The workflow contract centralizes pipeline orchestration and action definitions in a single WORKFLOW.md file and makes each template self-describing, so that the router interacts with the pipeline through a consistent, inspectable interface.
 
 ## Rationale
 
-A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, project context) while Smart Templates handle artifact definitions (instruction, output path, dependencies). Actions are defined inline in WORKFLOW.md because they have no output structure -- separate action template files (as explored in PR #97) add maintenance overhead without benefit. The router dispatch pattern consolidates 11 separate skill files into a single router that reads WORKFLOW.md dynamically, eliminating copy-pasted logic like change context detection. Both WORKFLOW.md and Smart Templates include a `template-version` field (integer) that enables `/opsx:workflow init` to detect user customizations and merge plugin updates instead of overwriting. Custom actions extend this system by allowing consumer projects to add their own actions to the `actions` array without modifying the plugin source.
+A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, project context) while Smart Templates handle artifact definitions (instruction, output path, dependencies). Actions are defined inline in WORKFLOW.md because they have no output structure -- separate action template files add maintenance overhead without benefit. The router dispatch pattern consolidates 11 separate skill files into a single router that reads WORKFLOW.md dynamically, eliminating copy-pasted logic like change context detection. Both WORKFLOW.md and Smart Templates include a `template-version` field (integer) that enables `/opsx:workflow init` to detect user customizations and merge plugin updates instead of overwriting. Custom actions extend this system by allowing consumer projects to add their own actions to the `actions` array without modifying the plugin source.
 
 ## Features
 
-- **WORKFLOW.md pipeline orchestration** -- YAML frontmatter with `templates_dir`, `pipeline` array (7 stages), `actions` array, `template-version`, optional `worktree`, `auto_approve`, `automation`, and `docs_language`; markdown body with `## Context` and `## Action: <name>` sections
+- **WORKFLOW.md pipeline orchestration** -- YAML frontmatter with `templates_dir`, `pipeline` array (7 stages), `actions` array, `template-version`, optional `worktree`, `auto_approve`, and `docs_language`; markdown body with `## Context` and `## Action: <name>` sections
 - **Smart Template format** -- each template carries `id`, `description`, `generates`, `requires`, `instruction`, and `template-version` fields in YAML frontmatter, with the output structure as the markdown body
 - **Inline action definitions** -- `actions` array in frontmatter lists action names (built-in and custom); each action has a `## Action: <name>` body section with `### Instruction` for procedural guidance
 - **Custom actions** -- consumer projects define additional actions by adding names to the `actions` array and writing corresponding `## Action: <name>` body sections with self-contained instructions; no plugin modification required
 - **Router dispatch pattern** -- single router handles all commands (built-in and custom) with shared intent recognition, change context detection, and WORKFLOW.md loading; validates actions against the `actions` array with fallback to built-in list
-- **Automation configuration** -- optional `automation.post_approval` section configures CI-triggered finalize on PR approval with state labels
 - **Template versioning** -- `template-version` (integer, monotonically increasing) enables version-aware merge during `/opsx:workflow init`
 - **Auto-approve default** -- `auto_approve` defaults to `true` when absent or uncommented; pipeline traversal proceeds without user confirmation at checkpoints on success paths; set to `false` to pause at every checkpoint
 
@@ -32,7 +31,7 @@ A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, p
 
 ### WORKFLOW.MD Provides Pipeline and Action Configuration
 
-The router reads WORKFLOW.md's YAML frontmatter to determine the template directory, pipeline stage order, available actions, and optional automation config. The markdown body provides the `## Context` section for project-level behavioral context and `## Action: <name>` sections with procedural instructions for each action.
+The router reads WORKFLOW.md's YAML frontmatter to determine the template directory, pipeline stage order, and available actions. The markdown body provides the `## Context` section for project-level behavioral context and `## Action: <name>` sections with procedural instructions for each action.
 
 ### Auto-Approve Controls Checkpoint Behavior
 
@@ -53,10 +52,6 @@ Custom actions listed in the `actions` array have their `## Action: <name>` sect
 ### Router Validates Actions Dynamically
 
 The router validates the invoked command against the `actions` array from WORKFLOW.md frontmatter. If WORKFLOW.md is missing (pre-init), the router falls back to the 4 built-in actions. If the action is not recognized, the router reports the error and lists available actions.
-
-### Automation Configuration
-
-The optional `automation.post_approval` section defines what happens when a PR receives all required review approvals: which action to execute (e.g., `finalize`) and which GitHub labels to use for state tracking (`running`, `complete`, `failed`). When absent, automation is treated as disabled.
 
 ## Known Limitations
 
