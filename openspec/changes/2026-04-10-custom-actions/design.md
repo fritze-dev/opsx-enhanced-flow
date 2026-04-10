@@ -24,7 +24,7 @@ User: /opsx:workflow qa-review
   → Router Step 2: load WORKFLOW.md (already happens)
   → Router Step 3: change context detection (same as apply/finalize)
   → Router Step 4: read ## Action: qa-review → ### Instruction (no requirement links)
-  → Router Step 5: generic fallback → spawn sub-agent with instruction + change context
+  → Router Step 5: generic fallback → execute instruction directly (agent decides whether to use sub-agent)
 ```
 
 **No new files, no new concepts.** The generic fallback reuses the existing Sub-Agent Execution pattern used by apply/finalize/init.
@@ -48,6 +48,7 @@ User: /opsx:workflow qa-review
 | Decision | Rationale | Alternatives |
 |----------|-----------|--------------|
 | Generic fallback in Step 5 rather than refactoring all 4 actions | Minimizes change surface. propose has unique Pipeline Traversal logic that can't be generalized. apply/finalize/init have requirement links that custom actions don't need. | Refactor all actions into a single generic dispatch — rejected because propose is fundamentally different. |
+| Execute instruction directly instead of forcing sub-agent | Custom actions may invoke skills that spawn their own sub-agents — forcing a router-level sub-agent would cause unnecessary nesting. Leaving execution mode to the agent gives custom action authors full flexibility. | Always spawn sub-agent — rejected because it constrains custom action authors and can cause double-nesting. |
 | Custom actions go through change context detection | Most custom actions operate on a change (QA review, deploy, lint). Actions that don't need change context can handle this in their instruction. | Skip change context for custom actions — rejected because it would limit usefulness. |
 | Validate against `actions` array, fall back to built-in list if WORKFLOW.md missing | Graceful degradation for projects without WORKFLOW.md (pre-init). | Hard-require WORKFLOW.md for all invocations — rejected because init needs to work without it. |
 

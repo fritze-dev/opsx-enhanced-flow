@@ -81,7 +81,7 @@ All template files SHALL use the Smart Template format: markdown with YAML front
 
 WORKFLOW.md frontmatter SHALL contain `actions` as an array of action names. The array SHALL include the 4 built-in actions (`init`, `propose`, `apply`, `finalize`) and MAY include additional consumer-defined custom actions (e.g., `actions: [init, propose, apply, qa-review, finalize]`). Each action SHALL have a corresponding `## Action: <name>` section in the WORKFLOW.md markdown body containing only `### Instruction` (procedural guidance for the AI agent). For built-in actions, requirement links (clickable markdown links to specific spec requirements using the format `[Requirement Name](openspec/specs/<spec>/spec.md#requirement-<slug>)`) SHALL live in the SKILL.md file, NOT in WORKFLOW.md. Custom actions do not have requirement links in SKILL.md — their instruction text in WORKFLOW.md SHALL be self-contained. This structure ensures prose stays out of frontmatter, the sub-agent receives focused context, and requirement wiring is managed at the skill level for built-in actions. Actions are NOT pipeline steps — they do not generate artifacts in the pipeline sequence. Actions are invoked by the router when the user calls the corresponding command.
 
-For built-in actions, the router SHALL read the `### Instruction` from the WORKFLOW.md body section and the requirement links from the SKILL.md, load the referenced requirement sections from specs, and spawn a sub-agent via the Agent tool with the instruction text as primary directive and the extracted requirements as behavioral context. For custom actions, the router SHALL read the `### Instruction` from the WORKFLOW.md body section and spawn a sub-agent with the instruction text as primary directive and the change directory context — without spec requirement links.
+For built-in actions, the router SHALL read the `### Instruction` from the WORKFLOW.md body section and the requirement links from the SKILL.md, load the referenced requirement sections from specs, and spawn a sub-agent via the Agent tool with the instruction text as primary directive and the extracted requirements as behavioral context. For custom actions, the router SHALL read the `### Instruction` from the WORKFLOW.md body section and execute it directly — the executing agent decides whether to handle it inline or spawn a sub-agent based on the instruction content. Custom actions do not receive spec requirement links.
 
 The system SHALL provide 4 built-in actions: `init` (project initialization and health check), `propose` (pipeline traversal for artifact generation), `apply` (task implementation with review.md generation), and `finalize` (post-approval changelog, docs, and version-bump). Consumer projects MAY define additional custom actions by adding them to the `actions` array and providing corresponding `## Action: <name>` body sections.
 
@@ -107,7 +107,7 @@ The system SHALL provide 4 built-in actions: `init` (project initialization and 
 - **AND** a `## Action: qa-review` body section with `### Instruction`
 - **WHEN** a user invokes `/opsx:workflow qa-review`
 - **THEN** the router SHALL read the `### Instruction` from the `## Action: qa-review` body section
-- **AND** SHALL spawn a sub-agent with the instruction text as primary directive and the change directory context
+- **AND** SHALL execute the instruction directly (the agent decides whether to handle it inline or spawn a sub-agent)
 - **AND** SHALL NOT look for requirement links in the SKILL.md for this action
 
 #### Scenario: Actions are not pipeline steps
@@ -123,7 +123,7 @@ The system SHALL provide a single router skill that handles all user-facing comm
 1. **Intent recognition**: Determine which command was invoked and validate it against the `actions` array
 2. **Change context detection** (for all actions except `init`): Get current branch via `git rev-parse --abbrev-ref HEAD`, scan `openspec/changes/*/proposal.md` for a proposal whose `branch` frontmatter field matches, fall back to worktree convention if inside a worktree
 3. **WORKFLOW.md loading**: Read frontmatter for `templates_dir`, `pipeline`, and `actions`
-4. **Dispatch**: For `propose` — traverse the pipeline, generate artifacts, handle checkpoint/resume. For `apply`/`finalize`/`init` — read action definition from WORKFLOW.md, spawn sub-agent with instruction + requirement links. For custom actions — read action definition from WORKFLOW.md, spawn sub-agent with instruction + change context (no requirement links).
+4. **Dispatch**: For `propose` — traverse the pipeline, generate artifacts, handle checkpoint/resume. For `apply`/`finalize`/`init` — read action definition from WORKFLOW.md, spawn sub-agent with instruction + requirement links. For custom actions — read action definition from WORKFLOW.md, execute instruction directly with change context (no requirement links, agent decides execution mode).
 
 **User Story:** As a developer I want a single entry point that handles built-in and custom actions with shared logic, so that change detection and context loading happen once and consumer projects can extend the workflow.
 
@@ -157,7 +157,7 @@ The system SHALL provide a single router skill that handles all user-facing comm
 - **WHEN** a user invokes `/opsx:workflow qa-review`
 - **THEN** the router SHALL validate `qa-review` against the `actions` array
 - **AND** SHALL read the `### Instruction` from the `## Action: qa-review` section
-- **AND** SHALL spawn a sub-agent with the instruction and change context
+- **AND** SHALL execute the instruction directly (agent decides execution mode)
 - **AND** SHALL NOT look for requirement links in SKILL.md
 
 #### Scenario: Router rejects action not in actions array
