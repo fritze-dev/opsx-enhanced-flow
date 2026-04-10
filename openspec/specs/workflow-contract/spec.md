@@ -1,7 +1,7 @@
 ---
 order: 3
 category: reference
-status: draft
+status: accepted
 version: 3
 lastModified: 2026-04-10
 change: 2026-04-10-custom-actions

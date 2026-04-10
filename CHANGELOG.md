@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Custom Actions (v2.0.1)
+
+### Added
+- Consumer-defined custom actions in WORKFLOW.md — projects can extend the workflow by adding action names to the `actions` array and providing `## Action: <name>` body sections with self-contained instructions
+- Generic fallback dispatch in the router — custom actions are validated against the `actions` array and executed directly, with the agent deciding whether to handle inline or spawn a sub-agent
+- Graceful degradation when WORKFLOW.md is missing — the router falls back to the 4 built-in actions (init, propose, apply, finalize) so that init works without a pre-existing WORKFLOW.md
+
+### Changed
+- Router Step 1 now validates actions dynamically against the `actions` array from WORKFLOW.md instead of a hardcoded list
+- CONSTITUTION.md Architecture Rules updated from "4 actions" to "4 built-in actions + consumer-defined custom actions"
+- Consumer WORKFLOW.md template includes a comment explaining custom action usage
+
 ## 2026-04-09 — Skill Consolidation (v2.0.0)
 
 ### Added

@@ -8,7 +8,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) -- WORKFLOW.md declares the 7-stage artifact pipeline order, inline action definitions, apply gate, optional worktree configuration, automation config, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure, action instructions, and artifact generation.
 
-3. **Router + Actions** (`skills/workflow/SKILL.md`) -- A single router skill dispatches to 4 actions: `init` (project setup and health checks), `propose` (pipeline traversal), `apply` (task implementation with review.md), and `finalize` (changelog, docs, version bump). The router handles shared orchestration (intent recognition, change context detection, WORKFLOW.md loading) and spawns sub-agents with bounded context for each action. All actions are model-invocable.
+3. **Router + Actions** (`skills/workflow/SKILL.md`) -- A single router skill dispatches to 4 built-in actions: `init` (project setup and health checks), `propose` (pipeline traversal), `apply` (task implementation with review.md), and `finalize` (changelog, docs, version bump), plus consumer-defined custom actions. The router handles shared orchestration (intent recognition, change context detection, WORKFLOW.md loading) and spawns sub-agents with bounded context for built-in actions. Custom actions are validated against the `actions` array in WORKFLOW.md and executed directly. All actions are model-invocable.
 
 Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
@@ -66,6 +66,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Automated QA steps in apply.instruction; verify auto-fix for mechanical WARNINGs; template sync convention; post-merge worktree cleanup | Instruction text is the enforcement layer; mechanical auto-fix scoped narrowly; constitution owns conventions; cleanup complements lazy detection | [ADR-039](decisions/adr-039-fix-friction-batch-agent-guidance.md) |
 | Spec frontmatter tracking with structured metadata across specs, proposals, designs, and templates | Eliminates fragile markdown parsing; enables collision detection, incremental detection via lastModified, and version-aware template merge on re-setup | [ADR-040](decisions/adr-040-spec-frontmatter-tracking.md) |
 | Consolidate 11 SKILL.md files to 1 router with 4 commands; inline actions in WORKFLOW.md; review.md as pipeline artifact | 93% orchestration code reduction; specs as true single source of truth; persistent PR-visible verification | [ADR-041](decisions/adr-041-skill-consolidation.md) |
+| Generic fallback dispatch for custom actions; direct execution; dynamic validation against actions array | Minimizes change surface (propose can't be generalized); avoids sub-agent nesting; graceful degradation without WORKFLOW.md | [ADR-042](decisions/adr-042-custom-action-dispatch-design.md) |
 
 ### Notable Trade-offs
 
@@ -114,6 +115,8 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Breaking change for consumers (ADR-041)**: Consumers on template-version 1 must run `/opsx:workflow init` to migrate to template-version 3. Mitigated by init handling the migration.
 - **Plugin stub indirection (ADR-041)**: Extra file-read between command invocation and router logic. Mitigated by stubs being trivially simple (~5 lines each).
 - **Loss of standalone preflight/verify commands (ADR-041)**: Users must go through propose or apply. Accepted because 4-command sufficiency covers all workflow needs.
+- **Custom action instruction quality (ADR-042)**: No spec requirement links for custom actions -- instruction quality depends entirely on the consumer author. Mitigated by clear documentation and the self-contained instruction pattern.
+- **Change context for all custom actions (ADR-042)**: Change context detection runs for every custom action even if not needed; the instruction must handle that case explicitly.
 
 ## Conventions
 
@@ -131,7 +134,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 
 | Capability | Description |
 |---|---|
-| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration, Smart Templates, inline actions, and router dispatch |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration, Smart Templates, inline actions, custom actions, and router dispatch |
 | [Three-Layer Architecture](capabilities/three-layer-architecture.md) | Constitution, WORKFLOW.md + Smart Templates, and Router + Actions with independent modifiability |
 | [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking |
 | [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |

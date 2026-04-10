@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: custom-actions
 worktree: .claude/worktrees/custom-actions
 capabilities:
