@@ -1,10 +1,9 @@
 ---
 order: 4
 category: change-workflow
-status: draft
-version: 2
+status: stable
+version: 3
 lastModified: 2026-04-10
-change: 2026-04-10-auto-test-generation
 ---
 ## Purpose
 

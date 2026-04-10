@@ -1,6 +1,6 @@
 <!--
 ---
-status: active
+status: completed
 branch: worktree-auto-test-generation
 capabilities:
   new: [test-generation]

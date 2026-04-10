@@ -1,10 +1,9 @@
 ---
 order: 9
 category: development
-status: draft
+status: stable
 version: 1
 lastModified: 2026-04-10
-change: 2026-04-10-auto-test-generation
 ---
 ## Purpose
 

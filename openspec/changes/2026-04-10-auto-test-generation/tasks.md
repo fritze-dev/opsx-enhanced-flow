@@ -19,15 +19,15 @@
 
 ## 3. QA Loop & Human Approval
 
-- [ ] 3.1. Metric Check:
-  - [ ] Pipeline integrity: WORKFLOW.md pipeline array contains `tests` between `preflight` and `tasks` — PASS/FAIL
-  - [ ] Dependency chain: tasks.md Smart Template `requires` field is `[tests]` — PASS/FAIL
-  - [ ] Template completeness: `openspec/templates/tests.md` exists with valid frontmatter — PASS/FAIL
-  - [ ] Template sync: All openspec/templates/ changes mirrored in src/templates/ — PASS/FAIL
-  - [ ] Review dimension: review.md instruction includes test coverage as 8th dimension — PASS/FAIL
-  - [ ] Constitution section: Constitution template includes `## Testing` section — PASS/FAIL
-  - [ ] No router changes: `src/skills/workflow/SKILL.md` is unchanged — PASS/FAIL
-- [ ] 3.2. Auto-Verify: generate review.md using the review template
+- [x] 3.1. Metric Check:
+  - [x] Pipeline integrity: WORKFLOW.md pipeline array contains `tests` between `preflight` and `tasks` — PASS
+  - [x] Dependency chain: tasks.md Smart Template `requires` field is `[tests]` — PASS
+  - [x] Template completeness: `openspec/templates/tests.md` exists with valid frontmatter — PASS
+  - [x] Template sync: All openspec/templates/ changes mirrored in src/templates/ — PASS
+  - [x] Review dimension: review.md instruction includes test coverage as 8th dimension — PASS
+  - [x] Constitution section: Constitution template includes `## Testing` section — PASS
+  - [x] No router changes: `src/skills/workflow/SKILL.md` is unchanged — PASS
+- [x] 3.2. Auto-Verify: generate review.md using the review template — PASS
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
 - [ ] 3.5. Final Verify: regenerate review.md after all fixes. Skip if 3.4 was not entered.
