@@ -2,8 +2,10 @@
 order: 13
 category: reference
 status: stable
-version: 3
+version: 4
 lastModified: 2026-04-10
+status: draft
+change: 2026-04-10-init-health-check-fixes
 ---
 ## Purpose
 
@@ -27,14 +29,14 @@ The system SHALL have a `CONSTITUTION.md` file at `openspec/CONSTITUTION.md` tha
 - **THEN** the file SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections
 
 ### Requirement: Schema Layer
-The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `openspec/templates/` to define the 6-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, and project context. Post-artifact commit/push logic is handled by the skill during propose pipeline traversal. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
+The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `openspec/templates/` to define the 7-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, and project context. Post-artifact commit/push logic is handled by the skill during propose pipeline traversal. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
 
 **User Story:** As a developer I want the artifact pipeline defined declaratively in WORKFLOW.md and self-describing templates, so that I can understand and modify the workflow without editing skill code.
 
 #### Scenario: WORKFLOW.md defines the pipeline order
 - **GIVEN** the `openspec/WORKFLOW.md` file
 - **WHEN** its frontmatter is read by a skill
-- **THEN** it SHALL declare a `pipeline` array with exactly 6 artifact IDs: research, proposal, specs, design, preflight, and tasks in that dependency order
+- **THEN** it SHALL declare a `pipeline` array with exactly 7 artifact IDs: research, proposal, specs, design, preflight, tasks, and review in that dependency order
 
 #### Scenario: Each Smart Template has instruction and metadata
 - **GIVEN** a Smart Template in `openspec/templates/`
