@@ -2,20 +2,20 @@
 
 ## 1. Foundation
 
-- [ ] 1.1. Create `openspec/templates/tests.md` Smart Template with id, requires, generates, instruction, and template body
-- [ ] 1.2. Sync `src/templates/tests.md` (consumer copy of tests template)
+- [x] 1.1. Create `openspec/templates/tests.md` Smart Template with id, requires, generates, instruction, and template body
+- [x] 1.2. Sync `src/templates/tests.md` (consumer copy of tests template)
 
 ## 2. Implementation
 
-- [ ] 2.1. [P] Update `openspec/WORKFLOW.md`: add `tests` to pipeline array, bump template-version from 3 to 4, update body text flow
-- [ ] 2.2. [P] Update `src/templates/workflow.md`: sync pipeline array and template-version
-- [ ] 2.3. [P] Update `openspec/templates/tasks.md`: change requires from `[preflight]` to `[tests]`, update instruction to reference generated tests, bump template-version from 1 to 2
-- [ ] 2.4. [P] Sync `src/templates/tasks.md` (consumer copy)
-- [ ] 2.5. [P] Update `openspec/templates/review.md`: add 8th verification dimension (test coverage), bump template-version from 1 to 2
-- [ ] 2.6. [P] Sync `src/templates/review.md` (consumer copy)
-- [ ] 2.7. [P] Update `openspec/templates/constitution.md`: add `## Testing` section after Tech Stack
-- [ ] 2.8. [P] Sync `src/templates/constitution.md` (consumer copy)
-- [ ] 2.9. Update `openspec/CONSTITUTION.md`: add `## Testing` section (Framework: None)
+- [x] 2.1. [P] Update `openspec/WORKFLOW.md`: add `tests` to pipeline array, bump template-version from 3 to 4, update body text flow
+- [x] 2.2. [P] Update `src/templates/workflow.md`: sync pipeline array and template-version
+- [x] 2.3. [P] Update `openspec/templates/tasks.md`: change requires from `[preflight]` to `[tests]`, update instruction to reference generated tests, bump template-version from 1 to 2
+- [x] 2.4. [P] Sync `src/templates/tasks.md` (consumer copy)
+- [x] 2.5. [P] Update `openspec/templates/review.md`: add 8th verification dimension (test coverage), bump template-version from 1 to 2
+- [x] 2.6. [P] Sync `src/templates/review.md` (consumer copy)
+- [x] 2.7. [P] Update `openspec/templates/constitution.md`: add `## Testing` section after Tech Stack
+- [x] 2.8. [P] Sync `src/templates/constitution.md` (consumer copy)
+- [x] 2.9. Update `openspec/CONSTITUTION.md`: add `## Testing` section (Framework: None)
 
 ## 3. QA Loop & Human Approval
 

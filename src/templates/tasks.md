@@ -3,7 +3,7 @@ id: tasks
 template-version: 2
 description: Implementation checklist with QA loop
 generates: tasks.md
-requires: [preflight]
+requires: [tests]
 instruction: |
   Create a clean implementation checklist based on design and pre-flight.
   Use `- [ ]` checkbox format — the apply phase parses these for tracking.
@@ -14,6 +14,10 @@ instruction: |
   Carry over every Success Metric from design.md as a PASS/FAIL checkbox
   in the QA Loop (before Auto-Verify).
   Add the QA loop with an explicit human approval gate.
+
+  Reference generated test files from tests.md. Implementation tasks
+  should make failing tests pass. Additional test tasks may be added
+  for cases not covered by Gherkin scenarios.
 
   Definition of Done is emergent from artifacts — there is no
   separate DoD checklist. Gherkin scenarios define functional

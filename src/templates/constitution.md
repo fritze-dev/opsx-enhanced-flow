@@ -14,6 +14,10 @@ instruction: |
 ## Tech Stack
 (Language, Runtime, Framework, Database, Testing, Package Manager)
 
+## Testing
+(Framework, test directory, file pattern, import style, conventions.
+ Leave empty or remove section if project has no test infrastructure.)
+
 ## Architecture Rules
 (Architectural patterns, module boundaries, dependency direction)
 

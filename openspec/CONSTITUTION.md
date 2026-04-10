@@ -10,6 +10,11 @@ template-version: 1
 - **Shell:** Bash (skill command execution)
 - **Platform:** Claude Code plugin system
 
+## Testing
+
+- **Framework:** None (plugin is Markdown/YAML artifacts, no executable tests)
+- **Validation:** Gherkin scenarios verified via review.md during apply
+
 ## Architecture Rules
 
 - **Three-layer architecture:** CONSTITUTION.md (global rules) → WORKFLOW.md + Smart Templates (artifact pipeline + inline actions) → Router (single workflow skill with 4 built-in actions (init, propose, apply, finalize) + consumer-defined custom actions)

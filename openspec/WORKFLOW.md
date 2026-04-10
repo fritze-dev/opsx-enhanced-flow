@@ -1,7 +1,7 @@
 ---
-template-version: 3
+template-version: 4
 templates_dir: openspec/templates
-pipeline: [research, proposal, specs, design, preflight, tasks, review]
+pipeline: [research, proposal, specs, design, preflight, tests, tasks, review]
 
 actions: [init, propose, apply, finalize]
 # Add custom actions here (e.g. qa-review) and define matching
@@ -19,7 +19,7 @@ auto_approve: true
 
 # Workflow
 
-Research → Propose → Specs → Design → Pre-Flight → Tasks → Apply → Review → Finalize
+Research → Propose → Specs → Design → Pre-Flight → Tests → Tasks → Apply → Review → Finalize
 
 ## Context
 
