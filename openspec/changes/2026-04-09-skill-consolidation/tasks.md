@@ -40,18 +40,18 @@
   - [x] Pipeline array has 7 entries ending with review — PASS
   - [x] 13 specs in openspec/specs/ (design estimate was approximate) — PASS
 - [x] 3.2. Auto-Verify: Run `/opsx:verify` — PASS (0 critical, 1 expected warning: draft specs)
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Approved** by user.
+- [x] 3.4. Fix Loop: Multiple iterations — single workflow skill, requirement links, post-artifact hook move, stale reference cleanup, requirement coverage audit.
+- [x] 3.5. Final Verify: Re-verified after all fixes — PASS.
+- [x] 3.6. Approval: Explicit **"Approved"** by user on 2026-04-10.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
-- [ ] 4.5. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #X"`)
+- [x] 4.1. Generate changelog (`/opsx:changelog`)
+- [x] 4.2. Generate/update docs (`/opsx:docs`)
+- [x] 4.3. Bump version (2.0.0)
+- [x] 4.4. Commit and push to remote
+- [x] 4.5. Update PR: mark ready for review
 
 ## 5. Post-Merge Reminders
 

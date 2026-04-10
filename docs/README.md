@@ -4,13 +4,13 @@
 
 The opsx-enhanced plugin uses a **three-layer architecture** where each layer has distinct responsibilities and can be modified independently:
 
-1. **Constitution** (`openspec/CONSTITUTION.md`) — Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
+1. **Constitution** (`openspec/CONSTITUTION.md`) -- Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) — WORKFLOW.md declares the 7-stage artifact pipeline (research → review), inline action definitions (init, apply, finalize), optional worktree configuration, automation config, and project context. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection. Together they are the single source of truth for pipeline structure, artifact generation, and action orchestration.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) -- WORKFLOW.md declares the 7-stage artifact pipeline order, inline action definitions, apply gate, optional worktree configuration, automation config, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure, action instructions, and artifact generation.
 
-3. **Workflow Skill** (`skills/workflow/SKILL.md`) — Single skill exposing 4 actions (init, propose, apply, finalize) via `/opsx:workflow <action>`. The skill handles change context detection, WORKFLOW.md loading, and dispatches to pipeline traversal (propose) or sub-agent execution (apply, finalize, init). All actions are model-invocable.
+3. **Router + Actions** (`skills/workflow/SKILL.md`) -- A single router skill dispatches to 4 actions: `init` (project setup and health checks), `propose` (pipeline traversal), `apply` (task implementation with review.md), and `finalize` (changelog, docs, version bump). The router handles shared orchestration (intent recognition, change context detection, WORKFLOW.md loading) and spawns sub-agents with bounded context for each action. All actions are model-invocable.
 
-Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
+Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them by reading WORKFLOW.md and templates directly at runtime, and the constitution does not contain pipeline-specific artifact definitions.
 
 ## Tech Stack
 
@@ -18,7 +18,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Configuration:** YAML (WORKFLOW.md frontmatter, Smart Template frontmatter, spec frontmatter)
 - **Shell:** Bash (skill command execution)
 - **Platform:** Claude Code plugin system
-- **No external dependencies:** Router reads WORKFLOW.md and Smart Templates directly — no CLI tools, Node.js, or npm required
+- **No external dependencies:** The router reads WORKFLOW.md and Smart Templates directly -- no CLI tools, Node.js, or npm required
 
 ## Key Design Decisions
 
@@ -26,7 +26,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 |----------|-----------|-----|
 | Organize 15 capabilities (not one per skill) | Groups related behavior logically; comprehensive coverage without 1:1 skill mapping burden | [ADR-001](decisions/adr-001-initial-spec-organization.md) |
 | WORKFLOW.md + Smart Templates own workflow rules | Clear separation: WORKFLOW.md and templates for universal rules, constitution for project-specific rules | [ADR-002](decisions/adr-002-workflow-rule-ownership.md) |
-| Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently specifiable and testable; single entry point via /opsx:workflow finalize | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
+| Split docs-generation into user-docs, architecture-docs, decision-docs | Each concern independently specifiable and testable; single entry point via /opsx:docs | [ADR-003](decisions/adr-003-documentation-ecosystem.md) |
 | Convention in constitution for release workflow; patch-only auto-bump | Skills remain generic shared code; 95%+ of changes are patches; prevents forgotten bumps | [ADR-004](decisions/adr-004-release-workflow.md) |
 | Single docs_language field in WORKFLOW.md; translation at generation time | Central, backward-compatible; one set of templates for all languages | [ADR-005](decisions/adr-005-configurable-documentation-language.md) |
 | Design review checkpoint as constitution convention | Respects skill immutability; design is the last cheap feedback point before quality gates | [ADR-006](decisions/adr-006-design-review-checkpoint.md) |
@@ -37,7 +37,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Rename init skill to setup; use git mv for history preservation | Avoids built-in /init conflict; preserves git history | [ADR-011](decisions/adr-011-rename-init-to-setup.md) |
 | Stateless date comparison for incremental generation; ADR consolidation heuristics | No state file to maintain; reduces excessive ADR granularity while preserving detail | [ADR-012](decisions/adr-012-incremental-docs-generation.md) |
 | Internal-only ADR references; post-generation link validation via glob | Eliminates external URL maintenance; catches broken spec links automatically | [ADR-013](decisions/adr-013-fix-adr-reference-quality.md) |
-| ~~Exclude baseline specs from implementation scope~~ | ~~Superseded by ADR-037 — specs are now edited directly during implementation~~ | [ADR-014](decisions/adr-014-fix-apply-baseline-edits.md) |
+| ~~Exclude baseline specs from implementation scope~~ | ~~Superseded by ADR-037 -- specs are now edited directly during implementation~~ | [ADR-014](decisions/adr-014-fix-apply-baseline-edits.md) |
 | Smart workflow checkpoints; auto-continue default with mandatory pauses | Reduces friction at routine transitions; increases rigor at critical decision points | [ADR-015](decisions/adr-015-smart-workflow-checkpoints.md) |
 | Inline rationale in Decision section; ADR-sourced README table | Separate Rationale was always redundant; ADRs are the canonical source for decisions | [ADR-016](decisions/adr-016-streamline-adr-format.md) |
 | Consolidation guidance via instruction + template + skill layers | Shift-left consolidation pressure prevents spec fragmentation; template section makes reasoning reviewable | [ADR-017](decisions/adr-017-consolidation-guidance.md) |
@@ -50,7 +50,7 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | General rule for marking standard tasks before commit | Simpler, less prescriptive; agent decides timing; accurate because all steps completed by commit time | [ADR-024](decisions/adr-024-general-rule-ensure-all-checked-before-commit-rat.md) |
 | Add mark-before-commit directive to apply.instruction only | Apply instruction owns the post-apply workflow; no other location needed | [ADR-025](decisions/adr-025-add-directive-to-apply-instruction-only.md) |
 | ~~Inline PR integration in proposal step~~ | ~~Superseded by ADR-028~~ | [ADR-026](decisions/adr-026-inline-pr-integration-in-proposal-step.md) |
-| Post-artifact commit and PR integration | Skill-level commit logic runs after every artifact during propose; branch+PR on first commit; avoids orphaned PRs | [ADR-028](decisions/adr-028-post-artifact-commit-and-pr-integration.md) |
+| Post-artifact commit and PR integration | Schema-level `post_artifact` hook commits after every artifact; branch+PR on first commit; avoids orphaned PRs | [ADR-028](decisions/adr-028-post-artifact-commit-and-pr-integration.md) |
 | All skills are model-invocable, including setup | disable-model-invocation: true makes skills undiscoverable; bootstrap needs setup | [ADR-M001](decisions/adr-M001-init-model-invocable.md) |
 | Remove CLI dependency; skills read schema.yaml directly | Zero external dependencies; Claude natively parses YAML; simpler than CLI subprocess | [ADR-027](decisions/adr-027-remove-cli-dependency.md) |
 | Dissolve schema directory; WORKFLOW.md + Smart Templates | Clean separation of orchestration and artifact definition; self-describing templates; one-way migration | [ADR-029](decisions/adr-029-dissolve-schema-directory.md) |
@@ -58,17 +58,18 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 | Plugin source in `src/`, auto GitHub Releases via CI, local marketplace for dev | Clean consumer cache; automated releases; VS Code-compatible dev workflow | [ADR-031](decisions/adr-031-auto-github-releases-and-plugin-source-restr.md) |
 | Documentation drift verification via semantic checks with CLEAN/DRIFTED/OUT OF SYNC verdicts | Structural element comparison is cheaper and more actionable than diff-based regeneration; three-tier severity matches existing quality gate patterns | [ADR-032](decisions/adr-032-documentation-drift-verification.md) |
 | Worktree-based change lifecycle with opt-in isolation, context detection, and template extraction | Full filesystem isolation eliminates merge conflicts for parallel changes; auto-detection reduces manual input; template pattern ensures consistency | [ADR-033](decisions/adr-033-worktree-based-change-lifecycle.md) |
-| ~~Auto-sync delta specs before archive instead of prompting~~ | ~~Superseded by ADR-037 — sync and archive eliminated~~ | [ADR-034](decisions/adr-034-auto-sync-before-archive.md) |
+| ~~Auto-sync delta specs before archive instead of prompting~~ | ~~Superseded by ADR-037 -- sync and archive eliminated~~ | [ADR-034](decisions/adr-034-auto-sync-before-archive.md) |
 | PR merge check before branch deletion; force delete on confirmed merge | GitHub API is authoritative for merge status; handles all merge strategies including squash | [ADR-035](decisions/adr-035-pr-merge-check-for-branch-deletion.md) |
-| ~~Fix sync race condition via blocking prompt and state-based validation~~ | ~~Superseded by ADR-037 — sync eliminated~~ | [ADR-036](decisions/adr-036-fix-sync-race-condition-in-archive.md) |
-| Eliminate delta specs, sync, and archive — edit specs directly, flat changes directory | Single spec format, no merge step, completion by tasks.md status not directory location | [ADR-037](decisions/adr-037-eliminate-delta-specs-sync-and-archive.md) |
-| Commit before approval in apply.instruction; WIP commit after verify, before user testing | Consistent with post-artifact commit pattern; skill owns commit behavior; template stays clean | [ADR-038](decisions/adr-038-commit-before-approval-in-apply-instruction.md) |
+| ~~Fix sync race condition via blocking prompt and state-based validation~~ | ~~Superseded by ADR-037 -- sync eliminated~~ | [ADR-036](decisions/adr-036-fix-sync-race-condition-in-archive.md) |
+| Eliminate delta specs, sync, and archive -- edit specs directly, flat changes directory | Single spec format, no merge step, completion by tasks.md status not directory location | [ADR-037](decisions/adr-037-eliminate-delta-specs-sync-and-archive.md) |
+| Commit before approval in apply.instruction; WIP commit after verify, before user testing | Consistent with post_artifact pattern; WORKFLOW.md owns commit behavior; template stays clean | [ADR-038](decisions/adr-038-commit-before-approval-in-apply-instruction.md) |
 | Automated QA steps in apply.instruction; verify auto-fix for mechanical WARNINGs; template sync convention; post-merge worktree cleanup | Instruction text is the enforcement layer; mechanical auto-fix scoped narrowly; constitution owns conventions; cleanup complements lazy detection | [ADR-039](decisions/adr-039-fix-friction-batch-agent-guidance.md) |
 | Spec frontmatter tracking with structured metadata across specs, proposals, designs, and templates | Eliminates fragile markdown parsing; enables collision detection, incremental detection via lastModified, and version-aware template merge on re-setup | [ADR-040](decisions/adr-040-spec-frontmatter-tracking.md) |
+| Consolidate 11 SKILL.md files to 1 router with 4 commands; inline actions in WORKFLOW.md; review.md as pipeline artifact | 93% orchestration code reduction; specs as true single source of truth; persistent PR-visible verification | [ADR-041](decisions/adr-041-skill-consolidation.md) |
 
 ### Notable Trade-offs
 
-- **15 capabilities (ADR-001)**: Significant number of specs to maintain, though each is focused and self-contained.
+- **15 capabilities (ADR-001)**: Significant number of specs to maintain, though each is focused and self-contained. Reduced to 13 after consolidation (ADR-041).
 - **Schema owns workflow rules (ADR-002)**: Reduced defense-in-depth since rules live in one place instead of being duplicated; accepted because schema enforcement plus skill guardrails are sufficient.
 - **Patch-only auto-bump (ADR-004)**: Version inflation with many small patches; no rollback mechanism for bad versions.
 - **Convention-based enforcement (ADR-004, ADR-006)**: Soft enforcement relying on agent compliance, not hard code enforcement; mitigated by constitution being injected into every prompt.
@@ -78,17 +79,17 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Deterministic slug renames (ADR-008)**: Slug change causes ADR file renames for existing ADRs; all links regenerate to match.
 - **Consolidated README (ADR-009)**: Breaking external links to previous file locations; low impact since docs are internal.
 - **"Read before write" is advisory (ADR-010)**: Agent compliance depends on well-written guidance; not hard-enforced.
-- **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:workflow init; low impact since the old command was not working anyway.
+- **Rename to setup (ADR-011)**: Breaking change for existing users who memorized /opsx:init; low impact since the old command was not working anyway.
 - **Incremental generation date comparison (ADR-012)**: Agent may misinterpret date comparison logic; worst case is unnecessary regeneration, which is a safe failure mode.
 - **ADR consolidation heuristics (ADR-012)**: May misjudge grouping in edge cases; conservative rules minimize false consolidation.
 - **Internal-only ADR references (ADR-013)**: Less direct traceability to GitHub issues; readers must follow change backlink then read proposal.md to find issue references.
 - **Cross-reference heuristic (ADR-013)**: May miss some relationships when connections are not explicit in change content; manual review can supplement.
-- **~~Baseline spec exclusion (ADR-014)~~**: Superseded by ADR-037 — specs are now edited directly during implementation.
+- **~~Baseline spec exclusion (ADR-014)~~**: Superseded by ADR-037 -- specs are now edited directly during implementation.
 - **Auto-continue surprises (ADR-015)**: Users accustomed to per-artifact pauses may be surprised by auto-continue behavior.
 - **Checkpoint enforcement is advisory (ADR-015)**: Text-based instructions in skills have no hard runtime enforcement; agents may still deviate.
 - **Inline rationale extraction (ADR-016)**: README table requires agent to parse the em-dash pattern from ADR Decision sections; for consolidated ADRs, agent summarizes the overarching decision.
 - **Consolidation guidance is instruction-based (ADR-017)**: Agent compliance not programmatically enforced; mitigated by Consolidation Check template section creating a visible, reviewable artifact. Over-consolidation possible with heuristics; mitigated by upper-bound guidance.
-- **Standard tasks soft enforcement (ADR-018)**: Apply instruction tells agent to skip standard tasks, but no hard gate. Consistent with all other enforcement in the system. Progress counts include standard tasks, showing e.g. "5/9 complete" after apply.
+- **Standard tasks soft enforcement (ADR-018)**: Apply instruction tells agent to skip standard tasks, but no hard gate. Progress counts include standard tasks, showing e.g. "5/9 complete" after apply.
 - **Inline assumptions moved to Assumptions section (ADR-019)**: Assumptions formerly inline within requirements lose proximity to their context; trades locality for centralized auditability.
 - **REVIEW auto-resolution adds prompts (ADR-019)**: Bootstrap and docs skill runs may be slower due to interactive user prompts for uncertain items and broken references.
 - **Multi-capability argument requires caller knowledge (ADR-022)**: Caller must know which capabilities were affected; no automatic detection from archive data.
@@ -99,17 +100,20 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **Free-form Section C parsing (ADR-030)**: Preflight side-effect analysis uses free-form markdown; parsing is inherently fragile. Generic side-effect descriptions are marked inconclusive rather than producing false warnings.
 - **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
-- **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation — mitigated by version-controlled schema and runtime read errors.
+- **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation -- mitigated by version-controlled schema and runtime read errors.
 - **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:workflow propose`.
-- **~~No opt-out for auto-sync (ADR-034)~~**: Superseded by ADR-037 — sync and archive eliminated.
+- **~~No opt-out for auto-sync (ADR-034)~~**: Superseded by ADR-037 -- sync and archive eliminated.
 - **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting. (Now used in lazy worktree cleanup at `/opsx:workflow propose`.)
-- **~~LLM may ignore blocking prompt context (ADR-036)~~**: Superseded by ADR-037 — sync eliminated.
+- **~~LLM may ignore blocking prompt context (ADR-036)~~**: Superseded by ADR-037 -- sync eliminated.
 - **Spec conflicts on shared branches (ADR-037)**: Two parallel changes editing the same baseline spec produce git merge conflicts; mitigated by worktree isolation for local changes.
 - **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:workflow finalize <capability>` override and preflight traceability.
-- **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post-artifact commit pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
+- **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
 - **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
 - **Proposal frontmatter set once at generation (ADR-040)**: If the user manually edits the Capabilities section without updating frontmatter, skills use stale data. Mitigated by preflight cross-checking.
 - **Template-version bump is manual (ADR-040)**: Plugin maintainers must remember to bump `template-version` when changing template content; if forgotten, consumers receive no update.
+- **Breaking change for consumers (ADR-041)**: Consumers on template-version 1 must run `/opsx:workflow init` to migrate to template-version 3. Mitigated by init handling the migration.
+- **Plugin stub indirection (ADR-041)**: Extra file-read between command invocation and router logic. Mitigated by stubs being trivially simple (~5 lines each).
+- **Loss of standalone preflight/verify commands (ADR-041)**: Users must go through propose or apply. Accepted because 4-command sufficiency covers all workflow needs.
 
 ## Conventions
 
@@ -118,44 +122,50 @@ Layers are independently modifiable — WORKFLOW.md and Smart Templates do not e
 - **README accuracy:** When plugin behavior changes, update the README to reflect the new state.
 - **Workflow friction:** Capture friction as GitHub Issues with the `friction` label.
 - **Design review checkpoint:** After creating specs + design artifacts, always pause for user alignment before preflight/tasks.
-- **No ADR references in specs:** Specs must not reference ADRs — ADRs are generated after implementation.
+- **No ADR references in specs:** Specs must not reference ADRs -- ADRs are generated after implementation.
+- **Template synchronization:** Changes to `openspec/WORKFLOW.md` must also be reflected in `src/templates/workflow.md`.
 
 ## Capabilities
 
-### Setup
+### Reference
 
 | Capability | Description |
 |---|---|
-| [Project Init](capabilities/project-init.md) | Project initialization, template installation, constitution generation, codebase scanning, and docs drift health checks |
+| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration, Smart Templates, inline actions, and router dispatch |
+| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | Constitution, WORKFLOW.md + Smart Templates, and Router + Actions with independent modifiability |
+| [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking |
+| [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
 
 ### Change Workflow
 
 | Capability | Description |
 |---|---|
-| [Change Workspace](capabilities/change-workspace.md) | Create and manage change workspaces with proposal-based context detection and worktree isolation |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 7-stage pipeline (research → review) with propose as single entry point, dependency gating, and worktree-aware PR integration |
+| [Change Workspace](capabilities/change-workspace.md) | Workspace creation via propose, worktree isolation, and change lifecycle tracking |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 7-stage pipeline with dependency gating, artifact frontmatter, and PR integration |
 
 ### Development
 
 | Capability | Description |
 |---|---|
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
-| [Quality Gates](capabilities/quality-gates.md) | Pre-implementation preflight checks, post-implementation review.md artifact generation |
-| [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking, review.md generation, and pause-on-blocker |
-| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md verdict as approval gate |
+| [Quality Gates](capabilities/quality-gates.md) | Preflight during propose, review.md during apply, and docs drift during init |
+| [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and review.md generation |
+| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md artifact, fix-verify cycles, and mandatory approval |
+
+### Setup
+
+| Capability | Description |
+|---|---|
+| [Project Init](capabilities/project-init.md) | One-command setup with template merge, codebase scanning, and health checks |
 
 ### Finalization
 
 | Capability | Description |
 |---|---|
-| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer updates |
-| [Documentation](capabilities/documentation.md) | Capability docs, ADRs, and consolidated README generated from specs and changes |
+| [Release Workflow](capabilities/release-workflow.md) | Version management, changelog generation, and consumer update process |
 
-### Reference
+### Documentation
 
 | Capability | Description |
 |---|---|
-| [Three-Layer Architecture](capabilities/three-layer-architecture.md) | CONSTITUTION.md, WORKFLOW.md + Smart Templates + Actions, and Router layers |
-| [Workflow Contract](capabilities/workflow-contract.md) | WORKFLOW.md pipeline orchestration, inline actions, Smart Template format, and router dispatch pattern |
-| [Spec Format](capabilities/spec-format.md) | Format rules for specs with normative descriptions, Gherkin scenarios, and frontmatter tracking fields |
-| [Roadmap Tracking](capabilities/roadmap-tracking.md) | Planned improvements tracked as GitHub Issues with a roadmap label |
+| [Documentation](capabilities/documentation.md) | Capability docs, ADRs, and consolidated README from specs and change artifacts |

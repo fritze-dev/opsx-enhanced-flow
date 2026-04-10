@@ -1,10 +1,9 @@
 ---
 order: 13
 category: reference
-status: draft
-version: 1
-lastModified: 2026-04-09
-change: 2026-04-09-skill-consolidation
+status: stable
+version: 2
+lastModified: 2026-04-10
 ---
 ## Purpose
 

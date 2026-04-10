@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: skill-consolidation
 worktree: .claude/worktrees/skill-consolidation
 capabilities:
