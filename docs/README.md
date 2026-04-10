@@ -69,6 +69,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Generic fallback dispatch for custom actions; direct execution; dynamic validation against actions array | Minimizes change surface (propose can't be generalized); avoids sub-agent nesting; graceful degradation without WORKFLOW.md | [ADR-042](decisions/adr-042-custom-action-dispatch-design.md) |
 | Uncomment `auto_approve: true` in both WORKFLOW.md and template; update spec default language | Consistency per constitution's template sync rule; existing scenarios already cover true/false behaviors | [ADR-043](decisions/adr-043-auto-approve-default.md) |
 | Remove automation config without deprecation; skip historical artifacts; clean CONSTITUTION.md convention | No consumers depend on it; historical artifacts document their time; stale convention reference would confuse | [ADR-044](decisions/adr-044-remove-automation-config.md) |
+| Auto-dispatch in router for full propose→apply→finalize flow; auto-approve only on clean PASS; design checkpoint opt-out not opt-in | Instructions can't chain across actions; warnings may need review; design review is highest-value checkpoint | [ADR-045](decisions/adr-045-auto-approve-full-flow.md) |
 
 ### Notable Trade-offs
 
@@ -120,6 +121,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Custom action instruction quality (ADR-042)**: No spec requirement links for custom actions -- instruction quality depends entirely on the consumer author. Mitigated by clear documentation and the self-contained instruction pattern.
 - **Change context for all custom actions (ADR-042)**: Change context detection runs for every custom action even if not needed; the instruction must handle that case explicitly.
 - **Consumer behavior change on init (ADR-043)**: Consumers who run `init` get auto-approve without explicit opt-in; users who relied on inline checkpoint pauses must set `auto_approve: false` explicitly.
+- **All-or-nothing auto-approve granularity (ADR-045)**: Users who want auto-approve but also want to pause between propose and apply lose that granularity; mitigated by the fact that `auto_approve: false` preserves all checkpoints.
 
 ## Conventions
 
@@ -156,7 +158,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
 | [Quality Gates](capabilities/quality-gates.md) | Preflight during propose, review.md during apply, and docs drift during init |
 | [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and review.md generation |
-| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md artifact, fix-verify cycles, and mandatory approval |
+| [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md artifact, fix-verify cycles, auto_approve bypass, and mandatory approval |
 
 ### Setup
 

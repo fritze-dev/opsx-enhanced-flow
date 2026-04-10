@@ -2,7 +2,7 @@
 order: 3
 category: reference
 status: stable
-version: 4
+version: 5
 lastModified: 2026-04-10
 ---
 ## Purpose
@@ -21,7 +21,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - `pipeline` (ordered array of artifact step IDs — each generates a file)
 - `actions` (array of action names, e.g., `[init, propose, apply, finalize]` — each has a corresponding `## Action: <name>` body section)
 - `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
-- `auto_approve` (optional boolean, defaults to `true` — pipeline traversal proceeds without user confirmation at checkpoints; set to `false` to pause at every checkpoint)
+- `auto_approve` (optional boolean, defaults to `true` — when true, the full propose→apply→finalize flow runs end-to-end without checkpoints on success paths; when false, pauses at every checkpoint including design review, preflight, user testing, and cross-action transitions)
 - `docs_language` (optional, defaults to English)
 
 **Markdown body** — prose instructions as named sections:
@@ -157,6 +157,21 @@ The system SHALL provide a single router skill that handles all user-facing comm
 - **AND** SHALL read the `### Instruction` from the `## Action: qa-review` section
 - **AND** SHALL execute the instruction directly (agent decides execution mode)
 - **AND** SHALL NOT look for requirement links in SKILL.md
+
+#### Scenario: Router auto-dispatches propose→apply→finalize when auto_approve is true
+- **GIVEN** `auto_approve: true` in WORKFLOW.md
+- **AND** the user invokes `/opsx:workflow propose my-feature`
+- **WHEN** propose completes successfully (all pipeline artifacts generated)
+- **THEN** the router SHALL automatically dispatch apply without pausing
+- **AND** when apply completes with review.md verdict PASS, SHALL automatically dispatch finalize
+- **AND** SHALL only pause if a FAIL verdict, BLOCKED preflight, or genuine clarification question occurs
+
+#### Scenario: Router pauses at each transition when auto_approve is false
+- **GIVEN** `auto_approve: false` in WORKFLOW.md
+- **AND** the user invokes `/opsx:workflow propose my-feature`
+- **WHEN** propose completes
+- **THEN** the router SHALL stop and suggest `/opsx:workflow apply`
+- **AND** SHALL NOT auto-dispatch subsequent actions
 
 #### Scenario: Router rejects action not in actions array
 - **GIVEN** a WORKFLOW.md with `actions: [init, propose, apply, finalize]`
