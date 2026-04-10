@@ -3,6 +3,29 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-09 — Skill Consolidation (v2.0.0)
+
+### Added
+- Single workflow skill (`/opsx:workflow <action>`) replaces 11 separate skill files — 4 actions: `init`, `propose`, `apply`, `finalize`
+- `review.md` pipeline artifact — verification report persisted in the change directory, visible in PRs, not skippable
+- 7-stage pipeline: research → proposal → specs → design → preflight → tasks → review
+- Inline action definitions in WORKFLOW.md body with clickable requirement links to specs in the skill
+- `auto_approve` config in WORKFLOW.md for fully autonomous pipeline execution
+- GitHub Actions CI pipeline (`.github/workflows/pipeline.yml`) — triggers finalize automatically on PR approval
+- `project-init` spec (merges project-setup + project-bootstrap)
+- `documentation` spec (merges user-docs + architecture-docs + decision-docs)
+
+### Changed
+- **BREAKING**: 13 commands consolidated to 4 (`/opsx:workflow init`, `propose`, `apply`, `finalize`)
+- **BREAKING**: WORKFLOW.md template-version 1 → 3 with actions array and action body sections
+- Architecture Layer 3 updated from "11 Skills" to "single workflow skill with 4 actions"
+- Post-artifact commit logic moved from WORKFLOW.md body to skill internals
+
+### Removed
+- 10 standalone skill files (new, ff, verify, discover, preflight, changelog, docs, docs-verify, bootstrap, setup)
+- `interactive-discovery` spec (0/49 usage — discover was never adopted)
+- 5 merged specs (project-setup, project-bootstrap, artifact-generation, user-docs, architecture-docs, decision-docs)
+
 ## 2026-04-09 — Worktree Fetch Latest Main
 
 ### Changed

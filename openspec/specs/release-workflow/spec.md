@@ -63,7 +63,7 @@ For intentional minor or major version changes, the maintainer SHALL manually se
 
 ### Requirement: Consumer Update Process
 
-The project documentation SHALL describe the complete consumer update process: refresh the marketplace listing, update the plugin, and restart Claude Code. This process SHALL be documented in the spec so that `/opsx:docs` can generate user-facing documentation from it.
+The project documentation SHALL describe the complete consumer update process: refresh the marketplace listing, update the plugin, and restart Claude Code. This process SHALL be documented in the spec so that `/opsx:workflow finalize` can generate user-facing documentation from it.
 
 **User Story:** As a consumer of the plugin I want to know exactly how to update, so that I always have the latest version.
 
@@ -106,8 +106,8 @@ The project spec SHALL document the complete happy path for plugin installation 
 - **WHEN** the maintainer tests the install flow
 - **THEN** `claude plugin marketplace add fritze-dev/opsx-enhanced-flow` SHALL succeed
 - **AND** `claude plugin install opsx@opsx-enhanced-flow` SHALL succeed
-- **AND** `/opsx:setup` SHALL install the schema and create config files
-- **AND** `/opsx:bootstrap` SHALL generate constitution and initial specs
+- **AND** `/opsx:workflow init` SHALL install the schema and create config files
+- **AND** `/opsx:workflow init` SHALL generate constitution and initial specs
 
 #### Scenario: Update flow after new version
 
@@ -116,7 +116,7 @@ The project spec SHALL document the complete happy path for plugin installation 
 - **WHEN** the maintainer tests the update flow
 - **THEN** `claude plugin marketplace update opsx-enhanced-flow` SHALL refresh the listing
 - **AND** `claude plugin update opsx@opsx-enhanced-flow` SHALL detect and install version N+1
-- **AND** `/opsx:setup` SHALL run idempotently without errors
+- **AND** `/opsx:workflow init` SHALL run idempotently without errors
 
 ### Requirement: Post-Push Developer Plugin Update
 
@@ -145,10 +145,10 @@ The post-apply workflow output SHALL include a "Next steps" section guiding the 
 
 - **GIVEN** a successful verification of a completed change
 - **WHEN** the verification summary is displayed
-- **THEN** the output SHALL include next steps: `/opsx:changelog` → `/opsx:docs` → version bump → push → update plugin
+- **THEN** the output SHALL include next steps: `/opsx:workflow finalize` → version bump → push → update plugin
 
 ### Requirement: Generate Changelog from Completed Changes
-The `/opsx:changelog` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories and identify completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing if frontmatter is absent). For each completed change not yet in the changelog, the agent SHALL identify affected capabilities by reading the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent). The agent SHALL read `proposal.md` for motivation and the current specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for changes not yet represented, preserving existing manually written entries.
+The `/opsx:workflow finalize` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories and identify completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing if frontmatter is absent). For each completed change not yet in the changelog, the agent SHALL identify affected capabilities by reading the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent). The agent SHALL read `proposal.md` for motivation and the current specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for changes not yet represented, preserving existing manually written entries.
 
 **User Story:** As a user of the project I want a changelog that tells me what changed and when, so that I can understand the impact of updates without reading spec files or commit logs.
 
@@ -156,23 +156,23 @@ The `/opsx:changelog` command SHALL generate release notes from completed change
 - **GIVEN** a completed change at `openspec/changes/2025-01-15-user-auth/` containing a proposal describing a new authentication feature
 - **AND** the proposal lists capability `user-auth` as new
 - **AND** `openspec/specs/user-auth/spec.md` contains user stories and scenarios
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 describing the new authentication feature using user stories from the spec
 
 #### Scenario: Multiple completed changes ordered newest first
 - **GIVEN** three completed changes dated 2025-01-10, 2025-02-05, and 2025-03-20
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** the changelog lists the 2025-03-20 entry first, followed by 2025-02-05, then 2025-01-10
 
 #### Scenario: Existing changelog preserved
 - **GIVEN** a `CHANGELOG.md` that already contains manually written entries for versions 1.0 and 1.1
 - **AND** a new completed change that has not been represented in the changelog
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** the agent adds the new entry at the top of the changelog without modifying or removing the existing 1.0 and 1.1 entries
 
 #### Scenario: No completed changes to process
 - **GIVEN** no completed changes exist under `openspec/changes/`
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** the agent informs the user that no completed changes were found and no changelog entries were generated
 
 #### Scenario: Change with only internal refactoring
@@ -181,27 +181,27 @@ The `/opsx:changelog` command SHALL generate release notes from completed change
 - **THEN** the agent either omits the entry entirely or includes it under a minimal note (e.g., "Internal improvements") rather than fabricating user-facing changes
 
 ### Requirement: Language-Aware Changelog Generation
-The `/opsx:changelog` command SHALL determine the documentation language before generating entries. The agent SHALL read `openspec/WORKFLOW.md` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths SHALL remain in English.
+The `/opsx:workflow finalize` command SHALL determine the documentation language before generating entries. The agent SHALL read `openspec/WORKFLOW.md` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths SHALL remain in English.
 
 **User Story:** As a non-English-speaking team I want changelog entries in my language, so that release notes are immediately understandable.
 
 #### Scenario: Changelog generated in configured language
 - **GIVEN** `openspec/WORKFLOW.md` contains `docs_language: German`
 - **AND** a new completed change exists that is not yet in the changelog
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** the new entry SHALL have German section headers (e.g., `### Hinzugefügt`, `### Geändert`, `### Behoben`)
 - **AND** entry descriptions SHALL be in German
 - **AND** dates SHALL remain in ISO format
 
 #### Scenario: Default to English when field is missing
 - **GIVEN** `openspec/WORKFLOW.md` does not contain a `docs_language` field
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** all entries SHALL be generated in English (unchanged behavior)
 
 #### Scenario: Existing entries preserved in previous language
 - **GIVEN** existing changelog entries were generated in English
 - **AND** `docs_language` has been changed to "French"
-- **WHEN** the developer runs `/opsx:changelog`
+- **WHEN** the developer runs `/opsx:workflow finalize`
 - **THEN** existing English entries SHALL be preserved unchanged
 - **AND** new entries SHALL be generated in French
 

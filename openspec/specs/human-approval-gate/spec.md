@@ -2,20 +2,20 @@
 order: 10
 category: development
 status: stable
-version: 1
-lastModified: 2026-04-08
+version: 2
+lastModified: 2026-04-10
 ---
 ## Purpose
 
-Defines the QA loop with mandatory explicit human approval before finalizing, including success metric validation, fix-verify cycles, and bidirectional feedback between code and specs.
+Defines the QA loop with mandatory explicit human approval before finalizing, including success metric validation, fix-verify cycles, and bidirectional feedback between code and specs. The QA loop now produces a `review.md` artifact in the change directory (replacing the previous transient verify report) as the approval gate.
 
 ## Requirements
 
 ### Requirement: QA Loop with Mandatory Approval
 
-The system SHALL require explicit human approval before a change can proceed to the post-apply workflow. The QA loop consists of: (1) running `/opsx:verify` to produce a verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
+The system SHALL require explicit human approval before a change can proceed to the post-apply workflow. The QA loop consists of: (1) generating `review.md` in the change directory using the review template to produce a persisted verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
 
-Approval SHALL be gated by a final verification pass. After the Fix Loop completes (all CRITICAL issues resolved, code and specs in sync), a final `/opsx:verify` SHALL be run (Final Verify step) before the user is asked for approval. This ensures that all changes made during the Fix Loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the Fix Loop was not entered (first verify was clean), the Final Verify step can be marked complete immediately.
+Approval SHALL be gated by a final verification pass. After the Fix Loop completes (all CRITICAL issues resolved, code and specs in sync), a final `review.md` SHALL be regenerated (Final Verify step) before the user is asked for approval. This ensures that all changes made during the Fix Loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the Fix Loop was not entered (first verify was clean), the Final Verify step can be marked complete immediately.
 
 The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verify, User Testing, Fix Loop, Final Verify, and Approval. The exact step numbering is a template concern defined in the tasks Smart Template. Implementation changes are committed and pushed before User Testing via the `apply.instruction` in WORKFLOW.md (not as a template step).
 
@@ -24,7 +24,7 @@ The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verif
 #### Scenario: Approval after clean verification
 
 - **GIVEN** a change "add-user-auth" has been implemented and all tasks are complete
-- **AND** the user runs `/opsx:verify` which produces a report with no CRITICAL or WARNING issues
+- **AND** apply generates `review.md` which shows no CRITICAL or WARNING issues
 - **AND** all success metric checkboxes in the QA Loop section are marked PASS
 - **WHEN** the system presents the verification report
 - **THEN** the system asks for explicit approval
@@ -60,7 +60,7 @@ The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verif
 - **GIVEN** a change where Auto-Verify found CRITICAL issues
 - **AND** the developer completed the Fix Loop, fixing all issues
 - **WHEN** the Fix Loop is complete
-- **THEN** the system SHALL run `/opsx:verify` one final time (Final Verify)
+- **THEN** the system SHALL regenerate `review.md` one final time (Final Verify)
 - **AND** the final verify report SHALL confirm 0 CRITICAL issues
 - **AND** only then SHALL the system proceed to request Approval
 
@@ -84,7 +84,7 @@ The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verif
 
 ### Requirement: Fix Loop
 
-Verify issues SHALL be resolved via a code fix or a spec update before re-verification. When verification finds CRITICAL or WARNING issues, the user SHALL address each issue by either (a) fixing the code to match the spec, or (b) updating the spec or design to match the intended implementation. After fixes are applied, the user SHALL re-run `/opsx:verify` to confirm resolution. The system SHALL support iterative fix-verify cycles until all CRITICAL issues are resolved and the user is satisfied with remaining warnings. The bidirectional feedback principle applies: when implementation reveals that a spec or design is wrong, updating the spec is a valid resolution path.
+Verify issues SHALL be resolved via a code fix or a spec update before re-verification. When verification finds CRITICAL or WARNING issues, the user SHALL address each issue by either (a) fixing the code to match the spec, or (b) updating the spec or design to match the intended implementation. After fixes are applied, the system SHALL regenerate `review.md` to confirm resolution. The system SHALL support iterative fix-verify cycles until all CRITICAL issues are resolved and the user is satisfied with remaining warnings. The bidirectional feedback principle applies: when implementation reveals that a spec or design is wrong, updating the spec is a valid resolution path.
 
 **User Story:** As a developer I want a structured fix-verify loop, so that every verification issue is explicitly resolved -- either by fixing the code or by updating the spec -- before the change is considered complete.
 
@@ -92,7 +92,7 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 
 - **GIVEN** a verification report with CRITICAL issue "Requirement not found: Session Timeout"
 - **WHEN** the developer implements session timeout logic in the auth module
-- **AND** re-runs `/opsx:verify`
+- **AND** regenerates `review.md`
 - **THEN** the new verification report no longer lists the session timeout issue as CRITICAL
 - **AND** the Completeness dimension reflects the additional requirement coverage
 
@@ -101,14 +101,14 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 - **GIVEN** a verification report with WARNING "Implementation may diverge from spec: auth uses session cookies, spec requires JWT"
 - **AND** the developer intentionally chose session cookies over JWT
 - **WHEN** the developer updates the spec to reflect session cookie authentication
-- **AND** re-runs `/opsx:verify`
+- **AND** regenerates `review.md`
 - **THEN** the new verification report no longer lists the divergence warning
 - **AND** the spec accurately reflects the implementation
 
 #### Scenario: Multiple fix-verify iterations
 
 - **GIVEN** a first verification finds 3 CRITICAL and 2 WARNING issues
-- **WHEN** the developer fixes all 3 CRITICAL issues and re-runs `/opsx:verify`
+- **WHEN** the developer fixes all 3 CRITICAL issues and regenerates `review.md`
 - **THEN** the second report shows 0 CRITICAL issues
 - **AND** may show the same 2 warnings plus any new issues introduced by the fixes
 - **AND** the developer may choose to address warnings or approve with acknowledged warnings
@@ -117,7 +117,7 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 
 - **GIVEN** a developer fixes a CRITICAL issue by refactoring the auth module
 - **AND** the refactoring removes a function that another requirement depends on
-- **WHEN** the developer re-runs `/opsx:verify`
+- **WHEN** the developer regenerates `review.md`
 - **THEN** the original CRITICAL issue is resolved
 - **BUT** a new CRITICAL issue appears for the broken dependency
 - **AND** the developer must address the new issue before approval
@@ -127,12 +127,12 @@ Verify issues SHALL be resolved via a code fix or a spec update before re-verifi
 - **GIVEN** a verification finds that the implementation uses a different architectural pattern than design.md specifies
 - **AND** the new pattern is superior and the developer wants to keep it
 - **WHEN** the developer updates design.md to document the actual architecture
-- **AND** re-runs `/opsx:verify`
+- **AND** regenerates `review.md`
 - **THEN** the coherence check passes because design.md now matches the implementation
 
 ## Edge Cases
 
-- **Approval without running verify**: If the user has never run `/opsx:verify` for the current change, the QA Loop approval checkbox in tasks.md will not be checked. The system SHALL warn that verification has not been performed.
+- **Approval without running verify**: If `review.md` has never been generated for the current change, the QA Loop approval checkbox in tasks.md will not be checked. The system SHALL warn that verification has not been performed.
 - **Stale verification**: If code changes are made after the last verify run, the verification report may be stale. The system does not enforce re-verification automatically but SHALL note the timestamp of the last verify run relative to the most recent code changes when the user proceeds with the post-apply workflow.
 - **No design.md success metrics**: If design.md does not contain explicit success metrics, the QA Loop section SHALL still include the mandatory human approval checkbox but will have no PASS/FAIL metric checkboxes.
 - **User provides partial approval**: If the user responds with something ambiguous (e.g., "looks ok" or "seems fine"), the system SHALL clarify that it needs an explicit "Approved" and SHALL NOT treat ambiguous responses as approval.

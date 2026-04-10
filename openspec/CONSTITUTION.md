@@ -12,13 +12,13 @@ template-version: 1
 
 ## Architecture Rules
 
-- **Three-layer architecture:** CONSTITUTION.md (global rules) → WORKFLOW.md + Smart Templates (artifact pipeline) → Skills (user commands)
-- Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed skill logic, skills depend on them via direct file reads
-- **Skill immutability:** Skills in `skills/` are generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
+- **Three-layer architecture:** CONSTITUTION.md (global rules) → WORKFLOW.md + Smart Templates (artifact pipeline + inline actions) → Router (single workflow skill with 4 actions: init, propose, apply, finalize)
+- Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them via direct file reads
+- **Router immutability:** The workflow skill (`skills/workflow/SKILL.md`) is generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)
-- Pipeline source of truth: `openspec/WORKFLOW.md` (orchestration) + `openspec/templates/` (Smart Templates)
+- Pipeline source of truth: `openspec/WORKFLOW.md` (orchestration + actions) + `openspec/templates/` (Smart Templates)
 - Specs: `openspec/specs/<capability>/spec.md` (one directory per capability, edited directly during specs stage)
-- Changes: `openspec/changes/YYYY-MM-DD-<feature>/` (date-prefixed at creation, contains planning artifacts)
+- Changes: `openspec/changes/YYYY-MM-DD-<feature>/` (date-prefixed at creation, contains planning artifacts + review.md)
 
 ## Code Style
 
@@ -39,7 +39,7 @@ template-version: 1
 - **Workflow friction:** When workflow execution reveals friction, capture it as a GitHub Issue with the `friction` label. Include: what happened, expected behavior, and suggested fix.
 - **Design review checkpoint:** After creating specs + design artifacts, always pause for user alignment before proceeding to preflight/tasks. The design phase is the mandatory review checkpoint in every OpenSpec workflow.
 - **No ADR references in specs:** Specs MUST NOT reference ADRs (e.g., "see ADR-019"). ADRs are generated after implementation — specs exist before ADRs do. Specs describe requirements; ADRs document the decisions that shaped them.
-- **Template synchronization:** Changes to `openspec/WORKFLOW.md` behavior fields (`apply.instruction`, `post_artifact`, `context`) must also be reflected in `src/templates/workflow.md`. The `worktree` config may intentionally differ between project and consumer template (e.g., `enabled: true` in project, commented out in consumer).
+- **Template synchronization:** Changes to `openspec/WORKFLOW.md` (actions, pipeline, body sections) must also be reflected in `src/templates/workflow.md`. The `worktree` and `automation` configs may intentionally differ between project and consumer template (e.g., `enabled: true` in project, commented out in consumer).
 
 ## Standard Tasks
 

@@ -52,19 +52,18 @@ instruction: |
 
 ## 3. QA Loop & Human Approval
 - [ ] 3.1. Metric Check: Verify each Success Metric from design.md — PASS / FAIL.
-- [ ] 3.2. Auto-Verify: Run `/opsx:verify` (built-in OpenSpec command).
+- [ ] 3.2. Auto-Verify: generate review.md using the review template.
 - [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
 - [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. Specs must match code before proceeding.
-- [ ] 3.5. Final Verify: Run `/opsx:verify` after all fixes to confirm consistency. Skip if 3.4 was not entered.
+- [ ] 3.5. Final Verify: regenerate review.md after all fixes to confirm consistency. Skip if 3.4 was not entered.
 - [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 <!-- Universal post-implementation steps. Always include this section.
      If the constitution defines ## Standard Tasks > ### Pre-Merge, append those items after these. -->
-- [ ] 4.1. Generate changelog (`/opsx:changelog`)
-- [ ] 4.2. Generate/update docs (`/opsx:docs`)
-- [ ] 4.3. Bump version
-- [ ] 4.4. Commit and push to remote
+- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [ ] 4.2. Bump version
+- [ ] 4.3. Commit and push to remote
 
 ## 5. Post-Merge Reminders
 <!-- Not tracked as tasks. Executed manually after the PR is merged.

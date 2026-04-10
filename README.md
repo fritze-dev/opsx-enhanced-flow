@@ -60,30 +60,15 @@ Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 ### Use the Workflow
 
 ```bash
-# 1. Set up OpenSpec in your project (one-time)
-/opsx:setup                     # Installs schema, config, and skills into the project
-# → Restart your IDE for skills to take effect
+# 1. Initialize project (one-time)
+/opsx:workflow init              # Installs schema, config, templates; scans codebase → constitution + specs
 
-# 2. Bootstrap your project (one-time)
-/opsx:bootstrap                 # AI scans your codebase → generates project rules + initial specs
-# → You review what the AI found
-
-# 3. Build a feature (repeat for each feature)
-/opsx:new feature-x             # Create a workspace for the new feature
-/opsx:ff                        # AI generates planning artifacts (specs edited directly), pauses for review after design, then generates pre-flight + tasks
+# 2. Build a feature (repeat for each feature)
+/opsx:workflow propose feature-x # Create workspace + generate artifacts (research → specs → design → preflight → tasks), pauses for review
 # → You review specs + design, confirm alignment
-/opsx:apply                     # AI implements according to the plan
-# → You test the result
-/opsx:verify                    # Automated checks → you confirm "Approved"
-/opsx:changelog                 # Generate release notes
-/opsx:docs                      # Generate user documentation
-
-# Optional: For complex features, run discovery first
-/opsx:new feature-y             # Create workspace
-/opsx:discover                  # AI researches + asks you clarifying questions
-# → You answer the questions
-/opsx:ff                        # AI generates remaining artifacts based on your answers
-# → ...continue as above
+/opsx:workflow apply             # AI implements according to the plan + generates review.md
+# → You test the result, approve
+/opsx:workflow finalize          # Changelog + docs + version bump (or automated via CI after PR approval)
 ```
 
 ---
@@ -103,7 +88,7 @@ The sections below cover workflow mechanics, configuration, and project structur
 - [Plugin Structure](#plugin-structure)
 - [Target Project Structure](#target-project-structure)
 - [Reference Files](#reference-files)
-- [Skills](#skills)
+- [Commands](#commands)
 - [Setup](#setup)
 - [Roadmap](#roadmap)
 
@@ -115,12 +100,13 @@ Quality practices baked into the workflow. Each "gem" is a specific artifact or 
 
 | Gem | Stored In | Purpose |
 |-----|-----------|---------|
-| **Constitution** | `CONSTITUTION.md` | Living project rules (tech stack, architecture, conventions) — created by bootstrap, auto-updated when features introduce changes, validated in pre-flight. |
+| **Constitution** | `CONSTITUTION.md` | Living project rules (tech stack, architecture, conventions) — created by init, auto-updated when features introduce changes, validated in pre-flight. |
 | **Discovery** | `research.md` | Research documentation & targeted clarification questions — prevents the AI from making assumptions or hallucinating solutions. |
 | **Intent Contract** | `proposal.md` | Captures why a change is needed and which capabilities it affects — creates the binding contract between planning and spec phases. Each capability maps to a spec file. |
 | **BDD / Gherkin** | `spec.md` | Normative requirements (SHALL/MUST) with structured Gherkin scenarios (Given/When/Then) and optional user stories — makes expected behavior precise and directly testable. |
 | **Success Metrics** | `design.md` | Hard, measurable success criteria — verified as PASS/FAIL in the QA loop before proceeding. |
 | **Pre-Flight Check** | `preflight.md` | Quality review before implementation: traceability, gap analysis, side effects, duplication & consistency checks, assumption audit. |
+| **Review** | `review.md` | PR-visible verification artifact generated after implementation — replaces transient verify checks with a persistent, non-skippable review record. |
 | **Changelog** | `CHANGELOG.md` | Auto-generated release notes from completed changes — tracks what changed, when, and why. Follows [Keep a Changelog](https://keepachangelog.com/) format. |
 | **User Docs** | `docs/capabilities/*.md` | Auto-generated end-user documentation from merged specs — always reflects the full current state of the project. |
 | **Decision Records** | `docs/decisions/adr-*.md` | Auto-generated Architecture Decision Records from completed changes' design decisions — preserves the "why" behind every architectural choice. |
@@ -139,7 +125,7 @@ Every artifact in the pipeline carries built-in completion criteria in a structu
 | `spec.md` — Gherkin Scenarios | **Functional completeness** — behavior is done when all scenarios pass | Each scenario is a discrete Given/When/Then check — pass or fail, no ambiguity |
 | `design.md` — Success Metrics | **Quality targets** — the feature meets its measurable goals | Each metric has a concrete threshold — verified as PASS/FAIL during QA |
 | `preflight.md` — Findings | **Risk resolution** — all identified gaps and side effects are addressed | Each finding is a checklist item — "Verify findings are binding" means unresolved items block the workflow |
-| `tasks.md` — QA Loop | **Implementation completeness** — all planned work is executed and tested | Explicit "Approved" gate — no silent completion without human sign-off |
+| `review.md` — Verification | **Implementation completeness** — all planned work is executed and verified | PR-visible artifact with explicit approval gate — no silent completion without human sign-off |
 
 Because these criteria live inside the artifacts — not in a separate checklist — they can't drift out of sync with the actual work. When the spec changes, the DoD changes with it.
 
@@ -149,65 +135,52 @@ Because these criteria live inside the artifacts — not in a separate checklist
 
 ### Three-Layer Architecture
 
-The system separates concerns into three layers: **CONSTITUTION.md** (project rules — the "How"), **WORKFLOW.md + Smart Templates** (artifact pipeline — the "What/When"), and **Skills** (user commands — the "How to interact"). This separation ensures the AI always has access to project rules during implementation, not just during planning. See [docs/README.md](docs/README.md) for a detailed breakdown.
+The system separates concerns into three layers: **CONSTITUTION.md** (project rules — the "How"), **WORKFLOW.md + Smart Templates** (artifact pipeline — the "What/When"), and **Router + Actions (4 commands)** (user interaction — the "How to interact"). A single SKILL.md file routes all commands, with `## Action: <name>` sections in WORKFLOW.md defining each action's behavior. This separation ensures the AI always has access to project rules during implementation, not just during planning. See [docs/README.md](docs/README.md) for a detailed breakdown.
 
 ---
 
 ### Workflow
 
-**Prerequisite:** Run `/opsx:setup` once per project to install the schema and configure OpenSpec.
+**Prerequisite:** Run `/opsx:workflow init` once per project to install the schema, templates, and generate the constitution + initial specs.
 
 #### Workflow Principles
 
-These design principles are enforced across the three-layer architecture — each rule lives at its authoritative source (schema, constitution, or skills) rather than being duplicated:
+These design principles are enforced across the three-layer architecture — each rule lives at its authoritative source (schema, constitution, or workflow actions) rather than being duplicated:
 
 - **User Stories encouraged** — Requirements SHOULD include User Stories to capture intent and user value. Stories are the bridge between stakeholders and engineers. Omit for purely technical or non-functional requirements. *(Schema: spec template)*
 - **Gherkin mandatory** — Strict Given/When/Then scenarios make behavior unambiguous and directly testable. No "the system should work well" hand-waving. *(Schema: spec template)*
 - **Preflight mandatory** — The pre-flight check catches gaps, side effects, and inconsistencies before implementation begins. Skipping it means discovering problems during coding. *(Schema: artifact dependency chain)*
-- **No silent completion** — The AI must wait for explicit "Approved" because only a human can verify that the implementation actually works as intended. This prevents premature completion. *(Skill: verify)*
+- **No silent completion** — The AI must wait for explicit "Approved" because only a human can verify that the implementation actually works as intended. This prevents premature completion. *(Action: apply → review.md)*
 - **Constitution always loaded** — The constitution defines project-wide rules that must inform every AI action — not just artifact generation but also implementation and verification. *(Config: context pointer)*
-- **Verify findings are binding** — All critical/warning issues from verification must be resolved (code fix or spec update) before proceeding. Findings are not optional suggestions. *(Skill: verify)*
+- **Review is persistent** — The `review.md` artifact is committed to the change workspace and visible in PRs. Unlike transient verification, it cannot be skipped or lost. *(Action: apply)*
 - **Bidirectional feedback** — When implementation reveals new edge cases or design flaws, specs and design are updated (not just the code). The QA fix loop is the enforcement point. *(Schema: tasks template)*
 - **Definition of Done is emergent** — Gherkin scenarios define functional completeness, success metrics define quality targets, preflight findings define risk resolution, and explicit approval gates implementation completeness. No separate DoD checklist needed. *(Schema: tasks instruction)*
-- **Design review mandatory** — The design phase is the mandatory review checkpoint in every workflow. `/opsx:ff` pauses after design for user alignment before generating preflight and tasks. This ensures the human reviews approach and architecture before the system proceeds to quality checks and implementation planning. *(Constitution: convention)*
+- **Design review mandatory** — The design phase is the mandatory review checkpoint in every workflow. `propose` pauses after design for user alignment before generating preflight and tasks. This ensures the human reviews approach and architecture before the system proceeds to quality checks and implementation planning. *(Constitution: convention)*
 
 #### Bootstrap
 
 | Step | Command | What Happens |
 |------|---------|--------------|
-| 1. Setup | `/opsx:setup` | Installs workflow + templates into the project. |
-| 2. Bootstrap | `/opsx:bootstrap` | Scans codebase → generates `CONSTITUTION.md` + initial specs. |
-| 3. Review | *Manual* | Review constitution and generated specs for correctness. |
-| 4. Docs | `/opsx:changelog` + `/opsx:docs` | Generate initial documentation. |
+| 1. Init | `/opsx:workflow init` | Installs workflow + templates, scans codebase → generates `CONSTITUTION.md` + initial specs. |
+| 2. Review | *Manual* | Review constitution and generated specs for correctness. |
+| 3. Docs | `/opsx:workflow finalize` | Generate initial changelog + documentation. |
 
 #### Feature Cycle
 
 | Step | Command | What Happens |
 |------|---------|--------------|
-| 1. Plan | `/opsx:new feature-x` + `/opsx:ff` | Create workspace, generate planning artifacts (research through design). ff pauses for review. |
-| 2. Review | *Manual* | Review specs + design, confirm alignment. ff continues with pre-flight + tasks. |
-| 3. Execute | `/opsx:apply` | AI implements according to `tasks.md`, stops at QA gate. |
-| 4. QA | *Manual + `/opsx:verify`* | User tests → Fix Loop → explicit "Approved". |
-| 5. Docs | `/opsx:changelog` + `/opsx:docs` | Generate release notes & user documentation. |
-
-#### Discovery Step (Optional)
-
-For complex features, run discovery separately before fast-forward:
-
-1. `/opsx:discover` → generates only `research.md`, stops for Q&A
-2. User answers open questions
-3. `/opsx:ff` → generates remaining artifacts based on research + answers
-
-**When to use discover:** 3+ coverage categories are Partial/Missing, external APIs involved, architectural impact unclear, or multiple viable approaches need trade-off analysis.
-
-**When to skip:** All categories are Clear, the feature is well-understood, or it's a small change with obvious implementation.
+| 1. Plan | `/opsx:workflow propose feature-x` | Create workspace, generate 7-stage pipeline artifacts (research → proposal → specs → design → preflight → tasks). Pauses for review. |
+| 2. Review | *Manual* | Review specs + design, confirm alignment. |
+| 3. Execute | `/opsx:workflow apply` | AI implements according to `tasks.md`, generates `review.md`. |
+| 4. QA | *Manual* | User tests → approves (review.md is PR-visible). |
+| 5. Finalize | `/opsx:workflow finalize` | Changelog + docs + version bump (or automated via CI after PR approval). |
 
 #### Recovery Path
 
 When code changes happen outside the spec process (hotfixes, dependency updates, external contributions):
 
-- **Small drift:** `/opsx:new hotfix-xyz` → `/opsx:ff` → derive specs from existing code → `/opsx:changelog` → `/opsx:docs`
-- **Large drift:** Re-run `/opsx:bootstrap` — it detects existing specs and runs in recovery mode (drift detection + consistency passes)
+- **Small drift:** `/opsx:workflow propose hotfix-xyz` → derive specs from existing code → `/opsx:workflow finalize`
+- **Large drift:** Re-run `/opsx:workflow init` — it detects existing specs and runs in recovery mode (drift detection + consistency passes)
 
 > The spec process assumes specs come before code. When reality diverges, use these paths to re-sync.
 
@@ -225,36 +198,28 @@ opsx-enhanced-flow/
 ├── src/                                   # Plugin source (what consumers get)
 │   ├── .claude-plugin/
 │   │   └── plugin.json                    # Plugin manifest (name: "opsx")
-│   ├── skills/                            # All plugin skills
-│   │   ├── new/SKILL.md                   # Start a new change
-│   │   ├── ff/SKILL.md                    # Fast-forward all artifacts
-│   │   ├── apply/SKILL.md                 # Implement tasks
-│   │   ├── verify/SKILL.md               # Verify implementation
-│   │   ├── docs-verify/SKILL.md            # Verify docs vs specs
-│   │   ├── setup/SKILL.md                 # Install workflow + templates
-│   │   ├── bootstrap/SKILL.md             # Codebase scan → constitution + specs
-│   │   ├── discover/SKILL.md              # Interactive research with Q&A
-│   │   ├── preflight/SKILL.md             # Standalone quality check
-│   │   ├── changelog/SKILL.md             # Generate release notes
-│   │   └── docs/SKILL.md                  # Generate user documentation
-│   └── templates/                         # Smart Templates (copied by /opsx:setup)
+│   ├── skills/                            # Single skill with action routing
+│   │   └── workflow/SKILL.md              # Router: dispatches to WORKFLOW.md actions
+│   └── templates/                         # Smart Templates (copied by /opsx:workflow init)
 │       ├── research.md                    # Research artifact template
 │       ├── proposal.md                    # Proposal artifact template
 │       ├── design.md                      # Design artifact template
 │       ├── preflight.md                   # Pre-flight check template
 │       ├── tasks.md                       # Implementation tasks template
+│       ├── review.md                      # Review artifact template
 │       ├── constitution.md                # Constitution scaffold template
 │       ├── specs/spec.md                  # Spec template
 │       └── docs/                          # Documentation output templates
 │
 ├── openspec/                              # Project's own OpenSpec (dogfooding)
-│   ├── WORKFLOW.md                        # Pipeline orchestration
+│   ├── WORKFLOW.md                        # Pipeline orchestration + action definitions
 │   ├── CONSTITUTION.md                    # Project constitution
 │   ├── templates/                         # Project's copy of Smart Templates
 │   ├── specs/                             # Specs (one per capability, edited directly)
 │   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
 ├── .github/workflows/                     # CI/CD
+│   ├── pipeline.yml                       # Post-approval finalize automation
 │   ├── release.yml                        # Auto tag + release on version change
 │   ├── claude.yml                         # @claude mention handler
 │   └── claude-code-review.yml             # Auto code review on PRs
@@ -262,14 +227,14 @@ opsx-enhanced-flow/
 └── README.md                              # This file
 ```
 
-### Target Project Structure (after setup)
+### Target Project Structure (after init)
 
 ```
 your-project/
 ├── openspec/
-│   ├── WORKFLOW.md                        # Pipeline orchestration (generated by /opsx:setup)
-│   ├── CONSTITUTION.md                    # Project rules (generated by /opsx:bootstrap)
-│   ├── templates/                         # Smart Templates (copied by /opsx:setup)
+│   ├── WORKFLOW.md                        # Pipeline orchestration + actions (generated by init)
+│   ├── CONSTITUTION.md                    # Project rules (generated by init)
+│   ├── templates/                         # Smart Templates (copied by init)
 │   ├── specs/                             # Specs (edited directly during specs stage)
 │   └── changes/                           # Feature workspaces
 │       └── YYYY-MM-DD-<feature-name>/     # Date-prefixed at creation
@@ -284,7 +249,7 @@ your-project/
 └── ...
 ```
 
-> **Change naming:** Change workspaces use the format `YYYY-MM-DD-<feature-name>/` — date-prefixed at creation. The `/opsx:changelog` skill relies on this date prefix for chronological ordering.
+> **Change naming:** Change workspaces use the format `YYYY-MM-DD-<feature-name>/` — date-prefixed at creation. The `finalize` action relies on this date prefix for chronological ordering.
 
 ---
 
@@ -292,28 +257,22 @@ your-project/
 
 | File | Purpose |
 |------|---------|
-| [WORKFLOW.md](openspec/WORKFLOW.md) | Pipeline orchestration: artifact order, apply gate, post-artifact hook, context pointer |
-| [CONSTITUTION.md](openspec/CONSTITUTION.md) | Living project rules (created by bootstrap, auto-updated in design step) |
+| [WORKFLOW.md](openspec/WORKFLOW.md) | Pipeline orchestration: artifact order, apply gate, context pointer, and `## Action: <name>` sections with inline `### Instruction` blocks |
+| [CONSTITUTION.md](openspec/CONSTITUTION.md) | Living project rules (created by init, auto-updated in design step) |
 | [templates/](openspec/templates/) | Smart Templates with YAML frontmatter (instruction, generates, requires) + output structure |
 
 ---
 
-### Skills
+### Commands
 
-All 10 skills are available as `/opsx:*` commands when the plugin is installed. See [docs/README.md](docs/README.md) for detailed capability documentation.
+All 4 commands are available via `/opsx:workflow <action>` when the plugin is installed. A single `src/skills/workflow/SKILL.md` routes to the appropriate action defined in WORKFLOW.md. See [docs/README.md](docs/README.md) for detailed capability documentation.
 
 | Command | Purpose |
 |---------|---------|
-| `/opsx:setup` | Install workflow + templates into project (one-time setup) |
-| `/opsx:bootstrap` | Full codebase scan → constitution + initial specs |
-| `/opsx:new` | Create a new change workspace (date-prefixed, with lazy worktree cleanup) |
-| `/opsx:discover` | Interactive research with Q&A for complex features |
-| `/opsx:ff` | Generate all remaining artifacts, edit specs directly (pauses at design review + preflight warnings) |
-| `/opsx:apply` | Implement according to `tasks.md` |
-| `/opsx:verify` | Automated verification checks |
-| `/opsx:preflight` | Standalone pre-flight quality check |
-| `/opsx:changelog` | Generate release notes from completed changes |
-| `/opsx:docs` | Generate user documentation from specs |
+| `/opsx:workflow init` | Initialize project or run health check (replaces setup + bootstrap) |
+| `/opsx:workflow propose` | Create change workspace + generate 7-stage artifacts (replaces new + discover + ff) |
+| `/opsx:workflow apply` | Implement tasks + generate review.md (replaces apply + verify) |
+| `/opsx:workflow finalize` | Changelog + docs + version bump (replaces changelog + docs) |
 
 ---
 
@@ -329,12 +288,12 @@ claude plugin marketplace add fritze-dev/opsx-enhanced-flow
 claude plugin install opsx@opsx-enhanced-flow
 ```
 
-After installing the plugin, run `/opsx:setup` in your project to install the workflow and templates. Then run `/opsx:bootstrap` to scan your codebase and generate the constitution + initial specs.
+After installing the plugin, run `/opsx:workflow init` in your project to install the workflow, templates, and generate the constitution + initial specs.
 
 
 #### Updating the Plugin
 
-Patch versions are bumped automatically during the post-apply workflow. To update as a consumer:
+Patch versions are bumped automatically during the finalize action. To update as a consumer:
 
 ```bash
 # 1. Refresh the marketplace listing
@@ -353,7 +312,7 @@ claude plugin uninstall opsx@opsx-enhanced-flow
 claude plugin install opsx@opsx-enhanced-flow
 ```
 
-> **Versioning:** Patch versions auto-increment during the post-apply workflow. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For minor/major releases, manually set the version and push — the Action handles the rest.
+> **Versioning:** Patch versions auto-increment during the finalize action. A GitHub Action automatically creates a git tag and GitHub Release when the version change is pushed to `main`. For minor/major releases, manually set the version and push — the Action handles the rest.
 
 > **Version pinning:** To pin to a specific version, add the marketplace with a tag reference:
 > ```bash
