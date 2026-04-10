@@ -60,7 +60,7 @@ Issues are resolved by fixing code to match the spec or updating the spec to mat
 
 ### Auto-Approve Skips Human Gate
 
-When `auto_approve: true` is set in WORKFLOW.md and review.md's verdict is PASS, the pipeline proceeds directly to finalize without pausing for human approval. A FAIL verdict always stops regardless of the setting.
+When `auto_approve: true` is set in WORKFLOW.md and review.md's verdict is PASS (no CRITICAL, no WARNING), the pipeline skips the user testing pause and proceeds directly to finalize without pausing for human approval. The design review checkpoint during propose is also skipped. A FAIL or BLOCKED verdict always stops regardless of the setting, and PASS WITH WARNINGS still pauses for acknowledgment.
 
 ## Known Limitations
 

@@ -35,9 +35,9 @@ Create change workspace if needed, then traverse the pipeline generating artifac
 If no change exists: ask user what to build, derive kebab-case name, create workspace (with worktree if enabled).
 Lazy worktree cleanup: before creating, check for stale worktrees (completed proposals or merged PRs) and clean up.
 Checkpoint/resume: skip completed artifacts, resume from first incomplete step.
-Design review checkpoint: pause after design for user alignment (constitutional requirement).
+Design review checkpoint: when auto_approve is false, pause after design for user alignment. When auto_approve is true, skip the design checkpoint and continue.
 Preflight checkpoint: PASS → continue, PASS WITH WARNINGS → pause for acknowledgment, BLOCKED → stop.
-review artifact: stop before review and suggest /opsx:workflow apply (review is generated during apply, not propose).
+review artifact: when auto_approve is false, stop before review and suggest /opsx:workflow apply. When auto_approve is true, do not stop — auto-continue to apply.
 
 ## Action: init
 
@@ -57,13 +57,13 @@ Report findings, suggest /opsx:workflow propose for changes needed.
 Implement tasks from tasks.md, then generate review.md.
 QA loop: implement → generate review.md → fix if FAIL → regenerate review.md → until PASS.
 Delete existing review.md before starting implementation.
-Pause only at user testing gate.
+When auto_approve is false, pause at user testing gate. When auto_approve is true and review.md verdict is PASS, skip user testing pause and auto-continue to finalize.
 Fix loop: after any fix, regenerate review.md before presenting to user.
 Artifact freshness: update preflight/design if fix resolves flagged issues.
 Standard Tasks (post-implementation section) are NOT part of apply.
 Constitution standard tasks: pre-merge executed during post-apply, post-merge remain as reminders.
 Before committing, mark all standard task checkboxes as complete except post-merge.
-After review.md PASS, commit and push implementation before pausing for user approval.
+After review.md PASS, commit and push implementation. When auto_approve is false, pause for user approval. When auto_approve is true, auto-continue to finalize.
 
 ## Action: finalize
 

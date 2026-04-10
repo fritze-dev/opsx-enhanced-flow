@@ -105,6 +105,7 @@ For `propose`, `apply`, `finalize`:
    - On first push (no PR exists): `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
    - Skip PR creation if `gh` unavailable. Continue on push failure.
 4. Follow the instruction from `## Action: propose` for checkpoint behavior, workspace creation, and pipeline gates
+5. **Auto-dispatch to apply**: If `auto_approve` is `true` in WORKFLOW.md frontmatter and propose completed successfully (all pipeline artifacts generated, no BLOCKED preflight), automatically dispatch the `apply` action using the same change context. Do NOT pause or suggest `/opsx:workflow apply` — proceed directly.
 
 ### `apply` — Sub-Agent Execution
 
@@ -114,6 +115,7 @@ For `propose`, `apply`, `finalize`:
    - The extracted requirement sections as behavioral context
    - Change directory path and artifact paths
    - The sub-agent implements tasks, generates review.md, runs the QA loop
+3. **Auto-dispatch to finalize**: If `auto_approve` is `true` and the apply sub-agent completed with review.md verdict PASS (no CRITICAL, no WARNING), automatically dispatch the `finalize` action using the same change context. Do NOT pause for user approval — proceed directly.
 
 ### `finalize` — Sub-Agent Execution
 

@@ -25,7 +25,7 @@ A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, p
 - **Custom actions** -- consumer projects define additional actions by adding names to the `actions` array and writing corresponding `## Action: <name>` body sections with self-contained instructions; no plugin modification required
 - **Router dispatch pattern** -- single router handles all commands (built-in and custom) with shared intent recognition, change context detection, and WORKFLOW.md loading; validates actions against the `actions` array with fallback to built-in list
 - **Template versioning** -- `template-version` (integer, monotonically increasing) enables version-aware merge during `/opsx:workflow init`
-- **Auto-approve default** -- `auto_approve` defaults to `true` when absent or uncommented; pipeline traversal proceeds without user confirmation at checkpoints on success paths; set to `false` to pause at every checkpoint
+- **Auto-approve default** -- `auto_approve` defaults to `true` when absent or uncommented; the full pipeline runs end-to-end without pausing: propose skips the design checkpoint, auto-dispatches apply; apply skips the user testing pause on PASS, auto-dispatches finalize. Set to `false` to pause at every checkpoint (design review, user testing gate, approval).
 
 ## Behavior
 
@@ -35,7 +35,7 @@ The router reads WORKFLOW.md's YAML frontmatter to determine the template direct
 
 ### Auto-Approve Controls Checkpoint Behavior
 
-The `auto_approve` field in WORKFLOW.md frontmatter defaults to `true`. When absent or `true`, pipeline checkpoints (preflight warnings acknowledgment, post-apply PASS) are skipped on success paths. When explicitly set to `false`, the pipeline pauses at each checkpoint for user confirmation. FAIL verdicts always stop regardless of `auto_approve`. The design review checkpoint after the design artifact is a constitutional requirement and is not controlled by `auto_approve` -- it always pauses.
+The `auto_approve` field in WORKFLOW.md frontmatter defaults to `true`. When `true`, the full pipeline runs end-to-end without pausing on success paths: propose skips the design review checkpoint and auto-dispatches apply; apply skips the user testing pause when review.md verdict is PASS and auto-dispatches finalize. When explicitly set to `false`, the pipeline pauses at each checkpoint: design review (user alignment), user testing gate (manual approval), and post-apply approval. FAIL or BLOCKED verdicts always stop regardless of `auto_approve`.
 
 ### Smart Templates Are Self-Describing
 
