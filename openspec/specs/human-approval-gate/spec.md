@@ -2,7 +2,7 @@
 order: 10
 category: development
 status: stable
-version: 2
+version: 3
 lastModified: 2026-04-10
 ---
 ## Purpose
@@ -13,7 +13,7 @@ Defines the QA loop with mandatory explicit human approval before finalizing, in
 
 ### Requirement: QA Loop with Mandatory Approval
 
-The system SHALL require explicit human approval before a change can proceed to the post-apply workflow. The QA loop consists of: (1) generating `review.md` in the change directory using the review template to produce a persisted verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
+The system SHALL require explicit human approval before a change can proceed to the post-apply workflow, unless `auto_approve: true` is set in WORKFLOW.md and the review.md verdict is PASS (no CRITICAL or WARNING issues). When auto_approve is true and review passes cleanly, the system SHALL auto-approve and proceed without pausing. The QA loop consists of: (1) generating `review.md` in the change directory using the review template to produce a persisted verification report, (2) presenting findings to the user, and (3) waiting for an explicit "Approved" response. The system SHALL NOT proceed without receiving explicit human approval. Approval SHALL only be requested after verification has been run and all CRITICAL issues have been resolved. The tasks.md template SHALL include a QA Loop section with an explicit human approval checkbox that MUST be checked before proceeding. Every Success Metric from design.md SHALL be carried over as a PASS/FAIL checkbox in the QA Loop section.
 
 Approval SHALL be gated by a final verification pass. After the Fix Loop completes (all CRITICAL issues resolved, code and specs in sync), a final `review.md` SHALL be regenerated (Final Verify step) before the user is asked for approval. This ensures that all changes made during the Fix Loop — including spec updates, design changes, and code fixes — are verified as consistent before finalizing. If the Fix Loop was not entered (first verify was clean), the Final Verify step can be marked complete immediately.
 
@@ -63,6 +63,23 @@ The QA Loop SHALL include the following steps in order: Metric Check, Auto-Verif
 - **THEN** the system SHALL regenerate `review.md` one final time (Final Verify)
 - **AND** the final verify report SHALL confirm 0 CRITICAL issues
 - **AND** only then SHALL the system proceed to request Approval
+
+#### Scenario: Auto-approve bypasses user testing when PASS and auto_approve true
+
+- **GIVEN** `auto_approve: true` in WORKFLOW.md
+- **AND** apply generates `review.md` with verdict PASS and 0 CRITICAL / 0 WARNING issues
+- **WHEN** the QA loop reaches the User Testing step
+- **THEN** the system SHALL skip the user testing pause
+- **AND** SHALL auto-mark the Approval checkbox as complete
+- **AND** SHALL proceed to the post-apply workflow
+
+#### Scenario: Auto-approve does NOT bypass when warnings present
+
+- **GIVEN** `auto_approve: true` in WORKFLOW.md
+- **AND** apply generates `review.md` with verdict PASS WITH WARNINGS
+- **WHEN** the QA loop reaches the User Testing step
+- **THEN** the system SHALL pause for user review of the warnings
+- **AND** SHALL NOT auto-approve
 
 #### Scenario: Final verify skipped when first verify is clean
 
