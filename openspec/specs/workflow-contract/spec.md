@@ -21,7 +21,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - `pipeline` (ordered array of artifact step IDs — each generates a file)
 - `actions` (array of action names, e.g., `[init, propose, apply, finalize]` — each has a corresponding `## Action: <name>` body section)
 - `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
-- `auto_approve` (optional boolean, when `true` pipeline traversal proceeds without user confirmation at checkpoints)
+- `auto_approve` (optional boolean, defaults to `true` — pipeline traversal proceeds without user confirmation at checkpoints; set to `false` to pause at every checkpoint)
 - `automation` (optional CI pipeline configuration — see Requirement: Automation Configuration)
 - `docs_language` (optional, defaults to English)
 
