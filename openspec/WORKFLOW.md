@@ -12,7 +12,7 @@ worktree:
   path_pattern: .claude/worktrees/{change}
   auto_cleanup: true
 
-# auto_approve: true
+auto_approve: true
 
 automation:
   post_approval:

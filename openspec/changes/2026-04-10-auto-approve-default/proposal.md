@@ -1,6 +1,6 @@
 <!--
 ---
-status: active
+status: completed
 branch: auto-approve-default
 capabilities:
   new: []

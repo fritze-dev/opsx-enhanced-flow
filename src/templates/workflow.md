@@ -12,7 +12,7 @@ actions: [init, propose, apply, finalize]
 #   path_pattern: .claude/worktrees/{change}
 #   auto_cleanup: false
 
-# auto_approve: true
+auto_approve: true
 
 # automation:
 #   post_approval:
