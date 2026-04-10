@@ -1,13 +1,13 @@
 ---
 title: "Project Init"
 capability: "project-init"
-description: "One-command project initialization with template merge, codebase scanning, constitution generation, and health checks"
+description: "One-command project initialization with template merge, codebase scanning, constitution generation, CLAUDE.md bootstrap, and health checks"
 lastUpdated: "2026-04-10"
 ---
 
 # Project Init
 
-Sets up a project for the opsx-enhanced workflow via `/opsx:workflow init` -- installing templates, generating a constitution from your codebase, configuring optional worktree isolation, and running health checks for spec and documentation drift.
+Sets up a project for the opsx-enhanced workflow via `/opsx:workflow init` -- installing templates, generating a constitution and CLAUDE.md from your codebase, configuring optional worktree isolation, and running health checks for spec and documentation drift.
 
 ## Purpose
 
@@ -15,11 +15,12 @@ Without a structured setup process, adopting spec-driven development requires ma
 
 ## Rationale
 
-A single `/opsx:workflow init` command covers fresh installs, legacy migrations, and re-initialization after plugin updates because these are all variations of the same concern: ensuring the project has the right files in the right state. Template merge detection uses a `template-version` field rather than blind overwrites so that user customizations survive plugin updates. The codebase scan runs on first setup to generate a project-specific constitution rather than a generic placeholder, since the constitution drives all subsequent AI behavior. Drift detection for specs and docs runs as a health check rather than auto-fixing, keeping the user in control of resolution decisions.
+A single `/opsx:workflow init` command covers fresh installs, legacy migrations, and re-initialization after plugin updates because these are all variations of the same concern: ensuring the project has the right files in the right state. Template merge detection uses a `template-version` field rather than blind overwrites so that user customizations survive plugin updates. The codebase scan runs on first setup to generate a project-specific constitution rather than a generic placeholder, since the constitution drives all subsequent AI behavior. CLAUDE.md is generated from a bootstrap template to ensure every consumer project gets agent-level directives for workflow compliance and knowledge transparency from the start. Drift detection for specs and docs runs as a health check rather than auto-fixing, keeping the user in control of resolution decisions.
 
 ## Features
 
-- **One-command setup** via `/opsx:workflow init` -- copies Smart Templates, installs WORKFLOW.md, creates CONSTITUTION.md placeholder, and validates the result
+- **One-command setup** via `/opsx:workflow init` -- copies Smart Templates, installs WORKFLOW.md, creates CONSTITUTION.md placeholder, generates CLAUDE.md from bootstrap template, and validates the result
+- **CLAUDE.md bootstrap** -- generates CLAUDE.md from a plugin template containing Workflow and Knowledge Management sections, adapted with project-specific rules from the codebase scan
 - **Version-aware template merge** -- uses `template-version` fields to detect user customizations and merge plugin updates instead of overwriting
 - **Constitution section-level merge** -- detects missing sections from newer template versions and offers to generate content for them based on the codebase
 - **Codebase scanning** -- analyzes tech stack, frameworks, languages, file structure, and coding conventions to populate the constitution with project-specific values
@@ -36,7 +37,7 @@ A single `/opsx:workflow init` command covers fresh installs, legacy migrations,
 
 ### Fresh Project Initialization
 
-When you run `/opsx:workflow init` on a project without the workflow installed, the system copies Smart Templates from the plugin's templates directory, installs WORKFLOW.md from the plugin template, and creates a CONSTITUTION.md placeholder. If `gh` is available and authenticated, it offers to enable worktree mode and configure the GitHub repository for rebase-merge. The command validates that all files are in place and reports a summary.
+When you run `/opsx:workflow init` on a project without the workflow installed, the system copies Smart Templates from the plugin's templates directory, installs WORKFLOW.md from the plugin template, creates a CONSTITUTION.md placeholder, and generates CLAUDE.md from the bootstrap template. If `gh` is available and authenticated, it offers to enable worktree mode and configure the GitHub repository for rebase-merge. The command validates that all files are in place and reports a summary. If CLAUDE.md already exists, init skips generation and preserves the existing file.
 
 ### Codebase Scanning and Constitution Generation
 
@@ -75,3 +76,4 @@ Init checks `gh` CLI availability and authentication, git version for worktree s
 - If WORKFLOW.md exists alongside legacy `schema.yaml` (partial manual migration), init preserves WORKFLOW.md and skips migration.
 - If the plugin `template-version` is lower than the local version (plugin downgrade), init warns and skips rather than downgrading.
 - If an empty repository has no source code files, init generates a minimal constitution with placeholder sections.
+- If the CLAUDE.md bootstrap template is missing from the plugin, init skips CLAUDE.md generation with a warning rather than blocking.
