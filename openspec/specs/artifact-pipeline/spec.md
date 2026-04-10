@@ -1,25 +1,26 @@
 ---
 order: 4
 category: change-workflow
-status: stable
+status: draft
 version: 2
 lastModified: 2026-04-10
+change: 2026-04-10-auto-test-generation
 ---
 ## Purpose
 
-Defines the 7-stage artifact pipeline (research, proposal, specs, design, preflight, tasks, review) driven by WORKFLOW.md and Smart Templates, with strict dependency gating that ensures no stage is skipped, implementation is gated by task completion, and verification produces a review.md artifact.
+Defines the 8-stage artifact pipeline (research, proposal, specs, design, preflight, tests, tasks, review) driven by WORKFLOW.md and Smart Templates, with strict dependency gating that ensures no stage is skipped, implementation is gated by task completion, and verification produces a review.md artifact.
 
 ## Requirements
 
-### Requirement: Seven-Stage Pipeline
-The system SHALL define a 7-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, tasks, and review. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, tasks requires preflight, and review requires tasks. The review artifact is generated during the apply phase (after implementation) rather than during artifact-forward generation. No stage SHALL be skippable; each MUST complete before the change is considered complete. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
+### Requirement: Eight-Stage Pipeline
+The system SHALL define an 8-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, tests, tasks, and review. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, tests requires preflight, tasks requires tests, and review requires tasks. The review artifact is generated during the apply phase (after implementation) rather than during artifact-forward generation. No stage SHALL be skippable; each MUST complete before the change is considered complete. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
 
 **User Story:** As a developer I want a structured pipeline that guides me from research through to implementation tasks, so that no critical thinking step is skipped and every decision is documented.
 
 #### Scenario: Pipeline stages execute in dependency order
 - **GIVEN** a new change workspace with no artifacts generated
 - **WHEN** the user progresses through the pipeline
-- **THEN** the system SHALL enforce the order: research first, then proposal, then specs, then design, then preflight, then tasks, then review
+- **THEN** the system SHALL enforce the order: research first, then proposal, then specs, then design, then preflight, then tests, then tasks, then review
 
 #### Scenario: Skipping a stage is prevented
 - **GIVEN** a change workspace where only research.md has been generated
@@ -29,7 +30,7 @@ The system SHALL define a 7-stage artifact pipeline with the following stages in
 #### Scenario: All stages produce verifiable artifacts
 - **GIVEN** a completed pipeline run
 - **WHEN** the change workspace is inspected
-- **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, tasks.md, and review.md
+- **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, tests.md, tasks.md, and review.md
 
 ### Requirement: Artifact Output Frontmatter
 Certain pipeline artifacts SHALL include YAML frontmatter in their generated output for machine-readable metadata:

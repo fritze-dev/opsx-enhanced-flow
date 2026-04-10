@@ -1,9 +1,10 @@
 ---
 order: 8
 category: development
-status: stable
+status: draft
 version: 2
 lastModified: 2026-04-10
+change: 2026-04-10-auto-test-generation
 ---
 ## Purpose
 
@@ -92,7 +93,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 ### Requirement: Post-Implementation Verification (review.md)
 
-The system SHALL verify the implementation against change artifacts as part of `/opsx:workflow apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess two dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage) and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
+The system SHALL verify the implementation against change artifacts as part of `/opsx:workflow apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess three dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage), **Testing** (test coverage: automated tests pass, manual test checklist items verified), and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
 
 **Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
 
@@ -133,6 +134,33 @@ The review.md generation SHALL serve as both the initial verification (tasks.md 
 - **THEN** `quality-gates` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 4`, `lastModified: 2026-04-08`
 - **AND** `spec-format` frontmatter SHALL be updated to `status: stable`, `change` removed, `version: 6`, `lastModified: 2026-04-08`
 - **AND** `proposal.md` frontmatter SHALL be updated to `status: completed`
+
+#### Scenario: Test coverage verification with automated tests
+- **GIVEN** a change with `tests.md` listing 5 automated test files and 2 manual test items
+- **AND** all 5 automated test files exist in the project's test directory
+- **AND** all 2 manual test items are checked off in tests.md
+- **WHEN** apply generates review.md
+- **THEN** the Testing dimension SHALL report "5/5 automated tests present, 2/2 manual items verified"
+- **AND** SHALL NOT raise any test coverage issues
+
+#### Scenario: Test coverage with missing automated test file
+- **GIVEN** a change with `tests.md` listing 3 automated test files
+- **AND** only 2 of the 3 test files exist in the project's test directory
+- **WHEN** apply generates review.md
+- **THEN** the Testing dimension SHALL report a WARNING: "Missing test file: <path>"
+
+#### Scenario: Test coverage with unchecked manual items
+- **GIVEN** a change with `tests.md` containing 4 manual test checklist items
+- **AND** only 2 of the 4 items are checked off
+- **WHEN** apply generates review.md
+- **THEN** the Testing dimension SHALL report a WARNING: "2 manual test items not verified"
+
+#### Scenario: Test coverage for project without framework
+- **GIVEN** a project with no test framework configured
+- **AND** `tests.md` contains only manual test items (no automated tests section)
+- **WHEN** apply generates review.md
+- **THEN** the Testing dimension SHALL verify only manual checklist completion
+- **AND** SHALL NOT check for automated test files
 
 #### Scenario: Verification with all checks passing
 
