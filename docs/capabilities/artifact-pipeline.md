@@ -1,13 +1,13 @@
 ---
 title: "Artifact Pipeline"
 capability: "artifact-pipeline"
-description: "7-stage pipeline with dependency gating, artifact frontmatter, consolidation checks, and worktree-aware PR integration"
+description: "8-stage pipeline with dependency gating, artifact frontmatter, consolidation checks, and worktree-aware PR integration"
 lastUpdated: "2026-04-10"
 ---
 
 # Artifact Pipeline
 
-The artifact pipeline guides every change through seven mandatory stages -- research, proposal, specs, design, preflight, tasks, and review -- enforcing strict dependency order so that no stage is skipped and implementation is gated by complete planning. Key artifacts include YAML frontmatter for machine-readable metadata. Every artifact is committed incrementally, with a draft pull request created automatically on the first commit.
+The artifact pipeline guides every change through eight mandatory stages -- research, proposal, specs, design, preflight, tests, tasks, and review -- enforcing strict dependency order so that no stage is skipped and implementation is gated by complete planning. Key artifacts include YAML frontmatter for machine-readable metadata. Every artifact is committed incrementally, with a draft pull request created automatically on the first commit.
 
 ## Purpose
 
@@ -15,11 +15,11 @@ Development teams working with AI assistants need a structured process that prev
 
 ## Rationale
 
-The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. The pipeline expanded from 6 to 7 stages with the addition of review as the final stage -- review.md is generated during apply as a persistent, PR-visible verification artifact that replaces the previous transient verify report. Propose serves as the single entry point for all pipeline traversal operations (workspace creation, checkpoint/resume, full lifecycle execution), eliminating the need for separate commands. The `auto_approve` configuration defaults to `true`, so pipeline traversal proceeds without user confirmation at checkpoints on success paths. Users who prefer inline pauses can set `auto_approve: false` explicitly.
+The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. The pipeline expanded from 7 to 8 stages with the addition of tests between preflight and tasks -- the tests stage generates test artifacts from Gherkin scenarios before implementation, enabling TDD. Review remains the final stage as a persistent, PR-visible verification artifact. Propose serves as the single entry point for all pipeline traversal operations (workspace creation, checkpoint/resume, full lifecycle execution), eliminating the need for separate commands. The `auto_approve` configuration defaults to `true`, so pipeline traversal proceeds without user confirmation at checkpoints on success paths. Users who prefer inline pauses can set `auto_approve: false` explicitly.
 
 ## Features
 
-- **Seven-Stage Pipeline** (`/opsx:workflow propose`): Research, proposal, specs, design, preflight, tasks, and review execute in strict dependency order. Each stage produces a verifiable artifact file.
+- **Eight-Stage Pipeline** (`/opsx:workflow propose`): Research, proposal, specs, design, preflight, tests, tasks, and review execute in strict dependency order. Each stage produces a verifiable artifact file.
 - **Artifact Output Frontmatter**: Proposals include `status`, `branch`, `capabilities` (new/modified/removed), and optionally `worktree`. Designs include `has_decisions` (boolean). Actions prefer frontmatter over markdown parsing.
 - **Explicit Dependency Declarations**: Each Smart Template declares its dependencies via a `requires` field. Dependencies are enforced by verifying file existence.
 - **Apply Gate**: Implementation is gated by the tasks artifact. Apply cannot begin until `tasks.md` exists and is non-empty.
@@ -36,7 +36,7 @@ The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates 
 
 ### Pipeline Stages Execute in Dependency Order (`/opsx:workflow propose`)
 
-When progressing through the pipeline, the system enforces the order: research, proposal, specs, design, preflight, tasks, review. Attempting to skip a stage is rejected. A completed pipeline run produces `research.md`, `proposal.md`, one or more `specs/<capability>/spec.md` files, `design.md`, `preflight.md`, `tasks.md`, and `review.md`.
+When progressing through the pipeline, the system enforces the order: research, proposal, specs, design, preflight, tests, tasks, review. Attempting to skip a stage is rejected. A completed pipeline run produces `research.md`, `proposal.md`, one or more `specs/<capability>/spec.md` files, `design.md`, `preflight.md`, `tests.md`, `tasks.md`, and `review.md`.
 
 ### Propose Creates and Manages Workspaces (`/opsx:workflow propose`)
 

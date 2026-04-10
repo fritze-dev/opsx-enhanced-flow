@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Auto-Test Generation (v2.0.7)
+
+### Added
+- New `tests` pipeline stage between `preflight` and `tasks` — generates test artifacts from Gherkin scenarios before implementation
+- `tests.md` Smart Template with dual-mode output: automated test stubs (when framework configured) + manual test checklist (always)
+- `## Testing` section in constitution template for framework configuration
+- Test coverage verification dimension (8th) in review template
+
+### Changed
+- Pipeline expanded from 7 to 8 stages: research → proposal → specs → design → preflight → **tests** → tasks → review
+- Tasks template now requires `[tests]` instead of `[preflight]`
+- WORKFLOW.md template-version bumped from 3 to 4
+
 ## 2026-04-10 — Transparent Knowledge Management (v2.0.6)
 
 ### Added

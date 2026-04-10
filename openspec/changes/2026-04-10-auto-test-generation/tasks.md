@@ -28,16 +28,16 @@
   - [x] Constitution section: Constitution template includes `## Testing` section — PASS
   - [x] No router changes: `src/skills/workflow/SKILL.md` is unchanged — PASS
 - [x] 3.2. Auto-Verify: generate review.md using the review template — PASS
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: regenerate review.md after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
+- [x] 3.5. Final Verify: regenerate review.md after all fixes. Skip if 3.4 was not entered.
+- [x] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
-- [ ] 4.2. Bump version
-- [ ] 4.3. Commit and push to remote
+- [x] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [x] 4.2. Bump version
+- [x] 4.3. Commit and push to remote
 - [ ] 4.4. Update PR: mark ready for review, update body with change summary and issue references (`gh pr ready && gh pr edit --body "... Closes #34"`)
 
 ## 5. Post-Merge Reminders

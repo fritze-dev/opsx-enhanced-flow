@@ -6,7 +6,7 @@ The opsx-enhanced plugin uses a **three-layer architecture** where each layer ha
 
 1. **Constitution** (`openspec/CONSTITUTION.md`) -- Global project rules including Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. Read before every AI action via WORKFLOW.md's `context` field. Serves as the single authoritative source for project-wide rules.
 
-2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) -- WORKFLOW.md declares the 7-stage artifact pipeline order, inline action definitions, apply gate, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure, action instructions, and artifact generation.
+2. **WORKFLOW.md + Smart Templates** (`openspec/WORKFLOW.md` + `openspec/templates/`) -- WORKFLOW.md declares the 8-stage artifact pipeline order, inline action definitions, apply gate, optional worktree configuration, and project context in YAML frontmatter. Smart Templates in `openspec/templates/` carry per-artifact instructions, output paths, dependencies, and `template-version` for merge detection in YAML frontmatter alongside the output structure. Together they are the single source of truth for pipeline structure, action instructions, and artifact generation.
 
 3. **Router + Actions** (`skills/workflow/SKILL.md`) -- A single router skill dispatches to 4 built-in actions: `init` (project setup and health checks), `propose` (pipeline traversal), `apply` (task implementation with review.md), and `finalize` (changelog, docs, version bump), plus consumer-defined custom actions. The router handles shared orchestration (intent recognition, change context detection, WORKFLOW.md loading) and spawns sub-agents with bounded context for built-in actions. Custom actions are validated against the `actions` array in WORKFLOW.md and executed directly. All actions are model-invocable.
 
@@ -73,6 +73,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | CLAUDE.md directive + constitution convention (dual placement) for knowledge management | ADR-039 scoping rule: CLAUDE.md for agent instructions (loaded every session), constitution for project conventions | [ADR-046](decisions/adr-046-dual-placement-claude-md-and-constitution.md) |
 | New `src/templates/claude.md` bootstrap template | Follows established template pattern; ensures consumer projects get CLAUDE.md via init | [ADR-047](decisions/adr-047-claude-md-bootstrap-template.md) |
 | Knowledge management directive maps types to destinations | Specific routing (rules→constitution, decisions→ADRs, requirements→specs, friction→issues) prevents ambiguity | [ADR-048](decisions/adr-048-knowledge-type-to-destination-mapping.md) |
+| New pipeline stage for test generation; constitution for framework config; always generate manual checklist; LLM-generated test stubs | Clean TDD flow with separate dependency tracking; three-layer architecture compliance; universal verification; unbounded framework support | [ADR-049](decisions/adr-049-auto-test-generation.md) |
 
 ### Notable Trade-offs
 
@@ -128,6 +129,9 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Dual placement maintenance (ADR-046)**: Knowledge management directive exists in both CLAUDE.md and CONSTITUTION.md; if the directive changes, both files need updating. Accepted because the directive is stable and the coverage benefit (every session vs workflow-only) outweighs the maintenance cost.
 - **CLAUDE.md template maintenance (ADR-047)**: One more template file to maintain; mitigated by small surface area (~20 lines) and stable content.
 - **Static routing rules (ADR-048)**: Knowledge type-to-destination mapping is hardcoded; new knowledge types require updating the directive. Mitigated by the four categories (rules, decisions, requirements, friction) covering the vast majority of project knowledge.
+- **8-stage pipeline overhead (ADR-049)**: One more artifact per change; accepted because test-first development value outweighs the overhead of generating tests.md.
+- **LLM-generated test stubs may be generic (ADR-049)**: Stubs are TDD red-phase starting points, not production tests; developers fill in implementation details.
+- **Breaking pipeline for old consumers (ADR-049)**: template-version bump (3 to 4) signals the change; consumers re-run init to get the new stage.
 
 ## Conventions
 
@@ -155,7 +159,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Capability | Description |
 |---|---|
 | [Change Workspace](capabilities/change-workspace.md) | Workspace creation via propose, worktree isolation, and change lifecycle tracking |
-| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 7-stage pipeline with dependency gating, artifact frontmatter, and PR integration |
+| [Artifact Pipeline](capabilities/artifact-pipeline.md) | 8-stage pipeline with dependency gating, artifact frontmatter, and PR integration |
 
 ### Development
 
@@ -163,6 +167,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 |---|---|
 | [Constitution Management](capabilities/constitution-management.md) | Constitution lifecycle management and global context enforcement |
 | [Quality Gates](capabilities/quality-gates.md) | Preflight during propose, review.md during apply, and docs drift during init |
+| [Test Generation](capabilities/test-generation.md) | Automated test stub and manual test plan generation from Gherkin scenarios before implementation |
 | [Task Implementation](capabilities/task-implementation.md) | Sequential task execution with progress tracking and review.md generation |
 | [Human Approval Gate](capabilities/human-approval-gate.md) | QA loop with review.md artifact, fix-verify cycles, auto_approve bypass, and mandatory approval |
 

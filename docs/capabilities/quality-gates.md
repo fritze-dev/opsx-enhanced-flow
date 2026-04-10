@@ -28,6 +28,7 @@ Preflight covers seven distinct dimensions (traceability, gaps, side effects, co
 - **Draft Spec Gate in Verify**: Verify checks all specs modified by the change for `status: draft`. Any remaining drafts produce a CRITICAL issue.
 - **Verify Completion (Draft-to-Stable Flip)**: When verify passes and the change is approved, spec tracking fields are finalized: `status` flips to `stable`, `change` is removed, `version` increments, `lastModified` is set. The proposal's `status` is set to `completed`.
 - **Seven Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, Marker Audit, and Draft Spec Validation.
+- **Test Coverage Verification**: Verify includes an 8th dimension checking that generated tests cover all spec scenarios and that automated test stubs exist for automatable scenarios when a framework is configured.
 - **Diff-Based Verification**: Verify loads the full branch diff as primary evidence. Codebase keyword search serves as a fallback.
 - **Task-Diff Mapping**: For each completed task, verify checks that the diff contains corresponding changes matching both file paths and content.
 - **Diff Scope Check**: Every file in the diff must be traceable to a task or design component. Untraced files are a single grouped SUGGESTION.
