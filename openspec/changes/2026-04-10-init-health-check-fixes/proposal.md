@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: init-health-check-fixes
 worktree: .claude/worktrees/init-health-check-fixes
 capabilities:

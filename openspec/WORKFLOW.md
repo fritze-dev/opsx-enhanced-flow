@@ -4,6 +4,8 @@ templates_dir: openspec/templates
 pipeline: [research, proposal, specs, design, preflight, tasks, review]
 
 actions: [init, propose, apply, finalize]
+# Add custom actions here (e.g. qa-review) and define matching
+# ## Action: <name> sections in the body below.
 
 worktree:
   enabled: true

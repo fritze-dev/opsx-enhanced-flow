@@ -4,8 +4,6 @@ category: reference
 status: stable
 version: 4
 lastModified: 2026-04-10
-status: draft
-change: 2026-04-10-init-health-check-fixes
 ---
 ## Purpose
 
