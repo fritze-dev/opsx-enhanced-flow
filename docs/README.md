@@ -68,6 +68,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Consolidate 11 SKILL.md files to 1 router with 4 commands; inline actions in WORKFLOW.md; review.md as pipeline artifact | 93% orchestration code reduction; specs as true single source of truth; persistent PR-visible verification | [ADR-041](decisions/adr-041-skill-consolidation.md) |
 | Generic fallback dispatch for custom actions; direct execution; dynamic validation against actions array | Minimizes change surface (propose can't be generalized); avoids sub-agent nesting; graceful degradation without WORKFLOW.md | [ADR-042](decisions/adr-042-custom-action-dispatch-design.md) |
 | Uncomment `auto_approve: true` in both WORKFLOW.md and template; update spec default language | Consistency per constitution's template sync rule; existing scenarios already cover true/false behaviors | [ADR-043](decisions/adr-043-auto-approve-default.md) |
+| Remove automation config without deprecation; skip historical artifacts; clean CONSTITUTION.md convention | No consumers depend on it; historical artifacts document their time; stale convention reference would confuse | [ADR-044](decisions/adr-044-remove-automation-config.md) |
 
 ### Notable Trade-offs
 

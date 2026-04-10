@@ -1,6 +1,6 @@
 <!--
 ---
-status: active
+status: completed
 branch: worktree-remove-automation-config
 capabilities:
   new: []

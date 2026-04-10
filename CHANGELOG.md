@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Remove Automation Config (v2.0.4)
+
+### Removed
+- CI automation config (`automation` section) from WORKFLOW.md, consumer template, and workflow-contract spec — finalize runs locally and the CI infrastructure added unnecessary complexity (closes #100)
+- `.github/workflows/pipeline.yml` (CI-triggered finalize workflow)
+
 ## 2026-04-10 — Auto-Approve as Default (v2.0.3)
 
 ### Changed
