@@ -17,10 +17,10 @@
   - [x] Spec language reflects "defaults to true" semantics — PASS
   - [x] WORKFLOW.md and template remain in sync per constitution — PASS
 - [x] 3.2. Auto-Verify: generate review.md using the review template.
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.5. Final Verify: regenerate review.md after all fixes. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.4. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify. (not entered)
+- [x] 3.5. Final Verify: regenerate review.md after all fixes. Skip if 3.4 was not entered. (skipped — first verify clean)
+- [x] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
