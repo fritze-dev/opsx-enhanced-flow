@@ -13,10 +13,10 @@
 - [x] 2.3. Metric Check: `src/templates/specs/spec.md` matches `openspec/templates/specs/spec.md` content with `template-version: 2` — PASS
 - [x] 2.4. Metric Check: `openspec/WORKFLOW.md` contains custom action hint comments after `actions:` — PASS
 - [x] 2.5. Auto-Verify: generate review.md using the review template.
-- [ ] 2.6. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 2.7. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 2.8. Final Verify: regenerate review.md after all fixes to confirm consistency. Skip if 2.7 was not entered.
-- [ ] 2.9. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 2.6. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 2.7. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
+- [x] 2.8. Final Verify: regenerate review.md after all fixes to confirm consistency. Skip if 2.7 was not entered.
+- [x] 2.9. Approval: Only finish on explicit **"Approved"** by the user.
 
 ## 3. Standard Tasks (Post-Implementation)
 - [x] 3.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
