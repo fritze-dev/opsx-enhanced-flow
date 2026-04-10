@@ -1,10 +1,9 @@
 ---
 order: 13
 category: reference
-status: accepted
+status: stable
 version: 3
 lastModified: 2026-04-10
-change: 2026-04-10-custom-actions
 ---
 ## Purpose
 

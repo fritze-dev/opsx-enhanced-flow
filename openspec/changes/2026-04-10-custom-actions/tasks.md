@@ -17,10 +17,10 @@
 - [x] 3.3. Metric Check: Action not in array produces error with list — PASS
 - [x] 3.4. Metric Check: Missing `## Action:` section produces clear error — PASS
 - [x] 3.5. Auto-Verify: generate review.md using the review template.
-- [ ] 3.6. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.7. Fix Loop: On verify issues or bug reports → fix code OR update specs/design → re-verify.
-- [ ] 3.8. Final Verify: regenerate review.md after all fixes. Skip if 3.7 was not entered.
-- [ ] 3.9. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.6. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.7. Fix Loop: Not entered.
+- [x] 3.8. Final Verify: Skipped (3.7 not entered).
+- [x] 3.9. Approval: Approved by user.
 
 ## 4. Standard Tasks (Post-Implementation)
 
