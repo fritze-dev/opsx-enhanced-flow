@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Transparent Knowledge Management (v2.0.6)
+
+### Added
+- `## Knowledge Management` section in CLAUDE.md directing agents to use transparent artifacts (constitution, specs, ADRs, issues) instead of auto-memory for project knowledge — type-to-destination routing maps rules→constitution, decisions→ADRs, requirements→specs, friction→issues (closes #69)
+- `Knowledge transparency` convention in CONSTITUTION.md documenting the project rule
+- `src/templates/claude.md` bootstrap template so consumer projects get CLAUDE.md via `/opsx:workflow init`
+
+### Changed
+- Init instruction in WORKFLOW.md and consumer template updated to generate CLAUDE.md alongside constitution during Fresh mode
+- `project-init` spec updated with new "CLAUDE.md Bootstrap" requirement
+
 ## 2026-04-10 — Auto-Approve Full Flow (v2.0.5)
 
 ### Changed

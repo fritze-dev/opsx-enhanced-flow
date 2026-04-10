@@ -70,6 +70,9 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Uncomment `auto_approve: true` in both WORKFLOW.md and template; update spec default language | Consistency per constitution's template sync rule; existing scenarios already cover true/false behaviors | [ADR-043](decisions/adr-043-auto-approve-default.md) |
 | Remove automation config without deprecation; skip historical artifacts; clean CONSTITUTION.md convention | No consumers depend on it; historical artifacts document their time; stale convention reference would confuse | [ADR-044](decisions/adr-044-remove-automation-config.md) |
 | Auto-dispatch in router for full propose→apply→finalize flow; auto-approve only on clean PASS; design checkpoint opt-out not opt-in | Instructions can't chain across actions; warnings may need review; design review is highest-value checkpoint | [ADR-045](decisions/adr-045-auto-approve-full-flow.md) |
+| CLAUDE.md directive + constitution convention (dual placement) for knowledge management | ADR-039 scoping rule: CLAUDE.md for agent instructions (loaded every session), constitution for project conventions | [ADR-046](decisions/adr-046-dual-placement-claude-md-and-constitution.md) |
+| New `src/templates/claude.md` bootstrap template | Follows established template pattern; ensures consumer projects get CLAUDE.md via init | [ADR-047](decisions/adr-047-claude-md-bootstrap-template.md) |
+| Knowledge management directive maps types to destinations | Specific routing (rules→constitution, decisions→ADRs, requirements→specs, friction→issues) prevents ambiguity | [ADR-048](decisions/adr-048-knowledge-type-to-destination-mapping.md) |
 
 ### Notable Trade-offs
 
@@ -122,6 +125,9 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Change context for all custom actions (ADR-042)**: Change context detection runs for every custom action even if not needed; the instruction must handle that case explicitly.
 - **Consumer behavior change on init (ADR-043)**: Consumers who run `init` get auto-approve without explicit opt-in; users who relied on inline checkpoint pauses must set `auto_approve: false` explicitly.
 - **All-or-nothing auto-approve granularity (ADR-045)**: Users who want auto-approve but also want to pause between propose and apply lose that granularity; mitigated by the fact that `auto_approve: false` preserves all checkpoints.
+- **Dual placement maintenance (ADR-046)**: Knowledge management directive exists in both CLAUDE.md and CONSTITUTION.md; if the directive changes, both files need updating. Accepted because the directive is stable and the coverage benefit (every session vs workflow-only) outweighs the maintenance cost.
+- **CLAUDE.md template maintenance (ADR-047)**: One more template file to maintain; mitigated by small surface area (~20 lines) and stable content.
+- **Static routing rules (ADR-048)**: Knowledge type-to-destination mapping is hardcoded; new knowledge types require updating the directive. Mitigated by the four categories (rules, decisions, requirements, friction) covering the vast majority of project knowledge.
 
 ## Conventions
 
