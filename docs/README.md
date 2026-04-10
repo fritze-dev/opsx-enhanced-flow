@@ -67,6 +67,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | Spec frontmatter tracking with structured metadata across specs, proposals, designs, and templates | Eliminates fragile markdown parsing; enables collision detection, incremental detection via lastModified, and version-aware template merge on re-setup | [ADR-040](decisions/adr-040-spec-frontmatter-tracking.md) |
 | Consolidate 11 SKILL.md files to 1 router with 4 commands; inline actions in WORKFLOW.md; review.md as pipeline artifact | 93% orchestration code reduction; specs as true single source of truth; persistent PR-visible verification | [ADR-041](decisions/adr-041-skill-consolidation.md) |
 | Generic fallback dispatch for custom actions; direct execution; dynamic validation against actions array | Minimizes change surface (propose can't be generalized); avoids sub-agent nesting; graceful degradation without WORKFLOW.md | [ADR-042](decisions/adr-042-custom-action-dispatch-design.md) |
+| Uncomment `auto_approve: true` in both WORKFLOW.md and template; update spec default language | Consistency per constitution's template sync rule; existing scenarios already cover true/false behaviors | [ADR-043](decisions/adr-043-auto-approve-default.md) |
 
 ### Notable Trade-offs
 
@@ -117,6 +118,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Loss of standalone preflight/verify commands (ADR-041)**: Users must go through propose or apply. Accepted because 4-command sufficiency covers all workflow needs.
 - **Custom action instruction quality (ADR-042)**: No spec requirement links for custom actions -- instruction quality depends entirely on the consumer author. Mitigated by clear documentation and the self-contained instruction pattern.
 - **Change context for all custom actions (ADR-042)**: Change context detection runs for every custom action even if not needed; the instruction must handle that case explicitly.
+- **Consumer behavior change on init (ADR-043)**: Consumers who run `init` get auto-approve without explicit opt-in; users who relied on inline checkpoint pauses must set `auto_approve: false` explicitly.
 
 ## Conventions
 

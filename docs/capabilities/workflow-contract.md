@@ -26,12 +26,17 @@ A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, p
 - **Router dispatch pattern** -- single router handles all commands (built-in and custom) with shared intent recognition, change context detection, and WORKFLOW.md loading; validates actions against the `actions` array with fallback to built-in list
 - **Automation configuration** -- optional `automation.post_approval` section configures CI-triggered finalize on PR approval with state labels
 - **Template versioning** -- `template-version` (integer, monotonically increasing) enables version-aware merge during `/opsx:workflow init`
+- **Auto-approve default** -- `auto_approve` defaults to `true` when absent or uncommented; pipeline traversal proceeds without user confirmation at checkpoints on success paths; set to `false` to pause at every checkpoint
 
 ## Behavior
 
 ### WORKFLOW.MD Provides Pipeline and Action Configuration
 
 The router reads WORKFLOW.md's YAML frontmatter to determine the template directory, pipeline stage order, available actions, and optional automation config. The markdown body provides the `## Context` section for project-level behavioral context and `## Action: <name>` sections with procedural instructions for each action.
+
+### Auto-Approve Controls Checkpoint Behavior
+
+The `auto_approve` field in WORKFLOW.md frontmatter defaults to `true`. When absent or `true`, pipeline checkpoints (preflight warnings acknowledgment, post-apply PASS) are skipped on success paths. When explicitly set to `false`, the pipeline pauses at each checkpoint for user confirmation. FAIL verdicts always stop regardless of `auto_approve`. The design review checkpoint after the design artifact is a constitutional requirement and is not controlled by `auto_approve` -- it always pauses.
 
 ### Smart Templates Are Self-Describing
 

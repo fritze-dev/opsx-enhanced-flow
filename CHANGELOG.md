@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-10 — Auto-Approve as Default (v2.0.3)
+
+### Changed
+- `auto_approve` now defaults to `true` in WORKFLOW.md and the consumer template — pipeline checkpoints (preflight warnings, post-apply PASS) no longer pause by default, reducing end-to-end friction while preserving all safety nets (FAIL always stops, design checkpoint is constitutional) (closes #101)
+- `workflow-contract` spec updated: `auto_approve` field description reflects "defaults to `true`" semantics
+- `artifact-pipeline` spec updated: "Propose as Single Entry Point" requirement reflects new default behavior
+
 ## 2026-04-10 — Init Health Check Fixes (v2.0.2)
 
 ### Fixed

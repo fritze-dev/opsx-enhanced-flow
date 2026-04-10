@@ -15,7 +15,7 @@ Development teams working with AI assistants need a structured process that prev
 
 ## Rationale
 
-The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. The pipeline expanded from 6 to 7 stages with the addition of review as the final stage -- review.md is generated during apply as a persistent, PR-visible verification artifact that replaces the previous transient verify report. Propose serves as the single entry point for all pipeline traversal operations (workspace creation, checkpoint/resume, full lifecycle execution), eliminating the need for separate commands. The `auto_approve` configuration controls whether pipeline traversal proceeds without user confirmation at checkpoints.
+The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates for self-describing artifact definitions, so that the workflow structure is transparent and modifiable without touching command code. The pipeline expanded from 6 to 7 stages with the addition of review as the final stage -- review.md is generated during apply as a persistent, PR-visible verification artifact that replaces the previous transient verify report. Propose serves as the single entry point for all pipeline traversal operations (workspace creation, checkpoint/resume, full lifecycle execution), eliminating the need for separate commands. The `auto_approve` configuration defaults to `true`, so pipeline traversal proceeds without user confirmation at checkpoints on success paths. Users who prefer inline pauses can set `auto_approve: false` explicitly.
 
 ## Features
 
@@ -23,7 +23,7 @@ The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates 
 - **Artifact Output Frontmatter**: Proposals include `status`, `branch`, `capabilities` (new/modified/removed), and optionally `worktree`. Designs include `has_decisions` (boolean). Actions prefer frontmatter over markdown parsing.
 - **Explicit Dependency Declarations**: Each Smart Template declares its dependencies via a `requires` field. Dependencies are enforced by verifying file existence.
 - **Apply Gate**: Implementation is gated by the tasks artifact. Apply cannot begin until `tasks.md` exists and is non-empty.
-- **Propose as Single Entry Point**: `/opsx:workflow propose` handles workspace creation, progress display, checkpoint/resume, and full artifact generation. Displays artifact status showing which stages are done, ready, or blocked.
+- **Propose as Single Entry Point**: `/opsx:workflow propose` handles workspace creation, progress display, checkpoint/resume, and full artifact generation. Displays artifact status showing which stages are done, ready, or blocked. The `auto_approve` configuration (defaults to `true`) controls whether checkpoints pause for user confirmation.
 - **WORKFLOW.md-Owned Workflow Rules**: The tasks template's `instruction` contains the Definition of Done rule and standard tasks directive. WORKFLOW.md action instructions contain the post-apply workflow sequence.
 - **Incremental Commits with Draft PR**: After each artifact, the system commits and pushes. On the first commit, a feature branch and draft PR are created. The post-artifact hook is worktree-aware.
 - **Post-Implementation Commit Before Approval**: After apply's auto-verify passes, the system commits implementation changes and pushes before pausing for user approval.
@@ -41,6 +41,10 @@ When progressing through the pipeline, the system enforces the order: research, 
 ### Propose Creates and Manages Workspaces (`/opsx:workflow propose`)
 
 When invoked with a description or name and no matching change exists, propose creates a new change workspace (with worktree if enabled). When invoked without arguments and existing changes are present, propose lists active changes and lets you select one. It displays artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
+
+### Auto-Approve Controls Pipeline Checkpoint Behavior
+
+The `auto_approve` workflow configuration defaults to `true` in WORKFLOW.md frontmatter. When absent or `true`, checkpoints are skipped on success paths -- preflight warnings are auto-acknowledged and the post-apply PASS proceeds without pausing. When explicitly set to `false`, the pipeline pauses at each checkpoint for user confirmation. FAIL verdicts always stop regardless of `auto_approve`. The design review checkpoint is a constitutional requirement and pauses independently of `auto_approve`.
 
 ### Artifact Output Frontmatter
 
