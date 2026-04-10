@@ -2,12 +2,12 @@
 order: 3
 category: reference
 status: stable
-version: 3
+version: 4
 lastModified: 2026-04-10
 ---
 ## Purpose
 
-Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, inline action definitions, and the router dispatch pattern for pipeline configuration.
+Defines the WORKFLOW.md pipeline orchestration contract, Smart Template format, inline action definitions, custom actions, and the router dispatch pattern for pipeline configuration.
 
 ## Requirements
 
@@ -22,7 +22,6 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 - `actions` (array of action names, e.g., `[init, propose, apply, finalize]` — each has a corresponding `## Action: <name>` body section)
 - `worktree` (optional object with `enabled`, `path_pattern`, `auto_cleanup`)
 - `auto_approve` (optional boolean, defaults to `true` — pipeline traversal proceeds without user confirmation at checkpoints; set to `false` to pause at every checkpoint)
-- `automation` (optional CI pipeline configuration — see Requirement: Automation Configuration)
 - `docs_language` (optional, defaults to English)
 
 **Markdown body** — prose instructions as named sections:
@@ -30,7 +29,7 @@ The system SHALL support an `openspec/WORKFLOW.md` file as the pipeline orchestr
 
 The `pipeline` array SHALL be the single source of truth for the artifact generation sequence. Frontmatter SHALL NOT contain multi-line prose instructions — these belong in body sections or in action `instruction` fields.
 
-**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration, action definitions, and automation config, so that all workflow configuration lives in one place.
+**User Story:** As a plugin maintainer I want a single WORKFLOW.md file for pipeline orchestration and action definitions, so that all workflow configuration lives in one place.
 
 #### Scenario: Router reads WORKFLOW.md for pipeline configuration
 - **GIVEN** a project with `openspec/WORKFLOW.md` containing frontmatter and body sections
@@ -114,7 +113,7 @@ The system SHALL provide 4 built-in actions: `init` (project initialization and 
 - **AND** `actions: [init, propose, apply, qa-review, finalize]`
 - **WHEN** the pipeline is traversed
 - **THEN** actions SHALL NOT be included in the pipeline artifact sequence
-- **AND** SHALL only be invoked via direct command or automation trigger
+- **AND** SHALL only be invoked via direct command
 
 ### Requirement: Router Dispatch Pattern
 
@@ -164,22 +163,6 @@ The system SHALL provide a single router skill that handles all user-facing comm
 - **WHEN** a user invokes `/opsx:workflow deploy`
 - **THEN** the router SHALL report that `deploy` is not a recognized action
 - **AND** SHALL list the available actions from the `actions` array
-
-### Requirement: Automation Configuration
-
-WORKFLOW.md frontmatter SHALL support an optional `automation` section that configures CI-triggered pipeline behavior. The `automation` section SHALL contain: `post_approval` (object defining what happens when a PR receives all required review approvals). The `post_approval` object SHALL contain: `action` (name of the action to execute — e.g., `finalize`) and `labels` (object mapping state names to GitHub label names — `running`, `complete`, `failed`).
-
-**User Story:** As a plugin maintainer I want CI automation behavior defined in WORKFLOW.md, so that the pipeline configuration stays centralized.
-
-#### Scenario: WORKFLOW.md contains automation configuration
-- **GIVEN** a valid `openspec/WORKFLOW.md` with CI automation enabled
-- **WHEN** the frontmatter is inspected
-- **THEN** it SHALL contain an `automation.post_approval` section with `action` and `labels` fields
-
-#### Scenario: Automation section is optional
-- **GIVEN** a valid `openspec/WORKFLOW.md` without an `automation` section
-- **WHEN** a skill or CI workflow checks for automation config
-- **THEN** the system SHALL treat automation as disabled
 
 ## Edge Cases
 
