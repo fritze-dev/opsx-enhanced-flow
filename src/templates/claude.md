@@ -1,3 +1,15 @@
+---
+id: claude
+template-version: 1
+description: CLAUDE.md bootstrap template with standard agent directives
+generates: CLAUDE.md
+requires: []
+instruction: |
+  Generate CLAUDE.md with project-specific agent instructions.
+  Always include the Workflow and Knowledge Management sections.
+  Add project-specific rules discovered during codebase analysis.
+  Use REVIEW markers for items needing user confirmation.
+---
 # Project Rules
 
 ## Workflow
