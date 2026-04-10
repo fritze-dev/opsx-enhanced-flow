@@ -12,7 +12,7 @@ template-version: 1
 
 ## Architecture Rules
 
-- **Three-layer architecture:** CONSTITUTION.md (global rules) → WORKFLOW.md + Smart Templates (artifact pipeline + inline actions) → Router (single workflow skill with 4 actions: init, propose, apply, finalize)
+- **Three-layer architecture:** CONSTITUTION.md (global rules) → WORKFLOW.md + Smart Templates (artifact pipeline + inline actions) → Router (single workflow skill with 4 built-in actions (init, propose, apply, finalize) + consumer-defined custom actions)
 - Layers are independently modifiable — WORKFLOW.md and Smart Templates do not embed router logic, the router depends on them via direct file reads
 - **Router immutability:** The workflow skill (`skills/workflow/SKILL.md`) is generic plugin code shared across all consumers. They MUST NOT be modified for project-specific behavior. Project-specific workflows and conventions MUST be defined in this constitution.
 - Plugin manifests live in `.claude-plugin/` (plugin.json, marketplace.json)

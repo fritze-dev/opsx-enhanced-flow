@@ -12,9 +12,9 @@ Central orchestration for the OpenSpec workflow. The first argument determines t
 
 ## Step 1: Identify Action
 
-Parse the first argument to determine which action to run. Valid actions: `init`, `propose`, `apply`, `finalize`.
+Parse the first argument to determine which action to run. Read the `actions` array from WORKFLOW.md frontmatter to determine valid actions. If WORKFLOW.md is missing, fall back to built-in actions: `init`, `propose`, `apply`, `finalize`.
 
-If no action provided or unrecognized: list available actions and ask the user to choose.
+If no action provided or unrecognized: list available actions from the array and ask the user to choose.
 
 ## Step 2: Load WORKFLOW.md
 
@@ -124,6 +124,15 @@ For `propose`, `apply`, `finalize`:
 
 1. If WORKFLOW.md missing: this IS the fresh install — proceed with default init behavior
 2. Spawn sub-agent with instruction + extracted requirements
+
+### Custom Action — Direct Execution
+
+For any action not listed above (propose, apply, finalize, init):
+1. Read all change artifacts for context (all files in change directory)
+2. Read the `## Action: <name>` instruction from WORKFLOW.md
+3. If the `## Action: <name>` section is missing: report the error and stop
+4. Execute the instruction directly with change directory context — the agent decides whether to handle inline or spawn a sub-agent based on the instruction content
+5. No spec requirements are loaded (custom actions are self-contained via their instruction)
 
 ## Guardrails
 
