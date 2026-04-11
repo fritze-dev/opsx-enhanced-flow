@@ -25,8 +25,8 @@ A single `/opsx:workflow init` command covers fresh installs, legacy migrations,
 - **Constitution section-level merge** -- detects missing sections from newer template versions and offers to generate content for them based on the codebase
 - **Codebase scanning** -- analyzes tech stack, frameworks, languages, file structure, and coding conventions to populate the constitution with project-specific values
 - **Constitution generation** -- produces Tech Stack, Architecture Rules, Code Style, Constraints, Conventions, and Standard Tasks sections from scan results
-- **Environment checks** -- detects `gh` CLI availability, git version (2.5+ for worktree support), and `.gitignore` configuration
-- **Worktree opt-in** -- offers to enable worktree-based change isolation when `gh` is available, including GitHub merge strategy configuration
+- **Environment checks** -- detects GitHub tooling availability, git version (2.5+ for worktree support), and `.gitignore` configuration
+- **Worktree opt-in** -- offers to enable worktree-based change isolation when GitHub tooling is available, including GitHub merge strategy configuration
 - **Legacy migration** -- detects old schema-based layouts and automatically migrates to the WORKFLOW.md format
 - **Idempotent re-initialization** -- skips already-completed steps when run on an initialized project
 - **Spec drift detection** -- compares existing specs against the codebase and reports discrepancies with suggested corrective actions
@@ -37,7 +37,7 @@ A single `/opsx:workflow init` command covers fresh installs, legacy migrations,
 
 ### Fresh Project Initialization
 
-When you run `/opsx:workflow init` on a project without the workflow installed, the system copies Smart Templates from the plugin's templates directory, installs WORKFLOW.md from the plugin template, creates a CONSTITUTION.md placeholder, and generates CLAUDE.md from the bootstrap template. If `gh` is available and authenticated, it offers to enable worktree mode and configure the GitHub repository for rebase-merge. The command validates that all files are in place and reports a summary. If CLAUDE.md already exists, init skips generation and preserves the existing file.
+When you run `/opsx:workflow init` on a project without the workflow installed, the system copies Smart Templates from the plugin's templates directory, installs WORKFLOW.md from the plugin template, creates a CONSTITUTION.md placeholder, and generates CLAUDE.md from the bootstrap template. If GitHub tooling is available and authenticated, it offers to enable worktree mode and configure the GitHub repository for rebase-merge. The command validates that all files are in place and reports a summary. If CLAUDE.md already exists, init skips generation and preserves the existing file.
 
 ### Codebase Scanning and Constitution Generation
 
@@ -61,7 +61,7 @@ As a health check, init verifies generated documentation against current specs a
 
 ### Environment Checks
 
-Init checks `gh` CLI availability and authentication, git version for worktree support, and `.gitignore` for the `/.claude/` entry. Results are informational -- they do not block init but determine which optional features are available.
+Init checks GitHub tooling availability and authentication, git version for worktree support, and `.gitignore` for the `/.claude/` entry. Results are informational -- they do not block init but determine which optional features are available.
 
 ## Known Limitations
 

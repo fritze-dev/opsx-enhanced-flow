@@ -45,7 +45,7 @@ The `version` field in `.claude-plugin/marketplace.json` MUST always match the `
 
 ### Requirement: Manual Minor and Major Release Process
 
-For intentional minor or major version changes, the maintainer SHALL manually set the version in both `src/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then push to `main`. The GitHub Actions release workflow SHALL automatically create the git tag and GitHub Release from the pushed version change. For cases where a tag and release are needed without a code change (e.g., retroactive tagging), the maintainer MAY manually create a git tag in the format `v<version>`, push the tag, and create a GitHub Release via `gh release create`.
+For intentional minor or major version changes, the maintainer SHALL manually set the version in both `src/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then push to `main`. The GitHub Actions release workflow SHALL automatically create the git tag and GitHub Release from the pushed version change. For cases where a tag and release are needed without a code change (e.g., retroactive tagging), the maintainer MAY manually create a git tag in the format `v<version>`, push the tag, and create a GitHub Release using available GitHub tooling.
 
 **User Story:** As a maintainer I want a clear process for minor/major releases, so that I can publish breaking or feature-level changes with proper git tags.
 
@@ -59,7 +59,7 @@ For intentional minor or major version changes, the maintainer SHALL manually se
 
 - **GIVEN** a maintainer needs to tag an existing commit without a version change push
 - **WHEN** the maintainer manually creates and pushes a git tag `v1.1.0`
-- **THEN** the maintainer MAY create a GitHub Release via `gh release create v1.1.0`
+- **THEN** the maintainer MAY create a GitHub Release using available GitHub tooling
 
 ### Requirement: Consumer Update Process
 

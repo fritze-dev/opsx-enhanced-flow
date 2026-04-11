@@ -14,7 +14,7 @@ Handles project initialization via `/opsx:workflow init`, including template ins
 ### Requirement: Install OpenSpec Workflow
 The system SHALL provide `/opsx:workflow init` as the single entry point for project setup. The init command SHALL: (1) copy Smart Templates from the plugin's `templates/` directory (at `${CLAUDE_PLUGIN_ROOT}/templates/`) into the project's `openspec/templates/` directory, (2) copy `openspec/WORKFLOW.md` from the plugin's workflow template at `${CLAUDE_PLUGIN_ROOT}/templates/workflow.md` (skip if WORKFLOW.md already exists), (3) create `openspec/CONSTITUTION.md` placeholder if none exists, and (4) generate `CLAUDE.md` from the bootstrap template at `${CLAUDE_PLUGIN_ROOT}/templates/claude.md` if no CLAUDE.md exists (see "CLAUDE.md Bootstrap" requirement). The init command SHALL be idempotent — running it on an already-initialized project SHALL skip completed steps.
 
-The init command SHALL check for `gh` CLI availability and authentication. If `gh` is available and authenticated, the init command SHALL ask the user whether to enable worktree-based change isolation. If the user opts in, the init command SHALL uncomment the `worktree:` section in the generated WORKFLOW.md and set `enabled: true`. The init command SHALL also offer to configure the GitHub repository merge strategy for rebase-merge via `gh api`.
+The init command SHALL check for GitHub tooling availability (gh CLI, MCP tools, or API). If GitHub tooling is available and authenticated, the init command SHALL ask the user whether to enable worktree-based change isolation. If the user opts in, the init command SHALL uncomment the `worktree:` section in the generated WORKFLOW.md and set `enabled: true`. The init command SHALL also offer to configure the GitHub repository merge strategy for rebase-merge using available GitHub tooling.
 
 The init command SHALL NOT install any external CLI tools or require Node.js/npm as prerequisites.
 
@@ -39,14 +39,14 @@ The init command SHALL ensure target directories exist (via `mkdir -p`) before c
 - **THEN** the system SHALL copy workflow.md to `openspec/WORKFLOW.md`
 
 #### Scenario: Worktree opt-in during init
-- **GIVEN** the `gh` CLI is installed and authenticated
+- **GIVEN** GitHub tooling is available and authenticated
 - **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL ask whether to enable worktree-based change isolation
 - **AND** if the user opts in, SHALL uncomment the `worktree:` section in WORKFLOW.md and set `enabled: true`
 - **AND** SHALL offer to configure the GitHub repo for rebase-merge
 
-#### Scenario: No gh CLI available
-- **GIVEN** the `gh` CLI is not installed or not authenticated
+#### Scenario: No GitHub tooling available
+- **GIVEN** no GitHub tooling is available or not authenticated
 - **WHEN** the user runs `/opsx:workflow init`
 - **THEN** the system SHALL skip the worktree opt-in question
 - **AND** SHALL leave the `worktree:` section commented out in WORKFLOW.md
@@ -165,22 +165,22 @@ The plugin SHALL include a workflow template file at `${CLAUDE_PLUGIN_ROOT}/temp
 
 ### Requirement: Environment Checks During Init
 
-The init command SHALL check the environment for: (1) `gh` CLI availability by running `gh --version` and authentication by running `gh auth status`, (2) git version by running `git --version` and verifying it is 2.5+ (required for worktree support), (3) `.gitignore` contains a `/.claude/` entry (required for worktree paths to be excluded from version control). The results SHALL be reported in the init summary. The environment checks SHALL NOT block init — they only inform which optional features (worktree mode, PR creation, merge strategy) are available. If git version is below 2.5, the system SHALL skip the worktree opt-in question and report that worktree mode requires git 2.5+. If `/.claude/` is not in `.gitignore`, the system SHALL offer to add it when the user opts into worktree mode.
+The init command SHALL check the environment for: (1) GitHub tooling availability (gh CLI, MCP tools, or API) and authentication status, (2) git version by running `git --version` and verifying it is 2.5+ (required for worktree support), (3) `.gitignore` contains a `/.claude/` entry (required for worktree paths to be excluded from version control). The results SHALL be reported in the init summary. The environment checks SHALL NOT block init — they only inform which optional features (worktree mode, PR creation, merge strategy) are available. If git version is below 2.5, the system SHALL skip the worktree opt-in question and report that worktree mode requires git 2.5+. If `/.claude/` is not in `.gitignore`, the system SHALL offer to add it when the user opts into worktree mode.
 
 **User Story:** As a user I want init to detect my environment capabilities, so that I know which features are available without manual checking.
 
-#### Scenario: gh CLI detected and authenticated
+#### Scenario: GitHub tooling detected and authenticated
 
-- **GIVEN** the `gh` CLI is installed and authenticated
+- **GIVEN** GitHub tooling is available and authenticated
 - **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system reports "gh CLI: available and authenticated"
+- **THEN** the system reports "GitHub tooling: available and authenticated"
 - **AND** offers worktree mode and merge strategy configuration
 
-#### Scenario: gh CLI not installed
+#### Scenario: No GitHub tooling found
 
-- **GIVEN** the `gh` CLI is not installed
+- **GIVEN** no GitHub tooling is available
 - **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system reports "gh CLI: not found"
+- **THEN** the system reports "GitHub tooling: not found"
 - **AND** skips worktree and merge strategy options
 
 #### Scenario: Git version supports worktrees
@@ -212,22 +212,22 @@ The init command SHALL check the environment for: (1) `gh` CLI availability by r
 
 ### Requirement: GitHub Merge Strategy Configuration
 
-When the user opts in during init and `gh` CLI is available, the system SHALL configure the GitHub repository merge strategy for rebase-merge by running `gh api repos/{owner}/{repo} -X PATCH` to set `allow_rebase_merge=true`. The system SHALL report the configuration result. If the API call fails (e.g., insufficient permissions), the system SHALL report the failure and continue init.
+When the user opts in during init and GitHub tooling is available, the system SHALL configure the GitHub repository merge strategy for rebase-merge by setting `allow_rebase_merge=true` on the repository using available GitHub tooling. The system SHALL report the configuration result. If the API call fails (e.g., insufficient permissions), the system SHALL report the failure and continue init.
 
 **User Story:** As a team lead I want the repo configured for rebase-merge during init, so that worktree-based changes merge cleanly with linear history.
 
 #### Scenario: Configure rebase-merge strategy
 
 - **GIVEN** the user opts in to worktree mode during init
-- **AND** the `gh` CLI is authenticated with repo admin permissions
+- **AND** GitHub tooling is authenticated with repo admin permissions
 - **WHEN** init configures the merge strategy
-- **THEN** the system runs `gh api repos/{owner}/{repo} -X PATCH -f allow_rebase_merge=true`
+- **THEN** the system sets `allow_rebase_merge=true` on the repository using available GitHub tooling
 - **AND** reports "GitHub merge strategy: rebase-merge enabled"
 
 #### Scenario: Merge strategy configuration fails
 
 - **GIVEN** the user opts in to worktree mode
-- **AND** the `gh` CLI lacks admin permissions
+- **AND** GitHub tooling lacks admin permissions
 - **WHEN** init attempts to configure the merge strategy
 - **THEN** the system reports the failure
 - **AND** continues with the rest of init
@@ -424,7 +424,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **CLAUDE.md manually edited after init**: User edits to CLAUDE.md are authoritative. Re-running init SHALL NOT overwrite a manually edited CLAUDE.md.
 - **Template merge with subdirectories**: The merge detection SHALL recursively process templates in subdirectories (e.g., `templates/specs/spec.md`, `templates/docs/capability.md`).
 - **Plugin downgrades**: If the plugin `template-version` is lower than the local `template-version`, the system SHALL warn and skip (do not downgrade).
-- **gh CLI installed but not authenticated**: Report "gh CLI: installed but not authenticated" and skip worktree opt-in.
+- **GitHub tooling available but not authenticated**: Report "GitHub tooling: available but not authenticated" and skip worktree opt-in.
 - **User declines worktree mode**: Leave WORKFLOW.md with commented-out `worktree:` section — no changes needed.
 - If the project has no source code files (empty repository), init SHALL generate a minimal constitution with placeholder sections and inform the user to update it manually.
 - If the codebase uses multiple languages or conflicting conventions, the constitution SHALL document the primary patterns and note the variations as exceptions.
@@ -437,8 +437,8 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Concurrent docs regeneration**: If `/opsx:workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
 ## Assumptions
 
-- The `gh` CLI `--version` command returns exit code 0 when installed. <!-- ASSUMPTION: gh version check -->
-- The `gh auth status` command returns exit code 0 when authenticated. <!-- ASSUMPTION: gh auth check -->
+- GitHub tooling availability can be reliably detected at init time (gh CLI via `gh --version`, MCP tools via tool listing, API via token presence). <!-- ASSUMPTION: GitHub tooling detection -->
+- GitHub tooling authentication status can be verified before attempting operations. <!-- ASSUMPTION: GitHub auth check -->
 - `git --version` output contains a parseable version number (e.g., "git version 2.43.0"). <!-- ASSUMPTION: git version parseable -->
 - The init command can reliably detect tech stack and conventions from static file analysis (file extensions, configuration files, package manifests) without executing any project code. <!-- ASSUMPTION: Static analysis sufficient -->
 - Recovery mode's drift detection compares structural and naming patterns rather than performing deep semantic analysis of code behavior. <!-- ASSUMPTION: Structural comparison -->

@@ -162,7 +162,7 @@ The system SHALL allow implementation tasks to modify spec files (`openspec/spec
 - **Standard tasks manually checked:** If a user manually marks standard tasks as `- [x]` before completion, the system SHALL count them as complete in progress totals.
 - **Apply re-invoked after standard tasks complete:** If all tasks including standard tasks are marked complete, the system SHALL report "All tasks complete" and suggest running the post-apply workflow.
 - **Pre-merge extras executed during post-apply:** Constitution-defined pre-merge standard tasks (e.g., "Update PR") SHALL be executed during the post-apply workflow after commit and push. Post-merge reminders (e.g., "Update plugin") use plain bullet format and are executed manually after the PR is merged.
-- **Constitution extra fails:** If a constitution extra fails (e.g., `gh pr ready` fails due to network), the agent SHALL note the failure, skip marking that task as complete, and continue with remaining extras. The failed task remains as `- [ ]` for manual resolution.
+- **Constitution extra fails:** If a constitution extra fails (e.g., marking a PR ready fails due to network), the agent SHALL note the failure, skip marking that task as complete, and continue with remaining extras. The failed task remains as `- [ ]` for manual resolution.
 - **Partial post-apply workflow:** If the post-apply workflow is interrupted (e.g., changelog fails), only the steps that actually completed should be marked. The commit step should not be marked if the commit does not happen.
 
 ## Assumptions

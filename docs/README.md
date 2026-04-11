@@ -109,7 +109,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Mark-before-commit partial failure (ADR-024)**: If a post-apply step fails before commit, the agent must be careful to only mark completed steps; relies on natural agent behavior.
 - **More commits per change (ADR-028)**: One commit per artifact instead of one bulk commit at proposal; intentional trade-off for better git traceability.
 - **Minimal initial PR body (ADR-028)**: Draft PR body is just "WIP: <name>" until the constitution standard task enriches it post-apply; teams must follow the branch for artifact content.
-- **gh CLI dependency for full PR functionality (ADR-028)**: Environments without `gh` CLI get degraded experience (branch created but no PR).
+- **GitHub tooling dependency for full PR functionality (ADR-028)**: Environments without GitHub tooling (gh CLI, MCP tools, or API) get degraded experience (branch created but no PR).
 - **Free-form Section C parsing (ADR-030)**: Preflight side-effect analysis uses free-form markdown; parsing is inherently fragile. Generic side-effect descriptions are marked inconclusive rather than producing false warnings.
 - **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
