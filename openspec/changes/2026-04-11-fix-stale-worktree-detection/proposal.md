@@ -1,6 +1,6 @@
 <!--
 ---
-status: active
+status: completed
 branch: claude/analyze-issue-111-AmS90
 capabilities:
   new: []

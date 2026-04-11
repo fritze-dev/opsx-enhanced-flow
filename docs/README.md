@@ -78,6 +78,7 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 | `.gitignore` negation rule for settings.json | Standard git pattern, allows single file to be tracked in ignored directory | [ADR-051](decisions/adr-051-gitignore-negation-rule-for-settings.md) |
 | No settings.json template in `src/templates/` | settings.json is project-specific (marketplace refs vary), not a pipeline artifact | [ADR-052](decisions/adr-052-no-settings-json-template.md) |
 | SessionStart hook as fallback for plugin auto-install | Workaround for `enabledPlugins` race condition; fires only on new sessions; harmless no-op when upstream fix lands | [ADR-053](decisions/adr-053-session-start-hook-fallback.md) |
+| Worktree path lookup, user prompt for abandoned/inactive, configurable stale_days | Branch-name glob fails with worktree- prefix; abandoned work may be salvageable; teams have different cadences | [ADR-054](decisions/adr-054-stale-worktree-detection-enhancements.md) |
 
 ### Notable Trade-offs
 

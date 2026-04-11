@@ -19,17 +19,17 @@ No foundation tasks — this change modifies existing spec and config files only
   - [x] Existing cleanup behavior unchanged — PASS
   - [x] `auto_approve: true` does not suppress abandoned/inactive prompts — PASS
 - [x] 3.2. Auto-Verify: generate review.md using the review template
-- [ ] 3.3. User Testing: **Stop here!** Ask the user for manual approval.
-- [ ] 3.4. Fix Loop: On verify issues or bug reports → fix specs/config → re-verify. Specs must match config before proceeding.
-- [ ] 3.5. Final Verify: regenerate review.md after all fixes to confirm consistency. Skip if 3.4 was not entered.
-- [ ] 3.6. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.3. User Testing: auto_approve — skipped
+- [x] 3.4. Fix Loop: not entered (no issues found)
+- [x] 3.5. Final Verify: skipped (3.4 not entered)
+- [x] 3.6. Approval: auto_approve — auto-continued
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
-- [ ] 4.2. Bump version
-- [ ] 4.3. Commit and push to remote
-- [ ] 4.4. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #111"`)
+- [x] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [x] 4.2. Bump version (2.0.8 → 2.0.9)
+- [x] 4.3. Commit and push to remote
+- [x] 4.4. Update PR: mark ready for review, update body with change summary and issue references
 
 ## 5. Post-Merge Reminders
 

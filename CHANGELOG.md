@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-11 — Fix Stale Worktree Detection (v2.0.10)
+
+### Fixed
+- Proposal lookup path in lazy worktree cleanup now reads from the worktree filesystem path instead of glob-matching by branch name — fixes detection failure caused by the `worktree-` branch prefix mismatch (closes #111)
+
+### Added
+- CLOSED PR detection (tier 3): worktrees with abandoned PRs now trigger a user prompt before cleanup
+- Inactivity detection (tier 4): worktrees with no commits beyond `stale_days` threshold trigger a user prompt
+- `worktree.stale_days` configuration field in WORKFLOW.md (default: 14 days) for the inactivity threshold
+- Four new Gherkin scenarios and four new edge cases in the change-workspace spec
+
+### Changed
+- Lazy worktree cleanup expanded from 3-tier to 5-tier detection hierarchy
+- Cleanup now distinguishes auto-clean (completed/merged) from prompted cleanup (abandoned/inactive)
+- Tiers 3-4 prompts are not suppressed by `auto_approve: true`
+
 ## 2026-04-11 — SessionStart Hook Fallback (v2.0.9)
 
 ### Added
