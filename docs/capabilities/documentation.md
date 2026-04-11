@@ -7,7 +7,7 @@ lastUpdated: "2026-04-10"
 
 # Documentation
 
-Generates all user-facing documentation from specs and completed change artifacts via `/opsx:workflow finalize`: enriched capability docs, Architecture Decision Records, and a consolidated README with architecture overview.
+Generates all user-facing documentation from specs and completed change artifacts via `workflow finalize`: enriched capability docs, Architecture Decision Records, and a consolidated README with architecture overview.
 
 ## Purpose
 
@@ -33,7 +33,7 @@ Capability docs are generated per-spec rather than per-change because users thin
 
 ## Behavior
 
-### Capability Doc Generation (`/opsx:workflow finalize`)
+### Capability Doc Generation (`workflow finalize`)
 
 For each spec, the system reads the spec and looks up completed changes whose proposal lists the capability. It enriches the doc with Purpose (problem-framing from the spec), Rationale (design context from research and design artifacts), Known Limitations (from design Non-Goals and risks), and Future Enhancements (deferred items from Non-Goals). Behavior subsections map one-to-one to Gherkin scenario groups. Normative language is replaced with natural user-facing explanations. The capability doc template at `openspec/templates/docs/capability.md` defines the structural format.
 
@@ -41,7 +41,7 @@ For each spec, the system reads the spec and looks up completed changes whose pr
 
 Before generating each doc, the system compares the spec's `lastModified` field against the doc's `lastUpdated` frontmatter. If the spec is older, the capability is skipped entirely. After generation, the content is compared against the existing file (excluding `lastUpdated`); if identical, the file is not written and the timestamp is not bumped.
 
-### ADR Generation (`/opsx:workflow finalize`)
+### ADR Generation (`workflow finalize`)
 
 For each completed change with `has_decisions: true` in its design.md frontmatter, the system reads the Decisions table and generates ADRs. Each ADR includes Status, Context (at least 4-6 sentences), Decision (with inline rationale via em-dash pattern), Alternatives Considered, Consequences (Positive/Negative), and References. The slug is derived deterministically from the decision text. Cross-references to related ADRs are added when clear thematic relationships exist.
 
@@ -49,7 +49,7 @@ For each completed change with `has_decisions: true` in its design.md frontmatte
 
 When multiple decisions from the same change share the same motivation, they are consolidated into a single ADR with numbered sub-decisions. Single-topic changes with 3+ decision rows are consolidated by default. Decisions addressing different concerns remain separate.
 
-### README Generation (`/opsx:workflow finalize`)
+### README Generation (`workflow finalize`)
 
 The README is built from the constitution (System Architecture, Tech Stack, Conventions), all ADR files (Key Design Decisions table with Notable Trade-offs), and all capability docs (grouped by spec `category` frontmatter, ordered by `order` field). Capability descriptions are concise (max 80 characters or 15 words). The README template at `openspec/templates/docs/readme.md` defines the format.
 

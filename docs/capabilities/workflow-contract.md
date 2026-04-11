@@ -15,7 +15,7 @@ Without a standardized contract format, pipeline configuration scatters across m
 
 ## Rationale
 
-A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, project context) while Smart Templates handle artifact definitions (instruction, output path, dependencies). Actions are defined inline in WORKFLOW.md because they have no output structure -- separate action template files add maintenance overhead without benefit. The router dispatch pattern consolidates 11 separate skill files into a single router that reads WORKFLOW.md dynamically, eliminating copy-pasted logic like change context detection. Both WORKFLOW.md and Smart Templates include a `template-version` field (integer) that enables `/opsx:workflow init` to detect user customizations and merge plugin updates instead of overwriting. Custom actions extend this system by allowing consumer projects to add their own actions to the `actions` array without modifying the plugin source.
+A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, project context) while Smart Templates handle artifact definitions (instruction, output path, dependencies). Actions are defined inline in WORKFLOW.md because they have no output structure -- separate action template files add maintenance overhead without benefit. The router dispatch pattern consolidates 11 separate skill files into a single router that reads WORKFLOW.md dynamically, eliminating copy-pasted logic like change context detection. Both WORKFLOW.md and Smart Templates include a `template-version` field (integer) that enables `workflow init` to detect user customizations and merge plugin updates instead of overwriting. Custom actions extend this system by allowing consumer projects to add their own actions to the `actions` array without modifying the plugin source.
 
 ## Features
 
@@ -24,7 +24,7 @@ A slim WORKFLOW.md handles pipeline orchestration (stage ordering, apply gate, p
 - **Inline action definitions** -- `actions` array in frontmatter lists action names (built-in and custom); each action has a `## Action: <name>` body section with `### Instruction` for procedural guidance
 - **Custom actions** -- consumer projects define additional actions by adding names to the `actions` array and writing corresponding `## Action: <name>` body sections with self-contained instructions; no plugin modification required
 - **Router dispatch pattern** -- single router handles all commands (built-in and custom) with shared intent recognition, change context detection, and WORKFLOW.md loading; validates actions against the `actions` array with fallback to built-in list
-- **Template versioning** -- `template-version` (integer, monotonically increasing) enables version-aware merge during `/opsx:workflow init`
+- **Template versioning** -- `template-version` (integer, monotonically increasing) enables version-aware merge during `workflow init`
 - **Auto-approve default** -- `auto_approve` defaults to `true` when absent or uncommented; the full pipeline runs end-to-end without pausing: propose skips the design checkpoint, auto-dispatches apply; apply skips the user testing pause on PASS, auto-dispatches finalize. Set to `false` to pause at every checkpoint (design review, user testing gate, approval).
 
 ## Behavior
@@ -62,7 +62,7 @@ The router validates the invoked command against the `actions` array from WORKFL
 
 ## Edge Cases
 
-- If WORKFLOW.md is missing, the router reports an error and suggests running `/opsx:workflow init`. For action validation, it falls back to the built-in actions list.
+- If WORKFLOW.md is missing, the router reports an error and suggests running `workflow init`. For action validation, it falls back to the built-in actions list.
 - If a Smart Template lacks YAML frontmatter, the router treats it as a plain template with no instruction or metadata and reports a warning.
 - If a Smart Template is missing the `template-version` field, init treats it as version 0 (always eligible for update).
 - If WORKFLOW.md contains malformed YAML, the router reports a parse error and stops.

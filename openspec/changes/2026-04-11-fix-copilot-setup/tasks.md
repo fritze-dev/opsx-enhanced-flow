@@ -27,7 +27,7 @@
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [x] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [x] 4.1. Run workflow skill with `finalize` (generates changelog and updates docs)
 - [x] 4.2. Bump version
 - [x] 4.3. Commit and push to remote
 - [ ] 4.4. Update PR: mark ready for review, update body with change summary and issue references

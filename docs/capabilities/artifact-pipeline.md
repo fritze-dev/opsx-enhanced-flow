@@ -19,11 +19,11 @@ The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates 
 
 ## Features
 
-- **Eight-Stage Pipeline** (`/opsx:workflow propose`): Research, proposal, specs, design, preflight, tests, tasks, and review execute in strict dependency order. Each stage produces a verifiable artifact file.
+- **Eight-Stage Pipeline** (`workflow propose`): Research, proposal, specs, design, preflight, tests, tasks, and review execute in strict dependency order. Each stage produces a verifiable artifact file.
 - **Artifact Output Frontmatter**: Proposals include `status`, `branch`, `capabilities` (new/modified/removed), and optionally `worktree`. Designs include `has_decisions` (boolean). Actions prefer frontmatter over markdown parsing.
 - **Explicit Dependency Declarations**: Each Smart Template declares its dependencies via a `requires` field. Dependencies are enforced by verifying file existence.
 - **Apply Gate**: Implementation is gated by the tasks artifact. Apply cannot begin until `tasks.md` exists and is non-empty.
-- **Propose as Single Entry Point**: `/opsx:workflow propose` handles workspace creation, progress display, checkpoint/resume, and full artifact generation. Displays artifact status showing which stages are done, ready, or blocked. The `auto_approve` configuration (defaults to `true`) controls whether checkpoints pause for user confirmation.
+- **Propose as Single Entry Point**: `workflow propose` handles workspace creation, progress display, checkpoint/resume, and full artifact generation. Displays artifact status showing which stages are done, ready, or blocked. The `auto_approve` configuration (defaults to `true`) controls whether checkpoints pause for user confirmation.
 - **WORKFLOW.md-Owned Workflow Rules**: The tasks template's `instruction` contains the Definition of Done rule and standard tasks directive. WORKFLOW.md action instructions contain the post-apply workflow sequence.
 - **Incremental Commits with Draft PR**: After each artifact, the system commits and pushes. On the first commit, a feature branch and draft PR are created. The post-artifact hook is worktree-aware.
 - **Post-Implementation Commit Before Approval**: After apply's auto-verify passes, the system commits implementation changes and pushes before pausing for user approval.
@@ -34,11 +34,11 @@ The pipeline uses WORKFLOW.md for declarative orchestration and Smart Templates 
 
 ## Behavior
 
-### Pipeline Stages Execute in Dependency Order (`/opsx:workflow propose`)
+### Pipeline Stages Execute in Dependency Order (`workflow propose`)
 
 When progressing through the pipeline, the system enforces the order: research, proposal, specs, design, preflight, tests, tasks, review. Attempting to skip a stage is rejected. A completed pipeline run produces `research.md`, `proposal.md`, one or more `specs/<capability>/spec.md` files, `design.md`, `preflight.md`, `tests.md`, `tasks.md`, and `review.md`.
 
-### Propose Creates and Manages Workspaces (`/opsx:workflow propose`)
+### Propose Creates and Manages Workspaces (`workflow propose`)
 
 When invoked with a description or name and no matching change exists, propose creates a new change workspace (with worktree if enabled). When invoked without arguments and existing changes are present, propose lists active changes and lets you select one. It displays artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
 

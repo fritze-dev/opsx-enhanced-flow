@@ -33,7 +33,7 @@
 - [ ] **Verify: AGENTS.md exists with agnostic language**
   - Setup: Change implemented
   - Action: Read `AGENTS.md`
-  - Verify: No `/opsx:workflow`, no `/workflow`, uses "workflow skill" language
+  - Verify: No `workflow`, no `/workflow`, uses "workflow skill" language
 
 - [ ] **Verify: CLAUDE.md is symlink to AGENTS.md**
   - Setup: Change implemented
@@ -62,7 +62,7 @@
 - [ ] **Verify: Template updated**
   - Setup: Change implemented
   - Action: Read `src/templates/claude.md`
-  - Verify: Generates agnostic content, no `/opsx:workflow` in template body
+  - Verify: Generates agnostic content, no `workflow` in template body
 
 - [ ] **Verify: CONSTITUTION.md updated**
   - Setup: Change implemented

@@ -63,14 +63,14 @@ Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 
 ```bash
 # 1. Initialize project (one-time)
-/opsx:workflow init              # Installs schema, config, templates; scans codebase → constitution + specs
+workflow init              # Installs schema, config, templates; scans codebase → constitution + specs
 
 # 2. Build a feature (repeat for each feature)
-/opsx:workflow propose feature-x # Create workspace + generate artifacts (research → specs → design → preflight → tasks), pauses for review
+workflow propose feature-x # Create workspace + generate artifacts (research → specs → design → preflight → tasks), pauses for review
 # → You review specs + design, confirm alignment
-/opsx:workflow apply             # AI implements according to the plan + generates review.md
+workflow apply             # AI implements according to the plan + generates review.md
 # → You test the result, approve
-/opsx:workflow finalize          # Changelog + docs + version bump
+workflow finalize          # Changelog + docs + version bump
 ```
 
 ---
@@ -143,7 +143,7 @@ The system separates concerns into three layers: **CONSTITUTION.md** (project ru
 
 ### Workflow
 
-**Prerequisite:** Run `/opsx:workflow init` once per project to install the schema, templates, and generate the constitution + initial specs.
+**Prerequisite:** Run `workflow init` once per project to install the schema, templates, and generate the constitution + initial specs.
 
 #### Workflow Principles
 
@@ -163,26 +163,26 @@ These design principles are enforced across the three-layer architecture — eac
 
 | Step | Command | What Happens |
 |------|---------|--------------|
-| 1. Init | `/opsx:workflow init` | Installs workflow + templates, scans codebase → generates `CONSTITUTION.md` + initial specs. |
+| 1. Init | `workflow init` | Installs workflow + templates, scans codebase → generates `CONSTITUTION.md` + initial specs. |
 | 2. Review | *Manual* | Review constitution and generated specs for correctness. |
-| 3. Docs | `/opsx:workflow finalize` | Generate initial changelog + documentation. |
+| 3. Docs | `workflow finalize` | Generate initial changelog + documentation. |
 
 #### Feature Cycle
 
 | Step | Command | What Happens |
 |------|---------|--------------|
-| 1. Plan | `/opsx:workflow propose feature-x` | Create workspace, generate 7-stage pipeline artifacts (research → proposal → specs → design → preflight → tasks). Pauses for review. |
+| 1. Plan | `workflow propose feature-x` | Create workspace, generate 7-stage pipeline artifacts (research → proposal → specs → design → preflight → tasks). Pauses for review. |
 | 2. Review | *Manual* | Review specs + design, confirm alignment. |
-| 3. Execute | `/opsx:workflow apply` | AI implements according to `tasks.md`, generates `review.md`. |
+| 3. Execute | `workflow apply` | AI implements according to `tasks.md`, generates `review.md`. |
 | 4. QA | *Manual* | User tests → approves (review.md is PR-visible). |
-| 5. Finalize | `/opsx:workflow finalize` | Changelog + docs + version bump. |
+| 5. Finalize | `workflow finalize` | Changelog + docs + version bump. |
 
 #### Recovery Path
 
 When code changes happen outside the spec process (hotfixes, dependency updates, external contributions):
 
-- **Small drift:** `/opsx:workflow propose hotfix-xyz` → derive specs from existing code → `/opsx:workflow finalize`
-- **Large drift:** Re-run `/opsx:workflow init` — it detects existing specs and runs in recovery mode (drift detection + consistency passes)
+- **Small drift:** `workflow propose hotfix-xyz` → derive specs from existing code → `workflow finalize`
+- **Large drift:** Re-run `workflow init` — it detects existing specs and runs in recovery mode (drift detection + consistency passes)
 
 > The spec process assumes specs come before code. When reality diverges, use these paths to re-sync.
 
@@ -207,7 +207,7 @@ opsx-enhanced-flow/
 │   │   └── plugin.json                    # Plugin manifest (name: "opsx")
 │   ├── skills/                            # Single skill with action routing
 │   │   └── workflow/SKILL.md              # Router: dispatches to WORKFLOW.md actions
-│   └── templates/                         # Smart Templates (copied by /opsx:workflow init)
+│   └── templates/                         # Smart Templates (copied by workflow init)
 │       ├── research.md                    # Research artifact template
 │       ├── proposal.md                    # Proposal artifact template
 │       ├── design.md                      # Design artifact template
@@ -273,14 +273,14 @@ your-project/
 
 ### Commands
 
-All 4 commands are available via `/opsx:workflow <action>` when the plugin is installed. A single `src/skills/workflow/SKILL.md` routes to the appropriate action defined in WORKFLOW.md. See [docs/README.md](docs/README.md) for detailed capability documentation.
+All 4 commands are available via `workflow <action>` when the plugin is installed. A single `src/skills/workflow/SKILL.md` routes to the appropriate action defined in WORKFLOW.md. See [docs/README.md](docs/README.md) for detailed capability documentation.
 
 | Command | Purpose |
 |---------|---------|
-| `/opsx:workflow init` | Initialize project or run health check (replaces setup + bootstrap) |
-| `/opsx:workflow propose` | Create change workspace + generate 7-stage artifacts (replaces new + discover + ff) |
-| `/opsx:workflow apply` | Implement tasks + generate review.md (replaces apply + verify) |
-| `/opsx:workflow finalize` | Changelog + docs + version bump (replaces changelog + docs) |
+| `workflow init` | Initialize project or run health check (replaces setup + bootstrap) |
+| `workflow propose` | Create change workspace + generate 7-stage artifacts (replaces new + discover + ff) |
+| `workflow apply` | Implement tasks + generate review.md (replaces apply + verify) |
+| `workflow finalize` | Changelog + docs + version bump (replaces changelog + docs) |
 
 ---
 
@@ -296,7 +296,7 @@ claude plugin marketplace add fritze-dev/opsx-enhanced-flow
 claude plugin install opsx@opsx-enhanced-flow
 ```
 
-After installing the plugin, run `/opsx:workflow init` in your project to install the workflow, templates, and generate the constitution + initial specs.
+After installing the plugin, run `workflow init` in your project to install the workflow, templates, and generate the constitution + initial specs.
 
 #### Claude Code Web
 

@@ -59,7 +59,7 @@ The system SHALL deliver all commands through a single router SKILL.md that disp
 #### Scenario: Router dispatches to custom actions
 - **GIVEN** a consumer WORKFLOW.md with `actions: [init, propose, apply, qa-review, finalize]`
 - **AND** a `## Action: qa-review` body section with `### Instruction`
-- **WHEN** a user invokes `/opsx:workflow qa-review`
+- **WHEN** a user invokes `workflow qa-review`
 - **THEN** the router SHALL read the instruction and execute it directly (agent decides execution mode)
 
 #### Scenario: Router is model-invocable
@@ -79,7 +79,7 @@ The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templa
 
 #### Scenario: Adding a custom action does not require router changes
 - **GIVEN** a consumer adds `qa-review` to their WORKFLOW.md `actions` array and writes a `## Action: qa-review` body section
-- **WHEN** the user invokes `/opsx:workflow qa-review`
+- **WHEN** the user invokes `workflow qa-review`
 - **THEN** the router SHALL dispatch the custom action without any modification to the router SKILL.md
 
 #### Scenario: Constitution update does not require WORKFLOW.md changes

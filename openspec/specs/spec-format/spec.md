@@ -60,8 +60,8 @@ Every requirement SHALL have at least one scenario using Gherkin format. Scenari
 Specs MAY include an optional YAML frontmatter block at the top of the file, delimited by `---` lines. The frontmatter SHALL support the following fields:
 
 **Documentation fields** (optional):
-- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `/opsx:workflow finalize` command SHALL read this value to determine capability ordering.
-- `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `/opsx:workflow finalize` command SHALL use this value to render category group headers in the capabilities table.
+- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `workflow finalize` command SHALL read this value to determine capability ordering.
+- `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `workflow finalize` command SHALL use this value to render category group headers in the capabilities table.
 
 **Tracking fields** (managed by skills):
 - `status` (string, `stable` or `draft`): Indicates whether the spec is actively being edited by a change. Default: `stable`. Skills SHALL set `status: draft` when modifying a spec during the specs stage and flip back to `stable` during verify completion.
@@ -69,7 +69,7 @@ Specs MAY include an optional YAML frontmatter block at the top of the file, del
 - `version` (integer): Monotonically increasing version number. Starts at `1` on creation. Skills SHALL increment by 1 each time a change modifies the spec and completes successfully (during verify completion).
 - `lastModified` (string, `YYYY-MM-DD`): The date the spec was last modified. Skills SHALL set this to the current date when editing the spec during the specs stage and again during verify completion.
 
-The `order` and `category` fields are optional. If `order` is absent, `/opsx:workflow finalize` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group. The tracking fields (`status`, `version`, `lastModified`) are optional for backward compatibility — skills SHALL handle their absence gracefully by treating missing `status` as `stable`, missing `version` as `1`, and missing `lastModified` as requiring regeneration.
+The `order` and `category` fields are optional. If `order` is absent, `workflow finalize` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group. The tracking fields (`status`, `version`, `lastModified`) are optional for backward compatibility — skills SHALL handle their absence gracefully by treating missing `status` as `stable`, missing `version` as `1`, and missing `lastModified` as requiring regeneration.
 
 The frontmatter block SHALL appear before the `## Purpose` section. Existing spec content (Purpose, Requirements, Edge Cases, Assumptions) SHALL remain unchanged.
 
@@ -78,12 +78,12 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 #### Scenario: Spec with documentation frontmatter
 - **GIVEN** a spec at `openspec/specs/quality-gates/spec.md`
 - **AND** the spec has frontmatter with `order: 8` and `category: development`
-- **WHEN** `/opsx:workflow finalize` generates the capabilities table
+- **WHEN** `workflow finalize` generates the capabilities table
 - **THEN** quality-gates appears at position 8, under a "Development" group header
 
 #### Scenario: Spec without frontmatter falls back gracefully
 - **GIVEN** a spec with no YAML frontmatter
-- **WHEN** `/opsx:workflow finalize` generates the capabilities table
+- **WHEN** `workflow finalize` generates the capabilities table
 - **THEN** the capability appears in an "Other" group with agent-determined ordering
 
 #### Scenario: Frontmatter assigned during spec creation
@@ -158,8 +158,8 @@ The `## Assumptions` section at the end of specs and design documents SHALL coll
 ## Edge Cases
 
 - If a requirement has zero scenarios, the spec SHALL be considered invalid and flagged during preflight.
-- If two specs share the same `order` value, `/opsx:workflow finalize` SHALL use alphabetical capability name as tiebreaker.
-- If a `category` value is not one of the standard categories, `/opsx:workflow finalize` SHALL still render it as a group header using title-case formatting.
+- If two specs share the same `order` value, `workflow finalize` SHALL use alphabetical capability name as tiebreaker.
+- If a `category` value is not one of the standard categories, `workflow finalize` SHALL still render it as a group header using title-case formatting.
 - If a spec has `status: draft` but no `change` field, the spec SHALL be treated as having an unknown change owner — preflight SHALL flag this as a warning.
 - If a spec has `status: stable` with a `change` field present, the `change` field SHALL be ignored (stale data).
 

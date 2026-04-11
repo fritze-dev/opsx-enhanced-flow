@@ -65,7 +65,7 @@ instruction: |
 ## 4. Standard Tasks (Post-Implementation)
 <!-- Universal post-implementation steps. Always include this section.
      If the constitution defines ## Standard Tasks > ### Pre-Merge, append those items after these. -->
-- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [ ] 4.1. Run `workflow finalize` (generates changelog and updates docs)
 - [ ] 4.2. Bump version
 - [ ] 4.3. Commit and push to remote
 

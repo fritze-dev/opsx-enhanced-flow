@@ -7,7 +7,7 @@ lastUpdated: "2026-04-10"
 
 # Quality Gates
 
-Three quality gates guard every change: preflight checks your specs and design during `/opsx:workflow propose` before tasks are created, review.md verification checks your implementation during `/opsx:workflow apply` after coding is done, and documentation drift detection runs during `/opsx:workflow init` as a project health check.
+Three quality gates guard every change: preflight checks your specs and design during `workflow propose` before tasks are created, review.md verification checks your implementation during `workflow apply` after coding is done, and documentation drift detection runs during `workflow init` as a project health check.
 
 ## Purpose
 
@@ -17,14 +17,14 @@ Starting implementation on incomplete or contradictory specs wastes effort and p
 
 Preflight covers seven distinct dimensions (traceability, gaps, side effects, constitution compliance, duplication, marker audit, and draft spec validation) because each catches a different category of problem expensive to fix during implementation. Verify now produces a `review.md` artifact in the change directory rather than a transient report -- this makes verification results persistent, PR-visible, and not skippable (file existence is checked). Verify assesses two dimensions -- Implementation (Completeness + Correctness) and Scope (Coherence + Side-Effects) -- using the branch diff as the primary evidence source. The verify completion step flips spec `draft` to `stable`, bumps `version`, and sets `lastModified`. Documentation drift verification moved from a standalone command to an init health check, consolidating project-level checks under a single entry point. All gates are stateless and report findings without auto-fixing (except mechanically fixable WARNINGs in verify).
 
-> **Workflow sequence**: Preflight runs during `/opsx:workflow propose` after the design phase and before task creation. Verify runs during `/opsx:workflow apply` as part of the QA loop (generating review.md). Docs drift detection runs during `/opsx:workflow init` as a project health check.
+> **Workflow sequence**: Preflight runs during `workflow propose` after the design phase and before task creation. Verify runs during `workflow apply` as part of the QA loop (generating review.md). Docs drift detection runs during `workflow init` as a project health check.
 
 ## Features
 
-- **Preflight Quality Check** (`/opsx:workflow propose`): Mandatory review across seven dimensions before tasks are created, producing `preflight.md` with a verdict of PASS, PASS WITH WARNINGS, or BLOCKED.
+- **Preflight Quality Check** (`workflow propose`): Mandatory review across seven dimensions before tasks are created, producing `preflight.md` with a verdict of PASS, PASS WITH WARNINGS, or BLOCKED.
 - **Draft Spec Validation**: Preflight verifies that all specs with `status: draft` belong to the current change. Foreign drafts are BLOCKED; orphaned drafts are WARNING.
 - **Mandatory Pause on Warnings**: When preflight returns PASS WITH WARNINGS, the system pauses and requires explicit acknowledgment before task creation.
-- **Post-Implementation Verification** (`/opsx:workflow apply`): Verification that produces `review.md` in the change directory -- a persistent artifact assessing Implementation and Scope dimensions using the branch diff as primary evidence, with issues classified as CRITICAL, WARNING, or SUGGESTION.
+- **Post-Implementation Verification** (`workflow apply`): Verification that produces `review.md` in the change directory -- a persistent artifact assessing Implementation and Scope dimensions using the branch diff as primary evidence, with issues classified as CRITICAL, WARNING, or SUGGESTION.
 - **Draft Spec Gate in Verify**: Verify checks all specs modified by the change for `status: draft`. Any remaining drafts produce a CRITICAL issue.
 - **Verify Completion (Draft-to-Stable Flip)**: When verify passes and the change is approved, spec tracking fields are finalized: `status` flips to `stable`, `change` is removed, `version` increments, `lastModified` is set. The proposal's `status` is set to `completed`.
 - **Seven Preflight Dimensions**: Traceability Matrix, Gap Analysis, Side-Effect Analysis, Constitution Check, Duplication and Consistency, Marker Audit, and Draft Spec Validation.
@@ -33,12 +33,12 @@ Preflight covers seven distinct dimensions (traceability, gaps, side effects, co
 - **Task-Diff Mapping**: For each completed task, verify checks that the diff contains corresponding changes matching both file paths and content.
 - **Diff Scope Check**: Every file in the diff must be traceable to a task or design component. Untraced files are a single grouped SUGGESTION.
 - **Preflight Side-Effect Cross-Check**: Verify reads `preflight.md` Section C and cross-checks each side-effect against tasks, diff, and codebase evidence.
-- **Documentation Drift Detection** (`/opsx:workflow init`): Checks capability docs, ADRs, and README against specs across three dimensions with CLEAN/DRIFTED/OUT OF SYNC verdicts. Uses `has_decisions` frontmatter for efficient ADR scanning.
+- **Documentation Drift Detection** (`workflow init`): Checks capability docs, ADRs, and README against specs across three dimensions with CLEAN/DRIFTED/OUT OF SYNC verdicts. Uses `has_decisions` frontmatter for efficient ADR scanning.
 - **Auto-Fix for Mechanical WARNINGs**: Stale cross-references, inconsistent naming, and outdated text are fixed inline. Judgment-required WARNINGs remain as open issues.
 
 ## Behavior
 
-### Preflight: Quality Check During Propose (`/opsx:workflow propose`)
+### Preflight: Quality Check During Propose (`workflow propose`)
 
 #### Preflight Passes With No Issues
 
@@ -64,7 +64,7 @@ Draft specs whose `change` field matches the current change are confirmed valid.
 
 When no blockers are found but minor gaps are detected, the verdict is "PASS WITH WARNINGS." The system pauses and asks you to acknowledge each warning before proceeding.
 
-### Verify: review.md During Apply (`/opsx:workflow apply`)
+### Verify: review.md During Apply (`workflow apply`)
 
 #### Verify Gates on Draft Spec Status
 
@@ -94,7 +94,7 @@ Mechanically fixable WARNINGs (stale references, inconsistent naming) are auto-f
 
 Verify cross-checks each side-effect from preflight's Section C against tasks, diff content, and the codebase. Unaddressed side-effects are WARNING.
 
-### Docs Drift Detection: Health Check During Init (`/opsx:workflow init`)
+### Docs Drift Detection: Health Check During Init (`workflow init`)
 
 #### All Documentation Is In Sync
 
@@ -102,7 +102,7 @@ When every spec has a corresponding capability doc, all design decisions have AD
 
 #### Missing Capability Doc
 
-When a spec exists but no corresponding capability doc is found, the report includes a CRITICAL issue recommending `/opsx:workflow finalize`.
+When a spec exists but no corresponding capability doc is found, the report includes a CRITICAL issue recommending `workflow finalize`.
 
 #### README Missing a Capability
 

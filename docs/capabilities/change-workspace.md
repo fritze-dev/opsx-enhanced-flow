@@ -7,7 +7,7 @@ lastUpdated: "2026-04-10"
 
 # Change Workspace
 
-Manages the full lifecycle of a change workspace -- from creation through completion -- so that every feature or improvement follows a structured, traceable path. Workspace creation is handled by `/opsx:workflow propose`, and change context detection is handled by the router.
+Manages the full lifecycle of a change workspace -- from creation through completion -- so that every feature or improvement follows a structured, traceable path. Workspace creation is handled by `workflow propose`, and change context detection is handled by the router.
 
 ## Purpose
 
@@ -19,7 +19,7 @@ Change names use kebab-case for consistent, URL-safe, filesystem-safe identifier
 
 ## Features
 
-- **Workspace creation via propose** -- `/opsx:workflow propose <name>` creates the workspace directory (or git worktree when enabled) and begins pipeline traversal
+- **Workspace creation via propose** -- `workflow propose <name>` creates the workspace directory (or git worktree when enabled) and begins pipeline traversal
 - **Proposal tracking frontmatter** -- proposals include `status`, `branch`, `worktree` (optional), and `capabilities` (new/modified/removed) in YAML frontmatter
 - **Worktree-based isolation** -- when `worktree.enabled` is `true` in WORKFLOW.md, creates a git worktree with a dedicated feature branch based on the latest remote main
 - **Automatic name derivation** -- provide a description instead of a kebab-case name and the system converts it
@@ -31,9 +31,9 @@ Change names use kebab-case for consistent, URL-safe, filesystem-safe identifier
 
 ## Behavior
 
-### Creating a Workspace (`/opsx:workflow propose`)
+### Creating a Workspace (`workflow propose`)
 
-When you run `/opsx:workflow propose add-user-auth`, the system creates a workspace at `openspec/changes/YYYY-MM-DD-add-user-auth/` and begins pipeline traversal. If you provide a description, the system derives a kebab-case name automatically. If the name is invalid, the system asks for a valid name. If a change with that name already exists, the system suggests continuing it.
+When you run `workflow propose add-user-auth`, the system creates a workspace at `openspec/changes/YYYY-MM-DD-add-user-auth/` and begins pipeline traversal. If you provide a description, the system derives a kebab-case name automatically. If the name is invalid, the system asks for a valid name. If a change with that name already exists, the system suggests continuing it.
 
 ### Proposal Tracking Frontmatter
 

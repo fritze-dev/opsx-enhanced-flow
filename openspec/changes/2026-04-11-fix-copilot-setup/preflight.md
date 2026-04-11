@@ -20,7 +20,7 @@ No gaps. All deliverables clearly defined.
 
 - **CLAUDE.md becomes symlink**: Claude Code reads symlinks. If not → easy to revert to file copy.
 - **SKILL.md rewrite**: Consumers on the current plugin version have the old Claude-specific SKILL.md. After next plugin update, they get the agnostic version. The agnostic version is MORE compatible (works everywhere), not less.
-- **Template change**: Consumers running `/opsx:workflow init` will get agnostic AGENTS.md-style content instead of Claude-specific CLAUDE.md content. This is an improvement.
+- **Template change**: Consumers running `workflow init` will get agnostic AGENTS.md-style content instead of Claude-specific CLAUDE.md content. This is an improvement.
 - **Existing CI workflows**: Unaffected — they live in `.github/workflows/`, we don't touch them.
 
 ## D. Constitution Check

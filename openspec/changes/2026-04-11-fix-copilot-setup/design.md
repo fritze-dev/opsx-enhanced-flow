@@ -33,7 +33,7 @@ AFTER:
 
 * `src/skills/workflow/SKILL.md` contains zero Claude Code-specific tool names
 * `.agents/skills/workflow/SKILL.md` is a valid symlink resolving to src
-* `AGENTS.md` exists with agnostic language (no `/opsx:workflow`, no `/workflow`)
+* `AGENTS.md` exists with agnostic language (no `workflow`, no `/workflow`)
 * `CLAUDE.md` is a symlink to `AGENTS.md`
 * `.github/copilot-instructions.md` does not exist
 * `.github/skills/` directory does not exist

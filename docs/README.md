@@ -114,17 +114,17 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Structural checks miss subtle content drift (ADR-032)**: Docs-verify checks for presence of requirement names, not prose-level accuracy; capability docs that restructure content differently from the spec may trigger false positives.
 - **Setup model-invocable (ADR-M001)**: Spec no longer distinguishes setup from other skills; would need revisiting if Claude Code adds user-only discoverable mode.
 - **CLI removal (ADR-027)**: Skills are slightly more verbose with file-read instructions; no programmatic schema validation -- mitigated by version-controlled schema and runtime read errors.
-- **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `/opsx:workflow propose`.
+- **Worktree disk usage (ADR-033)**: Each worktree is a full checkout; negligible for markdown projects but potentially significant for large repos. Users must switch directories after `workflow propose`.
 - **~~No opt-out for auto-sync (ADR-034)~~**: Superseded by ADR-037 -- sync and archive eliminated.
-- **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting. (Now used in lazy worktree cleanup at `/opsx:workflow propose`.)
+- **Force delete bypasses Git safety (ADR-035)**: `git branch -D` skips Git's commit-reachability check; mitigated by GitHub API confirmation of merge status before force-deleting. (Now used in lazy worktree cleanup at `workflow propose`.)
 - **~~LLM may ignore blocking prompt context (ADR-036)~~**: Superseded by ADR-037 -- sync eliminated.
 - **Spec conflicts on shared branches (ADR-037)**: Two parallel changes editing the same baseline spec produce git merge conflicts; mitigated by worktree isolation for local changes.
-- **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `/opsx:workflow finalize <capability>` override and preflight traceability.
+- **Incremental docs detection depends on proposal Capabilities (ADR-037)**: Author-curated proposal may omit a capability; mitigated by manual `workflow finalize <capability>` override and preflight traceability.
 - **More commits per change (ADR-038)**: Extra WIP implementation commit in git history; consistent with post_artifact pattern that already creates one commit per artifact. Soft enforcement via apply.instruction text.
 - **Auto-fix scope boundary is agent-judged (ADR-039)**: The distinction between "mechanically fixable" and "judgment-required" WARNINGs relies on the agent interpreting examples in the SKILL.md; edge cases may be misjudged. Mitigated by clear examples and conservative scoping.
 - **Proposal frontmatter set once at generation (ADR-040)**: If the user manually edits the Capabilities section without updating frontmatter, skills use stale data. Mitigated by preflight cross-checking.
 - **Template-version bump is manual (ADR-040)**: Plugin maintainers must remember to bump `template-version` when changing template content; if forgotten, consumers receive no update.
-- **Breaking change for consumers (ADR-041)**: Consumers on template-version 1 must run `/opsx:workflow init` to migrate to template-version 3. Mitigated by init handling the migration.
+- **Breaking change for consumers (ADR-041)**: Consumers on template-version 1 must run `workflow init` to migrate to template-version 3. Mitigated by init handling the migration.
 - **Plugin stub indirection (ADR-041)**: Extra file-read between command invocation and router logic. Mitigated by stubs being trivially simple (~5 lines each).
 - **Loss of standalone preflight/verify commands (ADR-041)**: Users must go through propose or apply. Accepted because 4-command sufficiency covers all workflow needs.
 - **Custom action instruction quality (ADR-042)**: No spec requirement links for custom actions -- instruction quality depends entirely on the consumer author. Mitigated by clear documentation and the self-contained instruction pattern.
