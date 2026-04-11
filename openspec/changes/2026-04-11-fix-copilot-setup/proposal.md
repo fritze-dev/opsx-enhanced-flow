@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: claude/setup-copilot-integration-2t2Ho
 worktree: .claude/worktrees/fix-copilot-setup
 capabilities:

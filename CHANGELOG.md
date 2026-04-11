@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-11 — Agent Skills + AGENTS.md Standards (v2.0.13)
+
+### Changed
+- Rewrite workflow SKILL.md to tool-agnostic Agent Skills Standard format, replace CLAUDE.md with symlink to AGENTS.md, update bootstrap template to generate AGENTS.md, add issues/PR permissions to copilot-setup-steps.yml, update CONSTITUTION.md with Agent Skills conventions
+
+### Added
+- AGENTS.md cross-client project instructions, .agents/skills/workflow/ symlink for cross-client skill discovery
+
+### Removed
+- .github/copilot-instructions.md, .github/skills/ directory
+
 ## 2026-04-11 — GitHub Copilot Coding Agent Setup (v2.0.12)
 
 ### Added

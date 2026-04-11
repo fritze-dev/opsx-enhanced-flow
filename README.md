@@ -197,6 +197,11 @@ opsx-enhanced-flow/
 ├── .claude-plugin/
 │   └── marketplace.json                   # Marketplace definition (source: "./src")
 │
+├── .agents/
+│   └── skills/workflow/SKILL.md           # Symlink → src skill (cross-client discovery)
+│
+├── AGENTS.md                              # Cross-client project instructions
+│
 ├── src/                                   # Plugin source (what consumers get)
 │   ├── .claude-plugin/
 │   │   └── plugin.json                    # Plugin manifest (name: "opsx")
@@ -221,9 +226,7 @@ opsx-enhanced-flow/
 │   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
 ├── .github/
-│   ├── copilot-instructions.md            # Custom instructions for GitHub Copilot
 │   ├── copilot-setup-steps.yml            # Environment setup for Copilot coding agent
-│   ├── skills/workflow/SKILL.md           # Symlink → src skill (Copilot discovery)
 │   └── workflows/                         # CI/CD
 │       ├── release.yml                    # Auto tag + release on version change
 │       ├── claude.yml                     # @claude mention handler
