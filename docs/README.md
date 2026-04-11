@@ -132,17 +132,11 @@ Layers are independently modifiable -- WORKFLOW.md and Smart Templates do not em
 - **Dual placement maintenance (ADR-046)**: Knowledge management directive exists in both CLAUDE.md and CONSTITUTION.md; if the directive changes, both files need updating. Accepted because the directive is stable and the coverage benefit (every session vs workflow-only) outweighs the maintenance cost.
 - **CLAUDE.md template maintenance (ADR-047)**: One more template file to maintain; mitigated by small surface area (~20 lines) and stable content.
 - **Static routing rules (ADR-048)**: Knowledge type-to-destination mapping is hardcoded; new knowledge types require updating the directive. Mitigated by the four categories (rules, decisions, requirements, friction) covering the vast majority of project knowledge.
-<<<<<<< HEAD
 - **8-stage pipeline overhead (ADR-049)**: One more artifact per change; accepted because test-first development value outweighs the overhead of generating tests.md.
 - **LLM-generated test stubs may be generic (ADR-049)**: Stubs are TDD red-phase starting points, not production tests; developers fill in implementation details.
 - **Breaking pipeline for old consumers (ADR-049)**: template-version bump (3 to 4) signals the change; consumers re-run init to get the new stage.
-=======
-- **Declarative plugin install assumption (ADR-049)**: Depends on Claude Code supporting `extraKnownMarketplaces` + `enabledPlugins` fields; if the API changes, settings.json must be updated.
-- **apt install latency (ADR-050)**: `gh` CLI install adds ~10-15s to new cloud session start. Mitigated by idempotent check that skips on session resume.
-- **CLAUDE_CODE_REMOTE dependency (ADR-051)**: Script relies on Claude Code Web continuing to set this environment variable; if removed, the gate would need updating.
-- **Gitignore pattern subtlety (ADR-052)**: The `/.claude/*` vs `/.claude/` distinction is a subtle git behavior that may confuse contributors; mitigated by comments in `.gitignore`.
-- **Inline settings generation (ADR-053)**: Changes to the settings.json format require updating the init instruction rather than a template file; accepted because the file is small and rarely changes.
->>>>>>> 9519d91 (Finalize: changelog, version bump to 2.0.7, mark tasks complete)
+- **Declarative plugin install assumption (ADR-050)**: Depends on Claude Code supporting `extraKnownMarketplaces` + `enabledPlugins` fields; if the API changes, settings.json must be updated.
+- **Gitignore pattern subtlety (ADR-051)**: The `/.claude/*` vs `/.claude/` distinction is a subtle git behavior that may confuse contributors; mitigated by comments in `.gitignore`.
 
 ## Conventions
 
