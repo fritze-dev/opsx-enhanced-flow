@@ -306,8 +306,7 @@ The `gh` CLI is not pre-installed in cloud sessions. Without it, the plugin skip
    ```
 2. **Environment variable** — add `GH_TOKEN` with a GitHub personal access token. The `gh` CLI reads it automatically.
 
-> Running `/opsx:workflow init` on a consumer project will generate `.claude/settings.json` automatically.
-
+> For consumer projects, copy `.claude/settings.json` from this repo and update the marketplace `repo` field if needed. Make sure `.gitignore` does not block `.claude/settings.json` (use `/.claude/*` with `!/.claude/settings.json`).
 
 #### Updating the Plugin
 
