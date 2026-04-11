@@ -57,16 +57,14 @@ The init skill will generate `.claude/settings.json` and `scripts/setup-remote.s
 | Decision | Rationale | Alternatives |
 |----------|-----------|--------------|
 | Declarative plugin install via `extraKnownMarketplaces` + `enabledPlugins` | Follows docs pattern, no script needed, auto-installs at session start | `claude plugin` commands in SessionStart hook (timing issues, more fragile) |
-| SessionStart hook only for `gh` CLI | Plugin install is declarative, so hook only handles system-level dependency | Single script for everything (mixes concerns, duplicates declarative capability) |
-| Gate on `CLAUDE_CODE_REMOTE=true` | Official env var per docs, prevents unnecessary execution locally | No gate + check `command -v gh` (would attempt apt in Codespaces too) |
+| `gh` CLI as optional user-configured dependency | User configures in their own Environment settings (setup script + GH_TOKEN). Keeps repo minimal, separates system deps from plugin config | SessionStart hook with setup script (mixes system deps into repo, runs on every session) |
 | `.gitignore` negation rule | Standard git pattern, allows single file to be tracked in ignored directory | Separate directory outside `.claude/` (not supported by Claude Code) |
 | No settings.json template in `src/templates/` | settings.json is project-specific (marketplace refs vary), not a pipeline artifact | Smart Template approach (over-engineered for a config file) |
 
 ## Risks & Trade-offs
 
 - **Self-referential marketplace**: The plugin repo declares itself as its own marketplace. The marketplace system fetches from GitHub independently of the local clone, so this should work. → Mitigated by testing in Claude Code Web.
-- **`apt install` latency**: `gh` CLI install adds ~10-15s to new session start. → Acceptable; idempotent check skips on resume.
-- **`GH_TOKEN` not configured**: `gh` commands fail. Plugin already handles this gracefully (skips PR creation). → Mitigated by clear warning in hook output and README documentation.
+- **`gh` CLI not available by default**: Without `gh`, plugin skips draft PR creation and can't create issues. → Mitigated by clear README documentation on how to set up `gh` optionally. Core workflow (propose/apply/finalize) works without it.
 
 ## Open Questions
 

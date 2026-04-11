@@ -291,14 +291,22 @@ After installing the plugin, run `/opsx:workflow init` in your project to instal
 
 #### Claude Code Web
 
-The plugin works in [Claude Code Web](https://claude.ai/code) (cloud sessions) with automatic setup:
+The plugin works in [Claude Code Web](https://claude.ai/code) (cloud sessions):
 
 - **Plugin auto-installs** via `.claude/settings.json` — declares the marketplace and enables the plugin declaratively at session start.
 - **Git operations work automatically** — Claude Code Web provides a GitHub Proxy, so `git push`, `git pull`, and branch operations work out of the box.
-- **`gh` CLI installed automatically** — a `SessionStart` hook runs `scripts/setup-remote.sh`, which installs the GitHub CLI if missing. The script only runs in cloud sessions (gated on `CLAUDE_CODE_REMOTE=true`); it is a no-op locally.
-- **Configure `GH_TOKEN`** — to enable `gh pr create`, `gh release`, and other GitHub API operations, add `GH_TOKEN` as an environment variable in your [Claude Code Web environment settings](https://claude.ai/settings/code). Without it, the plugin skips PR creation gracefully but warns on session start.
 
-> Running `/opsx:workflow init` on a consumer project will generate these files (`.claude/settings.json` and `scripts/setup-remote.sh`) automatically.
+**Optional: `gh` CLI for full GitHub integration**
+
+The `gh` CLI is not pre-installed in cloud sessions. Without it, the plugin skips draft PR creation gracefully. To enable `gh pr create`, `gh issue create`, and `gh release`, configure your [Claude Code Web environment](https://claude.ai/settings/code):
+
+1. **Setup script** — add to your environment settings:
+   ```bash
+   apt update && apt install -y gh
+   ```
+2. **Environment variable** — add `GH_TOKEN` with a GitHub personal access token. The `gh` CLI reads it automatically.
+
+> Running `/opsx:workflow init` on a consumer project will generate `.claude/settings.json` automatically.
 
 
 #### Updating the Plugin

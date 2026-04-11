@@ -9,18 +9,5 @@
   },
   "enabledPlugins": {
     "opsx@opsx-enhanced-flow": true
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/setup-remote.sh"
-          }
-        ]
-      }
-    ]
   }
 }
