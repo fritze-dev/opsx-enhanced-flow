@@ -1,5 +1,5 @@
 ---
-id: claude
+id: agents
 template-version: 2
 description: AGENTS.md bootstrap template with standard agent directives
 generates: AGENTS.md

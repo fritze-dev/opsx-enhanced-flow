@@ -46,7 +46,7 @@ review artifact: when auto_approve is false, stop before review and suggest /ops
 
 Project initialization and health check.
 Mode detection:
-- Fresh (no WORKFLOW.md): install templates, scan codebase, generate constitution and CLAUDE.md
+- Fresh (no WORKFLOW.md): install templates, scan codebase, generate constitution and AGENTS.md
 - Update (templates outdated): merge plugin template updates with local customizations
 - Re-sync (all installed): detect spec drift (code vs specs) + docs drift (docs vs specs)
 Report findings, suggest /opsx:workflow propose for changes needed.
