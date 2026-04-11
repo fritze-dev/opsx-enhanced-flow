@@ -3,7 +3,7 @@ order: 4
 category: change-workflow
 status: stable
 version: 3
-lastModified: 2026-04-10
+lastModified: 2026-04-11
 ---
 ## Purpose
 
@@ -129,13 +129,13 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the skill SHALL treat worktree mode as disabled and use existing directory-based behavior
 
 ### Requirement: Post-Artifact Commit and PR Integration
-The `/opsx:workflow propose` skill SHALL execute post-artifact commit logic after creating each artifact during pipeline traversal. The skill SHALL: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR via `gh pr create --draft`. This logic lives in the skill (SKILL.md), not in WORKFLOW.md.
+The `/opsx:workflow propose` skill SHALL execute post-artifact commit logic after creating each artifact during pipeline traversal. The skill SHALL: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR using available GitHub tooling. This logic lives in the skill (SKILL.md), not in WORKFLOW.md.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
 #### Scenario: First artifact triggers branch and PR creation
 - **GIVEN** a change workspace where no feature branch exists yet
-- **AND** the `gh` CLI is installed and authenticated
+- **AND** GitHub tooling is available (gh CLI, MCP tools, or API)
 - **WHEN** the agent finishes creating the first artifact
 - **THEN** the agent SHALL create a feature branch, commit, push, and create a draft PR
 
@@ -149,8 +149,8 @@ The `/opsx:workflow propose` skill SHALL execute post-artifact commit logic afte
 - **WHEN** the agent finishes creating an artifact
 - **THEN** the agent SHALL skip the branch creation step and proceed directly to staging, committing, and pushing
 
-#### Scenario: Graceful degradation without gh CLI
-- **GIVEN** the `gh` CLI is not installed or not authenticated
+#### Scenario: Graceful degradation without GitHub tooling
+- **GIVEN** no GitHub tooling is available (no gh CLI, no MCP tools, no API access)
 - **WHEN** the agent finishes creating the first artifact
 - **THEN** the agent SHALL create the branch, commit, attempt push, and skip PR creation
 
@@ -351,7 +351,7 @@ The `/opsx:workflow propose` command SHALL serve as the single entry point for a
 
 ## Assumptions
 
-- The `gh` CLI, when available, is authenticated and has permission to create PRs. <!-- ASSUMPTION: gh CLI authentication -->
+- GitHub tooling (gh CLI, MCP tools, or API), when available, is authenticated and has permission to create PRs. <!-- ASSUMPTION: GitHub tooling authentication -->
 - Artifact completion is determined by file existence and non-empty content. <!-- ASSUMPTION: File-existence-based completion -->
 - Agent compliance with instruction-based guidance is sufficient for consolidation enforcement. <!-- ASSUMPTION: Agent compliance sufficient -->
 - The WORKFLOW.md context field reliably enforces constitution loading. <!-- ASSUMPTION: Context-based constitution loading -->

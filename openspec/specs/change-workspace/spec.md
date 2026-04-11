@@ -172,9 +172,9 @@ If a match is found, the router SHALL auto-select the change and announce: "Dete
 The `/opsx:workflow propose` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed or abandoned:
 
 1. **Proposal status check**: Read `<worktree-path>/openspec/changes/*/proposal.md` (using the worktree's filesystem path from `git worktree list`). If the proposal has `status: completed`, the change is done — auto-clean.
-2. **Fallback — PR status (MERGED)**: If no proposal status is available or not `completed`, run `gh pr view <branch-name> --json state --jq '.state'`. If `MERGED`, the change is done — auto-clean.
+2. **Fallback — PR status (MERGED)**: If no proposal status is available or not `completed`, check the PR state for the branch using available GitHub tooling. If `MERGED`, the change is done — auto-clean.
 3. **Fallback — PR status (CLOSED)**: If the PR state is `CLOSED`, the change is abandoned. Prompt the user for confirmation before cleanup, displaying the branch name and PR URL. This prompt SHALL NOT be suppressed by `auto_approve`.
-4. **Fallback — inactivity**: If no PR exists (or `gh` is unavailable), check the last commit date on the branch via `git log -1 --format=%ci <branch-name>`. If older than `worktree.stale_days` (default: 14), prompt the user for confirmation before cleanup.
+4. **Fallback — inactivity**: If no PR exists (or no GitHub tooling is available), check the last commit date on the branch via `git log -1 --format=%ci <branch-name>`. If older than `worktree.stale_days` (default: 14), prompt the user for confirmation before cleanup.
 5. **Fallback — git branch**: If none of the above apply, try `git branch -d <branch-name>` (only deletes if merged).
 
 For completed changes (tiers 1–2), the system SHALL auto-remove the worktree without prompting. For abandoned or stale changes (tiers 3–4), the system SHALL prompt the user before removal. The cleanup sequence SHALL be: `git worktree remove <path>`, `git branch -D <branch-name>`, delete the remote branch. The system SHALL report cleaned-up worktrees before proceeding.
@@ -239,10 +239,10 @@ For completed changes (tiers 1–2), the system SHALL auto-remove the worktree w
 - **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system SHALL NOT remove the `wip-feature` worktree
 
-#### Scenario: Cleanup without gh CLI and no proposal status
+#### Scenario: Cleanup without GitHub tooling and no proposal status
 
 - **GIVEN** a worktree exists on branch `fix-auth`
-- **AND** proposal has no `status` field and `gh` CLI is unavailable
+- **AND** proposal has no `status` field and no GitHub tooling is available
 - **AND** the last commit is within the `stale_days` threshold
 - **WHEN** the system attempts cleanup
 - **THEN** the system falls back to `git branch -d fix-auth`
@@ -251,14 +251,14 @@ For completed changes (tiers 1–2), the system SHALL auto-remove the worktree w
 
 ### Requirement: Post-Merge Worktree Cleanup
 
-When a PR is merged from within a worktree (via `gh pr merge` or equivalent), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:workflow propose` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
+When a PR is merged from within a worktree (via any merge method), the system SHALL perform immediate cleanup of the completed worktree. The cleanup sequence SHALL be: (1) switch working directory to the main worktree, (2) remove the completed worktree, (3) delete the local branch, (4) delete the remote branch. The system SHALL detect that it is inside a worktree by checking `git rev-parse --git-dir` for a path containing `/worktrees/`. This immediate cleanup complements lazy cleanup at `/opsx:workflow propose` — lazy cleanup catches worktrees from merges that happened outside the agent session, while immediate cleanup handles in-session merges.
 
 **User Story:** As a developer I want the worktree cleaned up immediately after my PR is merged, so that I don't have stale worktrees lingering until the next `/opsx:workflow propose`.
 
 #### Scenario: Cleanup after successful local merge
 
 - **GIVEN** the agent is working inside a worktree at `.claude/worktrees/fix-auth` on branch `fix-auth`
-- **AND** the agent runs `gh pr merge` which succeeds
+- **AND** the agent merges the PR which succeeds
 - **WHEN** the merge completes
 - **THEN** the system SHALL switch the working directory to the main worktree
 - **AND** remove the worktree
@@ -321,7 +321,7 @@ Actions that operate on active changes (propose, apply) SHALL filter to active c
 - **Branch already exists**: If `git worktree add` fails because the branch already exists, try `git worktree add <path> <branch>` to reuse the existing branch.
 - **Worktree path exists but is not a git worktree**: Fail with error — do not overwrite arbitrary directories.
 - **Dirty worktree during cleanup**: `git worktree remove` fails on dirty worktrees. Report the error and skip this worktree.
-- **`gh` CLI unavailable during cleanup**: Fall back to inactivity check, then `git branch -d`. If all fail, skip this worktree and continue.
+- **GitHub tooling unavailable during cleanup**: Fall back to inactivity check, then `git branch -d`. If all fail, skip this worktree and continue.
 - **PR state `CLOSED` during cleanup**: A `CLOSED` PR indicates the change was abandoned (not merged). The system SHALL prompt the user rather than auto-cleaning, since the branch may contain salvageable work.
 - **`worktree.stale_days` absent**: If WORKFLOW.md has no `stale_days` field, default to 14 days.
 - **Branch with no commits**: If `git log -1` fails (branch has no commits), treat the worktree as active (do not flag for cleanup).
