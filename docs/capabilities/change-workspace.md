@@ -49,7 +49,7 @@ The router auto-detects the active change using a three-tier approach: (1) scan 
 
 ### Lazy Worktree Cleanup at Change Creation
 
-Before creating a new change, propose checks for stale worktrees. For each worktree, it checks the proposal's `status` field -- if `completed`, the worktree is cleaned up. Fallbacks include PR merge status via `gh` and `git branch -d`. Active worktrees are preserved.
+Before creating a new change, propose checks for stale worktrees using a five-tier detection hierarchy. Completed proposals and merged PRs are auto-cleaned. Closed (unmerged) PRs and branches inactive beyond the configurable `stale_days` threshold (default: 14 days) trigger a user prompt before cleanup. Proposals are read from the worktree filesystem path to avoid branch-naming mismatches. Active worktrees within the threshold are preserved.
 
 ### Post-Merge Worktree Cleanup
 

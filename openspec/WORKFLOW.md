@@ -11,6 +11,7 @@ worktree:
   enabled: true
   path_pattern: .claude/worktrees/{change}
   auto_cleanup: true
+  stale_days: 14
 
 auto_approve: true
 
@@ -33,7 +34,7 @@ must be written in English regardless of docs_language.
 
 Create change workspace if needed, then traverse the pipeline generating artifacts.
 If no change exists: ask user what to build, derive kebab-case name, create workspace (with worktree if enabled).
-Lazy worktree cleanup: before creating, check for stale worktrees (completed proposals or merged PRs) and clean up.
+Lazy worktree cleanup: before creating, check for stale worktrees. Auto-clean completed proposals and merged PRs. For closed PRs or branches inactive beyond stale_days, prompt the user before cleanup. Read proposals from worktree filesystem paths.
 Checkpoint/resume: skip completed artifacts, resume from first incomplete step.
 Design review checkpoint: when auto_approve is false, pause after design for user alignment. When auto_approve is true, skip the design checkpoint and continue.
 Preflight checkpoint: PASS → continue, PASS WITH WARNINGS → pause for acknowledgment, BLOCKED → stop.
