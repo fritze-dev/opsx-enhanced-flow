@@ -91,7 +91,6 @@ For `propose`, `apply`, `finalize`:
 - [Recovery Mode](openspec/specs/project-init/spec.md#requirement-recovery-mode-spec-drift-detection)
 - [Constitution Update](openspec/specs/constitution-management/spec.md#requirement-constitution-update)
 - [Preflight Quality Check](openspec/specs/quality-gates/spec.md#requirement-preflight-quality-check)
-- [Claude Code Web Settings Generation](openspec/specs/project-init/spec.md#requirement-claude-code-web-settings-generation)
 
 ## Step 5: Dispatch
 

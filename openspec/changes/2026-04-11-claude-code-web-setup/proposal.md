@@ -5,7 +5,7 @@ branch: worktree-claude-code-web-setup
 worktree: .claude/worktrees/claude-code-web-setup
 capabilities:
   new: []
-  modified: [project-init]
+  modified: []
   removed: []
 ---
 -->

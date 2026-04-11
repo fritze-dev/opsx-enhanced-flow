@@ -2,8 +2,8 @@
 order: 12
 category: setup
 status: stable
-version: 4
-lastModified: 2026-04-11
+version: 3
+lastModified: 2026-04-10
 ---
 ## Purpose
 
@@ -414,41 +414,6 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **THEN** the manual ADR is recognized by its `adr-MNNN` prefix
 - **AND** no issue is raised for it
 
-### Requirement: Claude Code Web Settings Generation
-
-The `/opsx:workflow init` command SHALL generate a `.claude/settings.json` file that enables the plugin to work in Claude Code Web sessions. The generated settings SHALL contain: (1) an `extraKnownMarketplaces` entry declaring the plugin's GitHub marketplace source, and (2) an `enabledPlugins` entry enabling the plugin.
-
-The init command SHALL ensure `.gitignore` contains a negation rule `!/.claude/settings.json` so that the settings file is tracked by git even when `/.claude/` is ignored.
-
-If `.claude/settings.json` already exists, init SHALL skip generation and report "`.claude/settings.json` already exists — skipped."
-
-**User Story:** As a developer using Claude Code Web I want `/opsx:workflow init` to configure my project for cloud sessions, so that the plugin is available without manual setup.
-
-#### Scenario: Fresh init generates Claude Code Web settings
-
-- **GIVEN** a project without `.claude/settings.json`
-- **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system SHALL generate `.claude/settings.json` with marketplace declaration and enabled plugin
-
-#### Scenario: Gitignore updated for settings.json
-
-- **GIVEN** `.gitignore` contains `/.claude/` but no negation for `settings.json`
-- **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system SHALL add `!/.claude/settings.json` to `.gitignore`
-
-#### Scenario: Gitignore already has negation rule
-
-- **GIVEN** `.gitignore` already contains `!/.claude/settings.json`
-- **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system SHALL not modify `.gitignore`
-
-#### Scenario: Settings.json already exists
-
-- **GIVEN** `.claude/settings.json` already exists
-- **WHEN** the user runs `/opsx:workflow init`
-- **THEN** the system SHALL skip settings generation
-- **AND** SHALL report "`.claude/settings.json` already exists — skipped"
-
 ## Edge Cases
 
 - If the user does not have write permissions, init SHALL fail before making changes.
@@ -470,9 +435,6 @@ If `.claude/settings.json` already exists, init SHALL skip generation and report
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
 - **Concurrent docs regeneration**: If `/opsx:workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
-- **`.claude/settings.json` with existing content**: If the file exists with user-added content, init SHALL preserve it entirely (skip, not merge).
-- **`.gitignore` missing entirely**: If no `.gitignore` exists, init SHALL create one with both `/.claude/*` and `!/.claude/settings.json`.
-
 ## Assumptions
 
 - The `gh` CLI `--version` command returns exit code 0 when installed. <!-- ASSUMPTION: gh version check -->
@@ -483,6 +445,4 @@ If `.claude/settings.json` already exists, init SHALL skip generation and report
 - Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec directory name in `openspec/specs/`. <!-- ASSUMPTION: Naming convention -->
 - The README capabilities table uses a parseable format (Markdown table or structured list) that allows the system to extract capability names. <!-- ASSUMPTION: README format -->
 - Completed changes' design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->
-- Claude Code Web cloud sessions set `CLAUDE_CODE_REMOTE=true` as an environment variable. <!-- ASSUMPTION: CLAUDE_CODE_REMOTE env var -->
-- The `extraKnownMarketplaces` and `enabledPlugins` fields in `.claude/settings.json` cause Claude Code to auto-install the declared plugin at session start. <!-- ASSUMPTION: declarative plugin install -->
 No further assumptions beyond those marked above.
