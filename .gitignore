@@ -1,2 +1,3 @@
 # Claude Code local config (generated, not part of plugin)
-/.claude/
+/.claude/*
+!/.claude/settings.json
