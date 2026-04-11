@@ -220,9 +220,14 @@ opsx-enhanced-flow/
 │   ├── specs/                             # Specs (one per capability, edited directly)
 │   └── changes/                           # Feature workspaces (YYYY-MM-DD-<name>/)
 │
-├── .github/workflows/                     # CI/CD
-│   ├── release.yml                        # Auto tag + release on version change
-│   └── claude.yml                         # @claude mention handler
+├── .github/
+│   ├── copilot-instructions.md            # Custom instructions for GitHub Copilot
+│   ├── copilot-setup-steps.yml            # Environment setup for Copilot coding agent
+│   ├── skills/workflow/SKILL.md           # Symlink → src skill (Copilot discovery)
+│   └── workflows/                         # CI/CD
+│       ├── release.yml                    # Auto tag + release on version change
+│       ├── claude.yml                     # @claude mention handler
+│       └── claude-code-review.yml         # Auto code review on PRs
 │
 └── README.md                              # This file
 ```

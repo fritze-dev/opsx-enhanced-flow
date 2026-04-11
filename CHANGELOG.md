@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-11 — GitHub Copilot Coding Agent Setup (v2.0.12)
+
+### Added
+- `.github/copilot-instructions.md` — curated project instructions for Copilot (derived from CONSTITUTION.md), enabling Copilot to follow the same workflow conventions as Claude Code
+- `.github/copilot-setup-steps.yml` — minimal environment setup for Copilot coding agent (checkout only, no external dependencies)
+- `.github/skills/workflow/SKILL.md` — symlink to existing skill so Copilot discovers and uses the workflow skill
+- Sync convention in CONSTITUTION.md for keeping `copilot-instructions.md` aligned with `CLAUDE.md` and project rules (closes #15)
+
 ## 2026-04-11 — Tool-Agnostic GitHub Operations (v2.0.11)
 
 ### Changed
