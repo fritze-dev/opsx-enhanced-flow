@@ -17,8 +17,8 @@
 ## 3. Standard Tasks (Post-Implementation)
 - [x] 3.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
 - [x] 3.2. Bump version
-- [ ] 3.3. Commit and push to remote
-- [ ] 3.4. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #112"`)
+- [x] 3.3. Commit and push to remote
+- [x] 3.4. N/A — pushed directly to main (no PR needed for config-only fix)
 
 ## 4. Post-Merge Reminders
 - Update plugin locally (`claude plugin marketplace update opsx-enhanced-flow && claude plugin update opsx@opsx-enhanced-flow`)
