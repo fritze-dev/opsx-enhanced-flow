@@ -31,7 +31,6 @@ A single `/opsx:workflow init` command covers fresh installs, legacy migrations,
 - **Idempotent re-initialization** -- skips already-completed steps when run on an initialized project
 - **Spec drift detection** -- compares existing specs against the codebase and reports discrepancies with suggested corrective actions
 - **Documentation drift verification** -- checks capability docs, ADRs, and README against current specs across three dimensions with CLEAN/DRIFTED/OUT OF SYNC verdicts
-- **Claude Code Web settings generation** -- generates `.claude/settings.json` with plugin marketplace declaration and enabled plugin for automatic plugin installation in Claude Code Web cloud sessions
 - **Initial change creation** -- creates the first change workspace after constitution generation and hands off to the standard pipeline
 
 ## Behavior
@@ -59,10 +58,6 @@ When existing specs are found, init enters recovery mode: scanning the codebase,
 ### Documentation Drift Verification
 
 As a health check, init verifies generated documentation against current specs across three dimensions: capability docs vs specs (missing docs are CRITICAL, omitted requirements are WARNING), ADRs vs design decisions (missing ADRs are WARNING, using `has_decisions` frontmatter to skip irrelevant designs), and README vs current state (missing capabilities are CRITICAL, stale ADR references are WARNING). The verdict is CLEAN, DRIFTED, or OUT OF SYNC. No issues are auto-fixed; the system recommends running `/opsx:workflow finalize` to regenerate.
-
-### Claude Code Web Settings Generation
-
-Init generates `.claude/settings.json` with the plugin marketplace declaration (`extraKnownMarketplaces` + `enabledPlugins`) so the plugin auto-installs in Claude Code Web cloud sessions. Init ensures `.gitignore` contains a negation rule `!/.claude/settings.json` so the settings file is tracked by git. The file is skipped if it already exists.
 
 ### Environment Checks
 
