@@ -2,8 +2,8 @@
 order: 12
 category: setup
 status: stable
-version: 3
-lastModified: 2026-04-10
+version: 4
+lastModified: 2026-04-11
 ---
 ## Purpose
 
@@ -414,6 +414,53 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **THEN** the manual ADR is recognized by its `adr-MNNN` prefix
 - **AND** no issue is raised for it
 
+### Requirement: Claude Code Web Settings Generation
+
+The `/opsx:workflow init` command SHALL generate a `.claude/settings.json` file that enables the plugin to work in Claude Code Web sessions. The generated settings SHALL contain: (1) an `extraKnownMarketplaces` entry declaring the plugin's GitHub marketplace source, (2) an `enabledPlugins` entry enabling the plugin, and (3) a `SessionStart` hook that executes a setup script for remote environment dependencies.
+
+The init command SHALL also generate a `scripts/setup-remote.sh` script that: (1) gates execution on the `CLAUDE_CODE_REMOTE` environment variable being `true`, (2) installs the `gh` CLI if not present, and (3) configures `gh` authentication if a `GH_TOKEN` environment variable is available.
+
+The init command SHALL ensure `.gitignore` contains a negation rule `!/.claude/settings.json` so that the settings file is tracked by git even when `/.claude/` is ignored.
+
+If `.claude/settings.json` already exists, init SHALL skip generation and report "`.claude/settings.json` already exists — skipped." If `scripts/setup-remote.sh` already exists, init SHALL skip generation and report the same.
+
+**User Story:** As a developer using Claude Code Web I want `/opsx:workflow init` to configure my project for cloud sessions, so that the plugin and `gh` CLI are available without manual setup.
+
+#### Scenario: Fresh init generates Claude Code Web settings
+
+- **GIVEN** a project without `.claude/settings.json`
+- **AND** without `scripts/setup-remote.sh`
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL generate `.claude/settings.json` with marketplace declaration, enabled plugin, and SessionStart hook
+- **AND** SHALL generate `scripts/setup-remote.sh` with remote environment gate and `gh` CLI installation
+- **AND** SHALL make the script executable
+
+#### Scenario: Gitignore updated for settings.json
+
+- **GIVEN** `.gitignore` contains `/.claude/` but no negation for `settings.json`
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL add `!/.claude/settings.json` to `.gitignore`
+
+#### Scenario: Gitignore already has negation rule
+
+- **GIVEN** `.gitignore` already contains `!/.claude/settings.json`
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL not modify `.gitignore`
+
+#### Scenario: Settings.json already exists
+
+- **GIVEN** `.claude/settings.json` already exists
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL skip settings generation
+- **AND** SHALL report "`.claude/settings.json` already exists — skipped"
+
+#### Scenario: Setup script already exists
+
+- **GIVEN** `scripts/setup-remote.sh` already exists
+- **WHEN** the user runs `/opsx:workflow init`
+- **THEN** the system SHALL skip script generation
+- **AND** SHALL report "`scripts/setup-remote.sh` already exists — skipped"
+
 ## Edge Cases
 
 - If the user does not have write permissions, init SHALL fail before making changes.
@@ -435,6 +482,9 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
 - **Concurrent docs regeneration**: If `/opsx:workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **`.claude/settings.json` with existing hooks**: If the file exists with user-added hooks, init SHALL preserve it entirely (skip, not merge). Users who need the Claude Code Web setup can copy the pattern from the plugin's `settings.json`.
+- **`.gitignore` missing entirely**: If no `.gitignore` exists, init SHALL create one with both `/.claude/` and `!/.claude/settings.json`.
+- **`scripts/` directory missing**: Init SHALL create the `scripts/` directory if it does not exist before writing the setup script.
 
 ## Assumptions
 
@@ -446,4 +496,6 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec directory name in `openspec/specs/`. <!-- ASSUMPTION: Naming convention -->
 - The README capabilities table uses a parseable format (Markdown table or structured list) that allows the system to extract capability names. <!-- ASSUMPTION: README format -->
 - Completed changes' design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->
+- Claude Code Web cloud sessions set `CLAUDE_CODE_REMOTE=true` as an environment variable. <!-- ASSUMPTION: CLAUDE_CODE_REMOTE env var -->
+- The `extraKnownMarketplaces` and `enabledPlugins` fields in `.claude/settings.json` cause Claude Code to auto-install the declared plugin at session start. <!-- ASSUMPTION: declarative plugin install -->
 No further assumptions beyond those marked above.
