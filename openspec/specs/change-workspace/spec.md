@@ -2,8 +2,8 @@
 order: 3
 category: change-workflow
 status: stable
-version: 2
-lastModified: 2026-04-10
+version: 3
+lastModified: 2026-04-11
 ---
 ## Purpose
 
@@ -169,23 +169,26 @@ If a match is found, the router SHALL auto-select the change and announce: "Dete
 
 ### Requirement: Lazy Worktree Cleanup at Change Creation
 
-The `/opsx:workflow propose` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed:
+The `/opsx:workflow propose` skill SHALL check for stale worktrees before creating a new change. The system SHALL run `git worktree list` and for each worktree (excluding the main working tree), determine if the associated change is completed or abandoned:
 
-1. **Proposal status check**: Find the change directory in the worktree matching the branch name (`openspec/changes/*-<branch>/proposal.md`). If the proposal has `status: completed`, the change is done.
-2. **Fallback — PR status**: If no proposal status is available, run `gh pr view <branch-name> --json state --jq '.state'`. If `MERGED`, the change is done.
-3. **Fallback — git branch**: If `gh` is unavailable, try `git branch -d <branch-name>` (only deletes if merged).
+1. **Proposal status check**: Read `<worktree-path>/openspec/changes/*/proposal.md` (using the worktree's filesystem path from `git worktree list`). If the proposal has `status: completed`, the change is done — auto-clean.
+2. **Fallback — PR status (MERGED)**: If no proposal status is available or not `completed`, run `gh pr view <branch-name> --json state --jq '.state'`. If `MERGED`, the change is done — auto-clean.
+3. **Fallback — PR status (CLOSED)**: If the PR state is `CLOSED`, the change is abandoned. Prompt the user for confirmation before cleanup, displaying the branch name and PR URL. This prompt SHALL NOT be suppressed by `auto_approve`.
+4. **Fallback — inactivity**: If no PR exists (or `gh` is unavailable), check the last commit date on the branch via `git log -1 --format=%ci <branch-name>`. If older than `worktree.stale_days` (default: 14), prompt the user for confirmation before cleanup.
+5. **Fallback — git branch**: If none of the above apply, try `git branch -d <branch-name>` (only deletes if merged).
 
-For completed changes, the system SHALL remove the worktree via `git worktree remove <path>`, delete the local branch via `git branch -D <branch-name>`, and delete the remote branch. The system SHALL report cleaned-up worktrees before proceeding.
+For completed changes (tiers 1–2), the system SHALL auto-remove the worktree without prompting. For abandoned or stale changes (tiers 3–4), the system SHALL prompt the user before removal. The cleanup sequence SHALL be: `git worktree remove <path>`, `git branch -D <branch-name>`, delete the remote branch. The system SHALL report cleaned-up worktrees before proceeding.
 
-**User Story:** As a developer I want stale worktrees cleaned up automatically when I start a new change, so that merged branches don't accumulate on disk.
+**User Story:** As a developer I want stale worktrees cleaned up automatically when I start a new change, so that completed, abandoned, and inactive branches don't accumulate on disk.
 
 #### Scenario: Cleanup worktree with completed proposal status
 
-- **GIVEN** a worktree exists at `.claude/worktrees/fix-auth` on branch `fix-auth`
-- **AND** `openspec/changes/2026-04-01-fix-auth/proposal.md` in the main tree has `status: completed`
+- **GIVEN** a worktree exists at `.claude/worktrees/feature-x` on branch `worktree-feature-x`
+- **AND** `<worktree-path>/openspec/changes/2026-04-10-feature-x/proposal.md` has `status: completed`
 - **WHEN** the user invokes `/opsx:workflow propose add-logging`
-- **THEN** the system removes the worktree and deletes the branch
-- **AND** reports "Cleaned up stale worktree: fix-auth (completed)"
+- **THEN** the system reads the proposal from the worktree filesystem path
+- **AND** removes the worktree and deletes the branch
+- **AND** reports "Cleaned up stale worktree: feature-x (completed)"
 
 #### Scenario: Cleanup worktree via PR status fallback
 
@@ -193,6 +196,34 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 - **AND** the PR for `fix-auth` has state "MERGED"
 - **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system removes the worktree and deletes the branch
+
+#### Scenario: Abandoned worktree detected via closed PR
+
+- **GIVEN** a worktree on branch `worktree-abandoned-feature` with `status: active`
+- **AND** the PR for `worktree-abandoned-feature` has state `CLOSED`
+- **WHEN** the user invokes `/opsx:workflow propose new-change`
+- **THEN** the system prompts: "Worktree 'abandoned-feature' has a closed PR (not merged). Clean up? [y/N]"
+- **AND** if the user confirms, the system removes the worktree and deletes the branch
+- **AND** if the user declines, the worktree is preserved
+
+#### Scenario: Inactive worktree detected via commit age
+
+- **GIVEN** a worktree on branch `worktree-old-experiment` with `status: active`
+- **AND** no PR exists for `worktree-old-experiment`
+- **AND** the last commit on the branch is 21 days old
+- **AND** `worktree.stale_days` is 14
+- **WHEN** the user invokes `/opsx:workflow propose new-change`
+- **THEN** the system prompts: "Worktree 'old-experiment' has had no commits for 21 days. Clean up? [y/N]"
+- **AND** if the user confirms, the system removes the worktree and deletes the branch
+- **AND** if the user declines, the worktree is preserved
+
+#### Scenario: Recent worktree within inactivity threshold preserved
+
+- **GIVEN** a worktree on branch `worktree-recent-work` with `status: active`
+- **AND** no PR exists, and the last commit is 5 days old
+- **AND** `worktree.stale_days` is 14
+- **WHEN** the user invokes `/opsx:workflow propose new-change`
+- **THEN** the system SHALL NOT prompt for cleanup of `recent-work`
 
 #### Scenario: No stale worktrees
 
@@ -204,6 +235,7 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 
 - **GIVEN** a worktree exists at `.claude/worktrees/wip-feature` on branch `wip-feature`
 - **AND** the proposal has `status: active`
+- **AND** the last commit is within the `stale_days` threshold
 - **WHEN** the user invokes `/opsx:workflow propose add-logging`
 - **THEN** the system SHALL NOT remove the `wip-feature` worktree
 
@@ -211,6 +243,7 @@ For completed changes, the system SHALL remove the worktree via `git worktree re
 
 - **GIVEN** a worktree exists on branch `fix-auth`
 - **AND** proposal has no `status` field and `gh` CLI is unavailable
+- **AND** the last commit is within the `stale_days` threshold
 - **WHEN** the system attempts cleanup
 - **THEN** the system falls back to `git branch -d fix-auth`
 - **AND** if the branch was fully merged to main, it is deleted and the worktree removed
@@ -288,7 +321,10 @@ Actions that operate on active changes (propose, apply) SHALL filter to active c
 - **Branch already exists**: If `git worktree add` fails because the branch already exists, try `git worktree add <path> <branch>` to reuse the existing branch.
 - **Worktree path exists but is not a git worktree**: Fail with error — do not overwrite arbitrary directories.
 - **Dirty worktree during cleanup**: `git worktree remove` fails on dirty worktrees. Report the error and skip this worktree.
-- **`gh` CLI unavailable during cleanup**: Fall back to `git branch -d`. If that also fails, skip this worktree and continue.
+- **`gh` CLI unavailable during cleanup**: Fall back to inactivity check, then `git branch -d`. If all fail, skip this worktree and continue.
+- **PR state `CLOSED` during cleanup**: A `CLOSED` PR indicates the change was abandoned (not merged). The system SHALL prompt the user rather than auto-cleaning, since the branch may contain salvageable work.
+- **`worktree.stale_days` absent**: If WORKFLOW.md has no `stale_days` field, default to 14 days.
+- **Branch with no commits**: If `git log -1` fails (branch has no commits), treat the worktree as active (do not flag for cleanup).
 - **Multiple changes in a worktree**: Each worktree should contain exactly one change matching the branch name. Additional `openspec/changes/` directories are ignored by worktree detection.
 - **Worktree config absent**: If WORKFLOW.md has no `worktree` section, treat as `worktree.enabled: false`.
 - **Proposal without frontmatter (legacy)**: The router SHALL fall back to tasks.md-based detection for active/completed status and branch-name convention for worktree context.
