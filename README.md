@@ -57,6 +57,8 @@ claude plugin install opsx@opsx-enhanced-flow
 
 Or use the chat slash commands: `/plugin marketplace add` and `/plugin install`.
 
+> **Claude Code Web:** For cloud sessions on [claude.ai/code](https://claude.ai/code), add the marketplace and plugin in the [Claude Code Web environment settings](https://claude.ai/settings/code) Setup Script instead of using the CLI commands above. See the [Claude Code Web](#claude-code-web) section below for details.
+
 ### Use the Workflow
 
 ```bash
@@ -293,7 +295,12 @@ After installing the plugin, run `/opsx:workflow init` in your project to instal
 
 The plugin works in [Claude Code Web](https://claude.ai/code) (cloud sessions):
 
-- **Plugin auto-installs** via `.claude/settings.json` — declares the marketplace and enables the plugin declaratively at session start.
+- **Plugin installation** — add the marketplace and install command to your [Claude Code Web environment settings](https://claude.ai/settings/code) Setup Script:
+  ```bash
+  claude plugin marketplace add fritze-dev/opsx-enhanced-flow
+  claude plugin install opsx@opsx-enhanced-flow
+  ```
+  This runs automatically at the start of each cloud session. Alternatively, commit `.claude/settings.json` with the marketplace and plugin declarations (see below).
 - **Git operations work automatically** — Claude Code Web provides a GitHub Proxy, so `git push`, `git pull`, and branch operations work out of the box.
 
 **GitHub integration**
