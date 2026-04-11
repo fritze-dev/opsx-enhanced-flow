@@ -46,6 +46,7 @@ template-version: 1
 - **Design review checkpoint:** After creating specs + design artifacts, pause for user alignment before proceeding to preflight/tasks — unless `auto_approve` is true, in which case continue without pausing. When `auto_approve` is false, the design phase is the mandatory review checkpoint.
 - **No ADR references in specs:** Specs MUST NOT reference ADRs (e.g., "see ADR-019"). ADRs are generated after implementation — specs exist before ADRs do. Specs describe requirements; ADRs document the decisions that shaped them.
 - **Template synchronization:** Changes to `openspec/WORKFLOW.md` (actions, pipeline, body sections) must also be reflected in `src/templates/workflow.md`. The `worktree` config may intentionally differ between project and consumer template (e.g., `enabled: true` in project, commented out in consumer).
+- **Copilot instructions sync:** When project rules in CONSTITUTION.md change, review `.github/copilot-instructions.md` for necessary updates to keep Copilot agent instructions aligned.
 - **Tool-agnostic instructions:** Specs, skills, and templates MUST describe intent (e.g., "create a draft PR") rather than hardcoding specific CLI tools (e.g., `gh pr create`). The plugin runs across environments with different tooling — Claude Code Web (MCP tools), desktop (gh CLI), or API-only. Concrete tool names may appear in parenthetical examples (e.g., "available GitHub tooling (gh CLI, MCP tools, or API)") but MUST NOT be the sole instruction.
 
 ## Standard Tasks
