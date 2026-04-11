@@ -1,14 +1,13 @@
 ---
 name: workflow
-description: Central OpenSpec workflow command. Use with action argument: init (setup project), propose (create change + artifacts), apply (implement + verify), finalize (changelog + docs + version). Example: /opsx:workflow propose
-disable-model-invocation: false
+description: Central OpenSpec workflow command. Use with action argument: init (setup project), propose (create change + artifacts), apply (implement + verify), finalize (changelog + docs + version). Example: workflow propose
 ---
 
 # Workflow
 
 Central orchestration for the OpenSpec workflow. The first argument determines the action: `init`, `propose`, `apply`, or `finalize`.
 
-**Input**: `/opsx:workflow <action> [arguments]`
+**Input**: `workflow <action> [arguments]`
 
 ## Step 1: Identify Action
 
@@ -25,7 +24,7 @@ Read from markdown body:
 - `## Context` section — follow its instructions (typically: read CONSTITUTION.md)
 - `## Action: <name>` sections — each contains `### Instruction` (procedural guidance for the action)
 
-If WORKFLOW.md is missing and action is not `init`, tell the user to run `/opsx:workflow init` first and stop.
+If WORKFLOW.md is missing and action is not `init`, tell the user to run the workflow skill with `init` first and stop.
 
 ## Step 3: Change Context Detection
 
@@ -36,7 +35,7 @@ For `propose`, `apply`, `finalize`:
 2. **Proposal frontmatter lookup**: Scan `openspec/changes/*/proposal.md` for a proposal whose YAML frontmatter `branch` field matches the current branch. If found, auto-select that change.
 3. **Fallback — worktree convention**: If no matching proposal, check if inside a worktree (`git rev-parse --git-dir` contains `/worktrees/`), derive change name from branch, search for `openspec/changes/*-<branch-name>/`.
 4. If detected: announce "Detected change context: using change '<name>'"
-5. If not detected and action is `apply` or `finalize`: list active changes, use **AskUserQuestion** to let user select.
+5. If not detected and action is `apply` or `finalize`: list active changes and ask the user to select.
 6. If not detected and action is `propose`: the user may be starting a new change — proceed to propose dispatch which handles workspace creation.
 
 ## Step 4: Load Action Context
@@ -99,33 +98,30 @@ For `propose`, `apply`, `finalize`:
 1. Read all change artifacts (if change exists) and the propose instruction from WORKFLOW.md
 2. For each step in `pipeline` array: read Smart Template at `<templates_dir>/<id>.md`, check artifact status, generate if ready
 3. **After each artifact**, commit and push:
-   - `git add openspec/changes/<change-dir>/ openspec/specs/`
-   - `git commit -m "WIP: <change-name> — <artifact-id>"`
-   - `git push`
-   - On first push (no PR exists): Create a draft PR titled `<Change Name>` with body `WIP: <change-name>` using available GitHub tooling
+   - Stage the change artifacts and specs
+   - Commit with message `WIP: <change-name> — <artifact-id>`
+   - Push to remote
+   - On first push (no PR exists): Create a draft PR titled `<Change Name>` with body `WIP: <change-name>` using available GitHub tooling (gh CLI, MCP tools, or API)
    - Skip PR creation if no GitHub tooling is available. Continue on push failure.
 4. Follow the instruction from `## Action: propose` for checkpoint behavior, workspace creation, and pipeline gates
-5. **Auto-dispatch to apply**: If `auto_approve` is `true` in WORKFLOW.md frontmatter and propose completed successfully (all pipeline artifacts generated, no BLOCKED preflight), automatically dispatch the `apply` action using the same change context. Do NOT pause or suggest `/opsx:workflow apply` — proceed directly.
+5. **Auto-dispatch to apply**: If `auto_approve` is `true` in WORKFLOW.md frontmatter and propose completed successfully (all pipeline artifacts generated, no BLOCKED preflight), automatically dispatch the `apply` action using the same change context. Do NOT pause — proceed directly.
 
-### `apply` — Sub-Agent Execution
+### `apply` — Implementation
 
 1. Read all change artifacts (research, proposal, design, tasks, specs)
-2. Spawn sub-agent via Agent tool with:
-   - The instruction text from `## Action: apply` as primary directive
-   - The extracted requirement sections as behavioral context
-   - Change directory path and artifact paths
-   - The sub-agent implements tasks, generates review.md, runs the QA loop
-3. **Auto-dispatch to finalize**: If `auto_approve` is `true` and the apply sub-agent completed with review.md verdict PASS (no CRITICAL, no WARNING), automatically dispatch the `finalize` action using the same change context. Do NOT pause for user approval — proceed directly.
+2. Execute the action using the instruction text from `## Action: apply` as primary directive, the extracted requirement sections as behavioral context, and the change directory path and artifact paths
+3. Implement tasks, generate review.md, run the QA loop
+4. **Auto-dispatch to finalize**: If `auto_approve` is `true` and review.md verdict is PASS (no CRITICAL, no WARNING), automatically dispatch the `finalize` action using the same change context. Do NOT pause for user approval — proceed directly.
 
-### `finalize` — Sub-Agent Execution
+### `finalize` — Post-Approval
 
 1. Read change artifacts for context (proposal, review.md)
-2. Spawn sub-agent with instruction + extracted requirements + change context
+2. Execute the action using the instruction text and extracted requirements
 
-### `init` — Sub-Agent Execution
+### `init` — Project Setup
 
 1. If WORKFLOW.md missing: this IS the fresh install — proceed with default init behavior
-2. Spawn sub-agent with instruction + extracted requirements
+2. Execute the action using the instruction text and extracted requirements
 
 ### Custom Action — Direct Execution
 
@@ -133,14 +129,14 @@ For any action not listed above (propose, apply, finalize, init):
 1. Read all change artifacts for context (all files in change directory)
 2. Read the `## Action: <name>` instruction from WORKFLOW.md
 3. If the `## Action: <name>` section is missing: report the error and stop
-4. Execute the instruction directly with change directory context — the agent decides whether to handle inline or spawn a sub-agent based on the instruction content
+4. Execute the instruction directly with change directory context
 5. No spec requirements are loaded (custom actions are self-contained via their instruction)
 
 ## Guardrails
 
 - Always read WORKFLOW.md before dispatching
 - Change context detection runs ONCE, shared across all actions
-- Sub-agents receive bounded context — NOT the workflow skill's conversation history
-- If WORKFLOW.md is missing and action is not `init`: stop and suggest `/opsx:workflow init`
+- Implementation agents receive bounded context — NOT the full conversation history
+- If WORKFLOW.md is missing and action is not `init`: stop and suggest running the workflow skill with `init`
 - For `propose`: do NOT create artifacts yet if the user hasn't confirmed what they want to build
 - For `apply`: delete review.md at start of implementation to prevent stale reviews
