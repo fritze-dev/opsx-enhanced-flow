@@ -289,6 +289,17 @@ claude plugin install opsx@opsx-enhanced-flow
 
 After installing the plugin, run `/opsx:workflow init` in your project to install the workflow, templates, and generate the constitution + initial specs.
 
+#### Claude Code Web
+
+The plugin works in [Claude Code Web](https://claude.ai/code) (cloud sessions) with automatic setup:
+
+- **Plugin auto-installs** via `.claude/settings.json` — declares the marketplace and enables the plugin declaratively at session start.
+- **Git operations work automatically** — Claude Code Web provides a GitHub Proxy, so `git push`, `git pull`, and branch operations work out of the box.
+- **`gh` CLI installed automatically** — a `SessionStart` hook runs `scripts/setup-remote.sh`, which installs the GitHub CLI if missing. The script only runs in cloud sessions (gated on `CLAUDE_CODE_REMOTE=true`); it is a no-op locally.
+- **Configure `GH_TOKEN`** — to enable `gh pr create`, `gh release`, and other GitHub API operations, add `GH_TOKEN` as an environment variable in your [Claude Code Web environment settings](https://claude.ai/settings/code). Without it, the plugin skips PR creation gracefully but warns on session start.
+
+> Running `/opsx:workflow init` on a consumer project will generate these files (`.claude/settings.json` and `scripts/setup-remote.sh`) automatically.
+
 
 #### Updating the Plugin
 
