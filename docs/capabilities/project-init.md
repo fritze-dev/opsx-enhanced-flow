@@ -1,13 +1,13 @@
 ---
 title: "Project Init"
 capability: "project-init"
-description: "One-command project initialization with template merge, codebase scanning, constitution generation, CLAUDE.md bootstrap, and health checks"
-lastUpdated: "2026-04-10"
+description: "One-command project initialization with template merge, codebase scanning, constitution generation, CLAUDE.md bootstrap, Claude Code Web settings generation, and health checks"
+lastUpdated: "2026-04-11"
 ---
 
 # Project Init
 
-Sets up a project for the opsx-enhanced workflow via `/opsx:workflow init` -- installing templates, generating a constitution and CLAUDE.md from your codebase, configuring optional worktree isolation, and running health checks for spec and documentation drift.
+Sets up a project for the opsx-enhanced workflow via `/opsx:workflow init` -- installing templates, generating a constitution and CLAUDE.md from your codebase, generating Claude Code Web settings for cloud sessions, configuring optional worktree isolation, and running health checks for spec and documentation drift.
 
 ## Purpose
 
@@ -31,6 +31,7 @@ A single `/opsx:workflow init` command covers fresh installs, legacy migrations,
 - **Idempotent re-initialization** -- skips already-completed steps when run on an initialized project
 - **Spec drift detection** -- compares existing specs against the codebase and reports discrepancies with suggested corrective actions
 - **Documentation drift verification** -- checks capability docs, ADRs, and README against current specs across three dimensions with CLEAN/DRIFTED/OUT OF SYNC verdicts
+- **Claude Code Web settings generation** -- generates `.claude/settings.json` with plugin marketplace declaration, enabled plugin, and SessionStart hook, plus `scripts/setup-remote.sh` for `gh` CLI installation in cloud sessions gated on `CLAUDE_CODE_REMOTE`
 - **Initial change creation** -- creates the first change workspace after constitution generation and hands off to the standard pipeline
 
 ## Behavior
@@ -58,6 +59,10 @@ When existing specs are found, init enters recovery mode: scanning the codebase,
 ### Documentation Drift Verification
 
 As a health check, init verifies generated documentation against current specs across three dimensions: capability docs vs specs (missing docs are CRITICAL, omitted requirements are WARNING), ADRs vs design decisions (missing ADRs are WARNING, using `has_decisions` frontmatter to skip irrelevant designs), and README vs current state (missing capabilities are CRITICAL, stale ADR references are WARNING). The verdict is CLEAN, DRIFTED, or OUT OF SYNC. No issues are auto-fixed; the system recommends running `/opsx:workflow finalize` to regenerate.
+
+### Claude Code Web Settings Generation
+
+Init generates `.claude/settings.json` with the plugin marketplace declaration (`extraKnownMarketplaces` + `enabledPlugins`) and a `SessionStart` hook that runs `scripts/setup-remote.sh`. It also generates the setup script itself, which gates execution on `CLAUDE_CODE_REMOTE=true`, installs the `gh` CLI via apt if missing, and configures `gh` authentication when `GH_TOKEN` is available. Init ensures `.gitignore` contains a negation rule `!/.claude/settings.json` so the settings file is tracked by git. Both files are skipped if they already exist.
 
 ### Environment Checks
 
