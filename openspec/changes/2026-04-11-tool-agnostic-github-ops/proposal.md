@@ -1,5 +1,5 @@
 ---
-status: active
+status: completed
 branch: tool-agnostic-github-ops
 worktree: .claude/worktrees/tool-agnostic-github-ops
 capabilities:

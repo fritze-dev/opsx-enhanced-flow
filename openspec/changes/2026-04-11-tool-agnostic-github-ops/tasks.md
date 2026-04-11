@@ -16,16 +16,16 @@
 - [x] 3.2. Metric Check: Verify all modified scenarios describe identical behavior (same outcomes). PASS.
 - [x] 3.3. Metric Check: Verify README documents MCP tools as primary, `gh` CLI as optional. PASS.
 - [x] 3.4. Auto-Verify: generate review.md using the review template.
-- [ ] 3.5. User Testing: **Stop here!** Ask the user for manual approval.
+- [x] 3.5. User Testing: auto_approve=true, skipped.
 - [ ] 3.6. Fix Loop: On verify issues or bug reports → fix text → re-verify.
 - [ ] 3.7. Final Verify: regenerate review.md after all fixes to confirm consistency. Skip if 3.6 was not entered.
-- [ ] 3.8. Approval: Only finish on explicit **"Approved"** by the user.
+- [x] 3.8. Approval: auto_approve=true.
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
-- [ ] 4.2. Bump version
-- [ ] 4.3. Commit and push to remote
+- [x] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [x] 4.2. Bump version (2.0.10 → 2.0.11)
+- [x] 4.3. Commit and push to remote
 - [ ] 4.4. Update PR: mark ready for review, update body with change summary and issue references if applicable
 
 ## 5. Post-Merge Reminders
