@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-11 — Claude Code Web Setup (v2.0.8)
+
+### Added
+- `.claude/settings.json` with `extraKnownMarketplaces` and `enabledPlugins` for automatic plugin installation in Claude Code Web sessions
+- `.gitignore` negation rule (`!/.claude/settings.json`) so settings file is tracked by git
+- README documentation for Claude Code Web setup (auto-setup, GitHub Proxy, optional `gh` CLI setup) (closes #14)
+
 ## 2026-04-10 — Auto-Test Generation (v2.0.7)
 
 ### Added

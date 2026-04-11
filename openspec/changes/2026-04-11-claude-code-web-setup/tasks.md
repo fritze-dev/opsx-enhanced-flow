@@ -27,10 +27,10 @@
 
 ## 4. Standard Tasks (Post-Implementation)
 
-- [ ] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
-- [ ] 4.2. Bump version
-- [ ] 4.3. Commit and push to remote
-- [ ] 4.4. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #14"`)
+- [x] 4.1. Run `/opsx:workflow finalize` (generates changelog and updates docs)
+- [x] 4.2. Bump version
+- [x] 4.3. Commit and push to remote
+- [x] 4.4. Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #14"`)
 
 ## 5. Post-Merge Reminders
 
