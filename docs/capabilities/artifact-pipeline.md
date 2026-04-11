@@ -56,7 +56,7 @@ Before generating any artifact, the system reads WORKFLOW.md and Smart Templates
 
 ### Incremental Commits and Draft PR
 
-After creating any artifact, the system commits and pushes. On the first artifact commit, the system creates a feature branch, commits, pushes, and creates a draft PR. If `gh` is unavailable, PR creation is skipped. The pipeline is never blocked by push or PR creation failures.
+After creating any artifact, the system commits and pushes. On the first artifact commit, the system creates a feature branch, commits, pushes, and creates a draft PR using available GitHub tooling. If no GitHub tooling is available, PR creation is skipped. The pipeline is never blocked by push or PR creation failures.
 
 ### Consolidation Check and Overlap Verification
 
@@ -74,5 +74,5 @@ The proposal template requires reviewing existing specs for domain overlap, chec
 - If a user manually deletes an artifact file mid-pipeline, the system detects the gap and requires regeneration.
 - If `tasks.md` contains no checkbox items, the apply phase is still gated by `tasks.md` existence.
 - If the feature branch already exists, the system reuses it rather than failing.
-- If push succeeds but `gh pr create` fails, the failure is noted but the pipeline is not blocked.
+- If push succeeds but draft PR creation fails, the failure is noted but the pipeline is not blocked.
 - If `worktree.path_pattern` does not contain `{change}`, the system reports an error during propose.
