@@ -102,8 +102,8 @@ For `propose`, `apply`, `finalize`:
    - `git add openspec/changes/<change-dir>/ openspec/specs/`
    - `git commit -m "WIP: <change-name> — <artifact-id>"`
    - `git push`
-   - On first push (no PR exists): `gh pr create --draft --title "<Change Name>" --body "WIP: <change-name>"`
-   - Skip PR creation if `gh` unavailable. Continue on push failure.
+   - On first push (no PR exists): Create a draft PR titled `<Change Name>` with body `WIP: <change-name>` using available GitHub tooling
+   - Skip PR creation if no GitHub tooling is available. Continue on push failure.
 4. Follow the instruction from `## Action: propose` for checkpoint behavior, workspace creation, and pipeline gates
 5. **Auto-dispatch to apply**: If `auto_approve` is `true` in WORKFLOW.md frontmatter and propose completed successfully (all pipeline artifacts generated, no BLOCKED preflight), automatically dispatch the `apply` action using the same change context. Do NOT pause or suggest `/opsx:workflow apply` — proceed directly.
 

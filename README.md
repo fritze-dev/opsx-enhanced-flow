@@ -296,15 +296,17 @@ The plugin works in [Claude Code Web](https://claude.ai/code) (cloud sessions):
 - **Plugin auto-installs** via `.claude/settings.json` — declares the marketplace and enables the plugin declaratively at session start.
 - **Git operations work automatically** — Claude Code Web provides a GitHub Proxy, so `git push`, `git pull`, and branch operations work out of the box.
 
-**Optional: `gh` CLI for full GitHub integration**
+**GitHub integration**
 
-The `gh` CLI is not pre-installed in cloud sessions. Without it, the plugin skips draft PR creation gracefully. To enable `gh pr create`, `gh issue create`, and `gh release`, configure your [Claude Code Web environment](https://claude.ai/settings/code):
+Claude Code Web includes built-in GitHub MCP tools for PR creation, PR management, and issue operations — no additional setup required. The plugin automatically uses whatever GitHub tooling is available in the environment.
+
+Alternatively, you can install the `gh` CLI for environments without built-in MCP tools. Configure your [Claude Code Web environment](https://claude.ai/settings/code):
 
 1. **Setup script** — add to your environment settings:
    ```bash
    apt update && apt install -y gh
    ```
-2. **Environment variable** — add `GH_TOKEN` with a GitHub personal access token. The `gh` CLI reads it automatically.
+2. **Environment variable** — add `GH_TOKEN` with a GitHub personal access token.
 
 > For consumer projects, copy `.claude/settings.json` from this repo and update the marketplace `repo` field if needed. Make sure `.gitignore` does not block `.claude/settings.json` (use `/.claude/*` with `!/.claude/settings.json`).
 

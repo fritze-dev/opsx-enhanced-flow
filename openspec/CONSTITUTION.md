@@ -55,7 +55,7 @@ template-version: 1
      Post-merge tasks are reminders — executed manually after the PR is merged. -->
 
 ### Pre-Merge
-- [ ] Update PR: mark ready for review, update body with change summary and issue references if applicable (`gh pr ready && gh pr edit --body "... Closes #X"`)
+- [ ] Update PR: mark ready for review, update body with change summary and issue references if applicable (e.g., `Closes #X`)
 
 ### Post-Merge
 - Update plugin locally (`claude plugin marketplace update opsx-enhanced-flow && claude plugin update opsx@opsx-enhanced-flow`)
