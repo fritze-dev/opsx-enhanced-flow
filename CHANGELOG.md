@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## 2026-04-11 — Tool-Agnostic GitHub Operations (v2.0.11)
+
+### Changed
+- Replace hardcoded `gh` CLI commands with tool-agnostic language ("available GitHub tooling") in artifact-pipeline spec, change-workspace spec, workflow skill, constitution, and README
+- Plugin now works seamlessly with Claude Code Web built-in MCP tools, desktop `gh` CLI, or any GitHub API tooling — no environment-specific coupling
+- README setup section rewritten: MCP tools documented as primary, `gh` CLI as optional alternative
+- Closes #114
+
 ## 2026-04-11 — Fix Stale Worktree Detection (v2.0.10)
 
 ### Fixed

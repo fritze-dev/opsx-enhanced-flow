@@ -53,7 +53,7 @@ Before creating a new change, propose checks for stale worktrees using a five-ti
 
 ### Post-Merge Worktree Cleanup
 
-After a successful `gh pr merge` from within a worktree, the system switches to the main worktree, removes the completed worktree, and deletes local and remote branches. If the worktree has uncommitted changes, removal fails and manual cleanup is suggested.
+After a successful PR merge from within a worktree, the system switches to the main worktree, removes the completed worktree, and deletes local and remote branches. If the worktree has uncommitted changes, removal fails and manual cleanup is suggested.
 
 ### Active vs Completed Change Detection
 
