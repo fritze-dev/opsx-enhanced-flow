@@ -15,7 +15,7 @@
 - [ ] 2.1. Create `.specshift/` directory
 - [ ] 2.2. `git mv openspec/WORKFLOW.md .specshift/WORKFLOW.md`
 - [ ] 2.3. `git mv openspec/CONSTITUTION.md .specshift/CONSTITUTION.md`
-- [ ] 2.4. `git mv openspec/templates .specshift/templates`
+- [ ] 2.4. `git rm -r openspec/templates` (local template copies removed — fresh copies via `specshift init` in Commit 3)
 - [ ] 2.5. `git mv openspec/changes .specshift/changes`
 - [ ] 2.6. Create `docs/specs/` directory, flatten specs: `git mv openspec/specs/<name>/spec.md docs/specs/<name>.md` for all 14 specs
 - [ ] 2.7. `git mv src/skills/workflow src/skills/specshift`
@@ -37,23 +37,24 @@
 - [ ] 2.20. [P] Update `.claude/settings.json` — marketplace and plugin references → `specshift`
 - [ ] 2.21. Commit: "Update: paths, branding, and commands to SpecShift"
 
-### Commit 3: New Files
+### Commit 3: New Files + Dogfooding Init
 
 - [ ] 2.22. Create `CLAUDE.md` — ultra-lean agent entry point (from template)
 - [ ] 2.23. Rename `src/templates/agents.md` → `src/templates/claude.md` (template for CLAUDE.md generation)
 - [ ] 2.24. Write `README.md` — SpecShift branding, new install flow (`claude plugin install specshift` / `specshift init` / `specshift propose`)
 - [ ] 2.25. Write `CHANGELOG.md` — fresh start with v0.1.0-beta entry
 - [ ] 2.26. Write `docs/decisions/adr-001-specshift-v1-architecture.md` — documents the restructuring decision
-- [ ] 2.27. Commit: "Add: CLAUDE.md, README, CHANGELOG, ADR-001"
+- [ ] 2.27. Run `specshift init` to copy fresh, updated templates from `src/templates/` → `.specshift/templates/` (validates init flow + ensures local templates match upstream)
+- [ ] 2.28. Commit: "Add: CLAUDE.md, README, CHANGELOG, ADR-001, init dogfooding templates"
 
 ### Commit 4: Historical Cleanup
 
-- [ ] 2.28. Flatten per-change spec snapshots in `.specshift/changes/*/specs/` — `spec.md` → `<name>.md`
-- [ ] 2.29. `git rm` old ADRs in `docs/decisions/` (except adr-001)
-- [ ] 2.30. `git rm` old capability docs in `docs/capabilities/` (regenerated at v1.0)
-- [ ] 2.31. `git rm` old `docs/README.md` (regenerated at v1.0)
-- [ ] 2.32. Check `.github/copilot-setup-steps.yml` for stale references, update if needed
-- [ ] 2.33. Commit: "Cleanup: flatten snapshots, remove stale docs"
+- [ ] 2.29. Flatten per-change spec snapshots in `.specshift/changes/*/specs/` — `spec.md` → `<name>.md`
+- [ ] 2.30. `git rm` old ADRs in `docs/decisions/` (except adr-001)
+- [ ] 2.31. `git rm` old capability docs in `docs/capabilities/` (regenerated at v1.0)
+- [ ] 2.32. `git rm` old `docs/README.md` (regenerated at v1.0)
+- [ ] 2.33. Check `.github/copilot-setup-steps.yml` for stale references, update if needed
+- [ ] 2.34. Commit: "Cleanup: flatten snapshots, remove stale docs"
 
 ## 3. QA Loop & Human Approval
 
