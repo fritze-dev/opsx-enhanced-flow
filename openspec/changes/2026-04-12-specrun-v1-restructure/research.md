@@ -53,11 +53,11 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 
 | Approach | Pro | Contra |
 |----------|-----|--------|
-| **A: Clean Slate (new repo, v1.0)** | Fresh history, no legacy baggage, clean naming from start | Loses git history, requires archiving old repo |
-| **B: In-place migration (v3.0)** | Preserves history, single repo | 58 changes + 54 ADRs as dead weight, messy history |
-| **C: Fork + rewrite** | Keeps history but starts fresh branch | Confusing dual history |
+| **A: Clean Slate (new repo, v1.0)** | Fresh history, no legacy baggage, clean naming from start | Loses git blame, requires archiving old repo, copy-paste statt git mv |
+| **B: In-place migration (v3.0)** | Preserves history, single repo | 58 changes + 54 ADRs as dead weight, messy history, old repo name bleibt |
+| **C: Fork & Rewrite (Duplicate)** | Preserves full git blame, git mv tracks renames, evolution visible, normal OSS pattern for v1.0 rewrites | .git etwas größer durch alte Objekte |
 
-**Selected: Approach A (Clean Slate)** — New repo `specshift`, version 1.0.0. Transfer only current specs as baseline. Old repo archived with migration prompt in README.
+**Selected: Approach C (Fork & Rewrite)** — Duplicate repo as `specshift`, restructure via `git mv`/`git rm`, commit as v1.0.0. Full git blame preserved — the evolution of prompts, SKILL.md, and specs remains traceable. Old changes and ADRs are deleted via `git rm` (but recoverable from history). This is the standard pattern for major OSS rewrites (React, Next.js, etc.).
 
 | Approach | Pro | Contra |
 |----------|-----|--------|
@@ -77,17 +77,17 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| Consumer projects break after plugin update | HIGH | No consumers yet (plugin is pre-release). Migration prompt in old repo README. |
-| Lost institutional knowledge from ADRs | MEDIUM | ADR decisions are already baked into current specs. New ADR-001 documents the architecture. |
-| Template-version reset to 1 | LOW | Clean slate — no existing consumers with template-version 4 to conflict with. |
-| Spec content drift during transfer | LOW | Transfer specs verbatim, only update paths and naming. |
-| Missing spec cross-references after flatten | MEDIUM | All `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md` — anchors stay the same. |
+| Consumer projects break after plugin update | HIGH | No consumers yet (plugin is pre-release). Old repo archived with migration note. |
+| git mv loses blame for heavily rewritten files | LOW | git mv preserves blame for renames/moves. Content edits (path updates) create new blame entries, which is correct — they document when the path change happened. |
+| Template-version reset to 1 | LOW | No existing consumers with template-version 4. Reset is clean. |
+| Missing spec cross-references after flatten | MEDIUM | All `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md` — anchors stay the same, only file path changes. |
+| .git size increase from deleted objects | NEGLIGIBLE | Old changes/ADRs stay in git objects but don't affect working tree. Normal for repos with history. |
 
 ## 5. Coverage Assessment
 
 | Category | Status | Notes |
 |----------|--------|-------|
-| Scope | Clear | Clean slate repo, transfer 14 specs, new folder structure, rename namespace |
+| Scope | Clear | Duplicate repo, restructure via git mv/rm, new folder structure, rename namespace |
 | Behavior | Clear | 4 actions (init, propose, apply, finalize), same pipeline, new paths |
 | Data Model | Clear | .specshift/ for infrastructure, docs/ for knowledge, src/ for upstream |
 | UX | Clear | Simpler root (CLAUDE.md + docs/ + src/), hidden infrastructure |
@@ -103,11 +103,11 @@ All categories Clear — no open questions needed.
 
 | # | Decision | Rationale | Alternatives Considered |
 |---|----------|-----------|------------------------|
-| 1 | Clean Slate v1.0 in new repo | No legacy baggage, clean git history, proper naming from start | In-place migration v3.0 (rejected: 58 changes + 54 ADRs as dead weight) |
+| 1 | Fork & Rewrite (Duplicate repo) | Preserves git blame for all prompts/specs/skill evolution, git mv tracks renames, standard OSS rewrite pattern | Clean Slate (rejected: loses git blame history), In-place migration (rejected: old repo name stuck) |
 | 2 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource shared across potential future skills | `src/skills/workflow/templates/` (rejected: unnecessary coupling) |
 | 3 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates unnecessary directory nesting | Root-level `specs/` (rejected: adds root clutter) |
 | 4 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
 | 5 | Plugin name "specshift" | Clean product name, matches repo name, owner stays "fritze.dev" | "fritze" (rejected: too personal for a product name) |
 | 6 | No migrate/update actions in v1 | init already handles template sync, no active consumers to migrate | Separate migrate + update actions (rejected: unnecessary complexity for v1) |
 | 7 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break, validates init/update paths | Symlinks to src/ (rejected: already proven unreliable) |
-| 8 | Transfer only specs, not ADRs/changes | ADR decisions are embedded in specs, old changes reference obsolete paths | Full transfer (rejected: dead weight with wrong paths) |
+| 8 | Delete old ADRs/changes via git rm | ADR decisions are embedded in specs, old changes reference obsolete paths. History preserved in git for traceability. | Keep all (rejected: dead weight with wrong paths) |
