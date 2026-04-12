@@ -1,4 +1,4 @@
-# Research: SpecRun v1.0 Restructure
+# Research: SpecShift v1.0 Restructure
 
 ## 1. Current State
 
@@ -47,7 +47,7 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 **Hidden infrastructure directories (precedent):**
 - `.git/` — version control infrastructure
 - `.claude/` — Claude Code config
-- `.specrun/` follows this established pattern for workflow infrastructure
+- `.specshift/` follows this established pattern for workflow infrastructure
 
 ## 3. Approaches
 
@@ -57,7 +57,7 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 | **B: In-place migration (v3.0)** | Preserves history, single repo | 58 changes + 54 ADRs as dead weight, messy history |
 | **C: Fork + rewrite** | Keeps history but starts fresh branch | Confusing dual history |
 
-**Selected: Approach A (Clean Slate)** — New repo `specrun`, version 1.0.0. Transfer only current specs as baseline. Old repo archived with migration prompt in README.
+**Selected: Approach A (Clean Slate)** — New repo `specshift`, version 1.0.0. Transfer only current specs as baseline. Old repo archived with migration prompt in README.
 
 | Approach | Pro | Contra |
 |----------|-----|--------|
@@ -89,12 +89,12 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 |----------|--------|-------|
 | Scope | Clear | Clean slate repo, transfer 14 specs, new folder structure, rename namespace |
 | Behavior | Clear | 4 actions (init, propose, apply, finalize), same pipeline, new paths |
-| Data Model | Clear | .specrun/ for infrastructure, docs/ for knowledge, src/ for upstream |
+| Data Model | Clear | .specshift/ for infrastructure, docs/ for knowledge, src/ for upstream |
 | UX | Clear | Simpler root (CLAUDE.md + docs/ + src/), hidden infrastructure |
 | Integration | Clear | Plugin system unchanged (marketplace.json + plugin.json + skills/) |
 | Edge Cases | Clear | No active consumers, no migration needed in v1 |
 | Constraints | Clear | Plugin manifest 2-level split, skill discovery conventions |
-| Terminology | Clear | SpecRun replaces OpenSpec/OPSX, "specrun" as plugin name |
+| Terminology | Clear | SpecShift replaces OpenSpec/OPSX, "specshift" as plugin name |
 | Non-Functional | Clear | No performance/security impact — pure structural change |
 
 All categories Clear — no open questions needed.
@@ -106,8 +106,8 @@ All categories Clear — no open questions needed.
 | 1 | Clean Slate v1.0 in new repo | No legacy baggage, clean git history, proper naming from start | In-place migration v3.0 (rejected: 58 changes + 54 ADRs as dead weight) |
 | 2 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource shared across potential future skills | `src/skills/workflow/templates/` (rejected: unnecessary coupling) |
 | 3 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates unnecessary directory nesting | Root-level `specs/` (rejected: adds root clutter) |
-| 4 | `.specrun/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
-| 5 | Plugin name "specrun" | Clean product name, matches repo name, owner stays "fritze.dev" | "fritze" (rejected: too personal for a product name) |
+| 4 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
+| 5 | Plugin name "specshift" | Clean product name, matches repo name, owner stays "fritze.dev" | "fritze" (rejected: too personal for a product name) |
 | 6 | No migrate/update actions in v1 | init already handles template sync, no active consumers to migrate | Separate migrate + update actions (rejected: unnecessary complexity for v1) |
 | 7 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break, validates init/update paths | Symlinks to src/ (rejected: already proven unreliable) |
 | 8 | Transfer only specs, not ADRs/changes | ADR decisions are embedded in specs, old changes reference obsolete paths | Full transfer (rejected: dead weight with wrong paths) |

@@ -1,7 +1,7 @@
 <!--
 ---
 status: active
-branch: specrun-v1-restructure
+branch: specshift-v1-restructure
 capabilities:
   new: []
   modified:
@@ -24,15 +24,15 @@ capabilities:
 -->
 ## Why
 
-The current "OpenSpec/OPSX" naming and `openspec/` folder structure create unnecessary nesting, namespace confusion, and template duplication. The project is ready for a clean v1.0 release as **SpecRun** — a product name that stands on its own. A clean slate in a new repository eliminates 58 historical changes, 54 ADRs with obsolete paths, and the baggage of iterative refactoring. This is the right moment because there are no active consumers relying on the current structure.
+The current "OpenSpec/OPSX" naming and `openspec/` folder structure create unnecessary nesting, namespace confusion, and template duplication. The project is ready for a clean v1.0 release as **SpecShift** — a product name that stands on its own. A clean slate in a new repository eliminates 58 historical changes, 54 ADRs with obsolete paths, and the baggage of iterative refactoring. This is the right moment because there are no active consumers relying on the current structure.
 
 ## What Changes
 
-- **BREAKING**: Rename product from "OpenSpec/OPSX" to "SpecRun", plugin name from `opsx` to `specrun`
-- **BREAKING**: New folder structure — `.specrun/` as hidden infrastructure dir, `docs/specs/` for flat specs
-- **BREAKING**: New repository `specrun` (old `opsx-enhanced-flow` archived)
-- All `openspec/` paths replaced: `openspec/WORKFLOW.md` → `.specrun/WORKFLOW.md`, `openspec/CONSTITUTION.md` → `.specrun/CONSTITUTION.md`, `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md`, `openspec/changes/` → `.specrun/changes/`, `openspec/templates/` → `.specrun/templates/`
-- Templates stay at `src/templates/` (plugin level), copied to `.specrun/templates/` during init
+- **BREAKING**: Rename product from "OpenSpec/OPSX" to "SpecShift", plugin name from `opsx` to `specshift`
+- **BREAKING**: New folder structure — `.specshift/` as hidden infrastructure dir, `docs/specs/` for flat specs
+- **BREAKING**: New repository `specshift` (old `opsx-enhanced-flow` archived)
+- All `openspec/` paths replaced: `openspec/WORKFLOW.md` → `.specshift/WORKFLOW.md`, `openspec/CONSTITUTION.md` → `.specshift/CONSTITUTION.md`, `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md`, `openspec/changes/` → `.specshift/changes/`, `openspec/templates/` → `.specshift/templates/`
+- Templates stay at `src/templates/` (plugin level), copied to `.specshift/templates/` during init
 - Skill discovery via plugin system only — no `.agents/` or `.claude/skills/` symlinks
 - `AGENTS.md` + `CLAUDE.md` symlink replaced by single `CLAUDE.md`
 - Dogfooding setup 1:1 like a client project (no symlinks)
@@ -49,14 +49,14 @@ None — this is a structural refactoring, not a new feature.
 
 All 14 existing specs receive path updates and naming changes:
 
-- `artifact-pipeline`: `openspec/` paths → `.specrun/` and `docs/specs/` paths throughout
-- `change-workspace`: Workspace path `openspec/changes/` → `.specrun/changes/`, proposal scan paths updated
-- `constitution-management`: Constitution path `openspec/CONSTITUTION.md` → `.specrun/CONSTITUTION.md`
+- `artifact-pipeline`: `openspec/` paths → `.specshift/` and `docs/specs/` paths throughout
+- `change-workspace`: Workspace path `openspec/changes/` → `.specshift/changes/`, proposal scan paths updated
+- `constitution-management`: Constitution path `openspec/CONSTITUTION.md` → `.specshift/CONSTITUTION.md`
 - `documentation`: All spec references, capability doc paths, ADR generation paths updated
 - `human-approval-gate`: Review artifact path references updated
-- `project-init`: Major rewrite — "Install OpenSpec Workflow" → "Install SpecRun Workflow", all target paths changed, legacy migration removed (handled by old repo README), template source paths updated
+- `project-init`: Major rewrite — "Install OpenSpec Workflow" → "Install SpecShift Workflow", all target paths changed, legacy migration removed (handled by old repo README), template source paths updated
 - `quality-gates`: Spec reference paths updated
-- `release-workflow`: Plugin name `opsx` → `specrun`, marketplace references updated, repo name changed
+- `release-workflow`: Plugin name `opsx` → `specshift`, marketplace references updated, repo name changed
 - `roadmap-tracking`: Minor path updates
 - `spec-format`: Spec directory references updated
 - `task-implementation`: Change artifact paths updated
@@ -86,12 +86,12 @@ N/A — no new specs proposed. All 14 existing specs are modified for path/namin
 ## Scope & Boundaries
 
 **In scope:**
-- New repo structure with `.specrun/`, `docs/specs/`, `src/`
+- New repo structure with `.specshift/`, `docs/specs/`, `src/`
 - All path and naming changes across specs, templates, skill, manifests
 - Spec content transfer (14 specs, flattened)
 - New ADR-001 documenting the architecture decision
 - New CHANGELOG.md starting at v1.0.0
-- New README.md with SpecRun branding and install instructions
+- New README.md with SpecShift branding and install instructions
 - Dogfooding setup as 1:1 client project
 
 **Out of scope:**
