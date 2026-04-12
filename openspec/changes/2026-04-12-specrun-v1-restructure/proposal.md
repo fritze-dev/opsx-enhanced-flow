@@ -96,11 +96,11 @@ N/A — no new specs proposed. All 14 existing specs are modified for path updat
 ## Impact
 
 - **SKILL.md**: Moved to `src/skills/specshift/SKILL.md`, all 39+ `openspec/` references updated
-- **All 14 templates**: `openspec/` paths replaced with new paths
-- **All 14 spec files**: Path references updated (~280+ occurrences)
+- **All 14 templates**: `openspec/` paths replaced with new paths, CLI command references updated (`workflow propose` → `specshift propose`, etc.)
+- **All 14 spec files**: Path references and internal markdown links updated (~280+ occurrences). Includes cross-spec links (e.g., `[Link](../change-workspace/spec.md)` → `[Link](change-workspace.md)`)
 - **Plugin manifests**: Name and version changed
 - **CONSTITUTION.md**: Self-referential paths updated
-- **WORKFLOW.md**: templates_dir and context paths updated
+- **WORKFLOW.md**: templates_dir and context paths updated, all `workflow <action>` references → `specshift <action>`
 - **Existing docs/ADRs**: Moved as-is (no content changes in beta)
 
 ## Scope & Boundaries
