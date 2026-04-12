@@ -1,4 +1,4 @@
-# Research: SpecShift v1.0 Restructure
+# Research: SpecShift Beta Restructure
 
 ## 1. Current State
 
@@ -51,20 +51,35 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 
 ## 3. Approaches
 
+### Repo Strategy
+
 | Approach | Pro | Contra |
 |----------|-----|--------|
-| **A: Clean Slate (new repo, v1.0)** | Fresh history, no legacy baggage, clean naming from start | Loses git blame, requires archiving old repo, copy-paste statt git mv |
-| **B: In-place migration (v3.0)** | Preserves history, single repo | 58 changes + 54 ADRs as dead weight, messy history, old repo name bleibt |
-| **C: Fork & Rewrite (Duplicate)** | Preserves full git blame, git mv tracks renames, evolution visible, normal OSS pattern for v1.0 rewrites | .git etwas größer durch alte Objekte |
+| **A: Clean Slate (new repo)** | Fresh history, no legacy baggage | Loses git blame, copy-paste statt git mv |
+| **B: In-place migration** | Preserves history, single repo | Old repo name stuck, messy history |
+| **C: Fork & Rewrite (Duplicate)** | Preserves full git blame, git mv tracks renames, evolution visible | .git etwas größer durch alte Objekte |
 
-**Selected: Approach C (Fork & Rewrite)** — Duplicate repo as `specshift`, restructure via `git mv`/`git rm`, commit as v1.0.0. Full git blame preserved — the evolution of prompts, SKILL.md, and specs remains traceable. Old changes and ADRs are deleted via `git rm` (but recoverable from history). This is the standard pattern for major OSS rewrites (React, Next.js, etc.).
+**Selected: Approach C (Fork & Rewrite)** — Duplicate repo as `specshift`, restructure via `git mv`/`git rm`. Full git blame preserved — the evolution of prompts, SKILL.md, and specs remains traceable. Standard pattern for major OSS rewrites.
+
+### Release Strategy
+
+| Approach | Pro | Contra |
+|----------|-----|--------|
+| **A: Ship v1.0 in one shot** | Clean release, everything polished | Premature polish — templates/workflow may still change, wasted effort on docs consolidation |
+| **B: Beta first, v1.0 later** | Validate mechanics before polishing, avoid rework on docs/ADRs, agile skateboard→car pattern | Two-phase effort, beta has rough edges |
+
+**Selected: Approach B (Beta → v1.0)** — Beta focuses on mechanics & structure (the code works in the new folders, the commands work). Existing docs/ADRs/specs stay as-is or move unsorted into `docs/`. v1.0 later: template freeze, ADR consolidation into clean specs, final README/CHANGELOG. No point polishing documentation that may change during beta usage.
+
+### Templates Location
 
 | Approach | Pro | Contra |
 |----------|-----|--------|
 | **Templates at `src/templates/`** | Plugin-level resource, matches Claude Code conventions | Not co-located with SKILL.md |
-| **Templates at `src/skills/workflow/templates/`** | Self-contained skill | Couples templates to single skill, deeper nesting |
+| **Templates at `src/skills/specshift/templates/`** | Self-contained skill | Couples templates to single skill, deeper nesting |
 
 **Selected: `src/templates/`** — Plugin-level resource, not skill-specific.
+
+### Specs Location
 
 | Approach | Pro | Contra |
 |----------|-----|--------|
@@ -78,23 +93,23 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 | Risk | Severity | Mitigation |
 |------|----------|------------|
 | Consumer projects break after plugin update | HIGH | No consumers yet (plugin is pre-release). Old repo archived with migration note. |
-| git mv loses blame for heavily rewritten files | LOW | git mv preserves blame for renames/moves. Content edits (path updates) create new blame entries, which is correct — they document when the path change happened. |
+| Premature docs polishing wastes effort | MEDIUM | Beta phase defers doc consolidation. Only restructure mechanics now, polish at v1.0. |
+| git mv loses blame for heavily rewritten files | LOW | git mv preserves blame for renames/moves. Content edits create new blame entries — correct behavior. |
 | Template-version reset to 1 | LOW | No existing consumers with template-version 4. Reset is clean. |
-| Missing spec cross-references after flatten | MEDIUM | All `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md` — anchors stay the same, only file path changes. |
-| .git size increase from deleted objects | NEGLIGIBLE | Old changes/ADRs stay in git objects but don't affect working tree. Normal for repos with history. |
+| Missing spec cross-references after flatten | MEDIUM | All `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md` — anchors stay the same. |
 
 ## 5. Coverage Assessment
 
 | Category | Status | Notes |
 |----------|--------|-------|
-| Scope | Clear | Duplicate repo, restructure via git mv/rm, new folder structure, rename namespace |
+| Scope | Clear | Beta: mechanics & structure. v1.0: polish & consolidation. |
 | Behavior | Clear | 4 actions (init, propose, apply, finalize), same pipeline, new paths |
 | Data Model | Clear | .specshift/ for infrastructure, docs/ for knowledge, src/ for upstream |
 | UX | Clear | Simpler root (CLAUDE.md + docs/ + src/), hidden infrastructure |
 | Integration | Clear | Plugin system unchanged (marketplace.json + plugin.json + skills/) |
-| Edge Cases | Clear | No active consumers, no migration needed in v1 |
+| Edge Cases | Clear | No active consumers, no migration needed |
 | Constraints | Clear | Plugin manifest 2-level split, skill discovery conventions |
-| Terminology | Clear | SpecShift replaces OpenSpec/OPSX, "specshift" as plugin name, skill renamed from `workflow` to `specshift` → commands become `specshift init`, `specshift propose`, etc. |
+| Terminology | Clear | SpecShift replaces OpenSpec/OPSX, skill renamed from `workflow` to `specshift` → commands become `specshift init`, `specshift propose`, etc. |
 | Non-Functional | Clear | No performance/security impact — pure structural change |
 
 All categories Clear — no open questions needed.
@@ -103,11 +118,12 @@ All categories Clear — no open questions needed.
 
 | # | Decision | Rationale | Alternatives Considered |
 |---|----------|-----------|------------------------|
-| 1 | Fork & Rewrite (Duplicate repo) | Preserves git blame for all prompts/specs/skill evolution, git mv tracks renames, standard OSS rewrite pattern | Clean Slate (rejected: loses git blame history), In-place migration (rejected: old repo name stuck) |
-| 2 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource shared across potential future skills | `src/skills/workflow/templates/` (rejected: unnecessary coupling) |
-| 3 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates unnecessary directory nesting | Root-level `specs/` (rejected: adds root clutter) |
-| 4 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
-| 5 | Plugin + skill name "specshift" | Clean product name, matches repo name, commands become `specshift init` etc. | Generic "workflow" (rejected: weak branding) |
-| 6 | No migrate/update actions in v1 | init already handles template sync, no active consumers to migrate | Separate migrate + update actions (rejected: unnecessary complexity for v1) |
-| 7 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break, validates init/update paths | Symlinks to src/ (rejected: already proven unreliable) |
-| 8 | Delete old ADRs/changes via git rm | ADR decisions are embedded in specs, old changes reference obsolete paths. History preserved in git for traceability. | Keep all (rejected: dead weight with wrong paths) |
+| 1 | Fork & Rewrite (Duplicate repo) | Preserves git blame for all prompts/specs/skill evolution, git mv tracks renames | Clean Slate (rejected: loses git blame), In-place migration (rejected: old repo name stuck) |
+| 2 | Beta → v1.0 phased release | Beta validates mechanics before polishing. Avoids wasted effort on docs/ADRs that may change during beta. | Ship v1.0 directly (rejected: premature polish, likely rework) |
+| 3 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource | `src/skills/specshift/templates/` (rejected: unnecessary coupling) |
+| 4 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates directory nesting | Root-level `specs/` (rejected: adds root clutter) |
+| 5 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/) | Visible root-level files (rejected: clutters root) |
+| 6 | Plugin + skill name "specshift" | Clean product name, matches repo name, commands become `specshift init` etc. | Generic "workflow" (rejected: weak branding) |
+| 7 | No migrate/update actions in beta | init already handles template sync, no active consumers | Separate actions (rejected: unnecessary complexity) |
+| 8 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break | Symlinks to src/ (rejected: already proven unreliable) |
+| 9 | Keep existing ADRs/specs unsorted in beta | No point consolidating docs that may still change. Move into docs/ as-is, polish at v1.0. | Delete via git rm (rejected: premature), Consolidate now (rejected: wasted effort) |
