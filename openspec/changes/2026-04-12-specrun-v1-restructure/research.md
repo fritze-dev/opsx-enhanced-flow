@@ -7,7 +7,7 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 **Plugin distribution:**
 - `src/.claude-plugin/plugin.json` — plugin manifest (name: "opsx", version: 2.0.13)
 - `.claude-plugin/marketplace.json` — marketplace entry (source: "./src")
-- `src/skills/workflow/SKILL.md` — single router skill with 4 actions
+- `src/skills/workflow/SKILL.md` — single router skill with 4 actions (will become `src/skills/specshift/SKILL.md`)
 - `src/templates/` — 14 Smart Templates for artifact generation
 
 **Project artifacts (dogfooding):**
@@ -94,7 +94,7 @@ The project is an OpenSpec/OPSX workflow plugin for Claude Code with the followi
 | Integration | Clear | Plugin system unchanged (marketplace.json + plugin.json + skills/) |
 | Edge Cases | Clear | No active consumers, no migration needed in v1 |
 | Constraints | Clear | Plugin manifest 2-level split, skill discovery conventions |
-| Terminology | Clear | SpecShift replaces OpenSpec/OPSX, "specshift" as plugin name |
+| Terminology | Clear | SpecShift replaces OpenSpec/OPSX, "specshift" as plugin name, skill renamed from `workflow` to `specshift` → commands become `specshift init`, `specshift propose`, etc. |
 | Non-Functional | Clear | No performance/security impact — pure structural change |
 
 All categories Clear — no open questions needed.
@@ -107,7 +107,7 @@ All categories Clear — no open questions needed.
 | 2 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource shared across potential future skills | `src/skills/workflow/templates/` (rejected: unnecessary coupling) |
 | 3 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates unnecessary directory nesting | Root-level `specs/` (rejected: adds root clutter) |
 | 4 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
-| 5 | Plugin name "specshift" | Clean product name, matches repo name, owner stays "fritze.dev" | "fritze" (rejected: too personal for a product name) |
+| 5 | Plugin + skill name "specshift" | Clean product name, matches repo name, commands become `specshift init` etc., owner stays "fritze.dev" | "fritze" (rejected: too personal), generic "workflow" (rejected: weak branding) |
 | 6 | No migrate/update actions in v1 | init already handles template sync, no active consumers to migrate | Separate migrate + update actions (rejected: unnecessary complexity for v1) |
 | 7 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break, validates init/update paths | Symlinks to src/ (rejected: already proven unreliable) |
 | 8 | Delete old ADRs/changes via git rm | ADR decisions are embedded in specs, old changes reference obsolete paths. History preserved in git for traceability. | Keep all (rejected: dead weight with wrong paths) |

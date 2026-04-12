@@ -28,7 +28,8 @@ The current "OpenSpec/OPSX" naming and `openspec/` folder structure create unnec
 
 ## What Changes
 
-- **BREAKING**: Rename product from "OpenSpec/OPSX" to "SpecShift", plugin name from `opsx` to `specshift`
+- **BREAKING**: Rename product from "OpenSpec/OPSX" to "SpecShift", plugin name from `opsx` to `specshift`, skill name from `workflow` to `specshift` → commands become `specshift init`, `specshift propose`, `specshift apply`, `specshift finalize`
+- **BREAKING**: Skill folder renamed from `src/skills/workflow/` to `src/skills/specshift/`
 - **BREAKING**: New folder structure — `.specshift/` as hidden infrastructure dir, `docs/specs/` for flat specs
 - **BREAKING**: Repository duplicated as `specshift` (old `opsx-enhanced-flow` archived). Full git history preserved via bare clone + remote change.
 - All `openspec/` paths replaced via `git mv`: `openspec/WORKFLOW.md` → `.specshift/WORKFLOW.md`, `openspec/CONSTITUTION.md` → `.specshift/CONSTITUTION.md`, `openspec/specs/<name>/spec.md` → `docs/specs/<name>.md`, `openspec/changes/` → `.specshift/changes/`, `openspec/templates/` → `.specshift/templates/`
@@ -55,7 +56,7 @@ All 14 existing specs receive path updates and naming changes:
 - `constitution-management`: Constitution path `openspec/CONSTITUTION.md` → `.specshift/CONSTITUTION.md`
 - `documentation`: All spec references, capability doc paths, ADR generation paths updated
 - `human-approval-gate`: Review artifact path references updated
-- `project-init`: Major rewrite — "Install OpenSpec Workflow" → "Install SpecShift Workflow", all target paths changed, legacy migration removed (handled by old repo README), template source paths updated
+- `project-init`: Major rewrite — "Install OpenSpec Workflow" → "Install SpecShift", all target paths changed, legacy migration removed (handled by old repo README), template source paths updated, skill references `workflow` → `specshift`
 - `quality-gates`: Spec reference paths updated
 - `release-workflow`: Plugin name `opsx` → `specshift`, marketplace references updated, repo name changed
 - `roadmap-tracking`: Minor path updates
@@ -76,7 +77,7 @@ N/A — no new specs proposed. All 14 existing specs are modified for path/namin
 ## Impact
 
 - **All 14 spec files**: Path references updated (~280+ occurrences)
-- **SKILL.md**: All 39+ `openspec/` references updated, requirement anchor links updated
+- **SKILL.md**: Moved to `src/skills/specshift/SKILL.md`, all 39+ `openspec/` references updated, requirement anchor links updated
 - **All 14 templates**: `openspec/` paths replaced with new paths
 - **Plugin manifests**: Name and version changed
 - **CONSTITUTION.md**: Self-referential paths and conventions updated
