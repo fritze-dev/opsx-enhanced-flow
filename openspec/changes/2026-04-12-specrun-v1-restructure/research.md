@@ -107,7 +107,7 @@ All categories Clear — no open questions needed.
 | 2 | Templates at `src/templates/` (plugin level) | Claude Code convention, plugin-level resource shared across potential future skills | `src/skills/workflow/templates/` (rejected: unnecessary coupling) |
 | 3 | Specs at `docs/specs/<name>.md` (flat) | All project knowledge under docs/, eliminates unnecessary directory nesting | Root-level `specs/` (rejected: adds root clutter) |
 | 4 | `.specshift/` as infrastructure dir | Hidden = clean root, established pattern (.git/, .claude/), holds WORKFLOW.md + CONSTITUTION.md + templates + changes | Visible root-level files (rejected: clutters root) |
-| 5 | Plugin + skill name "specshift" | Clean product name, matches repo name, commands become `specshift init` etc., owner stays "fritze.dev" | "fritze" (rejected: too personal), generic "workflow" (rejected: weak branding) |
+| 5 | Plugin + skill name "specshift" | Clean product name, matches repo name, commands become `specshift init` etc. | Generic "workflow" (rejected: weak branding) |
 | 6 | No migrate/update actions in v1 | init already handles template sync, no active consumers to migrate | Separate migrate + update actions (rejected: unnecessary complexity for v1) |
 | 7 | Dogfooding setup 1:1 like client | Tests real user flow, no symlinks that break, validates init/update paths | Symlinks to src/ (rejected: already proven unreliable) |
 | 8 | Delete old ADRs/changes via git rm | ADR decisions are embedded in specs, old changes reference obsolete paths. History preserved in git for traceability. | Keep all (rejected: dead weight with wrong paths) |
