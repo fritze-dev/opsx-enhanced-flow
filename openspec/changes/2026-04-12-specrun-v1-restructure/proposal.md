@@ -50,11 +50,11 @@ A Fork & Rewrite approach duplicates the repo under the new name, restructures v
 - Dogfooding setup 1:1 like a client project (no symlinks)
 - Template versions reset to 1, plugin version 0.1.0-beta
 - Path references updated in SKILL.md, templates, and WORKFLOW.md
+- All "OpenSpec"/"OPSX" wording removed from specs, templates, and skill — replaced with generic language (no product-specific branding in behavioral artifacts)
 
 ### Deferred to v1.0
 
 - ADR consolidation (55 ADRs → clean summary)
-- Spec content rewrite (remove OpenSpec wording from requirement names and prose)
 - Capability docs regeneration
 - Final README.md and CHANGELOG.md polish
 - Template freeze
@@ -68,7 +68,7 @@ None — this is a structural refactoring, not a new feature.
 
 ### Modified Capabilities
 
-All 14 existing specs receive **path updates only** in the beta. Content rewrites deferred to v1.0:
+All 14 existing specs receive **path updates and branding removal** in the beta. "OpenSpec"/"OPSX" wording removed — specs use generic language (e.g., "Install Workflow" not "Install OpenSpec Workflow"). No product-specific branding in specs or templates — product name belongs in README and plugin.json only:
 
 - `artifact-pipeline`: `openspec/` paths → `.specshift/` and `docs/specs/` paths
 - `change-workspace`: Workspace path `openspec/changes/` → `.specshift/changes/`
@@ -108,6 +108,7 @@ N/A — no new specs proposed. All 14 existing specs are modified for path updat
 **In scope (Beta):**
 - Duplicate repo as `specshift`, restructure via `git mv`/`git rm`
 - All path updates across specs, templates, skill, manifests
+- Remove all "OpenSpec"/"OPSX" branding from specs, templates, skill (generic language only)
 - Specs flattened via `git mv` (14 specs, `spec.md` → `<name>.md`)
 - Router SKILL.md functional with new paths
 - Dogfooding setup as 1:1 client project
@@ -115,7 +116,6 @@ N/A — no new specs proposed. All 14 existing specs are modified for path updat
 
 **Out of scope (deferred to v1.0):**
 - ADR consolidation and cleanup
-- Spec content rewrite (OpenSpec wording in requirement names/prose)
 - Capability docs regeneration
 - Final README.md / CHANGELOG.md polish
 - Template freeze
