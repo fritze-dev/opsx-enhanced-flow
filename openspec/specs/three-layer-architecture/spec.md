@@ -7,17 +7,17 @@ lastModified: 2026-04-10
 ---
 ## Purpose
 
-Defines the three-layer architecture (Constitution, WORKFLOW.md + Smart Templates, Router + Actions) that structures the opsx-enhanced plugin. Each layer has distinct responsibilities, separation rules, and interaction patterns that allow independent modification.
+Defines the three-layer architecture (Constitution, WORKFLOW.md + Smart Templates, Router + Actions) that structures the plugin. Each layer has distinct responsibilities, separation rules, and interaction patterns that allow independent modification.
 
 ## Requirements
 
 ### Requirement: Constitution Layer
-The system SHALL have a `CONSTITUTION.md` file at `openspec/CONSTITUTION.md` that defines global project rules. The constitution SHALL include sections for Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. All AI actions SHALL read the constitution before performing any work, enforced via WORKFLOW.md's `context` field. The constitution SHALL serve as the single authoritative source for project-wide rules that apply across all skills and artifacts.
+The system SHALL have a `CONSTITUTION.md` file at `.specshift/CONSTITUTION.md` that defines global project rules. The constitution SHALL include sections for Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions. All AI actions SHALL read the constitution before performing any work, enforced via WORKFLOW.md's `context` field. The constitution SHALL serve as the single authoritative source for project-wide rules that apply across all skills and artifacts.
 
 **User Story:** As a project maintainer I want a single constitution file that governs all AI behavior, so that consistency is enforced without repeating rules in every skill.
 
 #### Scenario: Constitution is read before any AI action
-- **GIVEN** a project with `openspec/CONSTITUTION.md` and `openspec/WORKFLOW.md` containing a `context` field pointing to the constitution
+- **GIVEN** a project with `.specshift/CONSTITUTION.md` and `.specshift/WORKFLOW.md` containing a `context` field pointing to the constitution
 - **WHEN** any AI-driven skill is invoked
 - **THEN** the constitution file is read and its rules are applied to the action
 
@@ -27,17 +27,17 @@ The system SHALL have a `CONSTITUTION.md` file at `openspec/CONSTITUTION.md` tha
 - **THEN** the file SHALL contain Tech Stack, Architecture Rules, Code Style, Constraints, and Conventions sections
 
 ### Requirement: Schema Layer
-The system SHALL use `openspec/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `openspec/templates/` to define the 7-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, and project context. Post-artifact commit/push logic is handled by the skill during propose pipeline traversal. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
+The system SHALL use `.specshift/WORKFLOW.md` (YAML frontmatter) combined with Smart Templates in `.specshift/templates/` to define the 7-stage artifact pipeline. WORKFLOW.md SHALL declare the pipeline order, apply gate, and project context. Post-artifact commit/push logic is handled by the skill during propose pipeline traversal. Each Smart Template SHALL declare its artifact's instruction, output path, and dependencies via YAML frontmatter. Together, WORKFLOW.md and Smart Templates SHALL be the single source of truth for pipeline structure and artifact generation instructions. Skills SHALL read WORKFLOW.md and Smart Templates directly to obtain artifact definitions, instructions, and dependency information.
 
 **User Story:** As a developer I want the artifact pipeline defined declaratively in WORKFLOW.md and self-describing templates, so that I can understand and modify the workflow without editing skill code.
 
 #### Scenario: WORKFLOW.md defines the pipeline order
-- **GIVEN** the `openspec/WORKFLOW.md` file
+- **GIVEN** the `.specshift/WORKFLOW.md` file
 - **WHEN** its frontmatter is read by a skill
 - **THEN** it SHALL declare a `pipeline` array with exactly 7 artifact IDs: research, proposal, specs, design, preflight, tasks, and review in that dependency order
 
 #### Scenario: Each Smart Template has instruction and metadata
-- **GIVEN** a Smart Template in `openspec/templates/`
+- **GIVEN** a Smart Template in `.specshift/templates/`
 - **WHEN** the template is inspected
 - **THEN** it SHALL have `id`, `generates`, `requires`, and `instruction` fields in its YAML frontmatter
 
@@ -59,7 +59,7 @@ The system SHALL deliver all commands through a single router SKILL.md that disp
 #### Scenario: Router dispatches to custom actions
 - **GIVEN** a consumer WORKFLOW.md with `actions: [init, propose, apply, qa-review, finalize]`
 - **AND** a `## Action: qa-review` body section with `### Instruction`
-- **WHEN** a user invokes `workflow qa-review`
+- **WHEN** a user invokes `specshift qa-review`
 - **THEN** the router SHALL read the instruction and execute it directly (agent decides execution mode)
 
 #### Scenario: Router is model-invocable
@@ -79,7 +79,7 @@ The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templa
 
 #### Scenario: Adding a custom action does not require router changes
 - **GIVEN** a consumer adds `qa-review` to their WORKFLOW.md `actions` array and writes a `## Action: qa-review` body section
-- **WHEN** the user invokes `workflow qa-review`
+- **WHEN** the user invokes `specshift qa-review`
 - **THEN** the router SHALL dispatch the custom action without any modification to the router SKILL.md
 
 #### Scenario: Constitution update does not require WORKFLOW.md changes
@@ -96,11 +96,11 @@ The three layers SHALL be independently modifiable. WORKFLOW.md and Smart Templa
 
 - If the constitution is missing or empty, the router SHALL report an error rather than proceeding without rules.
 - If WORKFLOW.md is malformed YAML, the router SHALL report a read error rather than proceeding with invalid data.
-- If the router SKILL.md is missing, the Claude Code plugin system SHALL not register any commands.
+- If the router SKILL.md is missing, the plugin system SHALL not register any commands.
 - If a new action is added without updating documentation, the system still functions but documentation is stale (detected by review.md generation during apply).
 
 ## Assumptions
 
-- The Claude Code plugin system discovers the router by scanning `skills/*/SKILL.md` files and uses YAML frontmatter for configuration. <!-- ASSUMPTION: Router discovery mechanism -->
+- The plugin system discovers the router by scanning `skills/*/SKILL.md` files and uses YAML frontmatter for configuration. <!-- ASSUMPTION: Router discovery mechanism -->
 - The WORKFLOW.md `context` field reliably enforces constitution reading before action execution. <!-- ASSUMPTION: Context enforcement -->
 No further assumptions beyond those marked above.

@@ -12,7 +12,7 @@ Defines the 8-stage artifact pipeline (research, proposal, specs, design, prefli
 ## Requirements
 
 ### Requirement: Eight-Stage Pipeline
-The system SHALL define an 8-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, tests, tasks, and review. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, tests requires preflight, tasks requires tests, and review requires tasks. The review artifact is generated during the apply phase (after implementation) rather than during artifact-forward generation. No stage SHALL be skippable; each MUST complete before the change is considered complete. The pipeline order SHALL be declared in the `pipeline` array of `openspec/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
+The system SHALL define an 8-stage artifact pipeline with the following stages in order: research, proposal, specs, design, preflight, tests, tasks, and review. Each stage SHALL produce a verifiable artifact file. The pipeline stages SHALL execute in strict dependency order: research has no dependencies, proposal requires research, specs requires proposal, design requires specs, preflight requires design, tests requires preflight, tasks requires tests, and review requires tasks. The review artifact is generated during the apply phase (after implementation) rather than during artifact-forward generation. No stage SHALL be skippable; each MUST complete before the change is considered complete. The pipeline order SHALL be declared in the `pipeline` array of `.specshift/WORKFLOW.md` frontmatter. Each stage's metadata (generates, requires, instruction) SHALL be defined in the corresponding Smart Template's YAML frontmatter.
 
 **User Story:** As a developer I want a structured pipeline that guides me from research through to implementation tasks, so that no critical thinking step is skipped and every decision is documented.
 
@@ -29,7 +29,7 @@ The system SHALL define an 8-stage artifact pipeline with the following stages i
 #### Scenario: All stages produce verifiable artifacts
 - **GIVEN** a completed pipeline run
 - **WHEN** the change workspace is inspected
-- **THEN** it SHALL contain research.md, proposal.md, one or more `specs/<capability>/spec.md` files, design.md, preflight.md, tests.md, tasks.md, and review.md
+- **THEN** it SHALL contain research.md, proposal.md, one or more spec files, design.md, preflight.md, tests.md, tasks.md, and review.md
 
 ### Requirement: Artifact Output Frontmatter
 Certain pipeline artifacts SHALL include YAML frontmatter in their generated output for machine-readable metadata:
@@ -78,7 +78,7 @@ Each artifact in the pipeline SHALL declare its dependencies explicitly in the S
 - **THEN** the dependency check SHALL fail and report that proposal and specs must be completed first
 
 #### Scenario: Smart Template declares dependencies explicitly
-- **GIVEN** a Smart Template file (e.g., `openspec/templates/proposal.md`)
+- **GIVEN** a Smart Template file (e.g., `.specshift/templates/proposal.md`)
 - **WHEN** its YAML frontmatter is inspected
 - **THEN** it SHALL have a `requires` field listing its direct dependencies by artifact ID (e.g., `[research]`)
 
@@ -94,12 +94,12 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 
 #### Scenario: Apply is blocked without tasks
 - **GIVEN** a change workspace where preflight.md is the latest completed artifact and tasks.md does not exist
-- **WHEN** the user invokes `workflow apply`
+- **WHEN** the user invokes `specshift apply`
 - **THEN** the system SHALL reject the apply attempt and report that tasks.md must be generated first
 
 #### Scenario: Apply proceeds after tasks completion
 - **GIVEN** a change workspace with all 6 artifacts completed including tasks.md
-- **WHEN** the user invokes `workflow apply`
+- **WHEN** the user invokes `specshift apply`
 - **THEN** the system SHALL begin implementation, reading the task checklist from tasks.md
 
 #### Scenario: Apply tracks progress in tasks.md
@@ -108,28 +108,28 @@ Implementation (the apply phase) SHALL be gated by completion of the tasks artif
 - **THEN** the system SHALL mark the corresponding `- [ ]` checkbox as `- [x]` in tasks.md
 
 ### Requirement: WORKFLOW.md Owns Pipeline Configuration
-`openspec/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `context` pointing to the constitution, optionally `docs_language`, and optionally `worktree` object with `enabled` (boolean), `path_pattern` (string with `{change}` placeholder), and `auto_cleanup` (boolean). Post-artifact commit/push/PR logic is handled by the skill during propose pipeline traversal. Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
+`.specshift/WORKFLOW.md` SHALL serve as the pipeline orchestration file. Its YAML frontmatter SHALL contain: `templates_dir` pointing to the Smart Templates directory, `pipeline` array defining artifact order, `apply` object with `requires` and `instruction`, `context` pointing to the constitution, optionally `docs_language`, and optionally `worktree` object with `enabled` (boolean), `path_pattern` (string with `{change}` placeholder), and `auto_cleanup` (boolean). Post-artifact commit/push/PR logic is handled by the skill during propose pipeline traversal. Skills SHALL read WORKFLOW.md for all pipeline-level configuration.
 
 **User Story:** As a workflow maintainer I want pipeline orchestration in a single WORKFLOW.md file, so that all pipeline configuration lives in one place.
 
 #### Scenario: WORKFLOW.md contains pipeline orchestration
-- **GIVEN** the `openspec/WORKFLOW.md` file
+- **GIVEN** the `.specshift/WORKFLOW.md` file
 - **WHEN** its frontmatter is inspected
 - **THEN** it SHALL contain `templates_dir`, `pipeline`, `actions`, and `template-version` fields
 - **AND** the `pipeline` array SHALL include `review` as the final stage
 
 #### Scenario: WORKFLOW.md contains optional worktree configuration
-- **GIVEN** the `openspec/WORKFLOW.md` file with worktree mode enabled
+- **GIVEN** the `.specshift/WORKFLOW.md` file with worktree mode enabled
 - **WHEN** its frontmatter is inspected
 - **THEN** it SHALL contain a `worktree` object with `enabled: true`, `path_pattern`, and `auto_cleanup` fields
 
 #### Scenario: WORKFLOW.md without worktree configuration
-- **GIVEN** the `openspec/WORKFLOW.md` file without a `worktree` section
+- **GIVEN** the `.specshift/WORKFLOW.md` file without a `worktree` section
 - **WHEN** a skill reads WORKFLOW.md
 - **THEN** the skill SHALL treat worktree mode as disabled and use existing directory-based behavior
 
 ### Requirement: Post-Artifact Commit and PR Integration
-The `workflow propose` skill SHALL execute post-artifact commit logic after creating each artifact during pipeline traversal. The skill SHALL: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR using available GitHub tooling. This logic lives in the skill (SKILL.md), not in WORKFLOW.md.
+The `specshift propose` skill SHALL execute post-artifact commit logic after creating each artifact during pipeline traversal. The skill SHALL: (1) check the current branch — if already on `<change-name>` branch (e.g., in a worktree), skip branch creation; if on main, create the branch via `git checkout -b <change-name>`; if on another branch, switch to it via `git checkout <change-name>`, (2) stage and commit the change artifacts with a WIP commit message including the artifact ID, (3) push the branch to the remote, and (4) on the first push only, create a draft PR using available GitHub tooling. This logic lives in the skill (SKILL.md), not in WORKFLOW.md.
 
 **User Story:** As a developer I want every artifact committed incrementally with a draft PR created on the first commit, so that my team has early visibility and every pipeline stage is tracked in version control.
 
@@ -161,7 +161,7 @@ The `workflow propose` skill SHALL execute post-artifact commit logic after crea
 
 ### Requirement: Post-Implementation Commit Before Approval
 
-The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `workflow apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as post-artifact commit (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
+The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push all implementation changes after `specshift apply` passes and before pausing for user approval. The commit message SHALL use the format `WIP: <change-name> — implementation`. This follows the same pattern as post-artifact commit (WIP commit + push per checkpoint) but applies to the implementation phase rather than the artifact phase, and is defined in `apply.instruction` rather than the tasks template. If push fails, the system SHALL continue with a local commit and note that the user should review changes locally. This WIP commit is distinct from the final commit in the Standard Tasks section, which includes changelog, docs, and version bump.
 
 **User Story:** As a developer I want implementation changes committed and pushed before I'm asked for approval, so that I can review the actual PR diff rather than being asked to approve uncommitted local changes.
 
@@ -193,18 +193,18 @@ The WORKFLOW.md `apply.instruction` SHALL direct the agent to commit and push al
 Each Smart Template's `instruction` field SHALL contain workflow rules that apply to its artifact type. The tasks template instruction SHALL include the Definition of Done rule (emergent from artifacts). The tasks template instruction SHALL include a standard tasks directive for including universal post-implementation steps and appending constitution-defined project-specific extras. The apply instruction in WORKFLOW.md SHALL include the post-apply workflow sequence and clarify that standard tasks are executed separately after apply completes.
 
 #### Scenario: Tasks template instruction includes DoD rule
-- **GIVEN** the tasks Smart Template at `openspec/templates/tasks.md`
+- **GIVEN** the tasks Smart Template at `.specshift/templates/tasks.md`
 - **WHEN** its `instruction` frontmatter field is inspected
 - **THEN** it SHALL contain a rule stating that Definition of Done is emergent from artifacts
 
 #### Scenario: Apply instruction in WORKFLOW.md includes post-apply workflow
-- **GIVEN** `openspec/WORKFLOW.md`
+- **GIVEN** `.specshift/WORKFLOW.md`
 - **WHEN** the `apply.instruction` field is inspected
-- **THEN** it SHALL contain the post-apply sequence: `workflow apply` → `workflow finalize`
+- **THEN** it SHALL contain the post-apply sequence: `specshift apply` → `specshift finalize`
 
 ### Requirement: Standard Tasks Directive in Task Generation
 
-The tasks Smart Template's `instruction` field SHALL include a standard tasks directive. The tasks template SHALL include a section 4 with universal post-implementation steps (changelog, docs, version bump, commit and push) that apply to all opsx-enhanced projects. The `instruction` SHALL additionally instruct the agent to check the project constitution for a `## Standard Tasks` section. If the constitution defines extra standard tasks, the agent SHALL append them to the template's universal steps in the generated `tasks.md`. If no `## Standard Tasks` section exists in the constitution, the agent SHALL include only the universal steps from the template.
+The tasks Smart Template's `instruction` field SHALL include a standard tasks directive. The tasks template SHALL include a section 4 with universal post-implementation steps (changelog, docs, version bump, commit and push) that apply to all spec-driven projects. The `instruction` SHALL additionally instruct the agent to check the project constitution for a `## Standard Tasks` section. If the constitution defines extra standard tasks, the agent SHALL append them to the template's universal steps in the generated `tasks.md`. If no `## Standard Tasks` section exists in the constitution, the agent SHALL include only the universal steps from the template.
 
 **User Story:** As a project maintainer I want universal post-implementation steps automatically in every task list, with the option to add project-specific extras in my constitution, so that all projects get a consistent baseline and each project can extend it.
 
@@ -233,7 +233,7 @@ The tasks Smart Template's `instruction` field SHALL include a standard tasks di
 
 #### Scenario: Template includes universal standard tasks
 
-- **GIVEN** the tasks template at `openspec/templates/tasks.md`
+- **GIVEN** the tasks template at `.specshift/templates/tasks.md`
 - **WHEN** the template is inspected
 - **THEN** it SHALL contain a section 4 with universal post-implementation steps as checkbox items
 
@@ -241,7 +241,7 @@ The tasks Smart Template's `instruction` field SHALL include a standard tasks di
 The proposal Smart Template's `instruction` field SHALL include explicit rules defining what constitutes a capability versus a feature detail, including heuristics for merging (shared actor/trigger/data model) and minimum scope (3+ requirements).
 
 #### Scenario: Guidance defines capability vs feature detail
-- **GIVEN** the proposal Smart Template at `openspec/templates/proposal.md`
+- **GIVEN** the proposal Smart Template at `.specshift/templates/proposal.md`
 - **WHEN** its `instruction` frontmatter field is inspected
 - **THEN** it SHALL contain a definition distinguishing capabilities from feature details and merging heuristics
 
@@ -254,7 +254,7 @@ The proposal Smart Template's `instruction` field SHALL include explicit rules d
 The proposal Smart Template's `instruction` field SHALL include a mandatory consolidation check requiring the agent to review existing specs, check domain overlap, check pair-wise overlap between new capabilities, and verify minimum requirement counts.
 
 #### Scenario: Consolidation check is present in proposal template instruction
-- **GIVEN** the proposal Smart Template at `openspec/templates/proposal.md`
+- **GIVEN** the proposal Smart Template at `.specshift/templates/proposal.md`
 - **WHEN** its `instruction` frontmatter field is inspected
 - **THEN** it SHALL contain a mandatory consolidation check with steps for existing spec review, domain overlap, pair-wise overlap, and minimum requirements
 
@@ -274,7 +274,7 @@ The proposal template SHALL include a `### Consolidation Check` section between 
 **User Story:** As a reviewer reading a proposal I want to see the agent's consolidation reasoning documented, so that I can verify the capability boundaries are well-considered before specs are created.
 
 #### Scenario: Proposal template includes Consolidation Check section
-- **GIVEN** the proposal template at `openspec/templates/proposal.md`
+- **GIVEN** the proposal template at `.specshift/templates/proposal.md`
 - **WHEN** the template is inspected
 - **THEN** it SHALL contain a `### Consolidation Check` section with instructions for documenting existing specs reviewed, overlap assessment, and merge assessment
 
@@ -292,7 +292,7 @@ The proposal template SHALL include a `### Consolidation Check` section between 
 The specs Smart Template's `instruction` field SHALL include an overlap verification step before editing spec files, requiring the agent to read the proposal's Consolidation Check and scan existing specs for overlap.
 
 #### Scenario: Overlap verification is present in specs template instruction
-- **GIVEN** the specs Smart Template at `openspec/templates/specs/spec.md`
+- **GIVEN** the specs Smart Template at `.specshift/templates/specs/spec.md`
 - **WHEN** its `instruction` frontmatter field is inspected
 - **THEN** it SHALL contain an overlap verification step
 
@@ -302,12 +302,12 @@ The specs Smart Template's `instruction` field SHALL include an overlap verifica
 - **THEN** the agent SHALL reclassify `admin-filters` as a Modified Capability on `admin-table-view` and update the proposal before editing the spec file
 
 ### Requirement: Propose as Single Entry Point for Pipeline Traversal
-The `workflow propose` command SHALL serve as the single entry point for all pipeline traversal operations. This includes: (1) creating new change workspaces (with worktree if enabled), (2) checkpoint/resume of partially completed pipelines, and (3) full lifecycle execution from research through tasks. When invoked with a description or name and no existing change matches, propose SHALL create a new change workspace. When invoked without a change name and existing changes are present, propose SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, propose SHALL derive a kebab-case name and create a new change. The `auto_approve` workflow configuration (defaults to `true` in WORKFLOW.md frontmatter) controls whether pipeline traversal proceeds without user confirmation at checkpoints. When `auto_approve` is absent or `true`, checkpoints are skipped on success paths. When explicitly set to `false`, the pipeline pauses at each checkpoint for user confirmation. Propose SHALL display artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
+The `specshift propose` command SHALL serve as the single entry point for all pipeline traversal operations. This includes: (1) creating new change workspaces (with worktree if enabled), (2) checkpoint/resume of partially completed pipelines, and (3) full lifecycle execution from research through tasks. When invoked with a description or name and no existing change matches, propose SHALL create a new change workspace. When invoked without a change name and existing changes are present, propose SHALL list active changes and use AskUserQuestion to let the user select which change to continue, showing the most recently modified change as recommended. When invoked with a description of what to build, propose SHALL derive a kebab-case name and create a new change. The `auto_approve` workflow configuration (defaults to `true` in WORKFLOW.md frontmatter) controls whether pipeline traversal proceeds without user confirmation at checkpoints. When `auto_approve` is absent or `true`, checkpoints are skipped on success paths. When explicitly set to `false`, the pipeline pauses at each checkpoint for user confirmation. Propose SHALL display artifact status for the current change, showing which artifacts are complete, in progress, or blocked.
 
 **User Story:** As a developer I want a single command that handles workspace creation, progress display, and artifact generation, so that I don't need to remember different commands for different pipeline states.
 
 #### Scenario: Propose creates new workspace from description
-- **GIVEN** the user invokes `workflow propose` with a description like "add user authentication"
+- **GIVEN** the user invokes `specshift propose` with a description like "add user authentication"
 - **AND** no change with a matching name exists
 - **WHEN** the action processes the input
 - **THEN** it SHALL derive a kebab-case name (e.g., `add-user-auth`) and create a new change directory
@@ -315,17 +315,17 @@ The `workflow propose` command SHALL serve as the single entry point for all pip
 
 #### Scenario: Propose displays artifact status
 - **GIVEN** a change workspace where research.md and proposal.md are complete
-- **WHEN** the user runs `workflow propose`
+- **WHEN** the user runs `specshift propose`
 - **THEN** the system SHALL display the status of all pipeline artifacts (research: done, proposal: done, specs: ready, design: blocked, preflight: blocked, tasks: blocked)
 
 #### Scenario: Propose detects existing change and offers selection
-- **GIVEN** existing changes under `openspec/changes/` and the user invokes `workflow propose` without specifying a name
+- **GIVEN** existing changes under `.specshift/changes/` and the user invokes `specshift propose` without specifying a name
 - **WHEN** the action detects active changes
 - **THEN** it SHALL present a list of active changes using AskUserQuestion
 - **AND** SHALL mark the most recently modified change as recommended
 
 #### Scenario: Propose asks what to build when no context provided
-- **GIVEN** no active changes exist and the user invokes `workflow propose` without a description
+- **GIVEN** no active changes exist and the user invokes `specshift propose` without a description
 - **WHEN** the action processes the input
 - **THEN** it SHALL ask the user what they want to build
 
@@ -346,7 +346,7 @@ The `workflow propose` command SHALL serve as the single entry point for all pip
 - **Branch already exists:** The agent SHALL reuse the existing branch rather than failing.
 - **Network failure during PR creation:** The pipeline SHALL NOT be blocked.
 - **Auto-continue transitions:** The skill's post-artifact commit logic runs after each artifact individually.
-- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `workflow propose`.
+- **Worktree config with invalid path_pattern**: If `path_pattern` does not contain `{change}`, the system SHALL report an error during `specshift propose`.
 - **Worktree config with empty path_pattern**: SHALL default to `.claude/worktrees/{change}`.
 
 ## Assumptions

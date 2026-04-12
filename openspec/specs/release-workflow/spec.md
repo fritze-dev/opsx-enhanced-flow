@@ -63,7 +63,7 @@ For intentional minor or major version changes, the maintainer SHALL manually se
 
 ### Requirement: Consumer Update Process
 
-The project documentation SHALL describe the complete consumer update process: refresh the marketplace listing, update the plugin, and restart Claude Code. This process SHALL be documented in the spec so that `workflow finalize` can generate user-facing documentation from it.
+The project documentation SHALL describe the complete consumer update process: refresh the marketplace listing, update the plugin, and restart Claude Code. This process SHALL be documented in the spec so that `specshift finalize` can generate user-facing documentation from it.
 
 **User Story:** As a consumer of the plugin I want to know exactly how to update, so that I always have the latest version.
 
@@ -71,15 +71,15 @@ The project documentation SHALL describe the complete consumer update process: r
 
 - **GIVEN** a new plugin version has been pushed by the maintainer
 - **WHEN** a consumer wants to update
-- **THEN** the consumer SHALL run `claude plugin marketplace update opsx-enhanced-flow`
-- **AND** SHALL run `claude plugin update opsx@opsx-enhanced-flow`
+- **THEN** the consumer SHALL run `claude plugin marketplace update specshift`
+- **AND** SHALL run `claude plugin update specshift`
 - **AND** SHALL restart Claude Code to load the new version
 
 #### Scenario: Update not detected
 
 - **GIVEN** a consumer runs `claude plugin update` but no new version is detected
 - **WHEN** the consumer investigates
-- **THEN** the consumer SHALL first run `claude plugin marketplace update opsx-enhanced-flow` to refresh the listing
+- **THEN** the consumer SHALL first run `claude plugin marketplace update specshift` to refresh the listing
 - **AND** SHALL retry the update
 - **AND** if still not detected, SHALL uninstall and reinstall the plugin as fallback
 
@@ -91,7 +91,7 @@ The constitution SHALL define a rule that skills in `skills/` are generic plugin
 
 - **GIVEN** a need for project-specific post-completion behavior (e.g., version bumps)
 - **WHEN** a developer plans the implementation
-- **THEN** the behavior SHALL be defined as a convention in `openspec/CONSTITUTION.md`
+- **THEN** the behavior SHALL be defined as a convention in `.specshift/CONSTITUTION.md`
 - **AND** SHALL NOT be added as a step in the skill file
 
 ### Requirement: End-to-End Install and Update Checklist
@@ -104,37 +104,37 @@ The project spec SHALL document the complete happy path for plugin installation 
 
 - **GIVEN** a clean project without the plugin installed
 - **WHEN** the maintainer tests the install flow
-- **THEN** `claude plugin marketplace add fritze-dev/opsx-enhanced-flow` SHALL succeed
-- **AND** `claude plugin install opsx@opsx-enhanced-flow` SHALL succeed
-- **AND** `workflow init` SHALL install the schema and create config files
-- **AND** `workflow init` SHALL generate constitution and initial specs
+- **THEN** `claude plugin marketplace add fritze-dev/specshift` SHALL succeed
+- **AND** `claude plugin install specshift` SHALL succeed
+- **AND** `specshift init` SHALL install the schema and create config files
+- **AND** `specshift init` SHALL generate constitution and initial specs
 
 #### Scenario: Update flow after new version
 
 - **GIVEN** a project with the plugin installed at version N
 - **AND** a new version N+1 has been pushed
 - **WHEN** the maintainer tests the update flow
-- **THEN** `claude plugin marketplace update opsx-enhanced-flow` SHALL refresh the listing
-- **AND** `claude plugin update opsx@opsx-enhanced-flow` SHALL detect and install version N+1
-- **AND** `workflow init` SHALL run idempotently without errors
+- **THEN** `claude plugin marketplace update specshift` SHALL refresh the listing
+- **AND** `claude plugin update specshift` SHALL detect and install version N+1
+- **AND** `specshift init` SHALL run idempotently without errors
 
 ### Requirement: Post-Push Developer Plugin Update
 
-After pushing a version bump to the remote, the developer's local plugin installation SHALL be updated to match the new version. For developers using the local marketplace (directory-based source), running `claude plugin update opsx@opsx-enhanced-flow` SHALL detect the local version change and update the cached plugin. For developers using the GitHub marketplace, the existing marketplace update + plugin update flow applies.
+After pushing a version bump to the remote, the developer's local plugin installation SHALL be updated to match the new version. For developers using the local marketplace (directory-based source), running `claude plugin update specshift` SHALL detect the local version change and update the cached plugin. For developers using the GitHub marketplace, the existing marketplace update + plugin update flow applies.
 
 **User Story:** As a plugin developer I want my local plugin to update after I push a new version, so that I'm always developing against the latest version.
 
 #### Scenario: Developer with local marketplace updates after version bump
 
 - **GIVEN** a version bump has been applied locally (via auto-bump or manual)
-- **WHEN** the developer runs `claude plugin update opsx@opsx-enhanced-flow`
+- **WHEN** the developer runs `claude plugin update specshift`
 - **THEN** the local plugin installation SHALL reflect the new version
 
 #### Scenario: Developer with GitHub marketplace updates after push
 
 - **GIVEN** a version bump has been pushed to remote
-- **WHEN** the developer runs `claude plugin marketplace update opsx-enhanced-flow`
-- **AND** runs `claude plugin update opsx@opsx-enhanced-flow`
+- **WHEN** the developer runs `claude plugin marketplace update specshift`
+- **AND** runs `claude plugin update specshift`
 - **THEN** the local plugin installation SHALL reflect the new version
 
 ### Requirement: Completion Workflow Next Steps
@@ -145,34 +145,34 @@ The post-apply workflow output SHALL include a "Next steps" section guiding the 
 
 - **GIVEN** a successful verification of a completed change
 - **WHEN** the verification summary is displayed
-- **THEN** the output SHALL include next steps: `workflow finalize` → version bump → push → update plugin
+- **THEN** the output SHALL include next steps: `specshift finalize` → version bump → push → update plugin
 
 ### Requirement: Generate Changelog from Completed Changes
-The `workflow finalize` command SHALL generate release notes from completed changes located in `openspec/changes/`. The agent SHALL scan all change directories and identify completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing if frontmatter is absent). For each completed change not yet in the changelog, the agent SHALL identify affected capabilities by reading the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent). The agent SHALL read `proposal.md` for motivation and the current specs at `openspec/specs/<capability>/spec.md` for user stories and scenario titles. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for changes not yet represented, preserving existing manually written entries.
+The `specshift finalize` command SHALL generate release notes from completed changes located in `.specshift/changes/`. The agent SHALL scan all change directories and identify completed changes by reading proposal frontmatter `status: completed` (falling back to tasks.md checkbox parsing if frontmatter is absent). For each completed change not yet in the changelog, the agent SHALL identify affected capabilities by reading the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent). The agent SHALL read `proposal.md` for motivation and the current specs at `docs/specs/<capability>.md` for user stories and scenario titles. The generated changelog SHALL follow the Keep a Changelog format with sections for Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. Entries SHALL be ordered newest first. The changelog SHALL be written to `CHANGELOG.md` in the project root. If `CHANGELOG.md` already exists, the agent SHALL update it by adding new entries for changes not yet represented, preserving existing manually written entries.
 
 **User Story:** As a user of the project I want a changelog that tells me what changed and when, so that I can understand the impact of updates without reading spec files or commit logs.
 
 #### Scenario: Changelog generated from single completed change
-- **GIVEN** a completed change at `openspec/changes/2025-01-15-user-auth/` containing a proposal describing a new authentication feature
+- **GIVEN** a completed change at `.specshift/changes/2025-01-15-user-auth/` containing a proposal describing a new authentication feature
 - **AND** the proposal lists capability `user-auth` as new
-- **AND** `openspec/specs/user-auth/spec.md` contains user stories and scenarios
-- **WHEN** the developer runs `workflow finalize`
+- **AND** `docs/specs/user-auth.md` contains user stories and scenarios
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** the agent creates or updates `CHANGELOG.md` with an entry dated 2025-01-15 describing the new authentication feature using user stories from the spec
 
 #### Scenario: Multiple completed changes ordered newest first
 - **GIVEN** three completed changes dated 2025-01-10, 2025-02-05, and 2025-03-20
-- **WHEN** the developer runs `workflow finalize`
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** the changelog lists the 2025-03-20 entry first, followed by 2025-02-05, then 2025-01-10
 
 #### Scenario: Existing changelog preserved
 - **GIVEN** a `CHANGELOG.md` that already contains manually written entries for versions 1.0 and 1.1
 - **AND** a new completed change that has not been represented in the changelog
-- **WHEN** the developer runs `workflow finalize`
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** the agent adds the new entry at the top of the changelog without modifying or removing the existing 1.0 and 1.1 entries
 
 #### Scenario: No completed changes to process
-- **GIVEN** no completed changes exist under `openspec/changes/`
-- **WHEN** the developer runs `workflow finalize`
+- **GIVEN** no completed changes exist under `.specshift/changes/`
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** the agent informs the user that no completed changes were found and no changelog entries were generated
 
 #### Scenario: Change with only internal refactoring
@@ -181,27 +181,27 @@ The `workflow finalize` command SHALL generate release notes from completed chan
 - **THEN** the agent either omits the entry entirely or includes it under a minimal note (e.g., "Internal improvements") rather than fabricating user-facing changes
 
 ### Requirement: Language-Aware Changelog Generation
-The `workflow finalize` command SHALL determine the documentation language before generating entries. The agent SHALL read `openspec/WORKFLOW.md` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (OpenSpec, Claude Code), commands (`/opsx:*`), and file paths SHALL remain in English.
+The `specshift finalize` command SHALL determine the documentation language before generating entries. The agent SHALL read `.specshift/WORKFLOW.md` and extract the `docs_language` field. If the field is missing or set to "English", the agent SHALL generate changelog entries in English (default behavior). If a non-English language is configured, the agent SHALL translate section headers (e.g., `### Added` → `### Hinzugefügt` for German) and entry descriptions to the target language. Dates SHALL remain in ISO format (`YYYY-MM-DD`). Product names (Claude Code), commands (`/specshift:*`), and file paths SHALL remain in English.
 
 **User Story:** As a non-English-speaking team I want changelog entries in my language, so that release notes are immediately understandable.
 
 #### Scenario: Changelog generated in configured language
-- **GIVEN** `openspec/WORKFLOW.md` contains `docs_language: German`
+- **GIVEN** `.specshift/WORKFLOW.md` contains `docs_language: German`
 - **AND** a new completed change exists that is not yet in the changelog
-- **WHEN** the developer runs `workflow finalize`
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** the new entry SHALL have German section headers (e.g., `### Hinzugefügt`, `### Geändert`, `### Behoben`)
 - **AND** entry descriptions SHALL be in German
 - **AND** dates SHALL remain in ISO format
 
 #### Scenario: Default to English when field is missing
-- **GIVEN** `openspec/WORKFLOW.md` does not contain a `docs_language` field
-- **WHEN** the developer runs `workflow finalize`
+- **GIVEN** `.specshift/WORKFLOW.md` does not contain a `docs_language` field
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** all entries SHALL be generated in English (unchanged behavior)
 
 #### Scenario: Existing entries preserved in previous language
 - **GIVEN** existing changelog entries were generated in English
 - **AND** `docs_language` has been changed to "French"
-- **WHEN** the developer runs `workflow finalize`
+- **WHEN** the developer runs `specshift finalize`
 - **THEN** existing English entries SHALL be preserved unchanged
 - **AND** new entries SHALL be generated in French
 
@@ -250,7 +250,7 @@ The project documentation SHALL describe how consumers can pin to a specific plu
 #### Scenario: Consumer pins to specific version
 
 - **GIVEN** a GitHub Release `v1.0.29` exists with a corresponding git tag
-- **WHEN** a consumer runs `claude plugin marketplace add fritze-dev/opsx-enhanced-flow#v1.0.29`
+- **WHEN** a consumer runs `claude plugin marketplace add fritze-dev/specshift#v1.0.29`
 - **THEN** the marketplace SHALL resolve to the commit tagged `v1.0.29`
 - **AND** the installed plugin SHALL be version `1.0.29`
 
@@ -270,9 +270,9 @@ The project documentation SHALL describe the local marketplace setup for plugin 
 
 #### Scenario: Developer registers local marketplace
 
-- **GIVEN** a developer with the plugin source at `/home/user/projekte/opsx-enhanced-flow`
-- **WHEN** the developer runs `claude plugin marketplace add /home/user/projekte/opsx-enhanced-flow --scope user`
-- **AND** runs `claude plugin install opsx@opsx-enhanced-flow`
+- **GIVEN** a developer with the plugin source at `/home/user/projekte/specshift`
+- **WHEN** the developer runs `claude plugin marketplace add /home/user/projekte/specshift --scope user`
+- **AND** runs `claude plugin install specshift`
 - **THEN** the installed plugin SHALL load from the local filesystem
 - **AND** `claude plugin list` SHALL show the current local version
 
@@ -289,11 +289,11 @@ The project documentation SHALL describe the local marketplace setup for plugin 
 - **AND** the developer changes the version in `src/.claude-plugin/plugin.json`
 - **WHEN** the developer runs `/reload-plugins`
 - **THEN** the old version SHALL still be reported by `claude plugin list`
-- **AND** only after `claude plugin update opsx@opsx-enhanced-flow` SHALL the new version be active
+- **AND** only after `claude plugin update specshift` SHALL the new version be active
 
 ### Requirement: Plugin Source Directory Structure
 
-The plugin source code SHALL reside in a `src/` subdirectory at the repository root. The `src/` directory SHALL contain: `.claude-plugin/plugin.json` (plugin manifest), `skills/` (all skill definitions), and `templates/` (Smart Templates for consumer projects). Files not needed by consumers (documentation, CI workflows, OpenSpec project files, changelogs) SHALL remain at the repository root, outside `src/`.
+The plugin source code SHALL reside in a `src/` subdirectory at the repository root. The `src/` directory SHALL contain: `.claude-plugin/plugin.json` (plugin manifest), `skills/` (all skill definitions), and `templates/` (Smart Templates for consumer projects). Files not needed by consumers (documentation, CI workflows, project files, changelogs) SHALL remain at the repository root, outside `src/`.
 
 **User Story:** As a plugin consumer I want to download only the files needed to run the plugin, so that my local cache is clean and minimal.
 
@@ -302,7 +302,7 @@ The plugin source code SHALL reside in a `src/` subdirectory at the repository r
 - **GIVEN** a marketplace with `source: "./src"` pointing to the plugin subdirectory
 - **WHEN** a consumer installs the plugin
 - **THEN** the consumer's plugin cache SHALL contain only the contents of `src/` (skills, templates, plugin.json)
-- **AND** SHALL NOT contain docs, CI workflows, changelogs, or OpenSpec project files
+- **AND** SHALL NOT contain docs, CI workflows, changelogs, or project files
 
 #### Scenario: Plugin root resolves to src directory
 
@@ -340,7 +340,7 @@ The `.claude-plugin/marketplace.json` at the repository root SHALL use `source: 
 
 ### Requirement: Repository Layout Separation
 
-The repository SHALL maintain a clear separation between plugin source files (in `src/`) and project management files (at repo root). The repository root SHALL contain: `.claude-plugin/marketplace.json`, `openspec/` (project's own OpenSpec workflow), `docs/`, `.github/`, `.devcontainer/`, `CLAUDE.md`, `README.md`, and `CHANGELOG.md`. The `src/` directory SHALL NOT contain project-specific files such as CLAUDE.md, README.md, or OpenSpec project configuration.
+The repository SHALL maintain a clear separation between plugin source files (in `src/`) and project management files (at repo root). The repository root SHALL contain: `.claude-plugin/marketplace.json`, `.specshift/` (project's own workflow configuration), `docs/`, `.github/`, `.devcontainer/`, `CLAUDE.md`, `README.md`, and `CHANGELOG.md`. The `src/` directory SHALL NOT contain project-specific files such as CLAUDE.md, README.md, or project configuration.
 
 #### Scenario: CLAUDE.md is project-level only
 
@@ -349,9 +349,35 @@ The repository SHALL maintain a clear separation between plugin source files (in
 - **THEN** `CLAUDE.md` SHALL exist at the repository root
 - **AND** SHALL NOT exist inside `src/`
 
-#### Scenario: OpenSpec project files separate from plugin
+#### Scenario: Project files separate from plugin
 
 - **GIVEN** the repository with `src/` plugin subdirectory
 - **WHEN** the file layout is inspected
-- **THEN** `openspec/WORKFLOW.md`, `openspec/CONSTITUTION.md`, `openspec/specs/`, and `openspec/changes/` SHALL exist at the repository root
+- **THEN** `.specshift/WORKFLOW.md`, `.specshift/CONSTITUTION.md`, `docs/specs/`, and `.specshift/changes/` SHALL exist at the repository root
 - **AND** SHALL NOT exist inside `src/`
+
+### Requirement: Marketplace Source Configuration
+
+The `.claude-plugin/marketplace.json` at the repository root SHALL use `source: "./src"` to reference the plugin subdirectory. This relative path SHALL resolve correctly for both local filesystem marketplaces (`claude plugin marketplace add <local-path>`) and GitHub-based marketplaces (`claude plugin marketplace add owner/repo`). The `plugin.json` manifest SHALL reside inside `src/.claude-plugin/plugin.json`, separate from the marketplace-level `.claude-plugin/marketplace.json` at the repo root.
+
+**User Story:** As a plugin developer I want the marketplace to work with both local paths and GitHub, so that I can develop locally and distribute to consumers without config changes.
+
+#### Scenario: Local marketplace resolves src directory
+
+- **GIVEN** a developer registers the local repo as marketplace via `claude plugin marketplace add /path/to/repo`
+- **WHEN** Claude Code reads `marketplace.json` with `source: "./src"`
+- **THEN** the plugin SHALL load from `/path/to/repo/src/`
+- **AND** the developer's local file changes SHALL be reflected after `claude plugin update`
+
+#### Scenario: GitHub marketplace resolves src directory
+
+- **GIVEN** a consumer adds the marketplace via `claude plugin marketplace add owner/repo`
+- **WHEN** Claude Code clones the repository and reads `marketplace.json` with `source: "./src"`
+- **THEN** the plugin SHALL load from the cloned repository's `src/` directory
+
+#### Scenario: Version in src plugin.json drives update detection
+
+- **GIVEN** a marketplace with `source: "./src"`
+- **WHEN** the version in `src/.claude-plugin/plugin.json` changes
+- **THEN** `claude plugin update` SHALL detect the new version
+- **AND** SHALL update the cached plugin from `src/`

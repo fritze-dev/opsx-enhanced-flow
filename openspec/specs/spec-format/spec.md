@@ -60,8 +60,8 @@ Every requirement SHALL have at least one scenario using Gherkin format. Scenari
 Specs MAY include an optional YAML frontmatter block at the top of the file, delimited by `---` lines. The frontmatter SHALL support the following fields:
 
 **Documentation fields** (optional):
-- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `workflow finalize` command SHALL read this value to determine capability ordering.
-- `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `workflow finalize` command SHALL use this value to render category group headers in the capabilities table.
+- `order` (integer): Display position in documentation TOC. Lower values appear first. The `order` value SHALL be assigned during spec creation and persisted in the spec. The `specshift finalize` command SHALL read this value to determine capability ordering.
+- `category` (string, kebab-case): Workflow phase grouping for documentation TOC. Standard categories are: `setup`, `change-workflow`, `development`, `finalization`, `reference`, `meta`. Projects MAY define custom categories. The `specshift finalize` command SHALL use this value to render category group headers in the capabilities table.
 
 **Tracking fields** (managed by skills):
 - `status` (string, `stable` or `draft`): Indicates whether the spec is actively being edited by a change. Default: `stable`. Skills SHALL set `status: draft` when modifying a spec during the specs stage and flip back to `stable` during verify completion.
@@ -69,30 +69,30 @@ Specs MAY include an optional YAML frontmatter block at the top of the file, del
 - `version` (integer): Monotonically increasing version number. Starts at `1` on creation. Skills SHALL increment by 1 each time a change modifies the spec and completes successfully (during verify completion).
 - `lastModified` (string, `YYYY-MM-DD`): The date the spec was last modified. Skills SHALL set this to the current date when editing the spec during the specs stage and again during verify completion.
 
-The `order` and `category` fields are optional. If `order` is absent, `workflow finalize` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group. The tracking fields (`status`, `version`, `lastModified`) are optional for backward compatibility — skills SHALL handle their absence gracefully by treating missing `status` as `stable`, missing `version` as `1`, and missing `lastModified` as requiring regeneration.
+The `order` and `category` fields are optional. If `order` is absent, `specshift finalize` SHALL fall back to agent-determined ordering. If `category` is absent, the capability SHALL appear in an "Other" group. The tracking fields (`status`, `version`, `lastModified`) are optional for backward compatibility — skills SHALL handle their absence gracefully by treating missing `status` as `stable`, missing `version` as `1`, and missing `lastModified` as requiring regeneration.
 
 The frontmatter block SHALL appear before the `## Purpose` section. Existing spec content (Purpose, Requirements, Edge Cases, Assumptions) SHALL remain unchanged.
 
 **User Story:** As a project maintainer I want deterministic ordering in docs, change-level tracking for collision detection, and version-based incremental detection, so that skills can reliably identify which specs are affected by a change without fragile text parsing.
 
 #### Scenario: Spec with documentation frontmatter
-- **GIVEN** a spec at `openspec/specs/quality-gates/spec.md`
+- **GIVEN** a spec at `docs/specs/quality-gates.md`
 - **AND** the spec has frontmatter with `order: 8` and `category: development`
-- **WHEN** `workflow finalize` generates the capabilities table
+- **WHEN** `specshift finalize` generates the capabilities table
 - **THEN** quality-gates appears at position 8, under a "Development" group header
 
 #### Scenario: Spec without frontmatter falls back gracefully
 - **GIVEN** a spec with no YAML frontmatter
-- **WHEN** `workflow finalize` generates the capabilities table
+- **WHEN** `specshift finalize` generates the capabilities table
 - **THEN** the capability appears in an "Other" group with agent-determined ordering
 
 #### Scenario: Frontmatter assigned during spec creation
 - **GIVEN** a new capability being specified during the specs artifact phase
-- **WHEN** the agent creates the spec at `openspec/specs/<capability>/spec.md`
+- **WHEN** the agent creates the spec at `docs/specs/<capability>.md`
 - **THEN** the spec SHALL include frontmatter with `order`, `category`, `status: draft`, `change`, `version: 1`, and `lastModified` values
 
 #### Scenario: Tracking fields set during spec editing
-- **GIVEN** a stable spec at `openspec/specs/quality-gates/spec.md` with `status: stable` and `version: 3`
+- **GIVEN** a stable spec at `docs/specs/quality-gates.md` with `status: stable` and `version: 3`
 - **WHEN** a change edits this spec during the specs stage
 - **THEN** the frontmatter SHALL be updated to `status: draft`, `change: <change-dir>`, and `lastModified: <today>`
 - **AND** `version` SHALL remain `3` (not bumped until completion)
@@ -114,7 +114,7 @@ The frontmatter block SHALL appear before the `## Purpose` section. Existing spe
 - **THEN** the skill SHALL treat the spec as `status: stable`, `version: 1`, and `lastModified` as unset (requiring regeneration)
 
 ### Requirement: Spec Format
-Specs (specs at `openspec/specs/<capability>/spec.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
+Specs (specs at `docs/specs/<capability>.md`) SHALL use a `## Purpose` section followed by a `## Requirements` section. Each requirement SHALL follow the standard format: `### Requirement: <name>`, normative description, optional User Story, and `#### Scenario:` blocks.
 
 **User Story:** As a developer reading the specs I want a clean format without change-tracking prefixes, so that I see the current state of requirements clearly.
 
@@ -158,8 +158,8 @@ The `## Assumptions` section at the end of specs and design documents SHALL coll
 ## Edge Cases
 
 - If a requirement has zero scenarios, the spec SHALL be considered invalid and flagged during preflight.
-- If two specs share the same `order` value, `workflow finalize` SHALL use alphabetical capability name as tiebreaker.
-- If a `category` value is not one of the standard categories, `workflow finalize` SHALL still render it as a group header using title-case formatting.
+- If two specs share the same `order` value, `specshift finalize` SHALL use alphabetical capability name as tiebreaker.
+- If a `category` value is not one of the standard categories, `specshift finalize` SHALL still render it as a group header using title-case formatting.
 - If a spec has `status: draft` but no `change` field, the spec SHALL be treated as having an unknown change owner — preflight SHALL flag this as a warning.
 - If a spec has `status: stable` with a `change` field present, the `change` field SHALL be ignored (stale data).
 

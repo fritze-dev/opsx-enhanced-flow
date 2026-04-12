@@ -7,13 +7,13 @@ lastModified: 2026-04-10
 ---
 ## Purpose
 
-Provides `workflow propose` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `workflow apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `workflow init` as a project-level health check.
+Provides `specshift propose` for pre-implementation quality checks across six dimensions, and post-implementation verification (now part of `specshift apply`) that produces a `review.md` artifact for completeness, correctness, and coherence assessment. Documentation drift verification (`docs-verify`) is absorbed into `specshift init` as a project-level health check.
 
 ## Requirements
 
 ### Requirement: Preflight Quality Check
 
-The system SHALL run a mandatory quality review before task creation when the user invokes `workflow propose`. The preflight check SHALL cover seven dimensions: (A) Traceability Matrix -- mapping each capability from the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent) to its corresponding spec at `openspec/specs/<capability>/spec.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md, and (G) Draft Spec Validation -- verifying that all specs with `status: draft` have a `change` value matching the current change directory name. Specs with `status: draft` belonging to a different change SHALL be flagged as BLOCKED. Specs with `status: draft` and no `change` field SHALL be flagged as WARNING. The Marker Audit SHALL:
+The system SHALL run a mandatory quality review before task creation when the user invokes `specshift propose`. The preflight check SHALL cover seven dimensions: (A) Traceability Matrix -- mapping each capability from the proposal's frontmatter `capabilities` field (falling back to parsing the Capabilities section if frontmatter is absent) to its corresponding spec at `docs/specs/<capability>.md` and verifying that the spec has been updated to reflect the proposed changes, (B) Gap Analysis -- identifying missing edge cases, error handling, and empty states, (C) Side-Effect Analysis -- assessing impact on existing systems and regression risks, (D) Constitution Check -- verifying consistency with project rules in constitution.md, (E) Duplication and Consistency -- detecting overlaps and contradictions across specs, (F) Marker Audit -- auditing all assumption and review markers from spec.md and design.md, and (G) Draft Spec Validation -- verifying that all specs with `status: draft` have a `change` value matching the current change directory name. Specs with `status: draft` belonging to a different change SHALL be flagged as BLOCKED. Specs with `status: draft` and no `change` field SHALL be flagged as WARNING. The Marker Audit SHALL:
 1. Collect all `<!-- ASSUMPTION: ... -->` tags and verify each has an accompanying visible list item. Assumptions written entirely inside HTML comments (no visible text) SHALL be flagged as format violations.
 2. Rate each valid assumption as Acceptable Risk, Needs Clarification, or Blocking.
 3. Scan for any remaining `<!-- REVIEW -->` or `<!-- REVIEW: ... -->` markers. Any REVIEW marker found SHALL be rated as Blocking, because REVIEW markers must be resolved before implementation.
@@ -28,7 +28,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 - **GIVEN** a change named "add-user-auth" with complete specs and design artifacts
 - **AND** all requirements have scenarios, no gaps are detected, all assumptions have visible text, and no REVIEW markers remain
-- **WHEN** the user invokes `workflow propose add-user-auth`
+- **WHEN** the user invokes `specshift propose add-user-auth`
 - **THEN** the system reads constitution.md, all change artifacts, and existing specs
 - **AND** produces `preflight.md` covering all six dimensions
 - **AND** the verdict is "PASS"
@@ -37,7 +37,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 #### Scenario: Preflight finds invisible assumption
 
 - **GIVEN** a change with a spec containing `<!-- ASSUMPTION: External API rate limit is 1000/min -->` with no visible list item
-- **WHEN** the user invokes `workflow propose`
+- **WHEN** the user invokes `specshift propose`
 - **THEN** the Marker Audit flags the invisible assumption as a format violation
 - **AND** the verdict is "BLOCKED"
 - **AND** the system recommends adding visible text: `- External API rate limit is 1000/min. <!-- ASSUMPTION: API rate limit -->`
@@ -45,7 +45,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 #### Scenario: Preflight finds unresolved REVIEW marker
 
 - **GIVEN** a change where design.md contains `<!-- REVIEW: confirm caching strategy -->`
-- **WHEN** the user invokes `workflow propose`
+- **WHEN** the user invokes `specshift propose`
 - **THEN** the Marker Audit flags the REVIEW marker as Blocking
 - **AND** the verdict is "BLOCKED"
 - **AND** the system informs the user that REVIEW markers must be resolved before proceeding
@@ -63,7 +63,7 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 - **GIVEN** a change where all requirements have scenarios, all assumptions have visible text, and no REVIEW markers remain
 - **BUT** a minor gap is detected (missing error handling for an unlikely edge case)
-- **WHEN** the user invokes `workflow propose`
+- **WHEN** the user invokes `specshift propose`
 - **THEN** the verdict is "PASS WITH WARNINGS"
 - **AND** each warning is listed with a recommendation
 - **AND** the system SHALL pause and ask the user to acknowledge each warning
@@ -71,28 +71,28 @@ The system SHALL produce a `preflight.md` artifact containing findings and a ver
 
 #### Scenario: Preflight validates draft spec ownership
 - **GIVEN** a change named `2026-04-08-my-change`
-- **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
-- **AND** `openspec/specs/user-auth/spec.md` has `status: draft` and `change: 2026-04-01-other-change`
-- **WHEN** the user invokes `workflow propose 2026-04-08-my-change`
+- **AND** `docs/specs/quality-gates.md` has `status: draft` and `change: 2026-04-08-my-change`
+- **AND** `docs/specs/user-auth.md` has `status: draft` and `change: 2026-04-01-other-change`
+- **WHEN** the user invokes `specshift propose 2026-04-08-my-change`
 - **THEN** the Draft Spec Validation dimension SHALL flag `user-auth` as BLOCKED (draft owned by different change)
 - **AND** SHALL confirm `quality-gates` as valid (draft owned by current change)
 
 #### Scenario: Preflight detects orphaned draft spec
 - **GIVEN** a spec with `status: draft` but no `change` field
-- **WHEN** the user invokes `workflow propose`
+- **WHEN** the user invokes `specshift propose`
 - **THEN** the Draft Spec Validation SHALL flag it as WARNING: "Draft spec with no change owner"
 
 #### Scenario: Required artifacts missing
 
 - **GIVEN** a change where specs exist but design.md has not been created
-- **WHEN** the user invokes `workflow propose`
+- **WHEN** the user invokes `specshift propose`
 - **THEN** the system SHALL abort the preflight
 - **AND** SHALL report which required artifacts are missing
-- **AND** SHALL suggest running `workflow propose` to generate them
+- **AND** SHALL suggest running `specshift propose` to generate them
 
 ### Requirement: Post-Implementation Verification (review.md)
 
-The system SHALL verify the implementation against change artifacts as part of `workflow apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess three dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage), **Testing** (test coverage: automated tests pass, manual test checklist items verified), and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `openspec/specs/<capability>/spec.md` to verify implementation against.
+The system SHALL verify the implementation against change artifacts as part of `specshift apply`, producing a `review.md` artifact in the change directory. Verification SHALL assess three dimensions: **Implementation** (Completeness + Correctness: task completion, requirement coverage, and scenario coverage), **Testing** (test coverage: automated tests pass, manual test checklist items verified), and **Scope** (Coherence + Side-Effects: design adherence, diff scope, side-effects, and code pattern consistency). The system SHALL read the proposal's frontmatter `capabilities` field to identify affected specs (falling back to parsing the Capabilities section if frontmatter is absent), then read each spec at `docs/specs/<capability>.md` to verify implementation against.
 
 **Draft spec gate:** As part of verification, the system SHALL check all specs listed in the change's proposal for `status: draft` with `change` matching the current change. If any such specs remain in draft status, the verify report SHALL include a CRITICAL issue: "Spec <name> is still in draft status — must be finalized before merge." This gate ensures no draft specs reach the main branch.
 
@@ -104,7 +104,7 @@ This completion step runs as part of the post-apply workflow, after user approva
 
 When a WARNING is **mechanically fixable** — i.e., it involves stale cross-references between artifacts, inconsistent naming, or outdated text that can be corrected by simple text replacement without judgment — the system SHALL auto-fix the issue inline before presenting the report. Auto-fixed issues SHALL still appear in the report as resolved WARNINGs with a note indicating the fix applied. WARNINGs that require user judgment (e.g., spec/design divergence where the user must choose which is correct) SHALL NOT be auto-fixed and SHALL be presented as open issues for user resolution.
 
-The system SHALL load the branch diff (full content and file list) as part of context loading. The diff content SHALL be the **primary evidence source** for verifying what this change introduced. Codebase keyword search SHALL serve as a fallback for requirements that may have been implemented in prior changes or pre-existing code. If no common ancestor with the base branch is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report. Files under `openspec/changes/` and `openspec/specs/` SHALL be excluded from scope checks as they are expected in the diff for any OpenSpec change.
+The system SHALL load the branch diff (full content and file list) as part of context loading. The diff content SHALL be the **primary evidence source** for verifying what this change introduced. Codebase keyword search SHALL serve as a fallback for requirements that may have been implemented in prior changes or pre-existing code. If no common ancestor with the base branch is available (e.g., orphan branch, first commit), the system SHALL skip all diff-based checks and note "No merge base available — diff checks skipped" in the report. Files under `.specshift/changes/` and `docs/specs/` SHALL be excluded from scope checks as they are expected in the diff for any workflow change.
 
 **Task-Diff Mapping**: For each task marked complete in `tasks.md`, the system SHALL check whether at least one file in the diff corresponds to the task description (keyword match against file paths and diff content). A file-level match alone is insufficient — the system SHALL additionally verify that the diff content relates to the task (e.g., a task about error handling should show error-handling code, not just a comment change). Tasks marked complete that produced no corresponding changes in the diff SHALL be flagged as WARNING.
 
@@ -120,7 +120,7 @@ The review.md generation SHALL serve as both the initial verification (tasks.md 
 
 #### Scenario: Verify gates on draft spec status
 - **GIVEN** a change `2026-04-08-my-change` that modified spec `quality-gates`
-- **AND** `openspec/specs/quality-gates/spec.md` has `status: draft` and `change: 2026-04-08-my-change`
+- **AND** `docs/specs/quality-gates.md` has `status: draft` and `change: 2026-04-08-my-change`
 - **WHEN** apply generates review.md for `2026-04-08-my-change`
 - **THEN** the report SHALL include a CRITICAL issue: "Spec quality-gates is still in draft status — must be finalized before merge"
 
@@ -264,7 +264,7 @@ The review.md generation SHALL serve as both the initial verification (tasks.md 
 
 #### Scenario: Diff scope check finds all files traceable
 
-- **GIVEN** a change with design.md listing `src/skills/verify/SKILL.md` and `openspec/specs/quality-gates/spec.md` as components
+- **GIVEN** a change with design.md listing `src/skills/verify/SKILL.md` and `docs/specs/quality-gates.md` as components
 - **AND** the branch diff contains changes to exactly those two files
 - **WHEN** the system performs diff scope verification
 - **THEN** all changed files are traceable to design components
@@ -303,20 +303,20 @@ The review.md generation SHALL serve as both the initial verification (tasks.md 
 
 ### Requirement: Documentation Drift Verification (init health check)
 
-The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `workflow init` project-level health checks. The verification SHALL assess three dimensions:
+The system SHALL verify that generated documentation accurately reflects the current state of specs as part of `specshift init` project-level health checks. The verification SHALL assess three dimensions:
 
-1. **Capability Docs vs Specs** — For each spec in `openspec/specs/*/spec.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
+1. **Capability Docs vs Specs** — For each spec in `docs/specs/*.md`, the system SHALL check that a corresponding capability doc exists in `docs/capabilities/` and that the doc's Purpose section aligns with the spec's Purpose, and that documented features cover the spec's requirements. Missing capability docs SHALL be classified as CRITICAL. Capability docs that omit requirements present in the spec SHALL be classified as WARNING.
 
-2. **ADRs vs Design Decisions** — The system SHALL scan all completed change directories' `design.md` files in `openspec/changes/*/design.md`. For each design.md, the system SHALL first check the frontmatter `has_decisions` field — if `false` or absent, skip this design.md. If `true`, scan for Decisions tables and verify that each decision has a corresponding ADR in `docs/decisions/`. Missing ADRs SHALL be classified as WARNING. The system SHALL recognize manual ADRs (prefix `adr-MNNN`) and skip them during the cross-check, since they have no corresponding design.md entry.
+2. **ADRs vs Design Decisions** — The system SHALL scan all completed change directories' `design.md` files in `.specshift/changes/*/design.md`. For each design.md, the system SHALL first check the frontmatter `has_decisions` field — if `false` or absent, skip this design.md. If `true`, scan for Decisions tables and verify that each decision has a corresponding ADR in `docs/decisions/`. Missing ADRs SHALL be classified as WARNING. The system SHALL recognize manual ADRs (prefix `adr-MNNN`) and skip them during the cross-check, since they have no corresponding design.md entry.
 
-3. **README vs Current State** — The system SHALL verify that `docs/README.md` lists all current capabilities from `openspec/specs/` in its capabilities table, that the Key Design Decisions table references existing ADRs, and that the architecture overview is consistent with `openspec/CONSTITUTION.md`. Missing capabilities in the README SHALL be classified as CRITICAL. Stale ADR references (pointing to deleted or renamed ADRs) SHALL be classified as WARNING.
+3. **README vs Current State** — The system SHALL verify that `docs/README.md` lists all current capabilities from `docs/specs/` in its capabilities table, that the Key Design Decisions table references existing ADRs, and that the architecture overview is consistent with `.specshift/CONSTITUTION.md`. Missing capabilities in the README SHALL be classified as CRITICAL. Stale ADR references (pointing to deleted or renamed ADRs) SHALL be classified as WARNING.
 
 Each issue found SHALL be classified as:
 - **CRITICAL** — documentation is missing or fundamentally incorrect (e.g., capability doc missing entirely, README omits a capability)
 - **WARNING** — documentation exists but has drifted from specs (e.g., requirement not reflected in capability doc, stale ADR reference)
 - **INFO** — minor discrepancy or observation that may be intentional (e.g., manual ADR with no matching design decision, capability doc has extra context beyond spec)
 
-The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `workflow finalize` to regenerate drifted documentation.
+The system SHALL produce a verification report with a summary (total issues by severity), followed by findings grouped by dimension, with file references for each issue. The report SHALL conclude with a verdict: **CLEAN** (0 critical, 0 warnings), **DRIFTED** (warnings but no criticals), or **OUT OF SYNC** (at least one critical). The system SHALL NOT automatically fix any issues; it SHALL recommend running `specshift finalize` to regenerate drifted documentation.
 
 The system SHALL gracefully handle missing documentation directories: if `docs/capabilities/` does not exist, the system SHALL report all capabilities as missing (CRITICAL) rather than erroring. If `docs/decisions/` does not exist, the system SHALL skip the ADR dimension and note it. If `docs/README.md` does not exist, the system SHALL report it as a single CRITICAL issue.
 
@@ -327,7 +327,7 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **GIVEN** a project with 5 capabilities, each having a corresponding capability doc in `docs/capabilities/`
 - **AND** all completed changes' design decisions have corresponding ADRs in `docs/decisions/`
 - **AND** `docs/README.md` lists all 5 capabilities and references valid ADRs
-- **WHEN** the user invokes `workflow init`
+- **WHEN** the user invokes `specshift init`
 - **THEN** the system produces a verification report
 - **AND** all three dimensions show no issues
 - **AND** the verdict is "CLEAN"
@@ -336,9 +336,9 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 - **GIVEN** a project with specs for "user-auth" and "data-export"
 - **AND** `docs/capabilities/` contains only `user-auth.md` (no `data-export.md`)
-- **WHEN** the user invokes `workflow init`
+- **WHEN** the user invokes `specshift init`
 - **THEN** the Capability Docs dimension reports a CRITICAL issue: "Missing capability doc for data-export"
-- **AND** the recommendation is "Run `workflow finalize` to generate the missing documentation"
+- **AND** the recommendation is "Run `specshift finalize` to generate the missing documentation"
 - **AND** the verdict is "OUT OF SYNC"
 
 #### Scenario: Capability doc omits a requirement from spec
@@ -351,11 +351,11 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 
 #### Scenario: README missing a capability
 
-- **GIVEN** a project with 6 specs in `openspec/specs/`
+- **GIVEN** a project with 6 specs in `docs/specs/`
 - **AND** `docs/README.md` capabilities table lists only 5 of them
 - **WHEN** the system checks README vs Current State
 - **THEN** the report includes a CRITICAL issue: "README capabilities table missing: <capability-name>"
-- **AND** recommends "Run `workflow finalize` to regenerate the README"
+- **AND** recommends "Run `specshift finalize` to regenerate the README"
 
 #### Scenario: Stale ADR reference in README
 
@@ -367,15 +367,15 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 #### Scenario: Documentation directory does not exist
 
 - **GIVEN** a project where `docs/capabilities/` has not been created yet
-- **WHEN** the user invokes `workflow init`
+- **WHEN** the user invokes `specshift init`
 - **THEN** the system reports each spec as a CRITICAL missing capability doc
 - **AND** does not error or abort
-- **AND** recommends "Run `workflow finalize` to generate initial documentation"
+- **AND** recommends "Run `specshift finalize` to generate initial documentation"
 
 #### Scenario: No design decisions to check
 
-- **GIVEN** a project with no completed changes in `openspec/changes/`
-- **WHEN** the user invokes `workflow init`
+- **GIVEN** a project with no completed changes in `.specshift/changes/`
+- **WHEN** the user invokes `specshift init`
 - **THEN** the system skips the ADR dimension
 - **AND** notes "No design decisions to verify against"
 - **AND** still checks the other two dimensions
@@ -397,24 +397,24 @@ The system SHALL gracefully handle missing documentation directories: if `docs/c
 - **False positives in keyword search**: Verify uses heuristic search to find implementation evidence. If a requirement keyword matches unrelated code, the system SHALL prefer SUGGESTION severity to avoid false critical issues.
 - **Large codebase**: Verification scans may be slow on very large codebases. The system SHALL focus on files referenced in design.md and recently modified files rather than exhaustive codebase search.
 - **Side-effect keyword ambiguity**: If a preflight side-effect description is too generic to produce meaningful keyword matches (e.g., "general performance impact"), the system SHALL skip that entry and note it as inconclusive rather than raising a false warning.
-- **Spec with no matching doc name**: If a spec directory uses a different naming convention than the capability doc filename, the system SHALL attempt to match by reading the doc's frontmatter `title` or first heading before reporting it as missing.
+- **Spec with no matching doc name**: If a spec uses a different naming convention than the capability doc filename, the system SHALL attempt to match by reading the doc's frontmatter `title` or first heading before reporting it as missing.
 - **Multiple specs mapping to one doc**: If a documentation restructuring merged multiple specs into one doc, the system SHALL report this as INFO rather than flagging missing docs.
 - **Empty capability doc**: If a capability doc exists but has no meaningful content (only frontmatter or a single heading), the system SHALL classify it as WARNING ("Capability doc for <name> appears empty").
 - **README with custom sections**: The system SHALL only check the capabilities table and Key Design Decisions table within the README, not custom project-specific sections that may intentionally differ from specs.
-- **Concurrent docs regeneration**: If `workflow finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
+- **Concurrent docs regeneration**: If `specshift finalize` is running concurrently, the verification report reflects the state at the time of each individual check.
 - **No merge base for diff checks**: If `git merge-base` fails (orphan branch, detached HEAD, first commit), all diff-based checks are skipped gracefully with a note in the report. Keyword-based verification proceeds as normal.
 - **Task description too generic for diff matching**: If a task description is too vague to produce meaningful file path matches (e.g., "Clean up code"), the system SHALL skip that task's diff mapping and note it as inconclusive rather than raising a false warning.
-- **Change artifacts in diff**: Files under `openspec/changes/` and `openspec/specs/` are expected in the diff for any change and SHALL be excluded from unintended change detection (they are always traceable to the change itself).
+- **Change artifacts in diff**: Files under `.specshift/changes/` and `docs/specs/` are expected in the diff for any change and SHALL be excluded from unintended change detection (they are always traceable to the change itself).
 - **Diff includes only artifact files**: When a change only modifies specs or planning artifacts (no code files), diff-based checks still apply — task-diff mapping verifies spec edits correspond to tasks, and scope checks verify no unrelated specs were modified.
 
 ## Assumptions
 
-- The OpenSpec CLI provides accurate artifact dependency and status information. <!-- ASSUMPTION: CLI accuracy -->
+- The workflow provides accurate artifact dependency and status information. <!-- ASSUMPTION: CLI accuracy -->
 - Keyword-based code search provides reasonable (not perfect) implementation coverage detection. <!-- ASSUMPTION: Heuristic search -->
 - constitution.md is the authoritative source for project rules and is kept up to date. <!-- ASSUMPTION: Constitution authority -->
 - The codebase is accessible and searchable for verification of requirement implementation. <!-- ASSUMPTION: Codebase accessibility -->
 - Preflight Section C uses a consistent structure (table or list with risk descriptions and assessments) that can be parsed for side-effect extraction. <!-- ASSUMPTION: Section C format -->
-- Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec directory name in `openspec/specs/`. <!-- ASSUMPTION: Naming convention -->
+- Capability docs in `docs/capabilities/` follow the naming convention `<capability-name>.md` matching the spec name in `docs/specs/`. <!-- ASSUMPTION: Naming convention -->
 - The README capabilities table uses a parseable format (Markdown table or structured list) that allows the system to extract capability names. <!-- ASSUMPTION: README format -->
 - Completed changes' design.md Decisions tables use a consistent Markdown table format with identifiable column headers. <!-- ASSUMPTION: Design decisions format -->
 - Git is available in the execution environment and the working directory is a git repository with a valid merge base to the main branch. <!-- ASSUMPTION: Git availability -->
